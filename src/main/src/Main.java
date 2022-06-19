@@ -1,5 +1,6 @@
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
+import node.NodeVisitor;
 import node.StatementListNode;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -9,6 +10,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Thomas Singer
@@ -38,5 +41,23 @@ public class Main {
 		final BLikeLangParser.RootContext root = parser.root();
 		final AstFactory astFactory = new AstFactory();
 		final StatementListNode result = astFactory.visitRoot(root);
+		checkVariables(result);
+	}
+
+	private static void checkVariables(StatementListNode result) {
+		final Set<String> definedVariables = new HashSet<>();
+		result.visit(new NodeVisitor() {
+			@Override
+			public void visitAssignment(String var) {
+				definedVariables.add(var);
+			}
+
+			@Override
+			public void visitVarRead(String varName, Token token) {
+				if (!definedVariables.contains(varName)) {
+					throw new ParseFailedException("Var " + varName + " undeclared", token);
+				}
+			}
+		});
 	}
 }
