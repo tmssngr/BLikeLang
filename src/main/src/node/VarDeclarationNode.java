@@ -2,8 +2,6 @@ package node;
 
 import java.util.Objects;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * @author Thomas Singer
  */
@@ -12,12 +10,14 @@ public final class VarDeclarationNode extends StatementNode {
 	// Fields =================================================================
 
 	private final String type;
-	private final Token var;
+	private final String var;
 	private final ExpressionNode expression;
+	private final int line;
+	private final int column;
 
 	// Setup ==================================================================
 
-	public VarDeclarationNode(String type, Token var, ExpressionNode expression) {
+	public VarDeclarationNode(String type, String var, ExpressionNode expression, int line, int column) {
 		Objects.requireNonNull(type);
 		Objects.requireNonNull(var);
 		Objects.requireNonNull(expression);
@@ -25,18 +25,20 @@ public final class VarDeclarationNode extends StatementNode {
 		this.type = type;
 		this.var = var;
 		this.expression = expression;
+		this.line = line;
+		this.column = column;
 	}
 
 	// Implemented ============================================================
 
 	@Override
 	public String toString() {
-		return "declare(" + type + " " + var.getText() + ", " + expression + ")";
+		return "declare(" + type + " " + var + ", " + expression + ")";
 	}
 
 	@Override
 	public void visit(NodeVisitor visitor) {
 		expression.visit(visitor);
-		visitor.visitDeclaration(var.getText(), var);
+		visitor.visitDeclaration(var, line, column);
 	}
 }
