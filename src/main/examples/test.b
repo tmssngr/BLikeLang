@@ -3,4 +3,4 @@
 comment */
 uint8 a = 10
 uint8 b = 5
-a = a + b
+a = a + b - 3
