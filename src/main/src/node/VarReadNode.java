@@ -7,7 +7,7 @@ public final class VarReadNode extends ExpressionNode {
 
 	// Fields =================================================================
 
-	private final String var;
+	public final String var;
 	private final int line;
 	private final int column;
 

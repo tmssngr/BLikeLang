@@ -9,8 +9,8 @@ public final class AssignmentNode extends StatementNode {
 
 	// Fields =================================================================
 
-	private final String var;
-	private final ExpressionNode expression;
+	public final String var;
+	public final ExpressionNode expression;
 	private final int line;
 	private final int column;
 

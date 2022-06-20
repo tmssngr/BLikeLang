@@ -9,9 +9,9 @@ public final class VarDeclarationNode extends StatementNode {
 
 	// Fields =================================================================
 
-	private final String type;
-	private final String var;
-	private final ExpressionNode expression;
+	public final String type;
+	public final String var;
+	public final ExpressionNode expression;
 	private final int line;
 	private final int column;
 
