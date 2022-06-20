@@ -53,14 +53,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Override
 	public AssignmentNode visitAssignment(BLikeLangParser.AssignmentContext ctx) {
 		final ExpressionNode expression = (ExpressionNode) visit(ctx.expression());
-		return new AssignmentNode(ctx.var, expression);
+		return new AssignmentNode(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
 	public VarDeclarationNode visitVarDeclaration(BLikeLangParser.VarDeclarationContext ctx) {
 		final String type = ctx.type.getText();
 		final ExpressionNode expression = (ExpressionNode) visit(ctx.expression());
-		return new VarDeclarationNode(type, ctx.var, expression);
+		return new VarDeclarationNode(type, ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
@@ -95,6 +95,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public VarReadNode visitExprVar(BLikeLangParser.ExprVarContext ctx) {
-		return new VarReadNode(ctx.var);
+		return new VarReadNode(ctx.var.getText(), ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 }

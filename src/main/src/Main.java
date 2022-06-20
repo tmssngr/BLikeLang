@@ -50,24 +50,24 @@ public class Main {
 		final Set<String> definedVariables = new HashSet<>();
 		result.visit(new NodeVisitor() {
 			@Override
-			public void visitDeclaration(String var, Token token) {
+			public void visitDeclaration(String var, int line, int column) {
 				if (definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " already defined", token);
+					throw new ParseFailedException("Var " + var + " already defined", line, column);
 				}
 				definedVariables.add(var);
 			}
 
 			@Override
-			public void visitAssignment(String var, Token token) {
+			public void visitAssignment(String var, int line, int column) {
 				if (!definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " undeclared", token);
+					throw new ParseFailedException("Var " + var + " undeclared", line, column);
 				}
 			}
 
 			@Override
-			public void visitVarRead(String var, Token token) {
+			public void visitVarRead(String var, int line, int column) {
 				if (!definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " undeclared", token);
+					throw new ParseFailedException("Var " + var + " undeclared", line, column);
 				}
 			}
 		});
