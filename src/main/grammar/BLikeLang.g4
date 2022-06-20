@@ -3,8 +3,10 @@ grammar BLikeLang;
 root: statements;
 
 statements: statement* ;
-statement: assignment #statementAssign
+statement: assignment     #statementAssign
+         | varDeclaration #statementDeclaration
          ;
+varDeclaration: type=Identifier var=Identifier Assign expression EOL;
 assignment: var=Identifier Assign expression EOL;
 expression: value=Number                                     #exprNumber
           | var=Identifier                                   #exprVar
