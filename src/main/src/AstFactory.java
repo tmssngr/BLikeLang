@@ -44,10 +44,23 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) {
+		final VarDeclarationNode node = visitVarDeclaration(ctx.varDeclaration());
+		statementListNode.add(node);
+		return null;
+	}
+
+	@Override
 	public AssignmentNode visitAssignment(BLikeLangParser.AssignmentContext ctx) {
-		final String var = ctx.var.getText();
 		final ExpressionNode expression = (ExpressionNode) visit(ctx.expression());
-		return new AssignmentNode(var, expression);
+		return new AssignmentNode(ctx.var, expression);
+	}
+
+	@Override
+	public VarDeclarationNode visitVarDeclaration(BLikeLangParser.VarDeclarationContext ctx) {
+		final String type = ctx.type.getText();
+		final ExpressionNode expression = (ExpressionNode) visit(ctx.expression());
+		return new VarDeclarationNode(type, ctx.var, expression);
 	}
 
 	@SuppressWarnings("SwitchStatementWithTooFewBranches")

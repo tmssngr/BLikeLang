@@ -41,6 +41,8 @@ public class Main {
 		final BLikeLangParser.RootContext root = parser.root();
 		final AstFactory astFactory = new AstFactory();
 		final StatementListNode result = astFactory.visitRoot(root);
+		System.out.println(result);
+
 		checkVariables(result);
 	}
 
@@ -48,14 +50,24 @@ public class Main {
 		final Set<String> definedVariables = new HashSet<>();
 		result.visit(new NodeVisitor() {
 			@Override
-			public void visitAssignment(String var) {
+			public void visitDeclaration(String var, Token token) {
+				if (definedVariables.contains(var)) {
+					throw new ParseFailedException("Var " + var + " already defined", token);
+				}
 				definedVariables.add(var);
 			}
 
 			@Override
-			public void visitVarRead(String varName, Token token) {
-				if (!definedVariables.contains(varName)) {
-					throw new ParseFailedException("Var " + varName + " undeclared", token);
+			public void visitAssignment(String var, Token token) {
+				if (!definedVariables.contains(var)) {
+					throw new ParseFailedException("Var " + var + " undeclared", token);
+				}
+			}
+
+			@Override
+			public void visitVarRead(String var, Token token) {
+				if (!definedVariables.contains(var)) {
+					throw new ParseFailedException("Var " + var + " undeclared", token);
 				}
 			}
 		});
