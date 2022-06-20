@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * @author Thomas Singer
  */
-public class Main {
+public final class Main {
 
 	// Static =================================================================
 

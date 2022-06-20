@@ -25,7 +25,7 @@ public abstract class BinaryExpressionNode extends ExpressionNode {
 	// Implemented ============================================================
 
 	@Override
-	public void visit(NodeVisitor visitor) {
+	public final void visit(NodeVisitor visitor) {
 		left.visit(visitor);
 		right.visit(visitor);
 	}
