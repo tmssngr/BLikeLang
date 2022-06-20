@@ -49,12 +49,12 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprBinary}
+	 * Visit a parse tree produced by the {@code exprAddSub}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprBinary(BLikeLangParser.ExprBinaryContext ctx);
+	T visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code exprVar}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
@@ -69,4 +69,11 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExprNumber(BLikeLangParser.ExprNumberContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code exprMultiply}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
 }

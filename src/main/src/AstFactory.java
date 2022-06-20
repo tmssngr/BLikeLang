@@ -64,13 +64,25 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public BinaryExpressionNode visitExprBinary(BLikeLangParser.ExprBinaryContext ctx) {
+	public Node visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) {
 		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
 		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
 
 		return switch (ctx.operator.getType()) {
 			case BLikeLangLexer.Plus -> new AddNode(left, right);
 			case BLikeLangLexer.Minus -> new SubNode(left, right);
+			default -> throw new ParseCancellationException();
+		};
+	}
+
+	@SuppressWarnings("SwitchStatementWithTooFewBranches")
+	@Override
+	public Node visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) {
+		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
+		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
+
+		return switch (ctx.operator.getType()) {
+			case BLikeLangLexer.Multiply -> new MultiplyNode(left, right);
 			default -> throw new ParseCancellationException();
 		};
 	}
