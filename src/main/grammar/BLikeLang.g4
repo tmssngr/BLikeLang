@@ -8,13 +8,14 @@ statement: assignment     #statementAssign
          ;
 varDeclaration: type=Identifier var=Identifier Assign expression EOL;
 assignment: var=Identifier Assign expression EOL;
-expression: value=Number                                     #exprNumber
-          | var=Identifier                                   #exprVar
-          | left=expression operator=Plus right=expression   #exprBinary
+expression: value=Number                                             #exprNumber
+          | var=Identifier                                           #exprVar
+          | left=expression operator=(Plus|Minus) right=expression   #exprBinary
           ;
 
 Assign: '=' ;
 Plus: '+';
+Minus: '-';
 
 EOL: NL | EOF;
 

@@ -63,7 +63,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		return new VarDeclarationNode(type, ctx.var, expression);
 	}
 
-	@SuppressWarnings("SwitchStatementWithTooFewBranches")
 	@Override
 	public BinaryExpressionNode visitExprBinary(BLikeLangParser.ExprBinaryContext ctx) {
 		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
@@ -71,6 +70,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return switch (ctx.operator.getType()) {
 			case BLikeLangLexer.Plus -> new AddNode(left, right);
+			case BLikeLangLexer.Minus -> new SubNode(left, right);
 			default -> throw new ParseCancellationException();
 		};
 	}
