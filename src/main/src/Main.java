@@ -2,6 +2,8 @@ import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
 import node.NodeVisitor;
 import node.StatementListNode;
+import node.TreePrinter;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
@@ -41,9 +43,11 @@ public final class Main {
 		final BLikeLangParser.RootContext root = parser.root();
 		final AstFactory astFactory = new AstFactory();
 		final StatementListNode result = astFactory.visitRoot(root);
-		System.out.println(result);
 
 		checkVariables(result);
+
+		final TreePrinter printer = new TreePrinter();
+		printer.print(printer.getStrings(result), System.out);
 	}
 
 	private static void checkVariables(StatementListNode result) {

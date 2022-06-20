@@ -1,6 +1,7 @@
 package node;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,5 +42,9 @@ public final class StatementListNode extends Node {
 
 	public void add(StatementNode node) {
 		statementList.add(node);
+	}
+
+	public List<? extends StatementNode> getStatements() {
+		return Collections.unmodifiableList(statementList);
 	}
 }
