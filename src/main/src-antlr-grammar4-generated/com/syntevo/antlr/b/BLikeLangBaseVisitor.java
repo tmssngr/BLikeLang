@@ -59,7 +59,7 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprBinary(BLikeLangParser.ExprBinaryContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -74,4 +74,11 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitExprNumber(BLikeLangParser.ExprNumberContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { return visitChildren(ctx); }
 }

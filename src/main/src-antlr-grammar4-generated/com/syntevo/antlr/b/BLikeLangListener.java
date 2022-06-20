@@ -72,17 +72,17 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprBinary}
+	 * Enter a parse tree produced by the {@code exprAddSub}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprBinary(BLikeLangParser.ExprBinaryContext ctx);
+	void enterExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprBinary}
+	 * Exit a parse tree produced by the {@code exprAddSub}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprBinary(BLikeLangParser.ExprBinaryContext ctx);
+	void exitExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code exprVar}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
@@ -107,4 +107,16 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprNumber(BLikeLangParser.ExprNumberContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code exprMultiply}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code exprMultiply}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
 }

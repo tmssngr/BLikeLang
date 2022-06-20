@@ -88,13 +88,13 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprBinary(BLikeLangParser.ExprBinaryContext ctx) { }
+	@Override public void enterExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprBinary(BLikeLangParser.ExprBinaryContext ctx) { }
+	@Override public void exitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -119,6 +119,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExprNumber(BLikeLangParser.ExprNumberContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

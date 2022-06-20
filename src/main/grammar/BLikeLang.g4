@@ -10,12 +10,14 @@ varDeclaration: type=Identifier var=Identifier Assign expression EOL;
 assignment: var=Identifier Assign expression EOL;
 expression: value=Number                                             #exprNumber
           | var=Identifier                                           #exprVar
-          | left=expression operator=(Plus|Minus) right=expression   #exprBinary
+          | left=expression operator=Multiply right=expression       #exprMultiply
+          | left=expression operator=(Plus|Minus) right=expression   #exprAddSub
           ;
 
 Assign: '=' ;
 Plus: '+';
 Minus: '-';
+Multiply: '*';
 
 EOL: NL | EOF;
 
