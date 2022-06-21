@@ -10,6 +10,7 @@ varDeclaration: type=Identifier var=Identifier Assign expression EOL;
 assignment: var=Identifier Assign expression EOL;
 expression: value=Number                                             #exprNumber
           | var=Identifier                                           #exprVar
+          | ParenOpen expression ParenClose                          #exprParen
           | left=expression operator=Multiply right=expression       #exprMultiply
           | left=expression operator=(Plus|Minus) right=expression   #exprAddSub
           ;
@@ -18,6 +19,8 @@ Assign: '=' ;
 Plus: '+';
 Minus: '-';
 Multiply: '*';
+ParenOpen: '(';
+ParenClose: ')';
 
 EOL: NL | EOF;
 
