@@ -49,6 +49,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code exprParen}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprParen(BLikeLangParser.ExprParenContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code exprAddSub}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree

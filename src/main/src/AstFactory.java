@@ -75,6 +75,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		};
 	}
 
+	@Override
+	public ExpressionNode visitExprParen(BLikeLangParser.ExprParenContext ctx) {
+		return (ExpressionNode)visit(ctx.expression());
+	}
+
 	@SuppressWarnings("SwitchStatementWithTooFewBranches")
 	@Override
 	public Node visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) {
