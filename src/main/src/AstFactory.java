@@ -5,6 +5,7 @@ import node.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -102,14 +103,31 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public Node visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) {
-		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
-		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
+		final ExpressionNode left = (ExpressionNode) Objects.requireNonNull(visit(ctx.left));
+		final ExpressionNode right = (ExpressionNode) Objects.requireNonNull(visit(ctx.right));
 
 		//noinspection SwitchStatementWithTooFewBranches
 		return switch (ctx.operator.getType()) {
 			case BLikeLangLexer.Multiply -> new MultiplyNode(left, right);
 			default -> throw new ParseCancellationException();
 		};
+	}
+
+	@Override
+	public FunctionCallNode visitFunctionCall(BLikeLangParser.FunctionCallContext ctx) {
+		final FunctionParametersNode parameters = visitParameters(ctx.parameters());
+		return new FunctionCallNode(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
+	}
+
+	@Override
+	public FunctionParametersNode visitParameters(BLikeLangParser.ParametersContext ctx) {
+		final FunctionParametersNode parameters = new FunctionParametersNode();
+		final List<BLikeLangParser.ExpressionContext> expressions = ctx.expression();
+		for (BLikeLangParser.ExpressionContext expression : expressions) {
+			final ExpressionNode expressionNode = (ExpressionNode) Objects.requireNonNull(visit(expression));
+			parameters.add(expressionNode);
+		}
+		return parameters;
 	}
 
 	@Override

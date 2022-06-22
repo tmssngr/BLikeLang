@@ -63,6 +63,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitReadVariable(BLikeLangParser.ReadVariableContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionCall(BLikeLangParser.FunctionCallContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -90,4 +97,10 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameters(BLikeLangParser.ParametersContext ctx);
 }
