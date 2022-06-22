@@ -96,6 +96,18 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitReadVariable(BLikeLangParser.ReadVariableContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCall(BLikeLangParser.FunctionCallContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCall(BLikeLangParser.FunctionCallContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -143,4 +155,14 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameters(BLikeLangParser.ParametersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameters(BLikeLangParser.ParametersContext ctx);
 }

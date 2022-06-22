@@ -11,11 +11,17 @@ varDeclaration: type=Identifier var=Identifier Assign expression End;
 assignment    :                 var=Identifier Assign expression End;
 expression: value=Number                                             #numberLiteral
           | var=Identifier                                           #readVariable
-          | ParenOpen expression ParenClose                          #expressionInParenthesis
+          | func=Identifier ParenOpen parameters ParenClose          #functionCall
+          |                 ParenOpen expression ParenClose          #expressionInParenthesis
           | left=expression operator=Multiply     right=expression   #binaryExpressionPoint
           | left=expression operator=(Plus|Minus) right=expression   #binaryExpressionDash
           ;
 
+parameters: expression?
+          | expression ( Comma expression )+
+          ;
+
+Comma : ',';
 End   : ';';
 Assign: '=' ;
 

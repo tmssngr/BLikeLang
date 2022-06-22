@@ -81,7 +81,21 @@ public class TreePrinter {
 		if (node instanceof VarReadNode) {
 			return getStrings((VarReadNode)node);
 		}
+		if (node instanceof FunctionCallNode) {
+			return getStrings((FunctionCallNode) node);
+		}
 		throw new UnsupportedOperationException();
+	}
+
+	private List<String> getStrings(FunctionCallNode node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("function call " + node.getName());
+		final List<ExpressionNode> expressions = node.getExpressions();
+		for (int i = 0, size = expressions.size(); i < size; i++) {
+			final ExpressionNode expressionNode = expressions.get(i);
+			append(getStrings(expressionNode), i < size - 1, strings);
+		}
+		return strings;
 	}
 
 	private List<String> getStrings(VarReadNode node) {
