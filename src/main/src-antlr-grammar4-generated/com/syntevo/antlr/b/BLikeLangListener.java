@@ -28,41 +28,29 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitStatements(BLikeLangParser.StatementsContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code statementAssign}
+	 * Enter a parse tree produced by the {@code assignStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterStatementAssign(BLikeLangParser.StatementAssignContext ctx);
+	void enterAssignStatement(BLikeLangParser.AssignStatementContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code statementAssign}
+	 * Exit a parse tree produced by the {@code assignStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitStatementAssign(BLikeLangParser.StatementAssignContext ctx);
+	void exitAssignStatement(BLikeLangParser.AssignStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code statementDeclaration}
+	 * Enter a parse tree produced by the {@code variableDeclaration}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void enterStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx);
+	void enterVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code statementDeclaration}
+	 * Exit a parse tree produced by the {@code variableDeclaration}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 */
-	void exitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code statementEmpty}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterStatementEmpty(BLikeLangParser.StatementEmptyContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code statementEmpty}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitStatementEmpty(BLikeLangParser.StatementEmptyContext ctx);
+	void exitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BLikeLangParser#varDeclaration}.
 	 * @param ctx the parse tree
@@ -84,63 +72,63 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprParen}
+	 * Enter a parse tree produced by the {@code readVariable}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprParen(BLikeLangParser.ExprParenContext ctx);
+	void enterReadVariable(BLikeLangParser.ReadVariableContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprParen}
+	 * Exit a parse tree produced by the {@code readVariable}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprParen(BLikeLangParser.ExprParenContext ctx);
+	void exitReadVariable(BLikeLangParser.ReadVariableContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprAddSub}
+	 * Enter a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
+	void enterBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprAddSub}
+	 * Exit a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
+	void exitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprVar}
+	 * Enter a parse tree produced by the {@code expressionInParenthesis}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprVar(BLikeLangParser.ExprVarContext ctx);
+	void enterExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprVar}
+	 * Exit a parse tree produced by the {@code expressionInParenthesis}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprVar(BLikeLangParser.ExprVarContext ctx);
+	void exitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprNumber}
+	 * Enter a parse tree produced by the {@code numberLiteral}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprNumber(BLikeLangParser.ExprNumberContext ctx);
+	void enterNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprNumber}
+	 * Exit a parse tree produced by the {@code numberLiteral}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprNumber(BLikeLangParser.ExprNumberContext ctx);
+	void exitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code exprMultiply}
+	 * Enter a parse tree produced by the {@code binaryExpressionDash}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
+	void enterBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code exprMultiply}
+	 * Exit a parse tree produced by the {@code binaryExpressionDash}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
+	void exitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
 }

@@ -143,6 +143,10 @@ public class BLikeLangParser extends Parser {
 		public StatementContext statement(int i) {
 			return getRuleContext(StatementContext.class,i);
 		}
+		public List<TerminalNode> NL() { return getTokens(BLikeLangParser.NL); }
+		public TerminalNode NL(int i) {
+			return getToken(BLikeLangParser.NL, i);
+		}
 		public StatementsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -169,17 +173,31 @@ public class BLikeLangParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(17);
+			setState(18);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==Identifier || _la==NL) {
 				{
-				{
-				setState(14);
-				statement();
+				setState(16);
+				_errHandler.sync(this);
+				switch (_input.LA(1)) {
+				case Identifier:
+					{
+					setState(14);
+					statement();
+					}
+					break;
+				case NL:
+					{
+					setState(15);
+					match(NL);
+					}
+					break;
+				default:
+					throw new NoViableAltException(this);
 				}
 				}
-				setState(19);
+				setState(20);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -207,58 +225,41 @@ public class BLikeLangParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class StatementAssignContext extends StatementContext {
+	public static class AssignStatementContext extends StatementContext {
 		public AssignmentContext assignment() {
 			return getRuleContext(AssignmentContext.class,0);
 		}
-		public StatementAssignContext(StatementContext ctx) { copyFrom(ctx); }
+		public AssignStatementContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterStatementAssign(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterAssignStatement(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitStatementAssign(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitAssignStatement(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitStatementAssign(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitAssignStatement(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class StatementDeclarationContext extends StatementContext {
+	public static class VariableDeclarationContext extends StatementContext {
 		public VarDeclarationContext varDeclaration() {
 			return getRuleContext(VarDeclarationContext.class,0);
 		}
-		public StatementDeclarationContext(StatementContext ctx) { copyFrom(ctx); }
+		public VariableDeclarationContext(StatementContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterStatementDeclaration(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterVariableDeclaration(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitStatementDeclaration(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitVariableDeclaration(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitStatementDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class StatementEmptyContext extends StatementContext {
-		public TerminalNode NL() { return getToken(BLikeLangParser.NL, 0); }
-		public StatementEmptyContext(StatementContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterStatementEmpty(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitStatementEmpty(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitStatementEmpty(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitVariableDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -269,29 +270,21 @@ public class BLikeLangParser extends Parser {
 		try {
 			setState(23);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 			case 1:
-				_localctx = new StatementAssignContext(_localctx);
+				_localctx = new AssignStatementContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(20);
+				setState(21);
 				assignment();
 				}
 				break;
 			case 2:
-				_localctx = new StatementDeclarationContext(_localctx);
+				_localctx = new VariableDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(21);
-				varDeclaration();
-				}
-				break;
-			case 3:
-				_localctx = new StatementEmptyContext(_localctx);
-				enterOuterAlt(_localctx, 3);
-				{
 				setState(22);
-				match(NL);
+				varDeclaration();
 				}
 				break;
 			}
@@ -432,28 +425,90 @@ public class BLikeLangParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class ExprParenContext extends ExpressionContext {
+	public static class ReadVariableContext extends ExpressionContext {
+		public Token var;
+		public TerminalNode Identifier() { return getToken(BLikeLangParser.Identifier, 0); }
+		public ReadVariableContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterReadVariable(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitReadVariable(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitReadVariable(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class BinaryExpressionPointContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token operator;
+		public ExpressionContext right;
+		public List<ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public TerminalNode Multiply() { return getToken(BLikeLangParser.Multiply, 0); }
+		public BinaryExpressionPointContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterBinaryExpressionPoint(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitBinaryExpressionPoint(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitBinaryExpressionPoint(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ExpressionInParenthesisContext extends ExpressionContext {
 		public TerminalNode ParenOpen() { return getToken(BLikeLangParser.ParenOpen, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public TerminalNode ParenClose() { return getToken(BLikeLangParser.ParenClose, 0); }
-		public ExprParenContext(ExpressionContext ctx) { copyFrom(ctx); }
+		public ExpressionInParenthesisContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExprParen(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExpressionInParenthesis(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExprParen(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExpressionInParenthesis(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExprParen(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExpressionInParenthesis(this);
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class ExprAddSubContext extends ExpressionContext {
+	public static class NumberLiteralContext extends ExpressionContext {
+		public Token value;
+		public TerminalNode Number() { return getToken(BLikeLangParser.Number, 0); }
+		public NumberLiteralContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterNumberLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitNumberLiteral(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitNumberLiteral(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class BinaryExpressionDashContext extends ExpressionContext {
 		public ExpressionContext left;
 		public Token operator;
 		public ExpressionContext right;
@@ -465,80 +520,18 @@ public class BLikeLangParser extends Parser {
 		}
 		public TerminalNode Plus() { return getToken(BLikeLangParser.Plus, 0); }
 		public TerminalNode Minus() { return getToken(BLikeLangParser.Minus, 0); }
-		public ExprAddSubContext(ExpressionContext ctx) { copyFrom(ctx); }
+		public BinaryExpressionDashContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExprAddSub(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterBinaryExpressionDash(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExprAddSub(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitBinaryExpressionDash(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExprAddSub(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class ExprVarContext extends ExpressionContext {
-		public Token var;
-		public TerminalNode Identifier() { return getToken(BLikeLangParser.Identifier, 0); }
-		public ExprVarContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExprVar(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExprVar(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExprVar(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class ExprNumberContext extends ExpressionContext {
-		public Token value;
-		public TerminalNode Number() { return getToken(BLikeLangParser.Number, 0); }
-		public ExprNumberContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExprNumber(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExprNumber(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExprNumber(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class ExprMultiplyContext extends ExpressionContext {
-		public ExpressionContext left;
-		public Token operator;
-		public ExpressionContext right;
-		public List<ExpressionContext> expression() {
-			return getRuleContexts(ExpressionContext.class);
-		}
-		public ExpressionContext expression(int i) {
-			return getRuleContext(ExpressionContext.class,i);
-		}
-		public TerminalNode Multiply() { return getToken(BLikeLangParser.Multiply, 0); }
-		public ExprMultiplyContext(ExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterExprMultiply(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitExprMultiply(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitExprMultiply(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitBinaryExpressionDash(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -564,26 +557,26 @@ public class BLikeLangParser extends Parser {
 			switch (_input.LA(1)) {
 			case Number:
 				{
-				_localctx = new ExprNumberContext(_localctx);
+				_localctx = new NumberLiteralContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 
 				setState(37);
-				((ExprNumberContext)_localctx).value = match(Number);
+				((NumberLiteralContext)_localctx).value = match(Number);
 				}
 				break;
 			case Identifier:
 				{
-				_localctx = new ExprVarContext(_localctx);
+				_localctx = new ReadVariableContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(38);
-				((ExprVarContext)_localctx).var = match(Identifier);
+				((ReadVariableContext)_localctx).var = match(Identifier);
 				}
 				break;
 			case ParenOpen:
 				{
-				_localctx = new ExprParenContext(_localctx);
+				_localctx = new ExpressionInParenthesisContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(39);
@@ -600,7 +593,7 @@ public class BLikeLangParser extends Parser {
 			_ctx.stop = _input.LT(-1);
 			setState(53);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
@@ -608,32 +601,32 @@ public class BLikeLangParser extends Parser {
 					{
 					setState(51);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 					case 1:
 						{
-						_localctx = new ExprMultiplyContext(new ExpressionContext(_parentctx, _parentState));
-						((ExprMultiplyContext)_localctx).left = _prevctx;
+						_localctx = new BinaryExpressionPointContext(new ExpressionContext(_parentctx, _parentState));
+						((BinaryExpressionPointContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(45);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(46);
-						((ExprMultiplyContext)_localctx).operator = match(Multiply);
+						((BinaryExpressionPointContext)_localctx).operator = match(Multiply);
 						setState(47);
-						((ExprMultiplyContext)_localctx).right = expression(3);
+						((BinaryExpressionPointContext)_localctx).right = expression(3);
 						}
 						break;
 					case 2:
 						{
-						_localctx = new ExprAddSubContext(new ExpressionContext(_parentctx, _parentState));
-						((ExprAddSubContext)_localctx).left = _prevctx;
+						_localctx = new BinaryExpressionDashContext(new ExpressionContext(_parentctx, _parentState));
+						((BinaryExpressionDashContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(48);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
 						setState(49);
-						((ExprAddSubContext)_localctx).operator = _input.LT(1);
+						((BinaryExpressionDashContext)_localctx).operator = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==Plus || _la==Minus) ) {
-							((ExprAddSubContext)_localctx).operator = (Token)_errHandler.recoverInline(this);
+							((BinaryExpressionDashContext)_localctx).operator = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -641,7 +634,7 @@ public class BLikeLangParser extends Parser {
 							consume();
 						}
 						setState(50);
-						((ExprAddSubContext)_localctx).right = expression(2);
+						((BinaryExpressionDashContext)_localctx).right = expression(2);
 						}
 						break;
 					}
@@ -649,7 +642,7 @@ public class BLikeLangParser extends Parser {
 				}
 				setState(55);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
 			}
 			}
 		}
@@ -683,21 +676,21 @@ public class BLikeLangParser extends Parser {
 
 	public static final String _serializedATN =
 		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\17;\4\2\t\2\4\3\t"+
-		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\3\2\3\3\7\3\22\n\3\f\3\16\3\25"+
-		"\13\3\3\4\3\4\3\4\5\4\32\n\4\3\5\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\3\6\3"+
+		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\3\2\3\2\3\3\3\3\7\3\23\n\3\f\3\16\3"+
+		"\26\13\3\3\4\3\4\5\4\32\n\4\3\5\3\5\3\5\3\5\3\5\3\5\3\6\3\6\3\6\3\6\3"+
 		"\6\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7.\n\7\3\7\3\7\3\7\3\7\3\7\3\7\7\7\66"+
 		"\n\7\f\7\16\79\13\7\3\7\2\3\f\b\2\4\6\b\n\f\2\3\3\2\5\6\2;\2\16\3\2\2"+
-		"\2\4\23\3\2\2\2\6\31\3\2\2\2\b\33\3\2\2\2\n!\3\2\2\2\f-\3\2\2\2\16\17"+
-		"\5\4\3\2\17\3\3\2\2\2\20\22\5\6\4\2\21\20\3\2\2\2\22\25\3\2\2\2\23\21"+
-		"\3\2\2\2\23\24\3\2\2\2\24\5\3\2\2\2\25\23\3\2\2\2\26\32\5\n\6\2\27\32"+
-		"\5\b\5\2\30\32\7\r\2\2\31\26\3\2\2\2\31\27\3\2\2\2\31\30\3\2\2\2\32\7"+
+		"\2\4\24\3\2\2\2\6\31\3\2\2\2\b\33\3\2\2\2\n!\3\2\2\2\f-\3\2\2\2\16\17"+
+		"\5\4\3\2\17\3\3\2\2\2\20\23\5\6\4\2\21\23\7\r\2\2\22\20\3\2\2\2\22\21"+
+		"\3\2\2\2\23\26\3\2\2\2\24\22\3\2\2\2\24\25\3\2\2\2\25\5\3\2\2\2\26\24"+
+		"\3\2\2\2\27\32\5\n\6\2\30\32\5\b\5\2\31\27\3\2\2\2\31\30\3\2\2\2\32\7"+
 		"\3\2\2\2\33\34\7\13\2\2\34\35\7\13\2\2\35\36\7\4\2\2\36\37\5\f\7\2\37"+
 		" \7\3\2\2 \t\3\2\2\2!\"\7\13\2\2\"#\7\4\2\2#$\5\f\7\2$%\7\3\2\2%\13\3"+
 		"\2\2\2&\'\b\7\1\2\'.\7\n\2\2(.\7\13\2\2)*\7\b\2\2*+\5\f\7\2+,\7\t\2\2"+
 		",.\3\2\2\2-&\3\2\2\2-(\3\2\2\2-)\3\2\2\2.\67\3\2\2\2/\60\f\4\2\2\60\61"+
 		"\7\7\2\2\61\66\5\f\7\5\62\63\f\3\2\2\63\64\t\2\2\2\64\66\5\f\7\4\65/\3"+
 		"\2\2\2\65\62\3\2\2\2\669\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28\r\3\2\2\2"+
-		"9\67\3\2\2\2\7\23\31-\65\67";
+		"9\67\3\2\2\2\b\22\24\31-\65\67";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

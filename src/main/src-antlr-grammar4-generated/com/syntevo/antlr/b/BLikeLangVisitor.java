@@ -23,26 +23,19 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatements(BLikeLangParser.StatementsContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code statementAssign}
+	 * Visit a parse tree produced by the {@code assignStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatementAssign(BLikeLangParser.StatementAssignContext ctx);
+	T visitAssignStatement(BLikeLangParser.AssignStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code statementDeclaration}
+	 * Visit a parse tree produced by the {@code variableDeclaration}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code statementEmpty}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStatementEmpty(BLikeLangParser.StatementEmptyContext ctx);
+	T visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link BLikeLangParser#varDeclaration}.
 	 * @param ctx the parse tree
@@ -56,38 +49,38 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprParen}
+	 * Visit a parse tree produced by the {@code readVariable}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprParen(BLikeLangParser.ExprParenContext ctx);
+	T visitReadVariable(BLikeLangParser.ReadVariableContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprAddSub}
+	 * Visit a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx);
+	T visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprVar}
+	 * Visit a parse tree produced by the {@code expressionInParenthesis}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprVar(BLikeLangParser.ExprVarContext ctx);
+	T visitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprNumber}
+	 * Visit a parse tree produced by the {@code numberLiteral}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprNumber(BLikeLangParser.ExprNumberContext ctx);
+	T visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code exprMultiply}
+	 * Visit a parse tree produced by the {@code binaryExpressionDash}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx);
+	T visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
 }

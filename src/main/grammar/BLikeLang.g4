@@ -2,18 +2,17 @@ grammar BLikeLang;
 
 root: statements;
 
-statements: statement* ;
-statement: assignment     #statementAssign
-         | varDeclaration #statementDeclaration
-         | NL             #statementEmpty
+statements: (statement | NL)* ;
+statement: assignment     #assignStatement
+         | varDeclaration #variableDeclaration
          ;
 varDeclaration: type=Identifier var=Identifier Assign expression End;
 assignment    :                 var=Identifier Assign expression End;
-expression: value=Number                                             #exprNumber
-          | var=Identifier                                           #exprVar
-          | ParenOpen expression ParenClose                          #exprParen
-          | left=expression operator=Multiply     right=expression   #exprMultiply
-          | left=expression operator=(Plus|Minus) right=expression   #exprAddSub
+expression: value=Number                                             #numberLiteral
+          | var=Identifier                                           #readVariable
+          | ParenOpen expression ParenClose                          #expressionInParenthesis
+          | left=expression operator=Multiply     right=expression   #binaryExpressionPoint
+          | left=expression operator=(Plus|Minus) right=expression   #binaryExpressionDash
           ;
 
 End   : ';';

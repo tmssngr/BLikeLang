@@ -32,17 +32,24 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public StatementListNode visitStatements(BLikeLangParser.StatementsContext ctx) {
+		assert statementListNode == null;
+
 		final StatementListNode statementListNode = new StatementListNode();
 		this.statementListNode = statementListNode;
-		super.visitStatements(ctx);
-		assert this.statementListNode == statementListNode;
-		this.statementListNode = null;
+		try {
+			visitChildren(ctx);
+
+			assert this.statementListNode == statementListNode;
+		}
+		finally {
+			this.statementListNode = null;
+		}
 		return statementListNode;
 	}
 
 	@Nullable
 	@Override
-	public Node visitStatementAssign(BLikeLangParser.StatementAssignContext ctx) {
+	public Node visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
 		Objects.requireNonNull(statementListNode);
 
 		final AssignmentNode node = visitAssignment(ctx.assignment());
@@ -52,7 +59,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Nullable
 	@Override
-	public Node visitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) {
+	public Node visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) {
 		Objects.requireNonNull(statementListNode);
 
 		final VarDeclarationNode node = visitVarDeclaration(ctx.varDeclaration());
@@ -74,7 +81,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) {
+	public Node visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) {
 		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
 		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
 
@@ -86,16 +93,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public ExpressionNode visitExprParen(BLikeLangParser.ExprParenContext ctx) {
-		return (ExpressionNode)visit(ctx.expression());
-	}
-
-	@SuppressWarnings("SwitchStatementWithTooFewBranches")
-	@Override
-	public Node visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) {
+	public Node visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) {
 		final ExpressionNode left = (ExpressionNode) visit(ctx.left);
 		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
 
+		//noinspection SwitchStatementWithTooFewBranches
 		return switch (ctx.operator.getType()) {
 			case BLikeLangLexer.Multiply -> new MultiplyNode(left, right);
 			default -> throw new ParseCancellationException();
@@ -103,13 +105,18 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public NumberNode visitExprNumber(BLikeLangParser.ExprNumberContext ctx) {
+	public ExpressionNode visitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx) {
+		return (ExpressionNode) visit(ctx.expression());
+	}
+
+	@Override
+	public NumberNode visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) {
 		final int value = Integer.parseUnsignedInt(ctx.Number().getText());
 		return new NumberNode(value);
 	}
 
 	@Override
-	public VarReadNode visitExprVar(BLikeLangParser.ExprVarContext ctx) {
+	public VarReadNode visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
 		return new VarReadNode(ctx.var.getText(), ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 }
