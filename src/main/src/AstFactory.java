@@ -3,6 +3,9 @@ import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
 import node.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * @author Thomas Singer
@@ -12,6 +15,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	// Fields =================================================================
 
+	@Nullable
 	private StatementListNode statementListNode;
 
 	// Setup ==================================================================
@@ -36,15 +40,21 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		return statementListNode;
 	}
 
+	@Nullable
 	@Override
 	public Node visitStatementAssign(BLikeLangParser.StatementAssignContext ctx) {
+		Objects.requireNonNull(statementListNode);
+
 		final AssignmentNode node = visitAssignment(ctx.assignment());
 		statementListNode.add(node);
 		return null;
 	}
 
+	@Nullable
 	@Override
 	public Node visitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) {
+		Objects.requireNonNull(statementListNode);
+
 		final VarDeclarationNode node = visitVarDeclaration(ctx.varDeclaration());
 		statementListNode.add(node);
 		return null;
