@@ -5,24 +5,26 @@ root: statements;
 statements: statement* ;
 statement: assignment     #statementAssign
          | varDeclaration #statementDeclaration
+         | NL             #statementEmpty
          ;
-varDeclaration: type=Identifier var=Identifier Assign expression EOL;
-assignment: var=Identifier Assign expression EOL;
+varDeclaration: type=Identifier var=Identifier Assign expression End;
+assignment    :                 var=Identifier Assign expression End;
 expression: value=Number                                             #exprNumber
           | var=Identifier                                           #exprVar
           | ParenOpen expression ParenClose                          #exprParen
-          | left=expression operator=Multiply right=expression       #exprMultiply
+          | left=expression operator=Multiply     right=expression   #exprMultiply
           | left=expression operator=(Plus|Minus) right=expression   #exprAddSub
           ;
 
+End   : ';';
 Assign: '=' ;
-Plus: '+';
-Minus: '-';
-Multiply: '*';
-ParenOpen: '(';
-ParenClose: ')';
 
-EOL: NL | EOF;
+Plus    : '+';
+Minus   : '-';
+Multiply: '*';
+
+ParenOpen : '(';
+ParenClose: ')';
 
 fragment DecimalNumber
     : [0-9]+
@@ -46,7 +48,6 @@ NL
 
 LineComment
 	: ('//' ~[\r\n]*
-	  | ';' ~[\r\n]*
 	  ) NL?
 	  -> skip
 	;
