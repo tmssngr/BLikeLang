@@ -63,6 +63,9 @@ public class TreePrinter {
 		if (node instanceof AssignmentNode) {
 			return getStrings((AssignmentNode)node);
 		}
+		if (node instanceof StatementListNode) {
+			return getStrings((StatementListNode)node);
+		}
 		throw new UnsupportedOperationException();
 	}
 

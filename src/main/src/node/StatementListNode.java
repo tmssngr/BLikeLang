@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class StatementListNode extends Node {
+public final class StatementListNode extends StatementNode {
 
 	// Fields =================================================================
 

@@ -3,8 +3,9 @@ grammar BLikeLang;
 root: statements;
 
 statements: (statement | NL)* ;
-statement: assignment     #assignStatement
-         | varDeclaration #variableDeclaration
+statement: assignment                      #assignStatement
+         | varDeclaration                  #variableDeclaration
+         | CurlyOpen statements CurlyClose #blockStatement
          ;
 varDeclaration: type=Identifier var=Identifier Assign expression End;
 assignment    :                 var=Identifier Assign expression End;
@@ -24,6 +25,8 @@ Multiply: '*';
 
 ParenOpen : '(';
 ParenClose: ')';
+CurlyOpen : '{';
+CurlyClose: '}';
 
 fragment DecimalNumber
     : [0-9]+

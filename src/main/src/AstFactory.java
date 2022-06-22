@@ -32,9 +32,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public StatementListNode visitStatements(BLikeLangParser.StatementsContext ctx) {
-		assert statementListNode == null;
+		final StatementListNode outerStatementList = statementListNode;
 
 		final StatementListNode statementListNode = new StatementListNode();
+		if (outerStatementList != null) {
+			outerStatementList.add(statementListNode);
+		}
 		this.statementListNode = statementListNode;
 		try {
 			visitChildren(ctx);
@@ -42,9 +45,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 			assert this.statementListNode == statementListNode;
 		}
 		finally {
-			this.statementListNode = null;
+			this.statementListNode = outerStatementList;
 		}
 		return statementListNode;
+	}
+
+	@Override
+	public Node visitBlockStatement(BLikeLangParser.BlockStatementContext ctx) {
+		return visitStatements(ctx.statements());
 	}
 
 	@Nullable
