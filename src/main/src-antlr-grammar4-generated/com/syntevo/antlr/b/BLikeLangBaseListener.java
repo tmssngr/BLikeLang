@@ -40,37 +40,25 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatementAssign(BLikeLangParser.StatementAssignContext ctx) { }
+	@Override public void enterAssignStatement(BLikeLangParser.AssignStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatementAssign(BLikeLangParser.StatementAssignContext ctx) { }
+	@Override public void exitAssignStatement(BLikeLangParser.AssignStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) { }
+	@Override public void enterVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStatementEmpty(BLikeLangParser.StatementEmptyContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStatementEmpty(BLikeLangParser.StatementEmptyContext ctx) { }
+	@Override public void exitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -100,61 +88,61 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprParen(BLikeLangParser.ExprParenContext ctx) { }
+	@Override public void enterReadVariable(BLikeLangParser.ReadVariableContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprParen(BLikeLangParser.ExprParenContext ctx) { }
+	@Override public void exitReadVariable(BLikeLangParser.ReadVariableContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { }
+	@Override public void enterBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { }
+	@Override public void exitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprVar(BLikeLangParser.ExprVarContext ctx) { }
+	@Override public void enterExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprVar(BLikeLangParser.ExprVarContext ctx) { }
+	@Override public void exitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprNumber(BLikeLangParser.ExprNumberContext ctx) { }
+	@Override public void enterNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprNumber(BLikeLangParser.ExprNumberContext ctx) { }
+	@Override public void exitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { }
+	@Override public void enterBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { }
+	@Override public void exitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

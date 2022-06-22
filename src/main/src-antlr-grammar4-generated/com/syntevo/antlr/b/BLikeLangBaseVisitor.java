@@ -31,21 +31,14 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatementAssign(BLikeLangParser.StatementAssignContext ctx) { return visitChildren(ctx); }
+	@Override public T visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatementDeclaration(BLikeLangParser.StatementDeclarationContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitStatementEmpty(BLikeLangParser.StatementEmptyContext ctx) { return visitChildren(ctx); }
+	@Override public T visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -66,33 +59,33 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprParen(BLikeLangParser.ExprParenContext ctx) { return visitChildren(ctx); }
+	@Override public T visitReadVariable(BLikeLangParser.ReadVariableContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprAddSub(BLikeLangParser.ExprAddSubContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprVar(BLikeLangParser.ExprVarContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprNumber(BLikeLangParser.ExprNumberContext ctx) { return visitChildren(ctx); }
+	@Override public T visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExprMultiply(BLikeLangParser.ExprMultiplyContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) { return visitChildren(ctx); }
 }
