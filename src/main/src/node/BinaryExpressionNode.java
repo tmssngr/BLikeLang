@@ -2,6 +2,8 @@ package node;
 
 import java.util.Objects;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
@@ -50,5 +52,12 @@ public final class BinaryExpressionNode extends ExpressionNode {
 	public void visit(NodeVisitor visitor) {
 		left.visit(visitor);
 		right.visit(visitor);
+	}
+
+	// Accessing ==============================================================
+
+	@NotNull
+	public BinaryExpressionNode createNew(ExpressionNode left, ExpressionNode right) {
+		return new BinaryExpressionNode(left, operator, right);
 	}
 }

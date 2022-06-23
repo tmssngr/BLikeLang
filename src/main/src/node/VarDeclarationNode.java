@@ -12,8 +12,8 @@ public final class VarDeclarationNode extends StatementNode {
 	public final String type;
 	public final String var;
 	public final ExpressionNode expression;
-	private final int line;
-	private final int column;
+	public final int line;
+	public final int column;
 
 	// Setup ==================================================================
 
