@@ -5,7 +5,21 @@ import java.util.Objects;
 /**
  * @author Thomas Singer
  */
-public abstract class BinaryExpressionNode extends ExpressionNode {
+public final class BinaryExpressionNode extends ExpressionNode {
+
+	// Static =================================================================
+
+	public static BinaryExpressionNode createAdd(ExpressionNode left, ExpressionNode right) {
+		return new BinaryExpressionNode(left, "+", right);
+	}
+
+	public static Node createSub(ExpressionNode left, ExpressionNode right) {
+		return new BinaryExpressionNode(left, "-", right);
+	}
+
+	public static BinaryExpressionNode createMultiply(ExpressionNode left, ExpressionNode right) {
+		return new BinaryExpressionNode(left, "*", right);
+	}
 
 	// Fields =================================================================
 
@@ -15,7 +29,7 @@ public abstract class BinaryExpressionNode extends ExpressionNode {
 
 	// Setup ==================================================================
 
-	protected BinaryExpressionNode(ExpressionNode left, String operator, ExpressionNode right) {
+	private BinaryExpressionNode(ExpressionNode left, String operator, ExpressionNode right) {
 		Objects.requireNonNull(left);
 		Objects.requireNonNull(operator);
 		Objects.requireNonNull(right);
@@ -28,12 +42,12 @@ public abstract class BinaryExpressionNode extends ExpressionNode {
 	// Implemented ============================================================
 
 	@Override
-	public final String toString() {
+	public String toString() {
 		return left + " " + operator + " " + right;
 	}
 
 	@Override
-	public final void visit(NodeVisitor visitor) {
+	public void visit(NodeVisitor visitor) {
 		left.visit(visitor);
 		right.visit(visitor);
 	}

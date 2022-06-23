@@ -16,7 +16,7 @@ public class TreePrinterTest {
 
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
-		                            "+- literal 5"), printer.getStrings(new AddNode(new VarReadNode("a", 0, 0), new NumberNode(5))));
+		                            "+- literal 5"), printer.getStrings(BinaryExpressionNode.createAdd(new VarReadNode("a", 0, 0), new NumberNode(5))));
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
 		                            "+- literal 5"), printer.getStrings(new AssignmentNode("a", new NumberNode(1), 0, 0)));

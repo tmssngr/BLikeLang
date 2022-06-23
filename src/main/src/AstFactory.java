@@ -95,8 +95,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final ExpressionNode right = (ExpressionNode) visit(ctx.right);
 
 		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.Plus -> new AddNode(left, right);
-			case BLikeLangLexer.Minus -> new SubNode(left, right);
+			case BLikeLangLexer.Plus -> BinaryExpressionNode.createAdd(left, right);
+			case BLikeLangLexer.Minus -> BinaryExpressionNode.createSub(left, right);
 			default -> throw new ParseCancellationException();
 		};
 	}
@@ -108,7 +108,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		//noinspection SwitchStatementWithTooFewBranches
 		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.Multiply -> new MultiplyNode(left, right);
+			case BLikeLangLexer.Multiply -> BinaryExpressionNode.createMultiply(left, right);
 			default -> throw new ParseCancellationException();
 		};
 	}
