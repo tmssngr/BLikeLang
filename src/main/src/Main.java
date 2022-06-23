@@ -1,8 +1,6 @@
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
-
 import node.*;
-
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +49,7 @@ public final class Main {
 		printer.print(printer.getStrings(rootAst), System.out);
 
 		final StatementListNode flattenedRootAst = createTempVars(rootAst);
-		printer.print(printer.getStrings(flattenedRootAst), System.out);
+		new CodePrinter().print(flattenedRootAst, System.out);
 	}
 
 	private static void checkVariables(StatementListNode root) {
