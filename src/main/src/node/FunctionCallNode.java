@@ -9,10 +9,10 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Fields =================================================================
 
-	private final String name;
+	public final String name;
 	private final FunctionParametersNode parameters;
-	private final int line;
-	private final int column;
+	public final int line;
+	public final int column;
 
 	// Setup ==================================================================
 
@@ -24,10 +24,6 @@ public final class FunctionCallNode extends ExpressionNode {
 	}
 
 	// Accessing ==============================================================
-
-	public String getName() {
-		return name;
-	}
 
 	public List<ExpressionNode> getExpressions() {
 		return parameters.getExpressions();

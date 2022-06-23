@@ -89,7 +89,7 @@ public class TreePrinter {
 
 	private List<String> getStrings(FunctionCallNode node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("function call " + node.getName());
+		strings.add("function call " + node.name);
 		final List<ExpressionNode> expressions = node.getExpressions();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
 			final ExpressionNode expressionNode = expressions.get(i);
