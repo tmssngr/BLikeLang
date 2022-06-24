@@ -84,9 +84,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public VarDeclarationNode visitVarDeclaration(BLikeLangParser.VarDeclarationContext ctx) {
-		final String type = ctx.type.getText();
 		final ExpressionNode expression = (ExpressionNode) visit(ctx.expression());
-		return new VarDeclarationNode(type, ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclarationNode(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override

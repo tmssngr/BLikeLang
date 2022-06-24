@@ -23,7 +23,7 @@ public final class VarReadNode extends ExpressionNode {
 
 	@Override
 	public String toString() {
-		return "read(" + var + ")";
+		return var;
 	}
 
 	@Override

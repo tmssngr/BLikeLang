@@ -50,10 +50,8 @@ public class CodePrinter {
 	private void print(VarDeclarationNode node, int indentation, PrintStream stream) {
 		printIndentation(indentation, stream);
 
-		stream.print(node.type.length() > 0 ? node.type : "<type>");
-		stream.print(" ");
 		stream.print(node.var);
-		stream.print(" = ");
+		stream.print(" := ");
 
 		print(node.expression, stream);
 
