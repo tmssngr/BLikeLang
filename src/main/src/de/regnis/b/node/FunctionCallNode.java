@@ -2,6 +2,8 @@ package de.regnis.b.node;
 
 import de.regnis.b.ExpressionVisitor;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,10 +13,10 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Fields =================================================================
 
-	private final FunctionParametersNode parameters;
 	public final String name;
 	public final int line;
 	public final int column;
+	private final List<ExpressionNode> parameters;
 
 	// Setup ==================================================================
 
@@ -24,9 +26,9 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	public FunctionCallNode(String name, FunctionParametersNode parameters, int line, int column) {
 		this.name = name;
-		this.parameters = parameters;
 		this.line = line;
 		this.column = column;
+		this.parameters = Collections.unmodifiableList(new ArrayList<>(parameters.getExpressions()));
 	}
 
 	// Implemented ============================================================
@@ -38,7 +40,7 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Accessing ==============================================================
 
-	public List<ExpressionNode> getExpressions() {
-		return parameters.getExpressions();
+	public List<ExpressionNode> getParameters() {
+		return parameters;
 	}
 }
