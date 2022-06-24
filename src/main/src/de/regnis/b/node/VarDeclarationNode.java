@@ -18,6 +18,10 @@ public final class VarDeclarationNode extends StatementNode {
 
 	// Setup ==================================================================
 
+	public VarDeclarationNode(String var, ExpressionNode expression) {
+		this(var, expression, -1, -1);
+	}
+
 	public VarDeclarationNode(String var, ExpressionNode expression, int line, int column) {
 		Objects.requireNonNull(var);
 		Objects.requireNonNull(expression);

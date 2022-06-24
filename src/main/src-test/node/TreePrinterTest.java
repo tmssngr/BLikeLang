@@ -1,10 +1,10 @@
 package node;
 
-import java.util.List;
-
 import de.regnis.b.node.*;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * @author Thomas Singer
@@ -17,9 +17,9 @@ public class TreePrinterTest {
 
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
-		                            "+- literal 5"), printer.getStrings(BinaryExpressionNode.createAdd(new VarReadNode("a", 0, 0), new NumberNode(5))));
+		                            "+- literal 5"), printer.getStrings(BinaryExpressionNode.createAdd(new VarReadNode("a"), new NumberNode(5))));
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
-		                            "+- literal 5"), printer.getStrings(new AssignmentNode("a", new NumberNode(1), 0, 0)));
+		                            "+- literal 5"), printer.getStrings(new AssignmentNode("a", new NumberNode(1))));
 	}
 }
