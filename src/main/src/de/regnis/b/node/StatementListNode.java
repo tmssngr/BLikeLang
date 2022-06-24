@@ -34,16 +34,17 @@ public final class StatementListNode extends StatementNode {
 		return buffer.toString();
 	}
 
-	// Accessing ==============================================================
-
 	public void visit(NodeVisitor visitor) {
 		for (StatementNode node : statementList) {
 			node.visit(visitor);
 		}
 	}
 
-	public void add(StatementNode node) {
+	// Accessing ==============================================================
+
+	public StatementListNode add(StatementNode node) {
 		statementList.add(node);
+		return this;
 	}
 
 	public List<? extends StatementNode> getStatements() {

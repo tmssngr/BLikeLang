@@ -20,8 +20,9 @@ public final class FunctionParametersNode extends Node {
 
 	// Accessing ==============================================================
 
-	public void add(ExpressionNode node) {
+	public FunctionParametersNode add(ExpressionNode node) {
 		expressions.add(node);
+		return this;
 	}
 
 	public List<ExpressionNode> getExpressions() {
