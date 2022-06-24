@@ -1,6 +1,7 @@
 package de.regnis.b.node;
 
-import java.io.PrintStream;
+import de.regnis.b.out.StringOutput;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,9 +18,10 @@ public class TreePrinter {
 
 	// Accessing ==============================================================
 
-	public void print(List<String> strings, PrintStream stream) {
+	public void print(List<String> strings, StringOutput output) {
 		for (String string : strings) {
-			stream.println(string);
+			output.print(string);
+			output.println();
 		}
 	}
 

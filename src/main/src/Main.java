@@ -3,7 +3,8 @@ import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.AstFactory;
 import de.regnis.b.ParseFailedException;
 import de.regnis.b.node.*;
-import node.NodeVisitor;
+import de.regnis.b.out.StringOutput;
+import node.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.NotNull;
@@ -49,10 +50,10 @@ public final class Main {
 
 		checkVariables(rootAst);
 		final TreePrinter printer = new TreePrinter();
-		printer.print(printer.getStrings(rootAst), System.out);
+		printer.print(printer.getStrings(rootAst), StringOutput.out);
 
 		final StatementListNode flattenedRootAst = createTempVars(rootAst);
-		new CodePrinter().print(flattenedRootAst, System.out);
+		new CodePrinter().print(flattenedRootAst, StringOutput.out);
 	}
 
 	private static void checkVariables(StatementListNode root) {
