@@ -9,7 +9,6 @@ public final class VarDeclarationNode extends StatementNode {
 
 	// Fields =================================================================
 
-	public final String type;
 	public final String var;
 	public final ExpressionNode expression;
 	public final int line;
@@ -17,12 +16,10 @@ public final class VarDeclarationNode extends StatementNode {
 
 	// Setup ==================================================================
 
-	public VarDeclarationNode(String type, String var, ExpressionNode expression, int line, int column) {
-		Objects.requireNonNull(type);
+	public VarDeclarationNode(String var, ExpressionNode expression, int line, int column) {
 		Objects.requireNonNull(var);
 		Objects.requireNonNull(expression);
 
-		this.type = type;
 		this.var = var;
 		this.expression = expression;
 		this.line = line;
@@ -33,7 +30,7 @@ public final class VarDeclarationNode extends StatementNode {
 
 	@Override
 	public String toString() {
-		return "declare(" + type + " " + var + ", " + expression + ")";
+		return "declare(" + var + ", " + expression + ")";
 	}
 
 	@Override

@@ -100,7 +100,7 @@ public final class Main {
 			if (statement instanceof VarDeclarationNode) {
 				final VarDeclarationNode varDeclarationNode = (VarDeclarationNode)statement;
 				final ExpressionNode simplifiedExpression = simplifyExpression(varDeclarationNode.expression, tempVarNameProvider, newStatementList);
-				newStatementList.add(new VarDeclarationNode(varDeclarationNode.type, varDeclarationNode.var, simplifiedExpression, varDeclarationNode.line, varDeclarationNode.column));
+				newStatementList.add(new VarDeclarationNode(varDeclarationNode.var, simplifiedExpression, varDeclarationNode.line, varDeclarationNode.column));
 			}
 			else if (statement instanceof AssignmentNode) {
 				final AssignmentNode assignmentNode = (AssignmentNode)statement;
@@ -153,7 +153,7 @@ public final class Main {
 	@NotNull
 	private static VarReadNode createTempVar(ExpressionNode node, Supplier<String> tempVarNameProvider, StatementListNode list) {
 		final String tempVar = tempVarNameProvider.get();
-		list.add(new VarDeclarationNode("", tempVar, node, -1, -1));
+		list.add(new VarDeclarationNode(tempVar, node, -1, -1));
 		return new VarReadNode(tempVar, -1, -1);
 	}
 }

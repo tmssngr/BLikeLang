@@ -7,8 +7,8 @@ statement: assignment                      #assignStatement
          | varDeclaration                  #variableDeclaration
          | CurlyOpen statements CurlyClose #blockStatement
          ;
-varDeclaration: type=Identifier var=Identifier Assign expression End;
-assignment    :                 var=Identifier Assign expression End;
+varDeclaration: Var var=Identifier Assign expression End;
+assignment    :     var=Identifier Assign expression End;
 expression: value=Number                                             #numberLiteral
           | var=Identifier                                           #readVariable
           | func=Identifier ParenOpen parameters ParenClose          #functionCall
@@ -33,6 +33,8 @@ ParenOpen : '(';
 ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
+
+Var: 'var';
 
 fragment DecimalNumber
     : [0-9]+
