@@ -1,7 +1,5 @@
 package de.regnis.b.node;
 
-import node.NodeVisitor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,10 +32,9 @@ public final class StatementListNode extends StatementNode {
 		return buffer.toString();
 	}
 
-	public void visit(NodeVisitor visitor) {
-		for (StatementNode node : statementList) {
-			node.visit(visitor);
-		}
+	@Override
+	public <O> O visit(StatementVisitor<O> visitor) {
+		return visitor.visitStatementList(this);
 	}
 
 	// Accessing ==============================================================

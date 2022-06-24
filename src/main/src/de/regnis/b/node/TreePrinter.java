@@ -1,5 +1,6 @@
 package de.regnis.b.node;
 
+import de.regnis.b.ExpressionVisitor;
 import de.regnis.b.out.StringOutput;
 
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class TreePrinter {
 
 	// Accessing ==============================================================
 
-	public void print(List<String> strings, StringOutput output) {
-		for (String string : strings) {
+	public void print(StatementListNode node, StringOutput output) {
+		for (String string : getStrings(node)) {
 			output.print(string);
 			output.println();
 		}
@@ -59,34 +60,48 @@ public class TreePrinter {
 	}
 
 	private List<String> getStrings(StatementNode node) {
-		if (node instanceof VarDeclarationNode) {
-			return getStrings((VarDeclarationNode)node);
-		}
-		if (node instanceof AssignmentNode) {
-			return getStrings((AssignmentNode)node);
-		}
-		if (node instanceof StatementListNode) {
-			return getStrings((StatementListNode)node);
-		}
-		throw new UnsupportedOperationException();
+		return node.visit(new StatementVisitor<>() {
+			@Override
+			public List<String> visitAssignment(AssignmentNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitStatementList(StatementListNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitVarDeclaration(VarDeclarationNode node) {
+				return getStrings(node);
+			}
+		});
 	}
 
 	// Utils ==================================================================
 
 	private List<String> getStrings(ExpressionNode node) {
-		if (node instanceof BinaryExpressionNode) {
-			return getStrings((BinaryExpressionNode)node);
-		}
-		if (node instanceof NumberNode) {
-			return getStrings((NumberNode)node);
-		}
-		if (node instanceof VarReadNode) {
-			return getStrings((VarReadNode)node);
-		}
-		if (node instanceof FunctionCallNode) {
-			return getStrings((FunctionCallNode) node);
-		}
-		throw new UnsupportedOperationException();
+		return node.visit(new ExpressionVisitor<>() {
+			@Override
+			public List<String> visitBinary(BinaryExpressionNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitFunctionCall(FunctionCallNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitNumber(NumberNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitVarRead(VarReadNode node) {
+				return getStrings(node);
+			}
+		});
 	}
 
 	private List<String> getStrings(FunctionCallNode node) {

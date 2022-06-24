@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import de.regnis.b.ExpressionVisitor;
+
 /**
  * @author Thomas Singer
  */
@@ -20,5 +22,10 @@ public final class NumberNode extends ExpressionNode {
 	@Override
 	public String toString() {
 		return String.valueOf(value);
+	}
+
+	@Override
+	public <O> O visit(ExpressionVisitor<O> visitor) {
+		return visitor.visitNumber(this);
 	}
 }

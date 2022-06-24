@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import de.regnis.b.ExpressionVisitor;
+
 import java.util.List;
 
 /**
@@ -9,8 +11,8 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Fields =================================================================
 
-	public final String name;
 	private final FunctionParametersNode parameters;
+	public final String name;
 	public final int line;
 	public final int column;
 
@@ -25,6 +27,13 @@ public final class FunctionCallNode extends ExpressionNode {
 		this.parameters = parameters;
 		this.line = line;
 		this.column = column;
+	}
+
+	// Implemented ============================================================
+
+	@Override
+	public <O> O visit(ExpressionVisitor<O> visitor) {
+		return visitor.visitFunctionCall(this);
 	}
 
 	// Accessing ==============================================================

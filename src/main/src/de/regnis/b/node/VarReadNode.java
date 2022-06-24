@@ -1,6 +1,6 @@
 package de.regnis.b.node;
 
-import node.NodeVisitor;
+import de.regnis.b.ExpressionVisitor;
 
 /**
  * @author Thomas Singer
@@ -10,8 +10,8 @@ public final class VarReadNode extends ExpressionNode {
 	// Fields =================================================================
 
 	public final String var;
-	private final int line;
-	private final int column;
+	public final int line;
+	public final int column;
 
 	// Setup ==================================================================
 
@@ -33,7 +33,7 @@ public final class VarReadNode extends ExpressionNode {
 	}
 
 	@Override
-	public void visit(NodeVisitor visitor) {
-		visitor.visitVarRead(var, line, column);
+	public <O> O visit(ExpressionVisitor<O> visitor) {
+		return visitor.visitVarRead(this);
 	}
 }
