@@ -76,7 +76,7 @@ public final class SplitExpressionsTransformation {
 	@NotNull
 	private FunctionCallNode createSimplifiedFunctionCall(FunctionCallNode node, StatementListNode list) {
 		final FunctionParametersNode parameters = new FunctionParametersNode();
-		for (ExpressionNode parameter : node.getExpressions()) {
+		for (ExpressionNode parameter : node.getParameters()) {
 			final ExpressionNode simplifiedParameter = splitInnerExpression(parameter, list);
 			parameters.add(simplifiedParameter);
 		}

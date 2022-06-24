@@ -42,7 +42,7 @@ public abstract class NodeVisitor<O> implements StatementVisitor<O>, ExpressionV
 	@Nullable
 	@Override
 	public O visitFunctionCall(FunctionCallNode node) {
-		for (ExpressionNode expression : node.getExpressions()) {
+		for (ExpressionNode expression : node.getParameters()) {
 			expression.visit(this);
 		}
 		return null;

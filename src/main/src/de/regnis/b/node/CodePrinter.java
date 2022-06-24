@@ -97,7 +97,7 @@ public class CodePrinter {
 			output.print(functionCallNode.name);
 			output.print("(");
 			boolean isFirst = true;
-			for (ExpressionNode expressionNode : functionCallNode.getExpressions()) {
+			for (ExpressionNode expressionNode : functionCallNode.getParameters()) {
 				if (isFirst) {
 					isFirst = false;
 				}
