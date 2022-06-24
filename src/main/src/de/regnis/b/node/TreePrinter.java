@@ -36,14 +36,14 @@ public class TreePrinter {
 
 	public List<String> getStrings(AssignmentNode node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " = ");
+		strings.add(node.var + " =");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
 
 	public List<String> getStrings(VarDeclarationNode node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " := ");
+		strings.add(node.var + " :=");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
