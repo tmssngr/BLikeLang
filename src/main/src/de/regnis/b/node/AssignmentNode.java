@@ -18,6 +18,10 @@ public final class AssignmentNode extends StatementNode {
 
 	// Setup ==================================================================
 
+	public AssignmentNode(String var, ExpressionNode expression) {
+		this(var, expression, -1, -1);
+	}
+
 	public AssignmentNode(String var, ExpressionNode expression, int line, int column) {
 		Objects.requireNonNull(var);
 		Objects.requireNonNull(expression);

@@ -15,6 +15,10 @@ public final class VarReadNode extends ExpressionNode {
 
 	// Setup ==================================================================
 
+	public VarReadNode(String var) {
+		this(var, -1, -1);
+	}
+
 	public VarReadNode(String var, int line, int column) {
 		this.var = var;
 		this.line = line;
