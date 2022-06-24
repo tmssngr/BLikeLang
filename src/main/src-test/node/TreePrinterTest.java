@@ -2,6 +2,7 @@ package node;
 
 import java.util.List;
 
+import de.regnis.b.node.*;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,8 +1,9 @@
-package node;
+package de.regnis.b.node;
+
+import node.NodeVisitor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Thomas Singer

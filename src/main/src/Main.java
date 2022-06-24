@@ -1,6 +1,9 @@
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
-import node.*;
+import de.regnis.b.AstFactory;
+import de.regnis.b.ParseFailedException;
+import de.regnis.b.node.*;
+import node.NodeVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.NotNull;
