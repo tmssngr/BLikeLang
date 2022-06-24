@@ -1,7 +1,9 @@
+package de.regnis.b;
+
 import com.syntevo.antlr.b.BLikeLangBaseVisitor;
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
-import node.*;
+import de.regnis.b.node.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
 

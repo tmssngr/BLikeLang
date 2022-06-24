@@ -1,4 +1,6 @@
-package node;
+package de.regnis.b.node;
+
+import node.NodeVisitor;
 
 /**
  * @author Thomas Singer

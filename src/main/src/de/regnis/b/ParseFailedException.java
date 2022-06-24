@@ -1,3 +1,5 @@
+package de.regnis.b;
+
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 /**

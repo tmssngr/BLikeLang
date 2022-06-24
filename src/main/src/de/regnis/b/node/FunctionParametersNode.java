@@ -1,4 +1,4 @@
-package node;
+package de.regnis.b.node;
 
 import java.util.ArrayList;
 import java.util.Collections;
