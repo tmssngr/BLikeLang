@@ -16,7 +16,7 @@ public final class BinaryExpressionNode extends ExpressionNode {
 		return new BinaryExpressionNode(left, "+", right);
 	}
 
-	public static Node createSub(ExpressionNode left, ExpressionNode right) {
+	public static BinaryExpressionNode createSub(ExpressionNode left, ExpressionNode right) {
 		return new BinaryExpressionNode(left, "-", right);
 	}
 
