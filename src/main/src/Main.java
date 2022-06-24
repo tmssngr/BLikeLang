@@ -3,13 +3,12 @@ import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.AstFactory;
 import de.regnis.b.ParseFailedException;
 import de.regnis.b.SplitExpressionsTransformation;
-import de.regnis.b.node.CodePrinter;
-import de.regnis.b.node.StatementListNode;
-import de.regnis.b.node.TreePrinter;
+import de.regnis.b.node.*;
 import de.regnis.b.out.StringOutput;
 import node.NodeVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,36 +49,51 @@ public final class Main {
 
 		checkVariables(rootAst);
 		final TreePrinter printer = new TreePrinter();
-		printer.print(printer.getStrings(rootAst), StringOutput.out);
+		printer.print(rootAst, StringOutput.out);
 
 		final StatementListNode flattenedRootAst = SplitExpressionsTransformation.createTempVars(rootAst);
 		new CodePrinter().print(flattenedRootAst, StringOutput.out);
 	}
 
 	private static void checkVariables(StatementListNode root) {
-		final Set<String> definedVariables = new HashSet<>();
-		root.visit(new NodeVisitor() {
+		final StatementVisitor<?> visitor = new NodeVisitor<>() {
+			private final Set<String> definedVariables = new HashSet<>();
+
+			@Nullable
 			@Override
-			public void visitDeclaration(String var, int line, int column) {
+			public Object visitAssignment(AssignmentNode node) {
+				super.visitAssignment(node);
+
+				final String var = node.var;
+				if (!definedVariables.contains(var)) {
+					throw new ParseFailedException("Var " + var + " undeclared", node.line, node.column);
+				}
+				return null;
+			}
+
+			@Nullable
+			@Override
+			public Object visitVarDeclaration(VarDeclarationNode node) {
+				super.visitVarDeclaration(node);
+
+				final String var = node.var;
 				if (definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " already defined", line, column);
+					throw new ParseFailedException("Var " + var + " already defined", node.line, node.column);
 				}
 				definedVariables.add(var);
+				return null;
 			}
 
+			@Nullable
 			@Override
-			public void visitAssignment(String var, int line, int column) {
+			public Object visitVarRead(VarReadNode node) {
+				final String var = node.var;
 				if (!definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " undeclared", line, column);
+					throw new ParseFailedException("Var " + var + " undeclared", node.line, node.column);
 				}
+				return null;
 			}
-
-			@Override
-			public void visitVarRead(String var, int line, int column) {
-				if (!definedVariables.contains(var)) {
-					throw new ParseFailedException("Var " + var + " undeclared", line, column);
-				}
-			}
-		});
+		};
+		visitor.visitStatementList(root);
 	}
 }

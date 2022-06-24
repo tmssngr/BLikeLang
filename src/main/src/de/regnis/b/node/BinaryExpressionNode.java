@@ -1,6 +1,6 @@
 package de.regnis.b.node;
 
-import node.NodeVisitor;
+import de.regnis.b.ExpressionVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -50,9 +50,8 @@ public final class BinaryExpressionNode extends ExpressionNode {
 	}
 
 	@Override
-	public void visit(NodeVisitor visitor) {
-		left.visit(visitor);
-		right.visit(visitor);
+	public <O> O visit(ExpressionVisitor<O> visitor) {
+		return visitor.visitBinary(this);
 	}
 
 	// Accessing ==============================================================

@@ -1,7 +1,5 @@
 package de.regnis.b.node;
 
-import node.NodeVisitor;
-
 import java.util.Objects;
 
 /**
@@ -40,8 +38,7 @@ public final class AssignmentNode extends StatementNode {
 	}
 
 	@Override
-	public void visit(NodeVisitor visitor) {
-		expression.visit(visitor);
-		visitor.visitAssignment(var, line, column);
+	public <O> O visit(StatementVisitor<O> visitor) {
+		return visitor.visitAssignment(this);
 	}
 }

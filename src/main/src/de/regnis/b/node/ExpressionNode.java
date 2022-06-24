@@ -1,14 +1,13 @@
 package de.regnis.b.node;
 
-import node.NodeVisitor;
+import de.regnis.b.ExpressionVisitor;
 
 /**
  * @author Thomas Singer
  */
 public abstract class ExpressionNode extends Node {
 
-	// Accessing ==============================================================
+	// Abstract ===============================================================
 
-	public void visit(NodeVisitor visitor) {
-	}
+	public abstract <O> O visit(ExpressionVisitor<O> visitor);
 }
