@@ -10,18 +10,24 @@ import java.util.Objects;
  */
 public final class BinaryExpressionNode extends ExpressionNode {
 
+	// Constants ==============================================================
+
+	public static final String PLUS = "+";
+	public static final String MINUS = "-";
+	public static final String MULTIPLY = "*";
+
 	// Static =================================================================
 
 	public static BinaryExpressionNode createAdd(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, "+", right);
+		return new BinaryExpressionNode(left, PLUS, right);
 	}
 
 	public static BinaryExpressionNode createSub(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, "-", right);
+		return new BinaryExpressionNode(left, MINUS, right);
 	}
 
 	public static BinaryExpressionNode createMultiply(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, "*", right);
+		return new BinaryExpressionNode(left, MULTIPLY, right);
 	}
 
 	// Fields =================================================================
