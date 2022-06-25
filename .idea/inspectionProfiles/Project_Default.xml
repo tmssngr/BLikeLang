@@ -19,7 +19,6 @@
     <inspection_tool class="AmbiguousFieldAccess" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AmbiguousMethodCall" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="Annotator" enabled="false" level="ERROR" enabled_by_default="false" />
-    <inspection_tool class="AnonymousInnerClassMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="AntDuplicateTargetsInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="AntMissingPropertiesFileInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="AntResolveInspection" enabled="false" level="ERROR" enabled_by_default="false" />
@@ -87,7 +86,6 @@
       <option name="onlyReportPrivateSetter" value="false" />
     </inspection_tool>
     <inspection_tool class="CallToStringConcatCanBeReplacedByOperator" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="CallToSuspiciousStringMethod" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CastConflictsWithInstanceof" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CastThatLosesPrecision" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreIntegerCharCasts" value="false" />
@@ -175,9 +173,6 @@
     <inspection_tool class="CustomSecurityManager" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CyclicClassDependency" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CyclicPackageDependency" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="CyclomaticComplexity" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="10" />
-    </inspection_tool>
     <inspection_tool class="DateToString" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DeclareCollectionAsInterface" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreLocalVariables" value="false" />
@@ -386,11 +381,6 @@
     </inspection_tool>
     <inspection_tool class="MethodMayBeSynchronized" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MethodNameSameAsParentName" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MethodOnlyUsedFromInnerClass" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreMethodsAccessedFromAnonymousClass" value="false" />
-      <option name="ignoreStaticMethodsFromNonStaticInnerClass" value="false" />
-      <option name="onlyReportStaticMethods" value="false" />
-    </inspection_tool>
     <inspection_tool class="MethodOverloadsParentMethod" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MethodOverridesInaccessibleMethodOfSuper" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MethodOverridesStaticMethod" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -468,9 +458,6 @@
       <option name="m_limit" value="5" />
     </inspection_tool>
     <inspection_tool class="NewMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="NonCommentSourceStatements" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="30" />
-    </inspection_tool>
     <inspection_tool class="NonExceptionNameEndsWithException" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NonFinalClone" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NonFinalFieldInImmutable" enabled="true" level="WARNING" enabled_by_default="true" />
