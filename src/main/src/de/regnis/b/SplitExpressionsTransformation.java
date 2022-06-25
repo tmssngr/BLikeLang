@@ -80,6 +80,6 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 	@NotNull
 	private String getNextTempVarName() {
 		tempVarIndex++;
-		return "t " + tempVarIndex;
+		return "$" + tempVarIndex;
 	}
 }
