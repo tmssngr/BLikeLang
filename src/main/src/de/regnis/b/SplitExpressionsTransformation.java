@@ -3,8 +3,6 @@ package de.regnis.b;
 import de.regnis.b.node.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * @author Thomas Singer
  */
@@ -32,38 +30,52 @@ public final class SplitExpressionsTransformation {
 	private StatementListNode handleStatementList(@NotNull StatementListNode statementList) {
 		final StatementListNode newStatementList = new StatementListNode();
 
-		final List<? extends StatementNode> statements = statementList.getStatements();
-		for (StatementNode statement : statements) {
-			if (statement instanceof VarDeclarationNode) {
-				final VarDeclarationNode varDeclarationNode = (VarDeclarationNode) statement;
-				final ExpressionNode simplifiedExpression = splitOutMostExpression(varDeclarationNode.expression, newStatementList);
-				newStatementList.add(new VarDeclarationNode(varDeclarationNode.var, simplifiedExpression, varDeclarationNode.line, varDeclarationNode.column));
-			}
-			else if (statement instanceof AssignmentNode) {
-				final AssignmentNode assignmentNode = (AssignmentNode) statement;
-				final ExpressionNode simplifiedExpression = splitOutMostExpression(assignmentNode.expression, newStatementList);
-				newStatementList.add(new AssignmentNode(assignmentNode.var, simplifiedExpression, assignmentNode.line, assignmentNode.column));
-			}
-			else if (statement instanceof StatementListNode) {
-				newStatementList.add(handleStatementList((StatementListNode) statement));
-			}
+		for (StatementNode statement : statementList.getStatements()) {
+			newStatementList.add(statement.visit(new StatementVisitor<>() {
+				@Override
+				public StatementNode visitAssignment(AssignmentNode node) {
+					final ExpressionNode simplifiedExpression = splitOutMostExpression(node.expression, newStatementList);
+					return new AssignmentNode(node.var, simplifiedExpression, node.line, node.column);
+				}
+
+				@Override
+				public StatementNode visitStatementList(StatementListNode node) {
+					return handleStatementList(node);
+				}
+
+				@Override
+				public StatementNode visitVarDeclaration(VarDeclarationNode node) {
+					final ExpressionNode simplifiedExpression = splitOutMostExpression(node.expression, newStatementList);
+					return new VarDeclarationNode(node.var, simplifiedExpression, node.line, node.column);
+				}
+			}));
 		}
 		return newStatementList;
 	}
 
 	@NotNull
 	private ExpressionNode splitOutMostExpression(ExpressionNode expression, StatementListNode list) {
-		if (expression instanceof BinaryExpressionNode) {
-			final BinaryExpressionNode ben = (BinaryExpressionNode) expression;
-			return createSimplifiedBinaryExpression(ben, list);
-		}
+		return expression.visit(new ExpressionVisitor<>() {
+			@Override
+			public ExpressionNode visitBinary(BinaryExpressionNode node) {
+				return createSimplifiedBinaryExpression(node, list);
+			}
 
-		if (expression instanceof FunctionCallNode) {
-			final FunctionCallNode fcn = (FunctionCallNode) expression;
-			return createSimplifiedFunctionCall(fcn, list);
-		}
+			@Override
+			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
+				return createSimplifiedFunctionCall(node, list);
+			}
 
-		return expression;
+			@Override
+			public ExpressionNode visitNumber(NumberNode node) {
+				return node;
+			}
+
+			@Override
+			public ExpressionNode visitVarRead(VarReadNode node) {
+				return node;
+			}
+		});
 	}
 
 	@NotNull
@@ -85,15 +97,29 @@ public final class SplitExpressionsTransformation {
 
 	@NotNull
 	private ExpressionNode splitInnerExpression(ExpressionNode expressionNode, StatementListNode list) {
-		if (expressionNode instanceof BinaryExpressionNode) {
-			final BinaryExpressionNode ben = createSimplifiedBinaryExpression((BinaryExpressionNode) expressionNode, list);
-			return createTempVar(ben, list);
-		}
-		if (expressionNode instanceof FunctionCallNode) {
-			final FunctionCallNode fcn = createSimplifiedFunctionCall((FunctionCallNode) expressionNode, list);
-			return createTempVar(fcn, list);
-		}
-		return expressionNode;
+		return expressionNode.visit(new ExpressionVisitor<>() {
+			@Override
+			public ExpressionNode visitBinary(BinaryExpressionNode node) {
+				final BinaryExpressionNode ben = createSimplifiedBinaryExpression(node, list);
+				return createTempVar(ben, list);
+			}
+
+			@Override
+			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
+				final FunctionCallNode fcn = createSimplifiedFunctionCall(node, list);
+				return createTempVar(fcn, list);
+			}
+
+			@Override
+			public ExpressionNode visitNumber(NumberNode node) {
+				return node;
+			}
+
+			@Override
+			public ExpressionNode visitVarRead(VarReadNode node) {
+				return node;
+			}
+		});
 	}
 
 	@NotNull
