@@ -1,21 +1,12 @@
 package de.regnis.b;
 
 import de.regnis.b.node.*;
-import de.regnis.b.out.StringOutput;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * @author Thomas Singer
  */
-public class SplitExpressionsTransformationTest {
-
-	// Constants ==============================================================
-
-	private static final String PREFIX = "{\n\t";
-	private static final String SUFFIX = "\n}\n";
-	private static final String NL = "\n\t";
+public class SplitExpressionsTransformationTest extends AbstractTransformationTest {
 
 	// Accessing ==============================================================
 
@@ -132,34 +123,5 @@ public class SplitExpressionsTransformationTest {
 								                                                 .add(BinaryExpressionNode.createMultiply(new NumberNode(3),
 								                                                                                          new NumberNode(4))))))
 		));
-	}
-
-	// Utils ==================================================================
-
-	private static void assertEquals(String expected, StatementListNode root) {
-		final TestStringOutput output = new TestStringOutput();
-		new CodePrinter().print(root, output);
-		Assert.assertEquals(expected, output.toString());
-	}
-
-	// Inner Classes ==========================================================
-
-	private static class TestStringOutput implements StringOutput {
-		private final StringBuilder buffer = new StringBuilder();
-
-		@Override
-		public void print(@NotNull String s) {
-			buffer.append(s);
-		}
-
-		@Override
-		public void println() {
-			print("\n");
-		}
-
-		@Override
-		public String toString() {
-			return buffer.toString();
-		}
 	}
 }
