@@ -1,6 +1,7 @@
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.AstFactory;
+import de.regnis.b.ConstantFoldingTransformation;
 import de.regnis.b.ParseFailedException;
 import de.regnis.b.SplitExpressionsTransformation;
 import de.regnis.b.node.*;
@@ -45,14 +46,17 @@ public final class Main {
 
 		final BLikeLangParser.RootContext rootContext = parser.root();
 		final AstFactory astFactory = new AstFactory();
-		final StatementListNode rootAst = astFactory.visitRoot(rootContext);
+		StatementListNode rootAst = astFactory.visitRoot(rootContext);
 
 		checkVariables(rootAst);
 		final TreePrinter printer = new TreePrinter();
 		printer.print(rootAst, StringOutput.out);
 
-		final StatementListNode flattenedRootAst = SplitExpressionsTransformation.createTempVars(rootAst);
-		new CodePrinter().print(flattenedRootAst, StringOutput.out);
+		rootAst = SplitExpressionsTransformation.createTempVars(rootAst);
+		new CodePrinter().print(rootAst, StringOutput.out);
+
+		rootAst = ConstantFoldingTransformation.transform(rootAst);
+		new CodePrinter().print(rootAst, StringOutput.out);
 	}
 
 	private static void checkVariables(StatementListNode root) {
