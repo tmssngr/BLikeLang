@@ -17,7 +17,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						.add(new AssignmentNode("a", new NumberNode(1)))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+		assertEquals(PREFIX + "a = b" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new VarReadNode("b")))
 		));
@@ -41,7 +41,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 								                                                  .add(new NumberNode(1)))))
 		));
 
-		assertEquals(PREFIX + "a = foo(read b)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+		assertEquals(PREFIX + "a = foo(b)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
 						                                                  new FunctionParametersNode()
@@ -52,7 +52,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	@Test
 	public void testSingleExtraction() {
 		assertEquals(PREFIX + "t 1 := 2 + 3" + NL
-				             + "a = 1 + read t 1" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             + "a = 1 + t 1" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new NumberNode(1),
@@ -61,7 +61,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		));
 
 		assertEquals(PREFIX + "t 1 := 1 + 2" + NL
-				             + "a = read t 1 + 3" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             + "a = t 1 + 3" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(BinaryExpressionNode.createAdd(new NumberNode(1),
@@ -70,7 +70,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		));
 
 		assertEquals(PREFIX + "t 1 := foo()" + NL
-				             + "a = read t 1 + 3" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             + "a = t 1 + 3" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new FunctionCallNode("foo",
@@ -79,7 +79,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		));
 
 		assertEquals(PREFIX + "t 1 := bar(1)" + NL +
-				             "a = foo(read t 1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             "a = foo(t 1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
 						                                                  new FunctionParametersNode()
@@ -89,7 +89,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		));
 
 		assertEquals(PREFIX + "t 1 := 1 - 2" + NL +
-				             "a = foo(read t 1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             "a = foo(t 1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
 						                                                  new FunctionParametersNode()
@@ -102,7 +102,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	public void testMultipleExtractions() {
 		assertEquals(PREFIX + "t 1 := 1 * 2" + NL
 				             + "t 2 := 3 * 4" + NL
-				             + "a := read t 1 + read t 2" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             + "a := t 1 + t 2" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new VarDeclarationNode("a",
 						                            BinaryExpressionNode.createAdd(BinaryExpressionNode.createMultiply(new NumberNode(1),
@@ -111,9 +111,9 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						                                                                                               new NumberNode(4)))))
 		));
 
-		assertEquals(PREFIX + "t 1 := 1 + read b" + NL
+		assertEquals(PREFIX + "t 1 := 1 + b" + NL
 				             + "t 2 := 3 * 4" + NL
-				             + "a := foo(read t 1, read t 2)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
+				             + "a := foo(t 1, t 2)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new VarDeclarationNode("a",
 						                            new FunctionCallNode("foo",
