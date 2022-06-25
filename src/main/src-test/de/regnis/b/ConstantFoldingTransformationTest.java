@@ -15,19 +15,19 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 						.add(new AssignmentNode("a", new NumberNode(1)))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new VarReadNode("b")))
 		));
 
-		assertEquals(PREFIX + "a = 1 + read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = 1 + b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new NumberNode(1),
 						                                                       new VarReadNode("b"))))
 		));
 
-		assertEquals(PREFIX + "a = read b - 4" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b - 4" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createSub(new VarReadNode("b"),
@@ -46,7 +46,7 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 								                                                  .add(new NumberNode(1)))))
 		));
 
-		assertEquals(PREFIX + "a = foo(read b)" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = foo(b)" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
 						                                                  new FunctionParametersNode()
@@ -63,21 +63,21 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 						                                                       new NumberNode(2))))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new VarReadNode("b"),
 						                                                       new NumberNode(0))))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new NumberNode(0),
 						                                                       new VarReadNode("b"))))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createSub(new VarReadNode("b"),
@@ -98,14 +98,14 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 						                                                            new VarReadNode("b"))))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createMultiply(new VarReadNode("b"),
 						                                                            new NumberNode(1))))
 		));
 
-		assertEquals(PREFIX + "a = read b" + SUFFIX, ConstantFoldingTransformation.transform(
+		assertEquals(PREFIX + "a = b" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createMultiply(new NumberNode(1),

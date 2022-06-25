@@ -79,7 +79,6 @@ public class CodePrinter {
 		else if (expression instanceof VarReadNode) {
 			final VarReadNode varReadNode = (VarReadNode) expression;
 
-			output.print("read ");
 			output.print(varReadNode.var);
 		}
 		else if (expression instanceof BinaryExpressionNode) {
