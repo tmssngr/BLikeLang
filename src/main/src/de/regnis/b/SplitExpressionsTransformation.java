@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class SplitExpressionsTransformation {
+public final class SplitExpressionsTransformation extends AbstractTransformation{
 
 	// Static =================================================================
 
@@ -26,70 +26,18 @@ public final class SplitExpressionsTransformation {
 
 	// Utils ==================================================================
 
-	@NotNull
-	private StatementListNode handleStatementList(@NotNull StatementListNode statementList) {
-		final StatementListNode newStatementList = new StatementListNode();
-
-		for (StatementNode statement : statementList.getStatements()) {
-			newStatementList.add(statement.visit(new StatementVisitor<>() {
-				@Override
-				public StatementNode visitAssignment(AssignmentNode node) {
-					final ExpressionNode simplifiedExpression = splitOutMostExpression(node.expression, newStatementList);
-					return new AssignmentNode(node.var, simplifiedExpression, node.line, node.column);
-				}
-
-				@Override
-				public StatementNode visitStatementList(StatementListNode node) {
-					return handleStatementList(node);
-				}
-
-				@Override
-				public StatementNode visitVarDeclaration(VarDeclarationNode node) {
-					final ExpressionNode simplifiedExpression = splitOutMostExpression(node.expression, newStatementList);
-					return new VarDeclarationNode(node.var, simplifiedExpression, node.line, node.column);
-				}
-			}));
-		}
-		return newStatementList;
+	@Override
+	protected BinaryExpressionNode handleBinary(BinaryExpressionNode node, StatementListNode newStatementList) {
+		final ExpressionNode left = splitInnerExpression(node.left, newStatementList);
+		final ExpressionNode right = splitInnerExpression(node.right, newStatementList);
+		return node.createNew(left, right);
 	}
 
-	@NotNull
-	private ExpressionNode splitOutMostExpression(ExpressionNode expression, StatementListNode list) {
-		return expression.visit(new ExpressionVisitor<>() {
-			@Override
-			public ExpressionNode visitBinary(BinaryExpressionNode node) {
-				return createSimplifiedBinaryExpression(node, list);
-			}
-
-			@Override
-			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
-				return createSimplifiedFunctionCall(node, list);
-			}
-
-			@Override
-			public ExpressionNode visitNumber(NumberNode node) {
-				return node;
-			}
-
-			@Override
-			public ExpressionNode visitVarRead(VarReadNode node) {
-				return node;
-			}
-		});
-	}
-
-	@NotNull
-	private BinaryExpressionNode createSimplifiedBinaryExpression(BinaryExpressionNode ben, StatementListNode list) {
-		final ExpressionNode left = splitInnerExpression(ben.left, list);
-		final ExpressionNode right = splitInnerExpression(ben.right, list);
-		return ben.createNew(left, right);
-	}
-
-	@NotNull
-	private FunctionCallNode createSimplifiedFunctionCall(FunctionCallNode node, StatementListNode list) {
+	@Override
+	protected FunctionCallNode handleFunctionCall(FunctionCallNode node, StatementListNode newStatementList) {
 		final FunctionParametersNode parameters = new FunctionParametersNode();
 		for (ExpressionNode parameter : node.getParameters()) {
-			final ExpressionNode simplifiedParameter = splitInnerExpression(parameter, list);
+			final ExpressionNode simplifiedParameter = splitInnerExpression(parameter, newStatementList);
 			parameters.add(simplifiedParameter);
 		}
 		return new FunctionCallNode(node.name, parameters, node.line, node.column);
@@ -100,13 +48,13 @@ public final class SplitExpressionsTransformation {
 		return expressionNode.visit(new ExpressionVisitor<>() {
 			@Override
 			public ExpressionNode visitBinary(BinaryExpressionNode node) {
-				final BinaryExpressionNode ben = createSimplifiedBinaryExpression(node, list);
+				final BinaryExpressionNode ben = handleBinary(node, list);
 				return createTempVar(ben, list);
 			}
 
 			@Override
 			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
-				final FunctionCallNode fcn = createSimplifiedFunctionCall(node, list);
+				final FunctionCallNode fcn = handleFunctionCall(node, list);
 				return createTempVar(fcn, list);
 			}
 
