@@ -72,7 +72,7 @@ public class TreePrinter {
 			}
 
 			@Override
-			public List<String> visitVarDeclaration(VarDeclarationNode node) {
+			public List<String> visitLocalVarDeclaration(VarDeclarationNode node) {
 				return getStrings(node);
 			}
 		});

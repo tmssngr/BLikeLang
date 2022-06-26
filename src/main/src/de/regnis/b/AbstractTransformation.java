@@ -32,7 +32,7 @@ public abstract class AbstractTransformation {
 				}
 
 				@Override
-				public StatementNode visitVarDeclaration(VarDeclarationNode node) {
+				public StatementNode visitLocalVarDeclaration(VarDeclarationNode node) {
 					return handleVarDeclaration(node, newStatementList);
 				}
 			}));

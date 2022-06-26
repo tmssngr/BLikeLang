@@ -39,6 +39,6 @@ public final class VarDeclarationNode extends StatementNode {
 
 	@Override
 	public <O> O visit(StatementVisitor<O> visitor) {
-		return visitor.visitVarDeclaration(this);
+		return visitor.visitLocalVarDeclaration(this);
 	}
 }

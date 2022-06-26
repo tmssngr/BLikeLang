@@ -77,8 +77,8 @@ public final class Main {
 
 			@Nullable
 			@Override
-			public Object visitVarDeclaration(VarDeclarationNode node) {
-				super.visitVarDeclaration(node);
+			public Object visitLocalVarDeclaration(VarDeclarationNode node) {
+				super.visitLocalVarDeclaration(node);
 
 				final String var = node.var;
 				if (definedVariables.contains(var)) {
