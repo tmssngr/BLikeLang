@@ -35,7 +35,7 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 
 	@Override
 	protected FunctionCallNode handleFunctionCall(FunctionCallNode node, StatementListNode newStatementList) {
-		final FunctionParametersNode parameters = new FunctionParametersNode();
+		final FunctionCallParameters parameters = new FunctionCallParameters();
 		for (ExpressionNode parameter : node.getParameters()) {
 			final ExpressionNode simplifiedParameter = splitInnerExpression(parameter, newStatementList);
 			parameters.add(simplifiedParameter);
