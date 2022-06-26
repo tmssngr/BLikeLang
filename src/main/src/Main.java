@@ -46,7 +46,7 @@ public final class Main {
 
 		final BLikeLangParser.RootContext rootContext = parser.root();
 		final AstFactory astFactory = new AstFactory();
-		StatementListNode rootAst = astFactory.visitRoot(rootContext);
+		DeclarationList rootAst = astFactory.visitRoot(rootContext);
 
 		checkVariables(rootAst);
 		final TreePrinter printer = new TreePrinter();
@@ -59,8 +59,8 @@ public final class Main {
 		new CodePrinter().print(rootAst, StringOutput.out);
 	}
 
-	private static void checkVariables(StatementListNode root) {
-		final StatementVisitor<?> visitor = new NodeVisitor<>() {
+	private static void checkVariables(DeclarationList root) {
+		final NodeVisitor<?> visitor = new NodeVisitor<>() {
 			private final Set<String> definedVariables = new HashSet<>();
 
 			@Nullable
@@ -98,6 +98,6 @@ public final class Main {
 				return null;
 			}
 		};
-		visitor.visitStatementList(root);
+		visitor.visitDeclarationList(root);
 	}
 }

@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class SplitExpressionsTransformation extends AbstractTransformation{
+public final class SplitExpressionsTransformation extends AbstractTransformation {
 
 	// Static =================================================================
 
-	public static StatementListNode transform(StatementListNode root) {
+	public static DeclarationList transform(DeclarationList root) {
 		final SplitExpressionsTransformation transformation = new SplitExpressionsTransformation();
-		return transformation.handleStatementList(root);
+		return transformation.handleDeclarationList(root);
 	}
 
 	// Fields =================================================================

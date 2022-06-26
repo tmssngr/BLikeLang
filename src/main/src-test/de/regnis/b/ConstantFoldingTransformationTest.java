@@ -80,7 +80,7 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 	// Utils ==================================================================
 
 	private void assertEquals(String expected, Consumer<StatementListFactory> factory) {
-		final StatementListNode root = createDocument(factory);
+		final DeclarationList root = createDocument(factory);
 		assertEquals(PREFIX + expected + SUFFIX, ConstantFoldingTransformation.transform(root));
 	}
 }

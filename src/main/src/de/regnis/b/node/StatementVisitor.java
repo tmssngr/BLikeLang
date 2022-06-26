@@ -9,4 +9,6 @@ public interface StatementVisitor<O> {
 	O visitStatementList(StatementListNode node);
 
 	O visitLocalVarDeclaration(VarDeclarationNode node);
+
+	O visitReturn(ReturnStatement node);
 }

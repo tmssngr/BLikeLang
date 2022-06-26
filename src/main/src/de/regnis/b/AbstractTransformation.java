@@ -15,8 +15,37 @@ public abstract class AbstractTransformation {
 
 	// Accessing ==============================================================
 
+	protected DeclarationList handleDeclarationList(@NotNull DeclarationList declarationList) {
+		final DeclarationList newDeclarationList = new DeclarationList();
+
+		for (Declaration declaration : declarationList.getDeclarations()) {
+			newDeclarationList.add(declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					return node;
+				}
+
+				@Override
+				public Declaration visitFunctionDeclaration(FunctionDeclaration node) {
+					final StatementNode statement = node.statement;
+					final StatementListNode statementList;
+					if (statement instanceof StatementListNode) {
+						statementList = (StatementListNode) statement;
+					}
+					else {
+						statementList = new StatementListNode();
+						statementList.add(statement);
+					}
+					final StatementListNode newStatementList = handleStatementList(statementList);
+					return new FunctionDeclaration(node.type, node.name, node.parameters, newStatementList);
+				}
+			}));
+		}
+		return newDeclarationList;
+	}
+
 	@NotNull
-	protected StatementListNode handleStatementList(@NotNull StatementListNode statementList) {
+	private StatementListNode handleStatementList(@NotNull StatementListNode statementList) {
 		final StatementListNode newStatementList = new StatementListNode();
 
 		for (StatementNode statement : statementList.getStatements()) {
@@ -35,6 +64,11 @@ public abstract class AbstractTransformation {
 				public StatementNode visitLocalVarDeclaration(VarDeclarationNode node) {
 					return handleVarDeclaration(node, newStatementList);
 				}
+
+				@Override
+				public StatementNode visitReturn(ReturnStatement node) {
+					return handleReturn(node, newStatementList);
+				}
 			}));
 		}
 		return newStatementList;
@@ -48,6 +82,11 @@ public abstract class AbstractTransformation {
 	protected StatementNode handleVarDeclaration(VarDeclarationNode node, StatementListNode newStatementList) {
 		final ExpressionNode expression = handleExpression(node.expression, newStatementList);
 		return new VarDeclarationNode(node.var, expression, node.line, node.column);
+	}
+
+	protected StatementNode handleReturn(ReturnStatement node, StatementListNode newStatementList) {
+		final ExpressionNode expression = handleExpression(node.expression, newStatementList);
+		return new ReturnStatement(expression);
 	}
 
 	protected ExpressionNode handleBinary(BinaryExpressionNode node, StatementListNode newStatementList) {

@@ -98,7 +98,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	// Utils ==================================================================
 
 	private void assertEquals(String expected, Consumer<StatementListFactory> factory) {
-		final StatementListNode root = createDocument(factory);
+		final DeclarationList root = createDocument(factory);
 		assertEquals(PREFIX + expected + SUFFIX, SplitExpressionsTransformation.transform(root));
 	}
 }
