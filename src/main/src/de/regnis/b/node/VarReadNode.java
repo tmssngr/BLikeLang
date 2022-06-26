@@ -1,7 +1,5 @@
 package de.regnis.b.node;
 
-import de.regnis.b.ExpressionVisitor;
-
 /**
  * @author Thomas Singer
  */

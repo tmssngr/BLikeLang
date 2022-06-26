@@ -1,6 +1,5 @@
 package de.regnis.b.node;
 
-import de.regnis.b.ExpressionVisitor;
 import de.regnis.b.out.StringOutput;
 
 import java.util.ArrayList;
