@@ -52,7 +52,7 @@ public final class Main {
 		final TreePrinter printer = new TreePrinter();
 		printer.print(rootAst, StringOutput.out);
 
-		rootAst = SplitExpressionsTransformation.createTempVars(rootAst);
+		rootAst = SplitExpressionsTransformation.transform(rootAst);
 		new CodePrinter().print(rootAst, StringOutput.out);
 
 		rootAst = ConstantFoldingTransformation.transform(rootAst);

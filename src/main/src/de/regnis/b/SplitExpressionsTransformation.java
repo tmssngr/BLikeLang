@@ -10,7 +10,7 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 
 	// Static =================================================================
 
-	public static StatementListNode createTempVars(StatementListNode root) {
+	public static StatementListNode transform(StatementListNode root) {
 		final SplitExpressionsTransformation transformation = new SplitExpressionsTransformation();
 		return transformation.handleStatementList(root);
 	}
