@@ -1,6 +1,7 @@
 package de.regnis.b.node;
 
 import de.regnis.b.out.StringOutput;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Thomas Singer
@@ -9,8 +10,46 @@ public class CodePrinter {
 
 	// Accessing ==============================================================
 
-	public void print(StatementListNode listNode, StringOutput output) {
-		print(listNode, 0, output);
+	public void print(DeclarationList listNode, StringOutput output) {
+		for (Declaration declaration : listNode.getDeclarations()) {
+			declaration.visit(new DeclarationVisitor<>() {
+				@Nullable
+				@Override
+				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					print(node.node, 0, output);
+					return null;
+				}
+
+				@Nullable
+				@Override
+				public Object visitFunctionDeclaration(FunctionDeclaration node) {
+					printFunctionDeclaration(node, output);
+					return null;
+				}
+			});
+		}
+	}
+
+	private void printFunctionDeclaration(FunctionDeclaration declaration, StringOutput output) {
+		output.print(declaration.type);
+		output.print(" ");
+		output.print(declaration.name);
+		output.print("(");
+		boolean isFirst = true;
+		for (FunctionDeclarationParameter parameter : declaration.parameters.getParameters()) {
+			if (isFirst) {
+				isFirst = false;
+			}
+			else {
+				output.print(", ");
+			}
+
+			output.print(parameter.type);
+			output.print(" ");
+			output.print(parameter.name);
+		}
+		output.print(") ");
+		print(declaration.statement, 0, output);
 	}
 
 	// Utils ==================================================================
@@ -32,21 +71,35 @@ public class CodePrinter {
 	}
 
 	private void print(StatementNode statement, int indentation, StringOutput output) {
-		if (statement instanceof VarDeclarationNode) {
-			final VarDeclarationNode varDeclarationNode = (VarDeclarationNode) statement;
-			print(varDeclarationNode, indentation, output);
-		}
-		else if (statement instanceof AssignmentNode) {
-			final AssignmentNode assignmentNode = (AssignmentNode) statement;
-			print(assignmentNode, indentation, output);
-		}
-		else if (statement instanceof StatementListNode) {
-			final StatementListNode statementListNode = (StatementListNode) statement;
-			print(statementListNode, indentation, output);
-		}
-		else {
-			throw new UnsupportedOperationException();
-		}
+		statement.visit(new StatementVisitor<Object>() {
+			@Nullable
+			@Override
+			public Object visitAssignment(AssignmentNode node) {
+				print(node, indentation, output);
+				return null;
+			}
+
+			@Nullable
+			@Override
+			public Object visitStatementList(StatementListNode node) {
+				print(node, indentation, output);
+				return null;
+			}
+
+			@Nullable
+			@Override
+			public Object visitLocalVarDeclaration(VarDeclarationNode node) {
+				print(node, indentation, output);
+				return null;
+			}
+
+			@Nullable
+			@Override
+			public Object visitReturn(ReturnStatement node) {
+				print(node, indentation, output);
+				return null;
+			}
+		});
 	}
 
 	private void print(VarDeclarationNode node, int indentation, StringOutput output) {
@@ -65,6 +118,16 @@ public class CodePrinter {
 
 		output.print(node.var);
 		output.print(" = ");
+
+		print(node.expression, output);
+
+		output.println();
+	}
+
+	private void print(ReturnStatement node, int indentation, StringOutput output) {
+		printIndentation(indentation, output);
+
+		output.print("return ");
 
 		print(node.expression, output);
 

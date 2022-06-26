@@ -14,14 +14,14 @@ public abstract class AbstractTransformationTest {
 
 	// Constants ==============================================================
 
-	protected static final String PREFIX = "{\n\t";
+	protected static final String PREFIX = "void test() {\n\t";
 	protected static final String SUFFIX = "\n}\n";
 	protected static final String NL = "\n\t";
 
 	// Static =================================================================
 
 	@NotNull
-	protected StatementListNode createDocument(Consumer<StatementListFactory> factory) {
+	protected DeclarationList createDocument(Consumer<StatementListFactory> factory) {
 		final StatementListNode statementList = new StatementListNode();
 		factory.accept(new StatementListFactory() {
 			@Override
@@ -34,10 +34,13 @@ public abstract class AbstractTransformationTest {
 				statementList.add(new VarDeclarationNode(name, expression));
 			}
 		});
-		return statementList;
+
+		final DeclarationList root = new DeclarationList();
+		root.add(new FunctionDeclaration("void", "test", new FunctionDeclarationParameters(), statementList));
+		return root;
 	}
 
-	protected static void assertEquals(String expected, StatementListNode root) {
+	protected static void assertEquals(String expected, DeclarationList root) {
 		final TestStringOutput output = new TestStringOutput();
 		new CodePrinter().print(root, output);
 		Assert.assertEquals(expected, output.toString());

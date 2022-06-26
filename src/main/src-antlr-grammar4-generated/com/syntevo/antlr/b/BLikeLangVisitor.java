@@ -17,6 +17,44 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitRoot(BLikeLangParser.RootContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link BLikeLangParser#declarations}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclarations(BLikeLangParser.DeclarationsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code globalVarDeclaration}
+	 * labeled alternative in {@link BLikeLangParser#declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code funcDeclaration}
+	 * labeled alternative in {@link BLikeLangParser#declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link BLikeLangParser#functionDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link BLikeLangParser#parameterDeclarations}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterDeclarations(BLikeLangParser.ParameterDeclarationsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link BLikeLangParser#parameterDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link BLikeLangParser#statements}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -43,6 +81,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBlockStatement(BLikeLangParser.BlockStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code returnStatement}
+	 * labeled alternative in {@link BLikeLangParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link BLikeLangParser#varDeclaration}.
 	 * @param ctx the parse tree

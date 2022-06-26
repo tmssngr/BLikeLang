@@ -18,6 +18,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	// Fields =================================================================
 
+	private final DeclarationList declarationList = new DeclarationList();
+
 	@Nullable
 	private StatementListNode statementListNode;
 
@@ -29,8 +31,50 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	// Implemented ============================================================
 
 	@Override
-	public StatementListNode visitRoot(BLikeLangParser.RootContext ctx) {
-		return visitStatements(ctx.statements());
+	public DeclarationList visitRoot(BLikeLangParser.RootContext ctx) {
+		return visitDeclarations(ctx.declarations());
+	}
+
+	@Override
+	public DeclarationList visitDeclarations(BLikeLangParser.DeclarationsContext ctx) {
+		visitChildren(ctx);
+		return declarationList;
+	}
+
+	@Nullable
+	@Override
+	public Node visitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx) {
+		final VarDeclarationNode node = visitVarDeclaration(ctx.varDeclaration());
+		declarationList.add(new GlobalVarDeclaration(node));
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public FunctionDeclaration visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
+		final String type = ctx.type.getText();
+		final String name = ctx.name.getText();
+		final FunctionDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
+		final StatementNode statement = (StatementNode) visit(ctx.statement());
+		declarationList.add(new FunctionDeclaration(type, name, parameters, statement));
+		return null;
+	}
+
+	@Override
+	public FunctionDeclarationParameters visitParameterDeclarations(BLikeLangParser.ParameterDeclarationsContext ctx) {
+		final FunctionDeclarationParameters parameters = new FunctionDeclarationParameters();
+		final List<BLikeLangParser.ParameterDeclarationContext> declarations = ctx.parameterDeclaration();
+		for (BLikeLangParser.ParameterDeclarationContext declaration : declarations) {
+			parameters.add(visitParameterDeclaration(declaration));
+		}
+		return parameters;
+	}
+
+	@Override
+	public FunctionDeclarationParameter visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx) {
+		final String type = ctx.type.getText();
+		final String name = ctx.name.getText();
+		return new FunctionDeclarationParameter(type, name);
 	}
 
 	@Override

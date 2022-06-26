@@ -9,9 +9,9 @@ public final class ConstantFoldingTransformation extends AbstractTransformation 
 
 	// Static =================================================================
 
-	public static StatementListNode transform(StatementListNode root) {
+	public static DeclarationList transform(DeclarationList root) {
 		final ConstantFoldingTransformation transformation = new ConstantFoldingTransformation();
-		return transformation.handleStatementList(root);
+		return transformation.handleDeclarationList(root);
 	}
 
 	// Setup ==================================================================

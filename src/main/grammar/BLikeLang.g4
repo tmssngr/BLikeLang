@@ -1,11 +1,22 @@
 grammar BLikeLang;
 
-root: statements;
+root: declarations;
+
+declarations: (declaration | NL)* ;
+declaration: varDeclaration      #globalVarDeclaration
+           | functionDeclaration #funcDeclaration
+           ;
+
+functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement;
+parameterDeclarations: parameterDeclaration?
+                     | parameterDeclaration (Comma parameterDeclaration)+;
+parameterDeclaration: type=Identifier name=Identifier;
 
 statements: (statement | NL)* ;
 statement: varDeclaration                  #localVarDeclaration
          | assignment                      #assignStatement
          | CurlyOpen statements CurlyClose #blockStatement
+         | Return expression? End          #returnStatement
          ;
 varDeclaration: Var var=Identifier Assign expression End;
 assignment    :     var=Identifier Assign expression End;
@@ -34,6 +45,7 @@ ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
 
+Return: 'return';
 Var: 'var';
 
 fragment DecimalNumber

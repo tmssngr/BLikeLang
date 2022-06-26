@@ -18,11 +18,64 @@ public class TreePrinter {
 
 	// Accessing ==============================================================
 
+	public void print(DeclarationList node, StringOutput output) {
+		for (String string : getStrings(node)) {
+			output.print(string);
+			output.println();
+		}
+	}
+
 	public void print(StatementListNode node, StringOutput output) {
 		for (String string : getStrings(node)) {
 			output.print(string);
 			output.println();
 		}
+	}
+
+	private List<String> getStrings(DeclarationList node) {
+		final List<String> strings = new ArrayList<>();
+		final List<Declaration> declarations = node.getDeclarations();
+		for (int i = 0, size = declarations.size(); i < size; i++) {
+			final Declaration declaration = declarations.get(i);
+			append(getStrings(declaration), i < size - 1, strings);
+		}
+		return strings;
+	}
+
+	private List<String> getStrings(Declaration declaration) {
+		return declaration.visit(new DeclarationVisitor<>() {
+			@Override
+			public List<String> visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+				return getStrings(node.node);
+			}
+
+			@Override
+			public List<String> visitFunctionDeclaration(FunctionDeclaration node) {
+				final StringBuilder buffer = new StringBuilder();
+				buffer.append(node.type);
+				buffer.append(" ");
+				buffer.append(node.name);
+				buffer.append("(");
+				boolean isFirst = true;
+				for (FunctionDeclarationParameter parameter : node.parameters.getParameters()) {
+					if (isFirst) {
+						isFirst = false;
+					}
+					else {
+						buffer.append(", ");
+					}
+
+					buffer.append(parameter.type);
+					buffer.append(" ");
+					buffer.append(parameter.name);
+				}
+				buffer.append(")");
+				final List<String> strings = new ArrayList<>();
+				strings.add(buffer.toString());
+				append(getStrings(node.statement), false, strings);
+				return strings;
+			}
+		});
 	}
 
 	public List<String> getStrings(BinaryExpressionNode node) {
@@ -43,6 +96,13 @@ public class TreePrinter {
 	public List<String> getStrings(VarDeclarationNode node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add(node.var + " :=");
+		append(getStrings(node.expression), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(ReturnStatement node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("return ");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
@@ -72,6 +132,11 @@ public class TreePrinter {
 
 			@Override
 			public List<String> visitLocalVarDeclaration(VarDeclarationNode node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitReturn(ReturnStatement node) {
 				return getStrings(node);
 			}
 		});
