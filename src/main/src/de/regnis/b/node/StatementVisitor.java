@@ -4,11 +4,11 @@ package de.regnis.b.node;
  * @author Thomas Singer
  */
 public interface StatementVisitor<O> {
-	O visitAssignment(AssignmentNode node);
+	O visitAssignment(Assignment node);
 
-	O visitStatementList(StatementListNode node);
+	O visitStatementList(StatementList node);
 
-	O visitLocalVarDeclaration(VarDeclarationNode node);
+	O visitLocalVarDeclaration(VarDeclaration node);
 
 	O visitReturn(ReturnStatement node);
 }

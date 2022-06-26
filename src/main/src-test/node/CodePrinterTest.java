@@ -14,15 +14,15 @@ public class CodePrinterTest {
 		final TestStringOutput output = new TestStringOutput();
 		new CodePrinter().print(
 				new DeclarationList()
-						.add(new GlobalVarDeclaration(new VarDeclarationNode("a", new NumberNode(0))))
-						.add(new FunctionDeclaration("int", "sqr",
-						                             new FunctionDeclarationParameters()
-								                             .add(new FunctionDeclarationParameter("int", "x")),
-						                             new StatementListNode()
+						.add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))
+						.add(new FuncDeclaration("int", "sqr",
+						                         new FuncDeclarationParameters()
+								                             .add(new FuncDeclarationParameter("int", "x")),
+						                         new StatementList()
 								                             .add(new ReturnStatement(
-										                             BinaryExpressionNode
-												                             .createMultiply(new VarReadNode("x"),
-												                                             new VarReadNode("x")))))),
+										                             BinaryExpression
+												                             .createMultiply(new VarRead("x"),
+												                                             new VarRead("x")))))),
 				output);
 		Assert.assertEquals("a := 0\n" +
 				                    "int sqr(int x) {\n" +

@@ -7,25 +7,25 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class FunctionCallParameters extends Node {
+public final class FuncCallParameters extends Node {
 
 	// Fields =================================================================
 
-	private final List<ExpressionNode> expressions = new ArrayList<>();
+	private final List<Expression> expressions = new ArrayList<>();
 
 	// Setup ==================================================================
 
-	public FunctionCallParameters() {
+	public FuncCallParameters() {
 	}
 
 	// Accessing ==============================================================
 
-	public FunctionCallParameters add(ExpressionNode node) {
+	public FuncCallParameters add(Expression node) {
 		expressions.add(node);
 		return this;
 	}
 
-	public List<ExpressionNode> getExpressions() {
+	public List<Expression> getExpressions() {
 		return Collections.unmodifiableList(expressions);
 	}
 }

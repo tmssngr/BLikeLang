@@ -26,18 +26,18 @@ public abstract class AbstractTransformation {
 				}
 
 				@Override
-				public Declaration visitFunctionDeclaration(FunctionDeclaration node) {
-					final StatementNode statement = node.statement;
-					final StatementListNode statementList;
-					if (statement instanceof StatementListNode) {
-						statementList = (StatementListNode) statement;
+				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+					final Statement statement = node.statement;
+					final StatementList statementList;
+					if (statement instanceof StatementList) {
+						statementList = (StatementList) statement;
 					}
 					else {
-						statementList = new StatementListNode();
+						statementList = new StatementList();
 						statementList.add(statement);
 					}
-					final StatementListNode newStatementList = handleStatementList(statementList);
-					return new FunctionDeclaration(node.type, node.name, node.parameters, newStatementList);
+					final StatementList newStatementList = handleStatementList(statementList);
+					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 				}
 			}));
 		}
@@ -45,28 +45,28 @@ public abstract class AbstractTransformation {
 	}
 
 	@NotNull
-	private StatementListNode handleStatementList(@NotNull StatementListNode statementList) {
-		final StatementListNode newStatementList = new StatementListNode();
+	private StatementList handleStatementList(@NotNull StatementList statementList) {
+		final StatementList newStatementList = new StatementList();
 
-		for (StatementNode statement : statementList.getStatements()) {
+		for (Statement statement : statementList.getStatements()) {
 			newStatementList.add(statement.visit(new StatementVisitor<>() {
 				@Override
-				public StatementNode visitAssignment(AssignmentNode node) {
+				public Statement visitAssignment(Assignment node) {
 					return handleAssignment(node, newStatementList);
 				}
 
 				@Override
-				public StatementNode visitStatementList(StatementListNode node) {
+				public Statement visitStatementList(StatementList node) {
 					return handleStatementList(node);
 				}
 
 				@Override
-				public StatementNode visitLocalVarDeclaration(VarDeclarationNode node) {
+				public Statement visitLocalVarDeclaration(VarDeclaration node) {
 					return handleVarDeclaration(node, newStatementList);
 				}
 
 				@Override
-				public StatementNode visitReturn(ReturnStatement node) {
+				public Statement visitReturn(ReturnStatement node) {
 					return handleReturn(node, newStatementList);
 				}
 			}));
@@ -74,50 +74,50 @@ public abstract class AbstractTransformation {
 		return newStatementList;
 	}
 
-	protected StatementNode handleAssignment(AssignmentNode node, StatementListNode newStatementList) {
-		final ExpressionNode expression = handleExpression(node.expression, newStatementList);
-		return new AssignmentNode(node.var, expression, node.line, node.column);
+	protected Statement handleAssignment(Assignment node, StatementList newStatementList) {
+		final Expression expression = handleExpression(node.expression, newStatementList);
+		return new Assignment(node.var, expression, node.line, node.column);
 	}
 
-	protected StatementNode handleVarDeclaration(VarDeclarationNode node, StatementListNode newStatementList) {
-		final ExpressionNode expression = handleExpression(node.expression, newStatementList);
-		return new VarDeclarationNode(node.var, expression, node.line, node.column);
+	protected Statement handleVarDeclaration(VarDeclaration node, StatementList newStatementList) {
+		final Expression expression = handleExpression(node.expression, newStatementList);
+		return new VarDeclaration(node.var, expression, node.line, node.column);
 	}
 
-	protected StatementNode handleReturn(ReturnStatement node, StatementListNode newStatementList) {
-		final ExpressionNode expression = handleExpression(node.expression, newStatementList);
+	protected Statement handleReturn(ReturnStatement node, StatementList newStatementList) {
+		final Expression expression = handleExpression(node.expression, newStatementList);
 		return new ReturnStatement(expression);
 	}
 
-	protected ExpressionNode handleBinary(BinaryExpressionNode node, StatementListNode newStatementList) {
+	protected Expression handleBinary(BinaryExpression node, StatementList newStatementList) {
 		return node;
 	}
 
-	protected ExpressionNode handleFunctionCall(FunctionCallNode node, StatementListNode newStatementList) {
+	protected Expression handleFunctionCall(FuncCall node, StatementList newStatementList) {
 		return node;
 	}
 
 	// Utils ==================================================================
 
-	private ExpressionNode handleExpression(ExpressionNode expression, StatementListNode newStatementList) {
+	private Expression handleExpression(Expression expression, StatementList newStatementList) {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
-			public ExpressionNode visitBinary(BinaryExpressionNode node) {
+			public Expression visitBinary(BinaryExpression node) {
 				return handleBinary(node, newStatementList);
 			}
 
 			@Override
-			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
+			public Expression visitFunctionCall(FuncCall node) {
 				return handleFunctionCall(node, newStatementList);
 			}
 
 			@Override
-			public ExpressionNode visitNumber(NumberNode node) {
+			public Expression visitNumber(NumberLiteral node) {
 				return node;
 			}
 
 			@Override
-			public ExpressionNode visitVarRead(VarReadNode node) {
+			public Expression visitVarRead(VarRead node) {
 				return node;
 			}
 		});

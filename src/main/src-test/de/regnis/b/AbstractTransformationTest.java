@@ -22,21 +22,21 @@ public abstract class AbstractTransformationTest {
 
 	@NotNull
 	protected DeclarationList createDocument(Consumer<StatementListFactory> factory) {
-		final StatementListNode statementList = new StatementListNode();
+		final StatementList statementList = new StatementList();
 		factory.accept(new StatementListFactory() {
 			@Override
-			public void assignment(String name, ExpressionNode expression) {
-				statementList.add(new AssignmentNode(name, expression));
+			public void assignment(String name, Expression expression) {
+				statementList.add(new Assignment(name, expression));
 			}
 
 			@Override
-			public void varDeclaration(String name, ExpressionNode expression) {
-				statementList.add(new VarDeclarationNode(name, expression));
+			public void varDeclaration(String name, Expression expression) {
+				statementList.add(new VarDeclaration(name, expression));
 			}
 		});
 
 		final DeclarationList root = new DeclarationList();
-		root.add(new FunctionDeclaration("void", "test", new FunctionDeclarationParameters(), statementList));
+		root.add(new FuncDeclaration("void", "test", new FuncDeclarationParameters(), statementList));
 		return root;
 	}
 
@@ -50,8 +50,8 @@ public abstract class AbstractTransformationTest {
 
 	protected interface StatementListFactory {
 
-		void assignment(String name, ExpressionNode expression);
+		void assignment(String name, Expression expression);
 
-		void varDeclaration(String name, ExpressionNode expression);
+		void varDeclaration(String name, Expression expression);
 	}
 }

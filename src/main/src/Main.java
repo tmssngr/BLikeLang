@@ -65,7 +65,7 @@ public final class Main {
 
 			@Nullable
 			@Override
-			public Object visitAssignment(AssignmentNode node) {
+			public Object visitAssignment(Assignment node) {
 				super.visitAssignment(node);
 
 				final String var = node.var;
@@ -77,7 +77,7 @@ public final class Main {
 
 			@Nullable
 			@Override
-			public Object visitLocalVarDeclaration(VarDeclarationNode node) {
+			public Object visitLocalVarDeclaration(VarDeclaration node) {
 				super.visitLocalVarDeclaration(node);
 
 				final String var = node.var;
@@ -90,7 +90,7 @@ public final class Main {
 
 			@Nullable
 			@Override
-			public Object visitVarRead(VarReadNode node) {
+			public Object visitVarRead(VarRead node) {
 				final String var = node.var;
 				if (!definedVariables.contains(var)) {
 					throw new ParseFailedException("Var " + var + " undeclared", node.line, node.column);

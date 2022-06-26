@@ -15,26 +15,26 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	@Test
 	public void testSimpleCases() {
 		assertEquals("a = 1", f -> f.
-				assignment("a", new NumberNode(1)));
+				assignment("a", new NumberLiteral(1)));
 
 		assertEquals("a = b", f -> f.
-				assignment("a", new VarReadNode("b")));
+				assignment("a", new VarRead("b")));
 
 		assertEquals("a = 1 + 2", f -> f.
 				assignment("a",
-				           BinaryExpressionNode.createAdd(new NumberNode(1),
-				                                          new NumberNode(2))));
+				           BinaryExpression.createAdd(new NumberLiteral(1),
+				                                      new NumberLiteral(2))));
 		assertEquals("a = foo()", f -> f.
-				assignment("a", new FunctionCallNode("foo", new FunctionCallParameters())));
+				assignment("a", new FuncCall("foo", new FuncCallParameters())));
 
 		assertEquals("a = foo(1)", f -> f.
-				assignment("a", new FunctionCallNode("foo",
-				                                     new FunctionCallParameters()
-						                                     .add(new NumberNode(1)))));
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                                     .add(new NumberLiteral(1)))));
 		assertEquals("a = foo(b)", f -> f.
-				assignment("a", new FunctionCallNode("foo",
-				                                     new FunctionCallParameters()
-						                                     .add(new VarReadNode("b")))));
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                                     .add(new VarRead("b")))));
 	}
 
 	@Test
@@ -42,34 +42,34 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		assertEquals("$1 := 2 + 3" + NL
 				             + "a = 1 + $1", f -> f.
 				assignment("a",
-				           BinaryExpressionNode.createAdd(new NumberNode(1),
-				                                          BinaryExpressionNode.createAdd(new NumberNode(2),
-				                                                                         new NumberNode(3)))));
+				           BinaryExpression.createAdd(new NumberLiteral(1),
+				                                      BinaryExpression.createAdd(new NumberLiteral(2),
+				                                                                 new NumberLiteral(3)))));
 		assertEquals("$1 := 1 + 2" + NL
 				             + "a = $1 + 3", f -> f.
 				assignment("a",
-				           BinaryExpressionNode.createAdd(BinaryExpressionNode.createAdd(new NumberNode(1),
-				                                                                         new NumberNode(2)),
-				                                          new NumberNode(3))));
+				           BinaryExpression.createAdd(BinaryExpression.createAdd(new NumberLiteral(1),
+				                                                                 new NumberLiteral(2)),
+				                                      new NumberLiteral(3))));
 		assertEquals("$1 := foo()" + NL
 				             + "a = $1 + 3", f -> f.
 				assignment("a",
-				           BinaryExpressionNode.createAdd(new FunctionCallNode("foo",
-				                                                               new FunctionCallParameters()),
-				                                          new NumberNode(3))));
+				           BinaryExpression.createAdd(new FuncCall("foo",
+				                                                   new FuncCallParameters()),
+				                                      new NumberLiteral(3))));
 		assertEquals("$1 := bar(1)" + NL +
 				             "a = foo($1)", f -> f.
-				assignment("a", new FunctionCallNode("foo",
-				                                     new FunctionCallParameters()
-						                                     .add(new FunctionCallNode("bar",
-						                                                               new FunctionCallParameters()
-								                                                               .add(new NumberNode(1)))))));
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                                     .add(new FuncCall("bar",
+						                                                       new FuncCallParameters()
+								                                                               .add(new NumberLiteral(1)))))));
 		assertEquals("$1 := 1 - 2" + NL +
 				             "a = foo($1)", f -> f.
-				assignment("a", new FunctionCallNode("foo",
-				                                     new FunctionCallParameters()
-						                                     .add(BinaryExpressionNode.createSub(new NumberNode(1),
-						                                                                         new NumberNode(2))))));
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                                     .add(BinaryExpression.createSub(new NumberLiteral(1),
+						                                                                     new NumberLiteral(2))))));
 	}
 
 	@Test
@@ -78,21 +78,21 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             + "$2 := 3 * 4" + NL
 				             + "a := $1 + $2", f -> f.
 				varDeclaration("a",
-				               BinaryExpressionNode.createAdd(BinaryExpressionNode.createMultiply(new NumberNode(1),
-				                                                                                  new NumberNode(2)),
-				                                              BinaryExpressionNode.createMultiply(new NumberNode(3),
-				                                                                                  new NumberNode(4)))));
+				               BinaryExpression.createAdd(BinaryExpression.createMultiply(new NumberLiteral(1),
+				                                                                          new NumberLiteral(2)),
+				                                          BinaryExpression.createMultiply(new NumberLiteral(3),
+				                                                                          new NumberLiteral(4)))));
 
 		assertEquals("$1 := 1 + b" + NL
 				             + "$2 := 3 * 4" + NL
 				             + "a := foo($1, $2)", f -> f.
 				varDeclaration("a",
-				               new FunctionCallNode("foo",
-				                                    new FunctionCallParameters()
-						                                    .add(BinaryExpressionNode.createAdd(new NumberNode(1),
-						                                                                        new VarReadNode("b")))
-						                                    .add(BinaryExpressionNode.createMultiply(new NumberNode(3),
-						                                                                             new NumberNode(4))))));
+				               new FuncCall("foo",
+				                            new FuncCallParameters()
+						                                    .add(BinaryExpression.createAdd(new NumberLiteral(1),
+						                                                                    new VarRead("b")))
+						                                    .add(BinaryExpression.createMultiply(new NumberLiteral(3),
+						                                                                         new NumberLiteral(4))))));
 	}
 
 	// Utils ==================================================================

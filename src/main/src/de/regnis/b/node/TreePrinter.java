@@ -25,7 +25,7 @@ public class TreePrinter {
 		}
 	}
 
-	public void print(StatementListNode node, StringOutput output) {
+	public void print(StatementList node, StringOutput output) {
 		for (String string : getStrings(node)) {
 			output.print(string);
 			output.println();
@@ -50,14 +50,14 @@ public class TreePrinter {
 			}
 
 			@Override
-			public List<String> visitFunctionDeclaration(FunctionDeclaration node) {
+			public List<String> visitFunctionDeclaration(FuncDeclaration node) {
 				final StringBuilder buffer = new StringBuilder();
 				buffer.append(node.type);
 				buffer.append(" ");
 				buffer.append(node.name);
 				buffer.append("(");
 				boolean isFirst = true;
-				for (FunctionDeclarationParameter parameter : node.parameters.getParameters()) {
+				for (FuncDeclarationParameter parameter : node.parameters.getParameters()) {
 					if (isFirst) {
 						isFirst = false;
 					}
@@ -78,7 +78,7 @@ public class TreePrinter {
 		});
 	}
 
-	public List<String> getStrings(BinaryExpressionNode node) {
+	public List<String> getStrings(BinaryExpression node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("operator " + node.operator);
 		append(getStrings(node.left), true, strings);
@@ -86,14 +86,14 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(AssignmentNode node) {
+	public List<String> getStrings(Assignment node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add(node.var + " =");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
 
-	public List<String> getStrings(VarDeclarationNode node) {
+	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add(node.var + " :=");
 		append(getStrings(node.expression), false, strings);
@@ -107,31 +107,31 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(StatementListNode node) {
+	public List<String> getStrings(StatementList node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("statementList");
-		final List<? extends StatementNode> statements = node.getStatements();
+		final List<? extends Statement> statements = node.getStatements();
 		for (int i = 0, size = statements.size(); i < size; i++) {
-			final StatementNode statement = statements.get(i);
+			final Statement statement = statements.get(i);
 			append(getStrings(statement), i < size - 1, strings);
 		}
 		return strings;
 	}
 
-	private List<String> getStrings(StatementNode node) {
+	private List<String> getStrings(Statement node) {
 		return node.visit(new StatementVisitor<>() {
 			@Override
-			public List<String> visitAssignment(AssignmentNode node) {
+			public List<String> visitAssignment(Assignment node) {
 				return getStrings(node);
 			}
 
 			@Override
-			public List<String> visitStatementList(StatementListNode node) {
+			public List<String> visitStatementList(StatementList node) {
 				return getStrings(node);
 			}
 
 			@Override
-			public List<String> visitLocalVarDeclaration(VarDeclarationNode node) {
+			public List<String> visitLocalVarDeclaration(VarDeclaration node) {
 				return getStrings(node);
 			}
 
@@ -144,46 +144,46 @@ public class TreePrinter {
 
 	// Utils ==================================================================
 
-	private List<String> getStrings(ExpressionNode node) {
+	private List<String> getStrings(Expression node) {
 		return node.visit(new ExpressionVisitor<>() {
 			@Override
-			public List<String> visitBinary(BinaryExpressionNode node) {
+			public List<String> visitBinary(BinaryExpression node) {
 				return getStrings(node);
 			}
 
 			@Override
-			public List<String> visitFunctionCall(FunctionCallNode node) {
+			public List<String> visitFunctionCall(FuncCall node) {
 				return getStrings(node);
 			}
 
 			@Override
-			public List<String> visitNumber(NumberNode node) {
+			public List<String> visitNumber(NumberLiteral node) {
 				return getStrings(node);
 			}
 
 			@Override
-			public List<String> visitVarRead(VarReadNode node) {
+			public List<String> visitVarRead(VarRead node) {
 				return getStrings(node);
 			}
 		});
 	}
 
-	private List<String> getStrings(FunctionCallNode node) {
+	private List<String> getStrings(FuncCall node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("function call " + node.name);
-		final List<ExpressionNode> expressions = node.getParameters();
+		final List<Expression> expressions = node.getParameters();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
-			final ExpressionNode expressionNode = expressions.get(i);
+			final Expression expressionNode = expressions.get(i);
 			append(getStrings(expressionNode), i < size - 1, strings);
 		}
 		return strings;
 	}
 
-	private List<String> getStrings(VarReadNode node) {
+	private List<String> getStrings(VarRead node) {
 		return Collections.singletonList("read var " + node.var);
 	}
 
-	private List<String> getStrings(NumberNode node) {
+	private List<String> getStrings(NumberLiteral node) {
 		return Collections.singletonList("literal " + node.value);
 	}
 

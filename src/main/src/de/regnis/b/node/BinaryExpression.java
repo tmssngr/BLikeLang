@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * @author Thomas Singer
  */
-public final class BinaryExpressionNode extends ExpressionNode {
+public final class BinaryExpression extends Expression {
 
 	// Constants ==============================================================
 
@@ -17,27 +17,27 @@ public final class BinaryExpressionNode extends ExpressionNode {
 
 	// Static =================================================================
 
-	public static BinaryExpressionNode createAdd(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, PLUS, right);
+	public static BinaryExpression createAdd(Expression left, Expression right) {
+		return new BinaryExpression(left, PLUS, right);
 	}
 
-	public static BinaryExpressionNode createSub(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, MINUS, right);
+	public static BinaryExpression createSub(Expression left, Expression right) {
+		return new BinaryExpression(left, MINUS, right);
 	}
 
-	public static BinaryExpressionNode createMultiply(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, MULTIPLY, right);
+	public static BinaryExpression createMultiply(Expression left, Expression right) {
+		return new BinaryExpression(left, MULTIPLY, right);
 	}
 
 	// Fields =================================================================
 
-	public final ExpressionNode left;
+	public final Expression left;
 	public final String operator;
-	public final ExpressionNode right;
+	public final Expression right;
 
 	// Setup ==================================================================
 
-	private BinaryExpressionNode(ExpressionNode left, String operator, ExpressionNode right) {
+	private BinaryExpression(Expression left, String operator, Expression right) {
 		Objects.requireNonNull(left);
 		Objects.requireNonNull(operator);
 		Objects.requireNonNull(right);
@@ -62,7 +62,7 @@ public final class BinaryExpressionNode extends ExpressionNode {
 	// Accessing ==============================================================
 
 	@NotNull
-	public BinaryExpressionNode createNew(ExpressionNode left, ExpressionNode right) {
-		return new BinaryExpressionNode(left, operator, right);
+	public BinaryExpression createNew(Expression left, Expression right) {
+		return new BinaryExpression(left, operator, right);
 	}
 }

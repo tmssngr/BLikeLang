@@ -3,18 +3,18 @@ package de.regnis.b.node;
 /**
  * @author Thomas Singer
  */
-public final class FunctionDeclaration extends Declaration {
+public final class FuncDeclaration extends Declaration {
 
 	// Fields =================================================================
 
 	public final String type;
 	public final String name;
-	public final FunctionDeclarationParameters parameters;
-	public final StatementNode statement;
+	public final FuncDeclarationParameters parameters;
+	public final Statement statement;
 
 	// Setup ==================================================================
 
-	public FunctionDeclaration(String type, String name, FunctionDeclarationParameters parameters, StatementNode statement) {
+	public FuncDeclaration(String type, String name, FuncDeclarationParameters parameters, Statement statement) {
 		this.type = type;
 		this.name = name;
 		this.parameters = parameters;

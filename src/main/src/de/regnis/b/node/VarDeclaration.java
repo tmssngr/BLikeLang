@@ -5,22 +5,22 @@ import java.util.Objects;
 /**
  * @author Thomas Singer
  */
-public final class VarDeclarationNode extends StatementNode {
+public final class VarDeclaration extends Statement {
 
 	// Fields =================================================================
 
 	public final String var;
-	public final ExpressionNode expression;
+	public final Expression expression;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public VarDeclarationNode(String var, ExpressionNode expression) {
+	public VarDeclaration(String var, Expression expression) {
 		this(var, expression, -1, -1);
 	}
 
-	public VarDeclarationNode(String var, ExpressionNode expression, int line, int column) {
+	public VarDeclaration(String var, Expression expression, int line, int column) {
 		Objects.requireNonNull(var);
 		Objects.requireNonNull(expression);
 

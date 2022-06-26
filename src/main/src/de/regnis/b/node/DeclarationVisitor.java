@@ -7,5 +7,5 @@ public interface DeclarationVisitor<O> {
 
 	O visitGlobalVarDeclaration(GlobalVarDeclaration node);
 
-	O visitFunctionDeclaration(FunctionDeclaration node);
+	O visitFunctionDeclaration(FuncDeclaration node);
 }

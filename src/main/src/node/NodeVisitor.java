@@ -20,22 +20,22 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 
 	@Nullable
 	@Override
-	public O visitFunctionDeclaration(FunctionDeclaration node) {
+	public O visitFunctionDeclaration(FuncDeclaration node) {
 		node.statement.visit(this);
 		return null;
 	}
 
 	@Nullable
 	@Override
-	public O visitAssignment(AssignmentNode node) {
+	public O visitAssignment(Assignment node) {
 		node.expression.visit(this);
 		return null;
 	}
 
 	@Nullable
 	@Override
-	public O visitStatementList(StatementListNode node) {
-		for (StatementNode statement : node.getStatements()) {
+	public O visitStatementList(StatementList node) {
+		for (Statement statement : node.getStatements()) {
 			statement.visit(this);
 		}
 		return null;
@@ -43,7 +43,7 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 
 	@Nullable
 	@Override
-	public O visitLocalVarDeclaration(VarDeclarationNode node) {
+	public O visitLocalVarDeclaration(VarDeclaration node) {
 		node.expression.visit(this);
 		return null;
 	}
@@ -57,7 +57,7 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 
 	@Nullable
 	@Override
-	public O visitBinary(BinaryExpressionNode node) {
+	public O visitBinary(BinaryExpression node) {
 		node.left.visit(this);
 		node.right.visit(this);
 		return null;
@@ -65,8 +65,8 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 
 	@Nullable
 	@Override
-	public O visitFunctionCall(FunctionCallNode node) {
-		for (ExpressionNode expression : node.getParameters()) {
+	public O visitFunctionCall(FuncCall node) {
+		for (Expression expression : node.getParameters()) {
 			expression.visit(this);
 		}
 		return null;
@@ -74,13 +74,13 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 
 	@Nullable
 	@Override
-	public O visitNumber(NumberNode node) {
+	public O visitNumber(NumberLiteral node) {
 		return null;
 	}
 
 	@Nullable
 	@Override
-	public O visitVarRead(VarReadNode node) {
+	public O visitVarRead(VarRead node) {
 		return null;
 	}
 
