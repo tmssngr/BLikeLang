@@ -8,5 +8,5 @@ public interface StatementVisitor<O> {
 
 	O visitStatementList(StatementListNode node);
 
-	O visitVarDeclaration(VarDeclarationNode node);
+	O visitLocalVarDeclaration(VarDeclarationNode node);
 }

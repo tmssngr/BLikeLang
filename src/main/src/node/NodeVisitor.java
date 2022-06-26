@@ -26,7 +26,7 @@ public abstract class NodeVisitor<O> implements StatementVisitor<O>, ExpressionV
 
 	@Nullable
 	@Override
-	public O visitVarDeclaration(VarDeclarationNode node) {
+	public O visitLocalVarDeclaration(VarDeclarationNode node) {
 		node.expression.visit(this);
 		return null;
 	}
