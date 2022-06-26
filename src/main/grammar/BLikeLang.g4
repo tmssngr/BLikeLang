@@ -9,17 +9,17 @@ statement: varDeclaration                  #localVarDeclaration
          ;
 varDeclaration: Var var=Identifier Assign expression End;
 assignment    :     var=Identifier Assign expression End;
-expression: value=Number                                             #numberLiteral
-          | var=Identifier                                           #readVariable
-          | func=Identifier ParenOpen parameters ParenClose          #functionCall
-          |                 ParenOpen expression ParenClose          #expressionInParenthesis
-          | left=expression operator=Multiply     right=expression   #binaryExpressionPoint
-          | left=expression operator=(Plus|Minus) right=expression   #binaryExpressionDash
+expression: value=Number                                                 #numberLiteral
+          | var=Identifier                                               #readVariable
+          | func=Identifier ParenOpen functionCallParameters ParenClose  #functionCall
+          |                 ParenOpen expression ParenClose              #expressionInParenthesis
+          | left=expression operator=Multiply     right=expression       #binaryExpressionPoint
+          | left=expression operator=(Plus|Minus) right=expression       #binaryExpressionDash
           ;
 
-parameters: expression?
-          | expression ( Comma expression )+
-          ;
+functionCallParameters: expression?
+                      | expression (Comma expression)+
+                      ;
 
 Comma : ',';
 End   : ';';

@@ -172,13 +172,13 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParameters(BLikeLangParser.ParametersContext ctx) { }
+	@Override public void enterFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitParameters(BLikeLangParser.ParametersContext ctx) { }
+	@Override public void exitFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -108,5 +108,5 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitParameters(BLikeLangParser.ParametersContext ctx) { return visitChildren(ctx); }
+	@Override public T visitFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx) { return visitChildren(ctx); }
 }
