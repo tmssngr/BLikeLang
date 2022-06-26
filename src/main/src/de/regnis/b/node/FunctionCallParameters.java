@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class FunctionParametersNode extends Node {
+public final class FunctionCallParameters extends Node {
 
 	// Fields =================================================================
 
@@ -15,12 +15,12 @@ public final class FunctionParametersNode extends Node {
 
 	// Setup ==================================================================
 
-	public FunctionParametersNode() {
+	public FunctionCallParameters() {
 	}
 
 	// Accessing ==============================================================
 
-	public FunctionParametersNode add(ExpressionNode node) {
+	public FunctionCallParameters add(ExpressionNode node) {
 		expressions.add(node);
 		return this;
 	}

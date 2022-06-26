@@ -31,20 +31,20 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 
 		assertEquals(PREFIX + "a = foo()" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
-						.add(new AssignmentNode("a", new FunctionCallNode("foo", new FunctionParametersNode())))
+						.add(new AssignmentNode("a", new FunctionCallNode("foo", new FunctionCallParameters())))
 		));
 
 		assertEquals(PREFIX + "a = foo(1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(new NumberNode(1)))))
 		));
 
 		assertEquals(PREFIX + "a = foo(b)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(new VarReadNode("b")))))
 		));
 	}
@@ -74,7 +74,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				new StatementListNode()
 						.add(new AssignmentNode("a",
 						                        BinaryExpressionNode.createAdd(new FunctionCallNode("foo",
-						                                                                            new FunctionParametersNode()),
+						                                                                            new FunctionCallParameters()),
 						                                                       new NumberNode(3))))
 		));
 
@@ -82,9 +82,9 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             "a = foo($1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(new FunctionCallNode("bar",
-								                                                                            new FunctionParametersNode()
+								                                                                            new FunctionCallParameters()
 										                                                                            .add(new NumberNode(1)))))))
 		));
 
@@ -92,7 +92,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             "a = foo($1)" + SUFFIX, SplitExpressionsTransformation.createTempVars(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(BinaryExpressionNode.createSub(new NumberNode(1),
 								                                                                                      new NumberNode(2))))))
 		));
@@ -117,7 +117,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				new StatementListNode()
 						.add(new VarDeclarationNode("a",
 						                            new FunctionCallNode("foo",
-						                                                 new FunctionParametersNode()
+						                                                 new FunctionCallParameters()
 								                                                 .add(BinaryExpressionNode.createAdd(new NumberNode(1),
 								                                                                                     new VarReadNode("b")))
 								                                                 .add(BinaryExpressionNode.createMultiply(new NumberNode(3),

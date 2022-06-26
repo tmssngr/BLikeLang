@@ -20,11 +20,11 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Setup ==================================================================
 
-	public FunctionCallNode(String name, FunctionParametersNode parameters) {
+	public FunctionCallNode(String name, FunctionCallParameters parameters) {
 		this(name, parameters, -1, -1);
 	}
 
-	public FunctionCallNode(String name, FunctionParametersNode parameters, int line, int column) {
+	public FunctionCallNode(String name, FunctionCallParameters parameters, int line, int column) {
 		this.name = name;
 		this.line = line;
 		this.column = column;

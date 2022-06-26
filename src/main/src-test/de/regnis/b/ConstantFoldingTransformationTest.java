@@ -36,20 +36,20 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 
 		assertEquals(PREFIX + "a = foo()" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
-						.add(new AssignmentNode("a", new FunctionCallNode("foo", new FunctionParametersNode())))
+						.add(new AssignmentNode("a", new FunctionCallNode("foo", new FunctionCallParameters())))
 		));
 
 		assertEquals(PREFIX + "a = foo(1)" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(new NumberNode(1)))))
 		));
 
 		assertEquals(PREFIX + "a = foo(b)" + SUFFIX, ConstantFoldingTransformation.transform(
 				new StatementListNode()
 						.add(new AssignmentNode("a", new FunctionCallNode("foo",
-						                                                  new FunctionParametersNode()
+						                                                  new FunctionCallParameters()
 								                                                  .add(new VarReadNode("b")))))
 		));
 	}

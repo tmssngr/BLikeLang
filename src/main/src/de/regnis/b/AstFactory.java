@@ -116,13 +116,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public FunctionCallNode visitFunctionCall(BLikeLangParser.FunctionCallContext ctx) {
-		final FunctionParametersNode parameters = visitParameters(ctx.parameters());
+		final FunctionCallParameters parameters = visitParameters(ctx.parameters());
 		return new FunctionCallNode(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
 	}
 
 	@Override
-	public FunctionParametersNode visitParameters(BLikeLangParser.ParametersContext ctx) {
-		final FunctionParametersNode parameters = new FunctionParametersNode();
+	public FunctionCallParameters visitParameters(BLikeLangParser.ParametersContext ctx) {
+		final FunctionCallParameters parameters = new FunctionCallParameters();
 		final List<BLikeLangParser.ExpressionContext> expressions = ctx.expression();
 		for (BLikeLangParser.ExpressionContext expression : expressions) {
 			final ExpressionNode expressionNode = (ExpressionNode) Objects.requireNonNull(visit(expression));
