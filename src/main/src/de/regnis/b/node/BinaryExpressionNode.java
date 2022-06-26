@@ -1,6 +1,5 @@
 package de.regnis.b.node;
 
-import de.regnis.b.ExpressionVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package de.regnis.b;
+package de.regnis.b.node;
 
 import de.regnis.b.node.BinaryExpressionNode;
 import de.regnis.b.node.FunctionCallNode;
