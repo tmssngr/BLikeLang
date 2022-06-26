@@ -22,7 +22,7 @@ public class CodePrinter {
 
 				@Nullable
 				@Override
-				public Object visitFunctionDeclaration(FunctionDeclaration node) {
+				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					printFunctionDeclaration(node, output);
 					return null;
 				}
@@ -30,13 +30,13 @@ public class CodePrinter {
 		}
 	}
 
-	private void printFunctionDeclaration(FunctionDeclaration declaration, StringOutput output) {
+	private void printFunctionDeclaration(FuncDeclaration declaration, StringOutput output) {
 		output.print(declaration.type);
 		output.print(" ");
 		output.print(declaration.name);
 		output.print("(");
 		boolean isFirst = true;
-		for (FunctionDeclarationParameter parameter : declaration.parameters.getParameters()) {
+		for (FuncDeclarationParameter parameter : declaration.parameters.getParameters()) {
 			if (isFirst) {
 				isFirst = false;
 			}
@@ -54,14 +54,14 @@ public class CodePrinter {
 
 	// Utils ==================================================================
 
-	private void print(StatementListNode listNode, int indentation, StringOutput output) {
+	private void print(StatementList listNode, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("{");
 		output.println();
 
 		indentation++;
 
-		for (StatementNode statement : listNode.getStatements()) {
+		for (Statement statement : listNode.getStatements()) {
 			print(statement, indentation, output);
 		}
 
@@ -70,25 +70,25 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(StatementNode statement, int indentation, StringOutput output) {
+	private void print(Statement statement, int indentation, StringOutput output) {
 		statement.visit(new StatementVisitor<Object>() {
 			@Nullable
 			@Override
-			public Object visitAssignment(AssignmentNode node) {
+			public Object visitAssignment(Assignment node) {
 				print(node, indentation, output);
 				return null;
 			}
 
 			@Nullable
 			@Override
-			public Object visitStatementList(StatementListNode node) {
+			public Object visitStatementList(StatementList node) {
 				print(node, indentation, output);
 				return null;
 			}
 
 			@Nullable
 			@Override
-			public Object visitLocalVarDeclaration(VarDeclarationNode node) {
+			public Object visitLocalVarDeclaration(VarDeclaration node) {
 				print(node, indentation, output);
 				return null;
 			}
@@ -102,7 +102,7 @@ public class CodePrinter {
 		});
 	}
 
-	private void print(VarDeclarationNode node, int indentation, StringOutput output) {
+	private void print(VarDeclaration node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		output.print(node.var);
@@ -113,7 +113,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(AssignmentNode node, int indentation, StringOutput output) {
+	private void print(Assignment node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		output.print(node.var);
@@ -134,18 +134,18 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(ExpressionNode expression, StringOutput output) {
-		if (expression instanceof NumberNode) {
-			final NumberNode numberNode = (NumberNode) expression;
+	private void print(Expression expression, StringOutput output) {
+		if (expression instanceof NumberLiteral) {
+			final NumberLiteral numberNode = (NumberLiteral) expression;
 			output.print(String.valueOf(numberNode.value));
 		}
-		else if (expression instanceof VarReadNode) {
-			final VarReadNode varReadNode = (VarReadNode) expression;
+		else if (expression instanceof VarRead) {
+			final VarRead varReadNode = (VarRead) expression;
 
 			output.print(varReadNode.var);
 		}
-		else if (expression instanceof BinaryExpressionNode) {
-			final BinaryExpressionNode binaryExpressionNode = (BinaryExpressionNode) expression;
+		else if (expression instanceof BinaryExpression) {
+			final BinaryExpression binaryExpressionNode = (BinaryExpression) expression;
 
 			print(binaryExpressionNode.left, output);
 			output.print(" ");
@@ -153,13 +153,13 @@ public class CodePrinter {
 			output.print(" ");
 			print(binaryExpressionNode.right, output);
 		}
-		else if (expression instanceof FunctionCallNode) {
-			final FunctionCallNode functionCallNode = (FunctionCallNode) expression;
+		else if (expression instanceof FuncCall) {
+			final FuncCall functionCallNode = (FuncCall) expression;
 
 			output.print(functionCallNode.name);
 			output.print("(");
 			boolean isFirst = true;
-			for (ExpressionNode expressionNode : functionCallNode.getParameters()) {
+			for (Expression expressionNode : functionCallNode.getParameters()) {
 				if (isFirst) {
 					isFirst = false;
 				}

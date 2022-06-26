@@ -3,7 +3,7 @@ package de.regnis.b.node;
 /**
  * @author Thomas Singer
  */
-public final class FunctionDeclarationParameter extends Node {
+public final class FuncDeclarationParameter extends Node {
 
 	// Fields =================================================================
 
@@ -12,7 +12,7 @@ public final class FunctionDeclarationParameter extends Node {
 
 	// Setup ==================================================================
 
-	public FunctionDeclarationParameter(String type, String name) {
+	public FuncDeclarationParameter(String type, String name) {
 		this.type = type;
 		this.name = name;
 	}

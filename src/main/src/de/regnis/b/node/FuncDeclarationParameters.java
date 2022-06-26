@@ -7,25 +7,25 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class FunctionDeclarationParameters extends Node {
+public final class FuncDeclarationParameters extends Node {
 
 	// Fields =================================================================
 
-	private final List<FunctionDeclarationParameter> parameters = new ArrayList<>();
+	private final List<FuncDeclarationParameter> parameters = new ArrayList<>();
 
 	// Setup ==================================================================
 
-	public FunctionDeclarationParameters() {
+	public FuncDeclarationParameters() {
 	}
 
 	// Accessing ==============================================================
 
-	public FunctionDeclarationParameters add(FunctionDeclarationParameter parameter) {
+	public FuncDeclarationParameters add(FuncDeclarationParameter parameter) {
 		parameters.add(parameter);
 		return this;
 	}
 
-	public List<FunctionDeclarationParameter> getParameters() {
+	public List<FuncDeclarationParameter> getParameters() {
 		return Collections.unmodifiableList(parameters);
 	}
 }

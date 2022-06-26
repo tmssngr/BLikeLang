@@ -7,22 +7,22 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class FunctionCallNode extends ExpressionNode {
+public final class FuncCall extends Expression {
 
 	// Fields =================================================================
 
 	public final String name;
 	public final int line;
 	public final int column;
-	private final List<ExpressionNode> parameters;
+	private final List<Expression> parameters;
 
 	// Setup ==================================================================
 
-	public FunctionCallNode(String name, FunctionCallParameters parameters) {
+	public FuncCall(String name, FuncCallParameters parameters) {
 		this(name, parameters, -1, -1);
 	}
 
-	public FunctionCallNode(String name, FunctionCallParameters parameters, int line, int column) {
+	public FuncCall(String name, FuncCallParameters parameters, int line, int column) {
 		this.name = name;
 		this.line = line;
 		this.column = column;
@@ -38,7 +38,7 @@ public final class FunctionCallNode extends ExpressionNode {
 
 	// Accessing ==============================================================
 
-	public List<ExpressionNode> getParameters() {
+	public List<Expression> getParameters() {
 		return parameters;
 	}
 }

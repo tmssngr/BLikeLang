@@ -9,11 +9,11 @@ public final class GlobalVarDeclaration extends Declaration {
 
 	// Fields =================================================================
 
-	public final VarDeclarationNode node;
+	public final VarDeclaration node;
 
 	// Setup ==================================================================
 
-	public GlobalVarDeclaration(@NotNull VarDeclarationNode node) {
+	public GlobalVarDeclaration(@NotNull VarDeclaration node) {
 		this.node = node;
 	}
 

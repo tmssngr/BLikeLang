@@ -7,15 +7,15 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class StatementListNode extends StatementNode {
+public final class StatementList extends Statement {
 
 	// Fields =================================================================
 
-	private final List<StatementNode> statementList = new ArrayList<>();
+	private final List<Statement> statementList = new ArrayList<>();
 
 	// Setup ==================================================================
 
-	public StatementListNode() {
+	public StatementList() {
 	}
 
 	// Implemented ============================================================
@@ -23,7 +23,7 @@ public final class StatementListNode extends StatementNode {
 	@Override
 	public String toString() {
 		final StringBuilder buffer = new StringBuilder();
-		for (StatementNode node : statementList) {
+		for (Statement node : statementList) {
 			if (buffer.length() > 0) {
 				buffer.append('\n');
 			}
@@ -39,12 +39,12 @@ public final class StatementListNode extends StatementNode {
 
 	// Accessing ==============================================================
 
-	public StatementListNode add(StatementNode node) {
+	public StatementList add(Statement node) {
 		statementList.add(node);
 		return this;
 	}
 
-	public List<? extends StatementNode> getStatements() {
+	public List<? extends Statement> getStatements() {
 		return Collections.unmodifiableList(statementList);
 	}
 }

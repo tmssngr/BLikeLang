@@ -22,51 +22,51 @@ public final class ConstantFoldingTransformation extends AbstractTransformation 
 	// Utils ==================================================================
 
 	@Override
-	protected ExpressionNode handleBinary(BinaryExpressionNode node, StatementListNode newStatementList) {
-		if (node.left instanceof NumberNode
-				&& node.right instanceof NumberNode) {
-			final int left = ((NumberNode) node.left).value;
-			final int right = ((NumberNode) node.right).value;
+	protected Expression handleBinary(BinaryExpression node, StatementList newStatementList) {
+		if (node.left instanceof NumberLiteral
+				&& node.right instanceof NumberLiteral) {
+			final int left = ((NumberLiteral) node.left).value;
+			final int right = ((NumberLiteral) node.right).value;
 			final int value = switch (node.operator) {
-				case BinaryExpressionNode.PLUS -> left + right;
-				case BinaryExpressionNode.MINUS -> left - right;
-				case BinaryExpressionNode.MULTIPLY -> left * right;
+				case BinaryExpression.PLUS -> left + right;
+				case BinaryExpression.MINUS -> left - right;
+				case BinaryExpression.MULTIPLY -> left * right;
 				default -> throw new UnsupportedOperationException();
 			};
-			return new NumberNode(value);
+			return new NumberLiteral(value);
 		}
 
-		if (node.left instanceof NumberNode) {
-			final int left = ((NumberNode) node.left).value;
-			if (node.operator.equals(BinaryExpressionNode.PLUS)) {
+		if (node.left instanceof NumberLiteral) {
+			final int left = ((NumberLiteral) node.left).value;
+			if (node.operator.equals(BinaryExpression.PLUS)) {
 				if (left == 0) {
 					return node.right;
 				}
 			}
-			else if (node.operator.equals(BinaryExpressionNode.MULTIPLY)) {
+			else if (node.operator.equals(BinaryExpression.MULTIPLY)) {
 				if (left == 1) {
 					return node.right;
 				}
-				if (left == 0 && node.right instanceof VarReadNode) {
-					return new NumberNode(0);
+				if (left == 0 && node.right instanceof VarRead) {
+					return new NumberLiteral(0);
 				}
 			}
 		}
 
-		if (node.right instanceof NumberNode) {
-			final int right = ((NumberNode) node.right).value;
-			if (node.operator.equals(BinaryExpressionNode.PLUS)
-					|| node.operator.equals(BinaryExpressionNode.MINUS)) {
+		if (node.right instanceof NumberLiteral) {
+			final int right = ((NumberLiteral) node.right).value;
+			if (node.operator.equals(BinaryExpression.PLUS)
+					|| node.operator.equals(BinaryExpression.MINUS)) {
 				if (right == 0) {
 					return node.left;
 				}
 			}
-			else if (node.operator.equals(BinaryExpressionNode.MULTIPLY)) {
+			else if (node.operator.equals(BinaryExpression.MULTIPLY)) {
 				if (right == 1) {
 					return node.left;
 				}
-				if (right == 0 && node.left instanceof VarReadNode) {
-					return new NumberNode(0);
+				if (right == 0 && node.left instanceof VarRead) {
+					return new NumberLiteral(0);
 				}
 			}
 		}

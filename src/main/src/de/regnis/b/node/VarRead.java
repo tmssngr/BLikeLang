@@ -3,27 +3,35 @@ package de.regnis.b.node;
 /**
  * @author Thomas Singer
  */
-public final class NumberNode extends ExpressionNode {
+public final class VarRead extends Expression {
 
 	// Fields =================================================================
 
-	public final int value;
+	public final String var;
+	public final int line;
+	public final int column;
 
 	// Setup ==================================================================
 
-	public NumberNode(int value) {
-		this.value = value;
+	public VarRead(String var) {
+		this(var, -1, -1);
+	}
+
+	public VarRead(String var, int line, int column) {
+		this.var = var;
+		this.line = line;
+		this.column = column;
 	}
 
 	// Implemented ============================================================
 
 	@Override
 	public String toString() {
-		return String.valueOf(value);
+		return var;
 	}
 
 	@Override
 	public <O> O visit(ExpressionVisitor<O> visitor) {
-		return visitor.visitNumber(this);
+		return visitor.visitVarRead(this);
 	}
 }

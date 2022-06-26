@@ -3,15 +3,15 @@ package de.regnis.b.node;
 /**
  * @author Thomas Singer
  */
-public final class ReturnStatement extends StatementNode {
+public final class ReturnStatement extends Statement {
 
 	// Fields =================================================================
 
-	public final ExpressionNode expression;
+	public final Expression expression;
 
 	// Setup ==================================================================
 
-	public ReturnStatement(ExpressionNode expression) {
+	public ReturnStatement(Expression expression) {
 		this.expression = expression;
 	}
 

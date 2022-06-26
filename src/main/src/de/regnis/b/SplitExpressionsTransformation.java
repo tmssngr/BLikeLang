@@ -27,54 +27,54 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 	// Utils ==================================================================
 
 	@Override
-	protected BinaryExpressionNode handleBinary(BinaryExpressionNode node, StatementListNode newStatementList) {
-		final ExpressionNode left = splitInnerExpression(node.left, newStatementList);
-		final ExpressionNode right = splitInnerExpression(node.right, newStatementList);
+	protected BinaryExpression handleBinary(BinaryExpression node, StatementList newStatementList) {
+		final Expression left = splitInnerExpression(node.left, newStatementList);
+		final Expression right = splitInnerExpression(node.right, newStatementList);
 		return node.createNew(left, right);
 	}
 
 	@Override
-	protected FunctionCallNode handleFunctionCall(FunctionCallNode node, StatementListNode newStatementList) {
-		final FunctionCallParameters parameters = new FunctionCallParameters();
-		for (ExpressionNode parameter : node.getParameters()) {
-			final ExpressionNode simplifiedParameter = splitInnerExpression(parameter, newStatementList);
+	protected FuncCall handleFunctionCall(FuncCall node, StatementList newStatementList) {
+		final FuncCallParameters parameters = new FuncCallParameters();
+		for (Expression parameter : node.getParameters()) {
+			final Expression simplifiedParameter = splitInnerExpression(parameter, newStatementList);
 			parameters.add(simplifiedParameter);
 		}
-		return new FunctionCallNode(node.name, parameters, node.line, node.column);
+		return new FuncCall(node.name, parameters, node.line, node.column);
 	}
 
 	@NotNull
-	private ExpressionNode splitInnerExpression(ExpressionNode expressionNode, StatementListNode list) {
+	private Expression splitInnerExpression(Expression expressionNode, StatementList list) {
 		return expressionNode.visit(new ExpressionVisitor<>() {
 			@Override
-			public ExpressionNode visitBinary(BinaryExpressionNode node) {
-				final BinaryExpressionNode ben = handleBinary(node, list);
+			public Expression visitBinary(BinaryExpression node) {
+				final BinaryExpression ben = handleBinary(node, list);
 				return createTempVar(ben, list);
 			}
 
 			@Override
-			public ExpressionNode visitFunctionCall(FunctionCallNode node) {
-				final FunctionCallNode fcn = handleFunctionCall(node, list);
+			public Expression visitFunctionCall(FuncCall node) {
+				final FuncCall fcn = handleFunctionCall(node, list);
 				return createTempVar(fcn, list);
 			}
 
 			@Override
-			public ExpressionNode visitNumber(NumberNode node) {
+			public Expression visitNumber(NumberLiteral node) {
 				return node;
 			}
 
 			@Override
-			public ExpressionNode visitVarRead(VarReadNode node) {
+			public Expression visitVarRead(VarRead node) {
 				return node;
 			}
 		});
 	}
 
 	@NotNull
-	private VarReadNode createTempVar(ExpressionNode node, StatementListNode list) {
+	private VarRead createTempVar(Expression node, StatementList list) {
 		final String tempVar = getNextTempVarName();
-		list.add(new VarDeclarationNode(tempVar, node, -1, -1));
-		return new VarReadNode(tempVar, -1, -1);
+		list.add(new VarDeclaration(tempVar, node, -1, -1));
+		return new VarRead(tempVar, -1, -1);
 	}
 
 	@NotNull
