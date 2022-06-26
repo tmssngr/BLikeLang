@@ -1,10 +1,11 @@
 package de.regnis.b;
 
-import de.regnis.b.node.CodePrinter;
-import de.regnis.b.node.StatementListNode;
-import de.regnis.b.out.StringOutput;
+import de.regnis.b.node.*;
+import node.TestStringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+
+import java.util.function.Consumer;
 
 /**
  * @author Thomas Singer
@@ -19,6 +20,23 @@ public abstract class AbstractTransformationTest {
 
 	// Static =================================================================
 
+	@NotNull
+	protected StatementListNode createDocument(Consumer<StatementListFactory> factory) {
+		final StatementListNode statementList = new StatementListNode();
+		factory.accept(new StatementListFactory() {
+			@Override
+			public void assignment(String name, ExpressionNode expression) {
+				statementList.add(new AssignmentNode(name, expression));
+			}
+
+			@Override
+			public void varDeclaration(String name, ExpressionNode expression) {
+				statementList.add(new VarDeclarationNode(name, expression));
+			}
+		});
+		return statementList;
+	}
+
 	protected static void assertEquals(String expected, StatementListNode root) {
 		final TestStringOutput output = new TestStringOutput();
 		new CodePrinter().print(root, output);
@@ -27,22 +45,10 @@ public abstract class AbstractTransformationTest {
 
 	// Inner Classes ==========================================================
 
-	private static class TestStringOutput implements StringOutput {
-		private final StringBuilder buffer = new StringBuilder();
+	protected interface StatementListFactory {
 
-		@Override
-		public void print(@NotNull String s) {
-			buffer.append(s);
-		}
+		void assignment(String name, ExpressionNode expression);
 
-		@Override
-		public void println() {
-			print("\n");
-		}
-
-		@Override
-		public String toString() {
-			return buffer.toString();
-		}
+		void varDeclaration(String name, ExpressionNode expression);
 	}
 }
