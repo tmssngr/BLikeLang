@@ -3,8 +3,8 @@ grammar BLikeLang;
 root: statements;
 
 statements: (statement | NL)* ;
-statement: assignment                      #assignStatement
-         | varDeclaration                  #variableDeclaration
+statement: varDeclaration                  #localVarDeclaration
+         | assignment                      #assignStatement
          | CurlyOpen statements CurlyClose #blockStatement
          ;
 varDeclaration: Var var=Identifier Assign expression End;

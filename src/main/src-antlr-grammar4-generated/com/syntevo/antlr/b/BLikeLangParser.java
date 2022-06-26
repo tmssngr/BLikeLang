@@ -231,6 +231,25 @@ public class BLikeLangParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	public static class LocalVarDeclarationContext extends StatementContext {
+		public VarDeclarationContext varDeclaration() {
+			return getRuleContext(VarDeclarationContext.class,0);
+		}
+		public LocalVarDeclarationContext(StatementContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterLocalVarDeclaration(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitLocalVarDeclaration(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitLocalVarDeclaration(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 	public static class BlockStatementContext extends StatementContext {
 		public TerminalNode CurlyOpen() { return getToken(BLikeLangParser.CurlyOpen, 0); }
 		public StatementsContext statements() {
@@ -271,25 +290,6 @@ public class BLikeLangParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class VariableDeclarationContext extends StatementContext {
-		public VarDeclarationContext varDeclaration() {
-			return getRuleContext(VarDeclarationContext.class,0);
-		}
-		public VariableDeclarationContext(StatementContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterVariableDeclaration(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitVariableDeclaration(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitVariableDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 
 	public final StatementContext statement() throws RecognitionException {
 		StatementContext _localctx = new StatementContext(_ctx, getState());
@@ -298,20 +298,20 @@ public class BLikeLangParser extends Parser {
 			setState(29);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case Identifier:
-				_localctx = new AssignStatementContext(_localctx);
+			case Var:
+				_localctx = new LocalVarDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(23);
-				assignment();
+				varDeclaration();
 				}
 				break;
-			case Var:
-				_localctx = new VariableDeclarationContext(_localctx);
+			case Identifier:
+				_localctx = new AssignStatementContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(24);
-				varDeclaration();
+				assignment();
 				}
 				break;
 			case CurlyOpen:
@@ -847,7 +847,7 @@ public class BLikeLangParser extends Parser {
 		"\2\3\3\2\6\7\2V\2\20\3\2\2\2\4\26\3\2\2\2\6\37\3\2\2\2\b!\3\2\2\2\n\'"+
 		"\3\2\2\2\f8\3\2\2\2\16O\3\2\2\2\20\21\5\4\3\2\21\3\3\2\2\2\22\25\5\6\4"+
 		"\2\23\25\7\21\2\2\24\22\3\2\2\2\24\23\3\2\2\2\25\30\3\2\2\2\26\24\3\2"+
-		"\2\2\26\27\3\2\2\2\27\5\3\2\2\2\30\26\3\2\2\2\31 \5\n\6\2\32 \5\b\5\2"+
+		"\2\2\26\27\3\2\2\2\27\5\3\2\2\2\30\26\3\2\2\2\31 \5\b\5\2\32 \5\n\6\2"+
 		"\33\34\7\13\2\2\34\35\5\4\3\2\35\36\7\f\2\2\36 \3\2\2\2\37\31\3\2\2\2"+
 		"\37\32\3\2\2\2\37\33\3\2\2\2 \7\3\2\2\2!\"\7\r\2\2\"#\7\17\2\2#$\7\5\2"+
 		"\2$%\5\f\7\2%&\7\4\2\2&\t\3\2\2\2\'(\7\17\2\2()\7\5\2\2)*\5\f\7\2*+\7"+

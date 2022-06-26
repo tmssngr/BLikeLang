@@ -31,14 +31,14 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) { return visitChildren(ctx); }
+	@Override public T visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) { return visitChildren(ctx); }
+	@Override public T visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
