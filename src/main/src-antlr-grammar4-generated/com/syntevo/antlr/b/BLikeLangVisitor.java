@@ -23,19 +23,19 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatements(BLikeLangParser.StatementsContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code localVarDeclaration}
+	 * labeled alternative in {@link BLikeLangParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code assignStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitAssignStatement(BLikeLangParser.AssignStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code variableDeclaration}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code blockStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.

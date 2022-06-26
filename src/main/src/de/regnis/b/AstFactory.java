@@ -70,7 +70,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Nullable
 	@Override
-	public Node visitVariableDeclaration(BLikeLangParser.VariableDeclarationContext ctx) {
+	public Node visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
 		Objects.requireNonNull(statementListNode);
 
 		final VarDeclarationNode node = visitVarDeclaration(ctx.varDeclaration());
