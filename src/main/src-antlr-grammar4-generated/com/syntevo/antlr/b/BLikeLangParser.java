@@ -22,11 +22,11 @@ public class BLikeLangParser extends Parser {
 		NL=15, LineComment=16, BlockComment=17;
 	public static final int
 		RULE_root = 0, RULE_statements = 1, RULE_statement = 2, RULE_varDeclaration = 3, 
-		RULE_assignment = 4, RULE_expression = 5, RULE_parameters = 6;
+		RULE_assignment = 4, RULE_expression = 5, RULE_functionCallParameters = 6;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"root", "statements", "statement", "varDeclaration", "assignment", "expression", 
-			"parameters"
+			"functionCallParameters"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -484,8 +484,8 @@ public class BLikeLangParser extends Parser {
 	public static class FunctionCallContext extends ExpressionContext {
 		public Token func;
 		public TerminalNode ParenOpen() { return getToken(BLikeLangParser.ParenOpen, 0); }
-		public ParametersContext parameters() {
-			return getRuleContext(ParametersContext.class,0);
+		public FunctionCallParametersContext functionCallParameters() {
+			return getRuleContext(FunctionCallParametersContext.class,0);
 		}
 		public TerminalNode ParenClose() { return getToken(BLikeLangParser.ParenClose, 0); }
 		public TerminalNode Identifier() { return getToken(BLikeLangParser.Identifier, 0); }
@@ -645,7 +645,7 @@ public class BLikeLangParser extends Parser {
 				setState(46);
 				match(ParenOpen);
 				setState(47);
-				parameters();
+				functionCallParameters();
 				setState(48);
 				match(ParenClose);
 				}
@@ -731,7 +731,7 @@ public class BLikeLangParser extends Parser {
 		return _localctx;
 	}
 
-	public static class ParametersContext extends ParserRuleContext {
+	public static class FunctionCallParametersContext extends ParserRuleContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
@@ -742,28 +742,28 @@ public class BLikeLangParser extends Parser {
 		public TerminalNode Comma(int i) {
 			return getToken(BLikeLangParser.Comma, i);
 		}
-		public ParametersContext(ParserRuleContext parent, int invokingState) {
+		public FunctionCallParametersContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_parameters; }
+		@Override public int getRuleIndex() { return RULE_functionCallParameters; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterParameters(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterFunctionCallParameters(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitParameters(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitFunctionCallParameters(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitParameters(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitFunctionCallParameters(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final ParametersContext parameters() throws RecognitionException {
-		ParametersContext _localctx = new ParametersContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_parameters);
+	public final FunctionCallParametersContext functionCallParameters() throws RecognitionException {
+		FunctionCallParametersContext _localctx = new FunctionCallParametersContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_functionCallParameters);
 		int _la;
 		try {
 			setState(77);

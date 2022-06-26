@@ -156,13 +156,13 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * Enter a parse tree produced by {@link BLikeLangParser#functionCallParameters}.
 	 * @param ctx the parse tree
 	 */
-	void enterParameters(BLikeLangParser.ParametersContext ctx);
+	void enterFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * Exit a parse tree produced by {@link BLikeLangParser#functionCallParameters}.
 	 * @param ctx the parse tree
 	 */
-	void exitParameters(BLikeLangParser.ParametersContext ctx);
+	void exitFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx);
 }

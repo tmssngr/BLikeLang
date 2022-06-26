@@ -98,9 +98,9 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link BLikeLangParser#parameters}.
+	 * Visit a parse tree produced by {@link BLikeLangParser#functionCallParameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParameters(BLikeLangParser.ParametersContext ctx);
+	T visitFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx);
 }
