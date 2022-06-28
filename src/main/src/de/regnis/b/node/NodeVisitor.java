@@ -1,7 +1,5 @@
-package node;
+package de.regnis.b.node;
 
-import de.regnis.b.node.ExpressionVisitor;
-import de.regnis.b.node.*;
 import org.jetbrains.annotations.Nullable;
 
 /**
