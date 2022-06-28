@@ -6,7 +6,7 @@ import de.regnis.b.ParseFailedException;
 import de.regnis.b.SplitExpressionsTransformation;
 import de.regnis.b.node.*;
 import de.regnis.b.out.StringOutput;
-import node.NodeVisitor;
+import de.regnis.b.node.NodeVisitor;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
