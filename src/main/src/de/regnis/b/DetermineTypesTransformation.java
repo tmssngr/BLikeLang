@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class DetermineTypes extends NodeVisitor<Object> {
+public final class DetermineTypesTransformation {
 
 	// Static =================================================================
 
@@ -20,7 +20,7 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 	 */
 	@NotNull
 	public static SymbolScope run(DeclarationList root) {
-		final DetermineTypes determineTypes = new DetermineTypes();
+		final DetermineTypesTransformation determineTypes = new DetermineTypesTransformation();
 		determineTypes.visitDeclarationList(root);
 		return determineTypes.symbolMap;
 	}
@@ -33,20 +33,34 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 
 	// Setup ==================================================================
 
-	private DetermineTypes() {
+	private DetermineTypesTransformation() {
 	}
 
-	// Implemented ============================================================
+	// Utils ==================================================================
 
-	@Override
-	public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-		super.visitGlobalVarDeclaration(node);
+	private void visitDeclarationList(DeclarationList node) {
+		for (Declaration declaration : node.getDeclarations()) {
+			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					return DetermineTypesTransformation.this.visitGlobalVarDeclaration(node);
+				}
+
+				@Override
+				public Object visitFunctionDeclaration(FuncDeclaration node) {
+					return DetermineTypesTransformation.this.visitFunctionDeclaration(node);
+				}
+			});
+		}
+	}
+
+	private Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+		visitExpression(node.node.expression);
 		symbolMap.declareVariable(node.node.var, node.node.expression.getType(), SymbolScope.VariableKind.Global);
 		return this;
 	}
 
-	@Override
-	public Object visitFunctionDeclaration(FuncDeclaration node) {
+	private Object visitFunctionDeclaration(FuncDeclaration node) {
 		final List<Type> parameterTypes = new ArrayList<>();
 		for (FuncDeclarationParameter parameter : node.parameters.getParameters()) {
 			parameterTypes.add(parameter.type);
@@ -63,7 +77,7 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 				symbolMap.declareVariable(parameter.name, parameter.type, SymbolScope.VariableKind.Parameter);
 			}
 
-			node.statement.visit(this);
+			visitStatement(node.statement);
 		}
 		finally {
 			symbolMap = outerSymbolMap;
@@ -72,13 +86,38 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitStatementList(StatementList node) {
+	private void visitStatement(Statement statement) {
+		statement.visit(new StatementVisitor<>() {
+			@Override
+			public Object visitAssignment(Assignment node) {
+				return DetermineTypesTransformation.this.visitAssignment(node);
+			}
+
+			@Override
+			public Object visitStatementList(StatementList node) {
+				return DetermineTypesTransformation.this.visitStatementList(node);
+			}
+
+			@Override
+			public Object visitLocalVarDeclaration(VarDeclaration node) {
+				return DetermineTypesTransformation.this.visitLocalVarDeclaration(node);
+			}
+
+			@Override
+			public Object visitReturn(ReturnStatement node) {
+				return DetermineTypesTransformation.this.visitReturn(node);
+			}
+		});
+	}
+
+	private Object visitStatementList(StatementList node) {
 		final SymbolScope outerSymbolMap = symbolMap;
 		try {
 			symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Local);
 
-			super.visitStatementList(node);
+			for (Statement statement : node.getStatements()) {
+				visitStatement(statement);
+			}
 		}
 		finally {
 			symbolMap = outerSymbolMap;
@@ -86,17 +125,15 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitLocalVarDeclaration(VarDeclaration node) {
-		super.visitLocalVarDeclaration(node);
+	private Object visitLocalVarDeclaration(VarDeclaration node) {
+		visitExpression(node.expression);
 		symbolMap.declareVariable(node.var, node.expression.getType(), SymbolScope.VariableKind.Local);
 		return this;
 	}
 
-	@Override
-	public Object visitAssignment(Assignment node) {
+	private Object visitAssignment(Assignment node) {
 		final Type variableType = symbolMap.getVariableType(node.var);
-		super.visitAssignment(node);
+		visitExpression(node.expression);
 		final Type expressionType = node.expression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variableType, expressionType)) {
 			throw new InvalidTypeException("Can't assign type " + expressionType + " to " + variableType);
@@ -104,9 +141,34 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitBinary(BinaryExpression node) {
-		super.visitBinary(node);
+	private void visitExpression(Expression expression) {
+		expression.visit(new ExpressionVisitor<>() {
+			@Override
+			public Object visitBinary(BinaryExpression node) {
+				return DetermineTypesTransformation.this.visitBinary(node);
+			}
+
+			@Override
+			public Object visitFunctionCall(FuncCall node) {
+				return DetermineTypesTransformation.this.visitFunctionCall(node);
+			}
+
+			@Override
+			public Object visitNumber(NumberLiteral node) {
+				return this;
+			}
+
+			@Override
+			public Object visitVarRead(VarRead node) {
+				return DetermineTypesTransformation.this.visitVarRead(node);
+			}
+		});
+	}
+
+	private Object visitBinary(BinaryExpression node) {
+		visitExpression(node.left);
+		visitExpression(node.right);
+
 		final Type leftType = node.left.getType();
 		final Type rightType = node.right.getType();
 		final Type type;
@@ -126,9 +188,10 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitFunctionCall(FuncCall node) {
-		super.visitFunctionCall(node);
+	private Object visitFunctionCall(FuncCall node) {
+		for (Expression expression : node.getParameters()) {
+			visitExpression(expression);
+		}
 
 		final SymbolScope.Function function = symbolMap.getFunction(node.name);
 		final List<Expression> expressions = node.getParameters();
@@ -149,13 +212,12 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitReturn(ReturnStatement node) {
+	private Object visitReturn(ReturnStatement node) {
 		if (functionReturnType == null) {
 			throw new IllegalStateException("Missing function return type");
 		}
 
-		super.visitReturn(node);
+		visitExpression(node.expression);
 
 		if (!BasicTypes.canBeAssignedFrom(functionReturnType, node.expression.getType())) {
 			throw new InvalidTypeException("The expected return type is " + functionReturnType + " which can't be assigned from " + node.expression.getType());
@@ -163,15 +225,9 @@ public final class DetermineTypes extends NodeVisitor<Object> {
 		return this;
 	}
 
-	@Override
-	public Object visitVarRead(VarRead node) {
+	private Object visitVarRead(VarRead node) {
 		final Type type = symbolMap.getVariableType(node.var);
 		node.setType(type);
-		return this;
-	}
-
-	@Override
-	public Object visitNumber(NumberLiteral node) {
 		return this;
 	}
 }
