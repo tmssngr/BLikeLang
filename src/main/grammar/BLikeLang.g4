@@ -52,7 +52,7 @@ fragment DecimalNumber
     : [0-9]+
     ;
 
-Number: DecimalNumber ;
+Number: [-]? DecimalNumber ('_' [ui] ('8' | '16'))?;
 
 Identifier
     : [a-zA-Z] [0-9a-zA-Z_]*

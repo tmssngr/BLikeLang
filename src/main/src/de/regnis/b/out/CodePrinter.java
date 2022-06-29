@@ -32,7 +32,7 @@ public class CodePrinter {
 	}
 
 	private void printFunctionDeclaration(FuncDeclaration declaration, StringOutput output) {
-		output.print(declaration.type);
+		output.print(declaration.type.toString());
 		output.print(" ");
 		output.print(declaration.name);
 		output.print("(");
@@ -45,7 +45,7 @@ public class CodePrinter {
 				output.print(", ");
 			}
 
-			output.print(parameter.type);
+			output.print(parameter.type.toString());
 			output.print(" ");
 			output.print(parameter.name);
 		}
