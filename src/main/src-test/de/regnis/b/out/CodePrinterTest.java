@@ -15,9 +15,9 @@ public class CodePrinterTest {
 		new CodePrinter().print(
 				new DeclarationList()
 						.add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))
-						.add(new FuncDeclaration("int", "sqr",
+						.add(new FuncDeclaration(BasicTypes.INT16, "sqr",
 						                         new FuncDeclarationParameters()
-								                             .add(new FuncDeclarationParameter("int", "x")),
+								                             .add(new FuncDeclarationParameter(BasicTypes.INT16, "x")),
 						                         new StatementList()
 								                             .add(new ReturnStatement(
 										                             BinaryExpression
@@ -25,7 +25,7 @@ public class CodePrinterTest {
 												                                             new VarRead("x")))))),
 				output);
 		Assert.assertEquals("a := 0\n" +
-				                    "int sqr(int x) {\n" +
+				                    "i16 sqr(i16 x) {\n" +
 				                    "\treturn x * x\n" +
 				                    "}\n", output.toString());
 	}

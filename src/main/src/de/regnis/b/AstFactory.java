@@ -69,7 +69,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Nullable
 	@Override
 	public FuncDeclaration visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
-		final String type = ctx.type.getText();
+		final Type type = BasicTypes.getType(ctx.type.getText(), true);
 		final String name = ctx.name.getText();
 		final FuncDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
 		final Statement statement = (Statement) visit(ctx.statement());
@@ -89,7 +89,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public FuncDeclarationParameter visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx) {
-		final String type = ctx.type.getText();
+		final Type type = BasicTypes.getType(ctx.type.getText(), false);
 		final String name = ctx.name.getText();
 		return new FuncDeclarationParameter(type, name);
 	}
@@ -199,8 +199,33 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public NumberLiteral visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) {
-		final int value = Integer.parseUnsignedInt(ctx.Number().getText());
-		return new NumberLiteral(value);
+		final Token number = ctx.value;
+		final String text = number.getText();
+		try {
+			final int suffixPos = text.indexOf('_');
+			final int value;
+			final BasicTypes.NumericType type;
+			if (suffixPos < 0) {
+				value = Integer.parseInt(text);
+				type = BasicTypes.determineType(value);
+			}
+			else {
+				value = Integer.parseInt(text.substring(0, suffixPos));
+				final String suffix = text.substring(suffixPos + 1);
+				type = BasicTypes.getNumbericType(suffix);
+			}
+
+			if (value < type.min || value > type.max) {
+				throw new ParseFailedException("Number out of bounds: " + text, number.getLine(), number.getCharPositionInLine());
+			}
+
+			final NumberLiteral numberLiteral = new NumberLiteral(value);
+			numberLiteral.setType(type);
+			return numberLiteral;
+		}
+		catch (NumberFormatException | BasicTypes.UnsupportedTypeException e) {
+			throw new ParseFailedException("Invalid number: " + text, number.getLine(), number.getCharPositionInLine());
+		}
 	}
 
 	@Override

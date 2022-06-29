@@ -38,7 +38,7 @@ public abstract class AbstractTransformationTest {
 		});
 
 		final DeclarationList root = new DeclarationList();
-		root.add(new FuncDeclaration("void", "test", new FuncDeclarationParameters(), statementList));
+		root.add(new FuncDeclaration(BasicTypes.VOID, "test", new FuncDeclarationParameters(), statementList));
 		return root;
 	}
 

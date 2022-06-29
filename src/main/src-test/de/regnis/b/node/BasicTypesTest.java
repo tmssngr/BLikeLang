@@ -41,4 +41,22 @@ public class BasicTypesTest {
 		catch (InvalidTypeException ignored) {
 		}
 	}
+
+	@Test
+	public void testCanBeAssigned() {
+		assertCanBeAssignedFrom(true, false, false, false, BasicTypes.UINT8);
+		assertCanBeAssignedFrom(false, true, false, false, BasicTypes.INT8);
+		assertCanBeAssignedFrom(true, false, true, false, BasicTypes.UINT16);
+		assertCanBeAssignedFrom(true, true, false, true, BasicTypes.INT16);
+	}
+
+	// Utils ==================================================================
+
+	@SuppressWarnings("SimplifiableAssertion")
+	private void assertCanBeAssignedFrom(boolean uint8, boolean int8, boolean uint16, boolean int16, BasicTypes.NumericType type) {
+		assertTrue(uint8 == BasicTypes.canBeAssignedFrom(type, BasicTypes.UINT8));
+		assertTrue(int8 == BasicTypes.canBeAssignedFrom(type, BasicTypes.INT8));
+		assertTrue(uint16 == BasicTypes.canBeAssignedFrom(type, BasicTypes.UINT16));
+		assertTrue(int16 == BasicTypes.canBeAssignedFrom(type, BasicTypes.INT16));
+	}
 }

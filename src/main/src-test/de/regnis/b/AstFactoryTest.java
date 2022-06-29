@@ -21,13 +21,13 @@ public class AstFactoryTest {
 				                    "      +- literal 1\n", TreePrinter.print(AstFactory.parseString(
 				"var a = 0;\n" +
 						"var b = a + 1;\n")));
-		Assert.assertEquals("+- void wom(int x)\n" +
+		Assert.assertEquals("+- void wom(i16 x)\n" +
 				                    "|  +- statementList\n" +
 				                    "|     +- b :=\n" +
 				                    "|        +- operator +\n" +
 				                    "|           +- read var a\n" +
 				                    "|           +- literal 1\n" +
-				                    "+- int getLength(int address)\n" +
+				                    "+- i16 getLength(i16 address)\n" +
 				                    "   +- statementList\n", TreePrinter.print(AstFactory.parseString(
 				"void wom(int x) {\n" +
 						"var b = a + 1;\n" +
