@@ -3,10 +3,12 @@ package de.regnis.b;
 import de.regnis.b.node.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
+
 /**
  * @author Thomas Singer
  */
-public final class SplitExpressionsTransformation extends AbstractTransformation {
+public final class SplitExpressionsTransformation extends AbstractTransformation<Function<Expression, Expression>> {
 
 	// Static =================================================================
 
@@ -27,35 +29,53 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 	// Utils ==================================================================
 
 	@Override
-	protected BinaryExpression handleBinary(BinaryExpression node, StatementList newStatementList) {
-		final Expression left = splitInnerExpression(node.left, newStatementList);
-		final Expression right = splitInnerExpression(node.right, newStatementList);
+	protected Function<Expression, Expression> createHelper(DeclarationList newDeclarationList) {
+		return expression -> {
+			final String tempVar = getNextTempVarName();
+			newDeclarationList.add(new GlobalVarDeclaration(new VarDeclaration(tempVar, expression, -1, -1)));
+			return new VarRead(tempVar, -1, -1);
+		};
+	}
+
+	@Override
+	protected Function<Expression, Expression> createHelper(StatementList newStatementList) {
+		return expression -> {
+			final String tempVar = getNextTempVarName();
+			newStatementList.add(new VarDeclaration(tempVar, expression, -1, -1));
+			return new VarRead(tempVar, -1, -1);
+		};
+	}
+
+	@Override
+	protected BinaryExpression handleBinary(BinaryExpression node, Function<Expression, Expression> tempVarFactory) {
+		final Expression left = splitInnerExpression(node.left, tempVarFactory);
+		final Expression right = splitInnerExpression(node.right, tempVarFactory);
 		return node.createNew(left, right);
 	}
 
 	@Override
-	protected FuncCall handleFunctionCall(FuncCall node, StatementList newStatementList) {
+	protected FuncCall handleFunctionCall(FuncCall node, Function<Expression, Expression> tempVarFactory) {
 		final FuncCallParameters parameters = new FuncCallParameters();
 		for (Expression parameter : node.getParameters()) {
-			final Expression simplifiedParameter = splitInnerExpression(parameter, newStatementList);
+			final Expression simplifiedParameter = splitInnerExpression(parameter, tempVarFactory);
 			parameters.add(simplifiedParameter);
 		}
 		return new FuncCall(node.name, parameters, node.line, node.column);
 	}
 
 	@NotNull
-	private Expression splitInnerExpression(Expression expressionNode, StatementList list) {
+	private Expression splitInnerExpression(Expression expressionNode, Function<Expression, Expression> tempVarFactory) {
 		return expressionNode.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final BinaryExpression ben = handleBinary(node, list);
-				return createTempVar(ben, list);
+				final BinaryExpression ben = handleBinary(node, tempVarFactory);
+				return tempVarFactory.apply(ben);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				final FuncCall fcn = handleFunctionCall(node, list);
-				return createTempVar(fcn, list);
+				final FuncCall fcn = handleFunctionCall(node, tempVarFactory);
+				return tempVarFactory.apply(fcn);
 			}
 
 			@Override
@@ -68,13 +88,6 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 				return node;
 			}
 		});
-	}
-
-	@NotNull
-	private VarRead createTempVar(Expression node, StatementList list) {
-		final String tempVar = getNextTempVarName();
-		list.add(new VarDeclaration(tempVar, node, -1, -1));
-		return new VarRead(tempVar, -1, -1);
 	}
 
 	@NotNull
