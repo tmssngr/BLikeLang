@@ -15,7 +15,7 @@ public final class DetermineTypesTest {
 		final DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
 				                                                       "var A = -1;\n" +
 				                                                       "var b=a+A;");
-		final SymbolScope scope = DetermineTypes.run(rootAst);
+		final SymbolScope scope = DetermineTypesTransformation.run(rootAst);
 		Assert.assertEquals(BasicTypes.UINT8, scope.getVariableType("a"));
 		Assert.assertEquals(BasicTypes.INT8, scope.getVariableType("A"));
 		Assert.assertEquals(BasicTypes.INT8, scope.getVariableType("b"));
@@ -35,7 +35,7 @@ public final class DetermineTypesTest {
 				                                                       "var a = 0;\n" +
 				                                                       "}");
 		try {
-			DetermineTypes.run(rootAst);
+			DetermineTypesTransformation.run(rootAst);
 			Assert.fail();
 		}
 		catch (SymbolScope.AlreadyDefinedException ex) {
