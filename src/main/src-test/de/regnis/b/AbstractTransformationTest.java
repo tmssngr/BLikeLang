@@ -1,7 +1,9 @@
 package de.regnis.b;
 
 import de.regnis.b.node.*;
-import node.TestStringOutput;
+import de.regnis.b.out.CodePrinter;
+import de.regnis.b.out.StringOutput;
+import de.regnis.b.out.StringStringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 
@@ -41,7 +43,7 @@ public abstract class AbstractTransformationTest {
 	}
 
 	protected static void assertEquals(String expected, DeclarationList root) {
-		final TestStringOutput output = new TestStringOutput();
+		final StringOutput output = new StringStringOutput();
 		new CodePrinter().print(root, output);
 		Assert.assertEquals(expected, output.toString());
 	}
