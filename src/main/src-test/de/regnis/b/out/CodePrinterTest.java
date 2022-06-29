@@ -1,4 +1,4 @@
-package node;
+package de.regnis.b.out;
 
 import de.regnis.b.node.*;
 import org.junit.Assert;
@@ -11,7 +11,7 @@ public class CodePrinterTest {
 
 	@Test
 	public void testDeclaration() {
-		final TestStringOutput output = new TestStringOutput();
+		final StringOutput output = new StringStringOutput();
 		new CodePrinter().print(
 				new DeclarationList()
 						.add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))

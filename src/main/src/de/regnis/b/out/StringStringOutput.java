@@ -1,12 +1,12 @@
-package node;
+package de.regnis.b.out;
 
-import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Thomas Singer
  */
-public class TestStringOutput implements StringOutput {
+public
+class StringStringOutput implements StringOutput {
 	private final StringBuilder buffer = new StringBuilder();
 
 	@Override

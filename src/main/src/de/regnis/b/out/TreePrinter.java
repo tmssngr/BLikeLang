@@ -1,6 +1,6 @@
-package de.regnis.b.node;
+package de.regnis.b.out;
 
-import de.regnis.b.out.StringOutput;
+import de.regnis.b.node.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +10,14 @@ import java.util.List;
  * @author Thomas Singer
  */
 public class TreePrinter {
+
+	// Static =================================================================
+
+	public static String print(DeclarationList root) {
+		final StringOutput output = new StringStringOutput();
+		new TreePrinter().print(root, output);
+		return output.toString();
+	}
 
 	// Setup ==================================================================
 
@@ -31,6 +39,48 @@ public class TreePrinter {
 			output.println();
 		}
 	}
+
+	public List<String> getStrings(BinaryExpression node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("operator " + node.operator);
+		append(getStrings(node.left), true, strings);
+		append(getStrings(node.right), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(Assignment node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add(node.var + " =");
+		append(getStrings(node.expression), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(VarDeclaration node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add(node.var + " :=");
+		append(getStrings(node.expression), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(ReturnStatement node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("return ");
+		append(getStrings(node.expression), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(StatementList node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("statementList");
+		final List<? extends Statement> statements = node.getStatements();
+		for (int i = 0, size = statements.size(); i < size; i++) {
+			final Statement statement = statements.get(i);
+			append(getStrings(statement), i < size - 1, strings);
+		}
+		return strings;
+	}
+
+	// Utils ==================================================================
 
 	private List<String> getStrings(DeclarationList node) {
 		final List<String> strings = new ArrayList<>();
@@ -78,46 +128,6 @@ public class TreePrinter {
 		});
 	}
 
-	public List<String> getStrings(BinaryExpression node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add("operator " + node.operator);
-		append(getStrings(node.left), true, strings);
-		append(getStrings(node.right), false, strings);
-		return strings;
-	}
-
-	public List<String> getStrings(Assignment node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " =");
-		append(getStrings(node.expression), false, strings);
-		return strings;
-	}
-
-	public List<String> getStrings(VarDeclaration node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " :=");
-		append(getStrings(node.expression), false, strings);
-		return strings;
-	}
-
-	public List<String> getStrings(ReturnStatement node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add("return ");
-		append(getStrings(node.expression), false, strings);
-		return strings;
-	}
-
-	public List<String> getStrings(StatementList node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add("statementList");
-		final List<? extends Statement> statements = node.getStatements();
-		for (int i = 0, size = statements.size(); i < size; i++) {
-			final Statement statement = statements.get(i);
-			append(getStrings(statement), i < size - 1, strings);
-		}
-		return strings;
-	}
-
 	private List<String> getStrings(Statement node) {
 		return node.visit(new StatementVisitor<>() {
 			@Override
@@ -141,8 +151,6 @@ public class TreePrinter {
 			}
 		});
 	}
-
-	// Utils ==================================================================
 
 	private List<String> getStrings(Expression node) {
 		return node.visit(new ExpressionVisitor<>() {

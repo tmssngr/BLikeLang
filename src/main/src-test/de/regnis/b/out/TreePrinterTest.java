@@ -1,4 +1,4 @@
-package node;
+package de.regnis.b.out;
 
 import de.regnis.b.node.*;
 import org.junit.Assert;
