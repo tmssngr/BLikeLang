@@ -1,5 +1,3 @@
-import com.syntevo.antlr.b.BLikeLangLexer;
-import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.AstFactory;
 import de.regnis.b.ConstantFoldingTransformation;
 import de.regnis.b.ParseFailedException;
@@ -8,13 +6,9 @@ import de.regnis.b.node.*;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.TreePrinter;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -30,24 +24,7 @@ public final class Main {
 	public static void main(String[] args) throws IOException {
 		final Path file = Paths.get("examples/test.b");
 
-		final TokenStream tokenStream;
-		try (InputStream stream = Files.newInputStream(file)) {
-			final CharStream charStream = CharStreams.fromStream(stream);
-			final BLikeLangLexer lexer = new BLikeLangLexer(charStream);
-			tokenStream = new CommonTokenStream(lexer);
-		}
-
-		final BLikeLangParser parser = new BLikeLangParser(tokenStream);
-		parser.addErrorListener(new BaseErrorListener() {
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-				throw new ParseCancellationException("line " + line + ":" + charPositionInLine + " " + msg);
-			}
-		});
-
-		final BLikeLangParser.RootContext rootContext = parser.root();
-		final AstFactory astFactory = new AstFactory();
-		DeclarationList rootAst = astFactory.visitRoot(rootContext);
+		DeclarationList rootAst = AstFactory.parseFile(file);
 
 		checkVariables(rootAst);
 		final TreePrinter printer = new TreePrinter();
