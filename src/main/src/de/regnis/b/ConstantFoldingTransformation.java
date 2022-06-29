@@ -5,7 +5,7 @@ import de.regnis.b.node.*;
 /**
  * @author Thomas Singer
  */
-public final class ConstantFoldingTransformation extends AbstractTransformation {
+public final class ConstantFoldingTransformation extends AbstractTransformation<Object> {
 
 	// Static =================================================================
 
@@ -22,7 +22,7 @@ public final class ConstantFoldingTransformation extends AbstractTransformation 
 	// Utils ==================================================================
 
 	@Override
-	protected Expression handleBinary(BinaryExpression node, StatementList newStatementList) {
+	protected Expression handleBinary(BinaryExpression node, Object unused) {
 		if (node.left instanceof NumberLiteral
 				&& node.right instanceof NumberLiteral) {
 			final int left = ((NumberLiteral) node.left).value;

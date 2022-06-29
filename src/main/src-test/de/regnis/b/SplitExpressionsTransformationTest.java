@@ -95,6 +95,12 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						                                                                         new NumberLiteral(4))))));
 	}
 
+	@Test
+	public void testGlobalVarExtractions() {
+		assertEquals("$1 := 2 * 3\n" +
+				             "a := 10 + $1\n", SplitExpressionsTransformation.transform(AstFactory.parseString("var a = 10 + 2 * 3;")));
+	}
+
 	// Utils ==================================================================
 
 	private void assertEquals(String expected, Consumer<StatementListFactory> factory) {
