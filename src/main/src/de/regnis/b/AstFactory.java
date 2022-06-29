@@ -4,9 +4,14 @@ import com.syntevo.antlr.b.BLikeLangBaseVisitor;
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.node.*;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,6 +20,18 @@ import java.util.Objects;
  */
 @SuppressWarnings("MethodDoesntCallSuperMethod")
 public final class AstFactory extends BLikeLangBaseVisitor<Node> {
+
+	// Static =================================================================
+
+	public static DeclarationList parseFile(Path file) throws IOException {
+		try (InputStream stream = Files.newInputStream(file)) {
+			return parse(CharStreams.fromStream(stream));
+		}
+	}
+
+	public static DeclarationList parseString(String s) {
+		return parse(CharStreams.fromString(s));
+	}
 
 	// Fields =================================================================
 
@@ -25,7 +42,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	// Setup ==================================================================
 
-	public AstFactory() {
+	private AstFactory() {
 	}
 
 	// Implemented ============================================================
@@ -189,5 +206,24 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Override
 	public VarRead visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
 		return new VarRead(ctx.var.getText(), ctx.var.getLine(), ctx.var.getCharPositionInLine());
+	}
+
+	// Utils ==================================================================
+
+	private static DeclarationList parse(CharStream charStream) {
+		final BLikeLangLexer lexer = new BLikeLangLexer(charStream);
+		final TokenStream tokenStream = new CommonTokenStream(lexer);
+
+		final BLikeLangParser parser = new BLikeLangParser(tokenStream);
+		parser.addErrorListener(new BaseErrorListener() {
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+				throw new ParseCancellationException("line " + line + ":" + charPositionInLine + " " + msg);
+			}
+		});
+
+		final BLikeLangParser.RootContext rootContext = parser.root();
+		final AstFactory astFactory = new AstFactory();
+		return astFactory.visitRoot(rootContext);
 	}
 }
