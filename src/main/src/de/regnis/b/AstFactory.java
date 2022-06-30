@@ -66,6 +66,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		return null;
 	}
 
+	@Override
+	public FuncDeclaration visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) {
+		return visitFunctionDeclaration(ctx.functionDeclaration());
+	}
+
 	@Nullable
 	@Override
 	public FuncDeclaration visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
@@ -91,7 +96,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	public FuncDeclarationParameter visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx) {
 		final Type type = BasicTypes.getType(ctx.type.getText(), false);
 		final String name = ctx.name.getText();
-		return new FuncDeclarationParameter(type, name);
+		return new FuncDeclarationParameter(type, name, ctx.name.getLine(), ctx.name.getCharPositionInLine());
 	}
 
 	@Override
@@ -149,6 +154,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	public VarDeclaration visitVarDeclaration(BLikeLangParser.VarDeclarationContext ctx) {
 		final Expression expression = (Expression) visit(ctx.expression());
 		return new VarDeclaration(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+	}
+
+	@Override
+	public ReturnStatement visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
+		final Expression expression = (Expression) visit(ctx.expression());
+		return new ReturnStatement(expression);
 	}
 
 	@Override
