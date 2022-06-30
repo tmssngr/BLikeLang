@@ -20,6 +20,16 @@ public final class SymbolScope {
 		return new SymbolScope(null, ScopeKind.Global);
 	}
 
+	@NotNull
+	public static String msgVarAlreadyDeclared(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": variable " + name + " already declared";
+	}
+
+	@NotNull
+	public static String msgVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": local variable " + name + " already declared as parameter";
+	}
+
 	// Fields =================================================================
 
 	private final Map<String, Variable> variables = new HashMap<>();
@@ -36,16 +46,16 @@ public final class SymbolScope {
 
 	// Accessing ==============================================================
 
-	public void declareVariable(@NotNull String name, @NotNull Type type, @NotNull VariableKind kind) {
+	public void declareVariable(@NotNull String name, @NotNull Type type, int line, int column, @NotNull VariableKind kind) {
 		if (variables.containsKey(name)) {
-			throw new AlreadyDefinedException(name);
+			throw new AlreadyDefinedException(msgVarAlreadyDeclared(name, line, column));
 		}
 
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
 						&& scope.variables.containsKey(name)) {
-					throw new AlreadyDefinedException(name);
+					throw new AlreadyDefinedException(msgVarAlreadyDeclaredAsParameter(name, line, column));
 				}
 			}
 		}
@@ -95,6 +105,8 @@ public final class SymbolScope {
 		}
 		return function;
 	}
+
+	// Utils ==================================================================
 
 	@NotNull
 	private SymbolScope getRootScope() {
