@@ -79,33 +79,29 @@ public class CodePrinter {
 	}
 
 	private void print(Statement statement, int indentation, StringOutput output) {
-		statement.visit(new StatementVisitor<Object>() {
-			@Nullable
+		statement.visit(new StatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
 				print(node, indentation, output);
-				return null;
+				return node;
 			}
 
-			@Nullable
 			@Override
 			public Object visitStatementList(StatementList node) {
 				print(node, indentation, output);
-				return null;
+				return node;
 			}
 
-			@Nullable
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
 				print(node, indentation, output);
-				return null;
+				return node;
 			}
 
-			@Nullable
 			@Override
 			public Object visitReturn(ReturnStatement node) {
 				print(node, indentation, output);
-				return null;
+				return node;
 			}
 		});
 	}
@@ -150,44 +146,47 @@ public class CodePrinter {
 	}
 
 	private void print(Expression expression, StringOutput output) {
-		if (expression instanceof NumberLiteral) {
-			final NumberLiteral numberNode = (NumberLiteral) expression;
-			output.print(String.valueOf(numberNode.value));
-		}
-		else if (expression instanceof VarRead) {
-			final VarRead varReadNode = (VarRead) expression;
-
-			output.print(varReadNode.var);
-		}
-		else if (expression instanceof BinaryExpression) {
-			final BinaryExpression binaryExpressionNode = (BinaryExpression) expression;
-
-			print(binaryExpressionNode.left, output);
-			output.print(" ");
-			output.print(binaryExpressionNode.operator);
-			output.print(" ");
-			print(binaryExpressionNode.right, output);
-		}
-		else if (expression instanceof FuncCall) {
-			final FuncCall functionCallNode = (FuncCall) expression;
-
-			output.print(functionCallNode.name);
-			output.print("(");
-			boolean isFirst = true;
-			for (Expression expressionNode : functionCallNode.getParameters()) {
-				if (isFirst) {
-					isFirst = false;
-				}
-				else {
-					output.print(", ");
-				}
-				print(expressionNode, output);
+		expression.visit(new ExpressionVisitor<>() {
+			@Override
+			public Object visitBinary(BinaryExpression node) {
+				print(node.left, output);
+				output.print(" ");
+				output.print(node.operator);
+				output.print(" ");
+				print(node.right, output);
+				return node;
 			}
-			output.print(")");
-		}
-		else {
-			throw new UnsupportedOperationException();
-		}
+
+			@Override
+			public Object visitFunctionCall(FuncCall node) {
+				output.print(node.name);
+				output.print("(");
+				boolean isFirst = true;
+				for (Expression expressionNode : node.getParameters()) {
+					if (isFirst) {
+						isFirst = false;
+					}
+					else {
+						output.print(", ");
+					}
+					print(expressionNode, output);
+				}
+				output.print(")");
+				return node;
+			}
+
+			@Override
+			public Object visitNumber(NumberLiteral node) {
+				output.print(String.valueOf(node.value));
+				return node;
+			}
+
+			@Override
+			public Object visitVarRead(VarRead node) {
+				output.print(node.var);
+				return node;
+			}
+		});
 	}
 
 	private void printIndentation(int indentation, StringOutput output) {
