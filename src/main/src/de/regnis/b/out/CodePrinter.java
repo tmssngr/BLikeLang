@@ -8,6 +8,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CodePrinter {
 
+	// Static =================================================================
+
+	public static String print(DeclarationList listNode) {
+		final StringStringOutput output = new StringStringOutput();
+		new CodePrinter().print(listNode, output);
+		return output.toString();
+	}
+
 	// Accessing ==============================================================
 
 	public void print(DeclarationList listNode, StringOutput output) {
@@ -30,6 +38,8 @@ public class CodePrinter {
 		}
 	}
 
+	// Utils ==================================================================
+
 	private void printFunctionDeclaration(FuncDeclaration declaration, StringOutput output) {
 		output.print(declaration.type.toString());
 		output.print(" ");
@@ -51,8 +61,6 @@ public class CodePrinter {
 		output.print(") ");
 		print(declaration.statementList, 0, output);
 	}
-
-	// Utils ==================================================================
 
 	private void print(StatementList listNode, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
