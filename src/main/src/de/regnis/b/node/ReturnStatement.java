@@ -8,11 +8,19 @@ public final class ReturnStatement extends Statement {
 	// Fields =================================================================
 
 	public final Expression expression;
+	public final int line;
+	public final int column;
 
 	// Setup ==================================================================
 
 	public ReturnStatement(Expression expression) {
+		this(expression, -1, -1);
+	}
+
+	public ReturnStatement(Expression expression, int line, int column) {
 		this.expression = expression;
+		this.line = line;
+		this.column = column;
 	}
 
 	// Implemented ============================================================

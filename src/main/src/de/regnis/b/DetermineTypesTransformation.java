@@ -30,6 +30,11 @@ public final class DetermineTypesTransformation {
 		return line + ":" + column + ": Variable " + name + ": Can't assign type " + currentType + " to " + expectedType;
 	}
 
+	@NotNull
+	public static String msgCantAssignReturnType(int line, int column, Type currentType, Type expectedType) {
+		return line + ":" + column + ": return statement: Can't assign type " + currentType + " to " + expectedType;
+	}
+
 	// Fields =================================================================
 
 	private final StringOutput warningOutput;
@@ -235,7 +240,7 @@ public final class DetermineTypesTransformation {
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new InvalidTypeException("Can't assign type " + expressionType + " to " + variable.type);
+			throw new InvalidTypeException(msgCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
 		}
 
 		return new Assignment(variable.newName, newExpression);
@@ -326,7 +331,7 @@ public final class DetermineTypesTransformation {
 		final Expression newExpression = visitExpression(node.expression);
 
 		if (!BasicTypes.canBeAssignedFrom(functionReturnType, newExpression.getType())) {
-			throw new InvalidTypeException("The expected return type is " + functionReturnType + " which can't be assigned from " + node.expression.getType());
+			throw new InvalidTypeException(msgCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
 		}
 
 		return new ReturnStatement(newExpression);
