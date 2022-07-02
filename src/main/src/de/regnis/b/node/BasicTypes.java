@@ -75,7 +75,7 @@ public final class BasicTypes {
 		if (name.equals("int")) {
 			return INT16;
 		}
-		throw new UnsupportedTypeException();
+		throw new UnsupportedTypeException(name);
 	}
 
 	// Fields =================================================================
@@ -119,5 +119,8 @@ public final class BasicTypes {
 	}
 
 	public static class UnsupportedTypeException extends RuntimeException {
+		public UnsupportedTypeException(@NotNull String name) {
+			super(name);
+		}
 	}
 }

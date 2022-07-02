@@ -27,6 +27,10 @@ public abstract class Expression extends Node {
 		return type;
 	}
 
+	boolean hasType() {
+		return type != null;
+	}
+
 	public void setType(@NotNull Type type) {
 		this.type = type;
 	}

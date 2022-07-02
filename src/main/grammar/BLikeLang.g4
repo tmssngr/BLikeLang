@@ -17,7 +17,9 @@ statement: varDeclaration                         #localVarDeclaration
          | CurlyOpen (statement | NL)* CurlyClose #blockStatement
          | Return expression? End                 #returnStatement
          ;
-varDeclaration: Var var=Identifier Assign expression End;
+varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
+              | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
+              ;
 assignment    :     var=Identifier Assign expression End;
 expression: value=Number                                                 #numberLiteral
           | var=Identifier                                               #readVariable

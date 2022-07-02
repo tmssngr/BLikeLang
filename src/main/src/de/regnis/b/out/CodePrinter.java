@@ -113,8 +113,15 @@ public class CodePrinter {
 	private void print(VarDeclaration node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		output.print(node.var);
-		output.print(" := ");
+		output.print(node.name);
+		if (node.typeName != null) {
+			output.print(" : ");
+			output.print(node.typeName);
+			output.print(" = ");
+		}
+		else {
+			output.print(" := ");
+		}
 
 		print(node.expression, output);
 

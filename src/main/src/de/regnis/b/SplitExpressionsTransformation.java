@@ -32,7 +32,7 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 	protected Function<Expression, Expression> createHelper(DeclarationList newDeclarationList) {
 		return expression -> {
 			final String tempVar = getNextTempVarName();
-			newDeclarationList.add(new GlobalVarDeclaration(new VarDeclaration(tempVar, expression, -1, -1)));
+			newDeclarationList.add(new GlobalVarDeclaration(VarDeclaration.createTempVarDeclaration(tempVar, expression)));
 			return new VarRead(tempVar, -1, -1);
 		};
 	}
@@ -41,7 +41,7 @@ public final class SplitExpressionsTransformation extends AbstractTransformation
 	protected Function<Expression, Expression> createHelper(StatementList newStatementList) {
 		return expression -> {
 			final String tempVar = getNextTempVarName();
-			newStatementList.add(new VarDeclaration(tempVar, expression, -1, -1));
+			newStatementList.add(VarDeclaration.createTempVarDeclaration(tempVar, expression));
 			return new VarRead(tempVar, -1, -1);
 		};
 	}

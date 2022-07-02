@@ -57,7 +57,12 @@ public class TreePrinter {
 
 	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " :=");
+		if (node.typeName != null) {
+			strings.add(node.name + " : " + node.typeName + " =");
+		}
+		else {
+			strings.add(node.name + " :=");
+		}
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}

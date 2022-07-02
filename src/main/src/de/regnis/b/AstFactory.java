@@ -58,7 +58,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Nullable
 	@Override
 	public Node visitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx) {
-		final VarDeclaration node = visitVarDeclaration(ctx.varDeclaration());
+		final VarDeclaration node = (VarDeclaration) visit(ctx.varDeclaration());
 		declarationList.add(new GlobalVarDeclaration(node));
 		return null;
 	}
@@ -113,8 +113,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
-		return visitVarDeclaration(ctx.varDeclaration());
+	public VarDeclaration visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
+		return (VarDeclaration) visit(ctx.varDeclaration());
 	}
 
 	@Override
@@ -124,9 +124,18 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public VarDeclaration visitVarDeclaration(BLikeLangParser.VarDeclarationContext ctx) {
+	public VarDeclaration visitInferVarDeclaration(BLikeLangParser.InferVarDeclarationContext ctx) {
+		final String name = ctx.var.getText();
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new VarDeclaration(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclaration(null, name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+	}
+
+	@Override
+	public VarDeclaration visitTypeVarDeclaration(BLikeLangParser.TypeVarDeclarationContext ctx) {
+		final String typeName = ctx.type.getText();
+		final String name = ctx.var.getText();
+		final Expression expression = (Expression) visit(ctx.expression());
+		return new VarDeclaration(typeName, name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
