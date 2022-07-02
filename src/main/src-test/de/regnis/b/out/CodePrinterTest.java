@@ -15,7 +15,7 @@ public class CodePrinterTest {
 	public void testDeclaration() {
 		Assert.assertEquals("a := 0\n" +
 				                    "i16 sqr(i16 x) {\n" +
-				                    "\treturn x * x\n" +
+				                    "  return x * x\n" +
 				                    "}\n",
 		                    CodePrinter.print(
 				                    new DeclarationList()
