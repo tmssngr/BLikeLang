@@ -1,6 +1,8 @@
 package de.regnis.b;
 
 import de.regnis.b.node.*;
+import de.regnis.b.out.StringOutput;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,13 +21,15 @@ public final class DetermineTypesTransformation {
 	 * @throws SymbolScope.AlreadyDefinedException
 	 */
 	@NotNull
-	public static SymbolScope run(DeclarationList root) {
-		final DetermineTypesTransformation determineTypes = new DetermineTypesTransformation();
+	public static void run(DeclarationList root, StringOutput warningOutput) {
+		final DetermineTypesTransformation determineTypes = new DetermineTypesTransformation(warningOutput);
 		final DeclarationList newRoot = determineTypes.visitDeclarationList(root);
-		return determineTypes.symbolMap;
+//		return determineTypes.symbolMap;
 	}
 
 	// Fields =================================================================
+
+	private final StringOutput warningOutput;
 
 	private SymbolScope symbolMap = SymbolScope.createRootInstance();
 	@Nullable
@@ -33,7 +37,8 @@ public final class DetermineTypesTransformation {
 
 	// Setup ==================================================================
 
-	private DetermineTypesTransformation() {
+	private DetermineTypesTransformation(StringOutput warningOutput) {
+		this.warningOutput = warningOutput;
 	}
 
 	// Utils ==================================================================
@@ -53,6 +58,9 @@ public final class DetermineTypesTransformation {
 				}
 			}));
 		}
+
+		symbolMap.reportUnusedVariables(warningOutput);
+
 		return newRoot;
 	}
 
@@ -72,15 +80,16 @@ public final class DetermineTypesTransformation {
 		symbolMap.declareFunction(node.name, node.type, parameterTypes);
 
 		final SymbolScope outerSymbolMap = symbolMap;
+		functionReturnType = node.type;
+		symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
 		try {
-			symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
-			functionReturnType = node.type;
-
 			for (FuncDeclarationParameter parameter : node.parameters.getParameters()) {
 				symbolMap.declareVariable(parameter.name, parameter.type, parameter.line, parameter.column, SymbolScope.VariableKind.Parameter);
 			}
 
 			final StatementList newStatementList = visitStatementList(node.statementList);
+			symbolMap.reportUnusedVariables(warningOutput);
+
 			return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 		}
 		finally {
@@ -115,14 +124,15 @@ public final class DetermineTypesTransformation {
 
 	private StatementList visitStatementList(StatementList list) {
 		final SymbolScope outerSymbolMap = symbolMap;
+		symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Local);
 		try {
-			symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Local);
-
 			final StatementList newList = new StatementList();
 
 			for (Statement statement : list.getStatements()) {
 				newList.add(visitStatement(statement));
 			}
+
+			symbolMap.reportUnusedVariables(warningOutput);
 
 			return newList;
 		}
@@ -138,7 +148,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Assignment visitAssignment(Assignment node) {
-		final Type variableType = symbolMap.getVariableType(node.var);
+		final Type variableType = symbolMap.variableRead(node.var);
 		visitExpression(node.expression);
 		final Type expressionType = node.expression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variableType, expressionType)) {
@@ -161,7 +171,7 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				return this;
+				return node;
 			}
 
 			@Override
@@ -232,7 +242,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Object visitVarRead(VarRead node) {
-		final Type type = symbolMap.getVariableType(node.var);
+		final Type type = symbolMap.variableRead(node.var);
 		node.setType(type);
 		return this;
 	}

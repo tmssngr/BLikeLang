@@ -1,6 +1,7 @@
 package de.regnis.b;
 
 import de.regnis.b.node.Type;
+import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,16 @@ public final class SymbolScope {
 		return line + ":" + column + ": local variable " + name + " already declared as parameter";
 	}
 
+	@NotNull
+	public static String msgVarIsUnused(int line, int column, String name) {
+		return line + ":" + column + ": Variable " + name + " is unused";
+	}
+
+	@NotNull
+	public static String msgParamIsUnused(int line, int column, String name) {
+		return line + ":" + column + ": Parameter " + name + " is unused";
+	}
+
 	// Fields =================================================================
 
 	private final Map<String, Variable> variables = new HashMap<>();
@@ -54,13 +65,13 @@ public final class SymbolScope {
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
-						&& scope.variables.containsKey(name)) {
+				    && scope.variables.containsKey(name)) {
 					throw new AlreadyDefinedException(msgVarAlreadyDeclaredAsParameter(name, line, column));
 				}
 			}
 		}
 
-		variables.put(name, new Variable(type, kind));
+		variables.put(name, new Variable(type, kind, line, column));
 	}
 
 	public void declareFunction(@NotNull String name, @NotNull Type type, @NotNull List<Type> parameterTypes) {
@@ -83,11 +94,12 @@ public final class SymbolScope {
 	 * @throws UndeclaredException
 	 */
 	@NotNull
-	public Type getVariableType(@NotNull String name) {
+	public Type variableRead(@NotNull String name) {
 		SymbolScope scope = this;
 		while (scope != null) {
 			final Variable variable = scope.variables.get(name);
 			if (variable != null) {
+				variable.used = true;
 				return variable.type;
 			}
 
@@ -104,6 +116,21 @@ public final class SymbolScope {
 			throw new UndeclaredException(name);
 		}
 		return function;
+	}
+
+	public void reportUnusedVariables(@NotNull StringOutput output) {
+		for (Map.Entry<String, Variable> entry : variables.entrySet()) {
+			final String name = entry.getKey();
+			final Variable variable = entry.getValue();
+			if (!variable.used) {
+				final int line = variable.line;
+				final int column = variable.column;
+				output.print(scopeKind == ScopeKind.Parameter
+						             ? msgParamIsUnused(line, column, name)
+						             :msgVarIsUnused(line, column, name));
+				output.println();
+			}
+		}
 	}
 
 	// Utils ==================================================================
@@ -130,10 +157,16 @@ public final class SymbolScope {
 	private static final class Variable {
 		private final Type type;
 		private final VariableKind kind;
+		private final int line;
+		private final int column;
 
-		private Variable(@NotNull Type type, @NotNull VariableKind kind) {
+		private boolean used;
+
+		private Variable(@NotNull Type type, @NotNull VariableKind kind, int line, int column) {
 			this.type = type;
 			this.kind = kind;
+			this.line = line;
+			this.column = column;
 		}
 	}
 

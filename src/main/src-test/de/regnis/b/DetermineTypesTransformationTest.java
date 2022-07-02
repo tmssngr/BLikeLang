@@ -1,9 +1,12 @@
 package de.regnis.b;
 
-import de.regnis.b.node.*;
-
-import org.junit.Assert;
+import de.regnis.b.node.DeclarationList;
+import de.regnis.b.out.StringOutput;
+import de.regnis.b.out.StringStringOutput;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Thomas Singer
@@ -17,29 +20,23 @@ public final class DetermineTypesTransformationTest {
 		final DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
 				                                                       "var A = -1;\n" +
 				                                                       "var b=a+A;");
-		final SymbolScope scope = DetermineTypesTransformation.run(rootAst);
-		Assert.assertEquals(BasicTypes.UINT8, scope.getVariableType("a"));
-		Assert.assertEquals(BasicTypes.INT8, scope.getVariableType("A"));
-		Assert.assertEquals(BasicTypes.INT8, scope.getVariableType("b"));
-
-		try {
-			scope.getVariableType("c");
-			Assert.fail();
-		}
-		catch (SymbolScope.UndeclaredException ex) {
-			Assert.assertEquals("c", ex.getMessage());
-		}
+		final StringOutput out = new StringStringOutput();
+		DetermineTypesTransformation.run(rootAst, out);
+		assertEquals(SymbolScope.msgVarIsUnused(3, 4, "b") + "\n", out.toString());
 	}
 
 	@Test
-	public void testValidDupliceDeclarations() {
+	public void testValidDuplicateDeclarations() {
 		final DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
-				                                                       "int twice(int a) return a * 2;\n" +
+				                                                       "int twice(int a, int b) return a * 2;\n" +
 				                                                       "int zero() {\n" +
 				                                                       "var a = 0;\n" +
 				                                                       "return a;\n" +
 				                                                       "}");
-		final SymbolScope scope = DetermineTypesTransformation.run(rootAst);
+		final StringOutput out = new StringStringOutput();
+		DetermineTypesTransformation.run(rootAst, out);
+		assertEquals(SymbolScope.msgParamIsUnused(2, 21, "b") + "\n" +
+				                    SymbolScope.msgVarIsUnused(1, 4, "a") + "\n", out.toString());
 	}
 
 	@Test
@@ -48,11 +45,11 @@ public final class DetermineTypesTransformationTest {
 				                                                 "var a = 0;\n" +
 				                                                 "}");
 		try {
-			DetermineTypesTransformation.run(rootAst);
-			Assert.fail();
+			DetermineTypesTransformation.run(rootAst, StringOutput.out);
+			fail();
 		}
 		catch (SymbolScope.AlreadyDefinedException ex) {
-			Assert.assertEquals(SymbolScope.msgVarAlreadyDeclaredAsParameter("a", 2, 4), ex.getMessage());
+			assertEquals(SymbolScope.msgVarAlreadyDeclaredAsParameter("a", 2, 4), ex.getMessage());
 		}
 
 		rootAst = AstFactory.parseString("int func(int a) {\n" +
@@ -61,11 +58,11 @@ public final class DetermineTypesTransformationTest {
 				                                 "}\n" +
 				                                 "}");
 		try {
-			DetermineTypesTransformation.run(rootAst);
-			Assert.fail();
+			DetermineTypesTransformation.run(rootAst, StringOutput.out);
+			fail();
 		}
 		catch (SymbolScope.AlreadyDefinedException ex) {
-			Assert.assertEquals(SymbolScope.msgVarAlreadyDeclaredAsParameter("a", 3, 5), ex.getMessage());
+			assertEquals(SymbolScope.msgVarAlreadyDeclaredAsParameter("a", 3, 5), ex.getMessage());
 		}
 	}
 }
