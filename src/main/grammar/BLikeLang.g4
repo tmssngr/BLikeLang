@@ -21,13 +21,15 @@ varDeclaration: Var             var=Identifier Assign expression End #inferVarDe
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
               ;
 assignment    :     var=Identifier Assign expression End;
-expression: value=Number                                                 #numberLiteral
-          | var=Identifier                                               #readVariable
-          | func=Identifier ParenOpen functionCallParameters ParenClose  #functionCall
-          |                 ParenOpen expression ParenClose              #expressionInParenthesis
-          | left=expression operator=Multiply     right=expression       #binaryExpressionPoint
-          | left=expression operator=(Plus|Minus) right=expression       #binaryExpressionDash
-          | ParenOpen type=Identifier ParenClose expression              #typeCast
+expression: value=Number                                                   #numberLiteral
+          | value=BooleanLiteral                                           #booleanLiteral
+          | var=Identifier                                                 #readVariable
+          | func=Identifier ParenOpen functionCallParameters ParenClose    #functionCall
+          |                 ParenOpen expression ParenClose                #expressionInParenthesis
+          | left=expression operator=Multiply     right=expression         #binaryExpressionPoint
+          | left=expression operator=(Plus|Minus) right=expression         #binaryExpressionDash
+          | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression  #binaryExpressionBool
+          | ParenOpen type=Identifier ParenClose expression                #typeCast
           ;
 
 functionCallParameters: expression?
@@ -42,6 +44,13 @@ Plus    : '+';
 Minus   : '-';
 Multiply: '*';
 
+Lt : '<' ;
+Le : '<=';
+Eq : '==';
+Ge : '>=';
+Gt : '>';
+Ne : '!=';
+
 ParenOpen : '(';
 ParenClose: ')';
 CurlyOpen : '{';
@@ -49,6 +58,8 @@ CurlyClose: '}';
 
 Return: 'return';
 Var: 'var';
+
+BooleanLiteral: 'true' | 'false';
 
 fragment DecimalNumber
     : [0-9]+

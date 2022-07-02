@@ -164,6 +164,18 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code binaryExpressionBool}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code binaryExpressionBool}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code typeCast}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -211,6 +223,18 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code booleanLiteral}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code booleanLiteral}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code expressionInParenthesis}
 	 * labeled alternative in {@link BLikeLangParser#expression}.

@@ -20,10 +20,20 @@ public final class BasicTypes {
 			return "void";
 		}
 	};
+	public static final Type BOOLEAN = new Type() {
+		@Override
+		public String toString() {
+			return "boolean";
+		}
+	};
 
 	// Static =================================================================
 
 	public static boolean canBeAssignedFrom(Type expectedType, Type providedType) {
+		if (expectedType == providedType) {
+			return true;
+		}
+
 		return expectedType instanceof final NumericType expected
 				&& providedType instanceof final NumericType provided
 				&& expected.min <= provided.min
@@ -54,6 +64,9 @@ public final class BasicTypes {
 	public static Type getType(@NotNull String name, boolean allowVoid) {
 		if (allowVoid && name.equals(VOID.toString())) {
 			return VOID;
+		}
+		if (name.equals(BOOLEAN.toString())) {
+			return BOOLEAN;
 		}
 		return getNumbericType(name);
 	}

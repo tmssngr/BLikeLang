@@ -182,6 +182,12 @@ public class CodePrinter {
 			}
 
 			@Override
+			public Object visitBoolean(BooleanLiteral node) {
+				output.print(String.valueOf(node.value));
+				return node;
+			}
+
+			@Override
 			public Object visitVarRead(VarRead node) {
 				output.print(node.var);
 				return node;

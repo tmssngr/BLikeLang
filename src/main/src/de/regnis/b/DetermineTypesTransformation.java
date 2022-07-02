@@ -264,6 +264,11 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
+			public Expression visitBoolean(BooleanLiteral node) {
+				return node;
+			}
+
+			@Override
 			public Expression visitVarRead(VarRead node) {
 				return DetermineTypesTransformation.this.visitVarRead(node);
 			}
@@ -281,20 +286,34 @@ public final class DetermineTypesTransformation {
 
 		final Type leftType = newLeft.getType();
 		final Type rightType = newRight.getType();
-		final Type type;
-		if (leftType instanceof final BasicTypes.NumericType lnt
-				&& rightType instanceof final BasicTypes.NumericType rnt) {
-			if (lnt.isSigned() || rnt.isSigned()) {
-				type = lnt.min > rnt.min ? rnt : lnt;
-			}
-			else {
-				type = lnt.max > rnt.max ? lnt : rnt;
-			}
-		}
-		else {
+		final Type type = getBinaryExpressionType(leftType, node.operator, rightType);
+		if (type == null) {
 			throw new InvalidTypeException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
 		}
 		return node.createNew(type, newLeft, newRight);
+	}
+
+	@Nullable
+	private Type getBinaryExpressionType(Type left, String operator, Type right) {
+		if (left instanceof final BasicTypes.NumericType lnt
+				&& right instanceof final BasicTypes.NumericType rnt) {
+			if (BinaryExpression.isComparison(operator)) {
+			return BasicTypes.BOOLEAN;
+			}
+
+			if (lnt.isSigned() || rnt.isSigned()) {
+				return lnt.min > rnt.min ? rnt : lnt;
+			}
+			return lnt.max > rnt.max ? lnt : rnt;
+		}
+
+		if (left == BasicTypes.BOOLEAN && right == BasicTypes.BOOLEAN) {
+			if (operator.equals(BinaryExpression.EQ) || operator.equals(BinaryExpression.NE)) {
+				return BasicTypes.BOOLEAN;
+			}
+		}
+
+		return null;
 	}
 
 	private FuncCall visitFunctionCall(FuncCall node) {

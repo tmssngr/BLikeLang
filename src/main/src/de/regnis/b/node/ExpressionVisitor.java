@@ -10,6 +10,8 @@ public interface ExpressionVisitor<O> {
 
 	O visitNumber(NumberLiteral node);
 
+	O visitBoolean(BooleanLiteral node);
+
 	O visitVarRead(VarRead node);
 
 	O visitTypeCast(TypeCast node);

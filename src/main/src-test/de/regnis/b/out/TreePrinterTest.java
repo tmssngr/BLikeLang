@@ -22,5 +22,7 @@ public class TreePrinterTest {
 		                            "+- literal 1"), printer.getStrings(new Assignment("a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a :=",
 		                            "+- literal 1"), printer.getStrings(new VarDeclaration("a", new NumberLiteral(1))));
+		Assert.assertEquals(List.of("a :=",
+		                            "+- literal true"), printer.getStrings(new VarDeclaration("a", BooleanLiteral.TRUE)));
 	}
 }
