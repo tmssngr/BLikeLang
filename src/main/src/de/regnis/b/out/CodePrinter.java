@@ -1,7 +1,6 @@
 package de.regnis.b.out;
 
 import de.regnis.b.node.*;
-import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -50,7 +49,7 @@ public class CodePrinter {
 			output.print(parameter.name);
 		}
 		output.print(") ");
-		print(declaration.statement, 0, output);
+		print(declaration.statementList, 0, output);
 	}
 
 	// Utils ==================================================================

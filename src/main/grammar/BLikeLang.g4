@@ -12,11 +12,10 @@ parameterDeclarations: parameterDeclaration?
                      | parameterDeclaration (Comma parameterDeclaration)+;
 parameterDeclaration: type=Identifier name=Identifier;
 
-statements: (statement | NL)* ;
-statement: varDeclaration                  #localVarDeclaration
-         | assignment                      #assignStatement
-         | CurlyOpen statements CurlyClose #blockStatement
-         | Return expression? End          #returnStatement
+statement: varDeclaration                         #localVarDeclaration
+         | assignment                             #assignStatement
+         | CurlyOpen (statement | NL)* CurlyClose #blockStatement
+         | Return expression? End                 #returnStatement
          ;
 varDeclaration: Var var=Identifier Assign expression End;
 assignment    :     var=Identifier Assign expression End;

@@ -37,9 +37,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	private final DeclarationList declarationList = new DeclarationList();
 
-	@Nullable
-	private StatementList statementListNode;
-
 	// Setup ==================================================================
 
 	private AstFactory() {
@@ -78,7 +75,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final String name = ctx.name.getText();
 		final FuncDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
 		final Statement statement = (Statement) visit(ctx.statement());
-		declarationList.add(new FuncDeclaration(type, name, parameters, statement));
+		final StatementList statementList = statement.toStatementList();
+		declarationList.add(new FuncDeclaration(type, name, parameters, statementList));
 		return null;
 	}
 
@@ -100,48 +98,23 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public StatementList visitStatements(BLikeLangParser.StatementsContext ctx) {
-		final StatementList outerStatementList = statementListNode;
-
-		final StatementList statementListNode = new StatementList();
-		if (outerStatementList != null) {
-			outerStatementList.add(statementListNode);
-		}
-		this.statementListNode = statementListNode;
-		try {
-			visitChildren(ctx);
-
-			assert this.statementListNode == statementListNode;
-		}
-		finally {
-			this.statementListNode = outerStatementList;
-		}
-		return statementListNode;
-	}
-
-	@Override
 	public Node visitBlockStatement(BLikeLangParser.BlockStatementContext ctx) {
-		return visitStatements(ctx.statements());
+		final StatementList statementList = new StatementList();
+		for (BLikeLangParser.StatementContext statementCtx : ctx.statement()) {
+			final Statement statement = (Statement) visit(statementCtx);
+			statementList.add(statement);
+		}
+		return statementList;
 	}
 
-	@Nullable
 	@Override
 	public Node visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
-		Objects.requireNonNull(statementListNode);
-
-		final Assignment node = visitAssignment(ctx.assignment());
-		statementListNode.add(node);
-		return null;
+		return visitAssignment(ctx.assignment());
 	}
 
-	@Nullable
 	@Override
 	public Node visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
-		Objects.requireNonNull(statementListNode);
-
-		final VarDeclaration node = visitVarDeclaration(ctx.varDeclaration());
-		statementListNode.add(node);
-		return null;
+		return visitVarDeclaration(ctx.varDeclaration());
 	}
 
 	@Override
@@ -157,7 +130,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public ReturnStatement visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
+	public Node visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
 		final Expression expression = (Expression) visit(ctx.expression());
 		return new ReturnStatement(expression);
 	}

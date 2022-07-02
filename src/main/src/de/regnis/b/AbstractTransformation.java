@@ -28,16 +28,7 @@ public abstract class AbstractTransformation<H> {
 
 				@Override
 				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-					final Statement statement = node.statement;
-					final StatementList statementList;
-					if (statement instanceof StatementList) {
-						statementList = (StatementList) statement;
-					}
-					else {
-						statementList = new StatementList();
-						statementList.add(statement);
-					}
-					final StatementList newStatementList = handleStatementList(statementList);
+					final StatementList newStatementList = handleStatementList(node.statementList);
 					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 				}
 			}));

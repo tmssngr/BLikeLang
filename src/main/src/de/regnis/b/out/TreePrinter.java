@@ -122,7 +122,7 @@ public class TreePrinter {
 				buffer.append(")");
 				final List<String> strings = new ArrayList<>();
 				strings.add(buffer.toString());
-				append(getStrings(node.statement), false, strings);
+				append(getStrings(node.statementList), false, strings);
 				return strings;
 			}
 		});

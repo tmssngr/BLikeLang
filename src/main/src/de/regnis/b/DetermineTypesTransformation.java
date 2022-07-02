@@ -80,8 +80,8 @@ public final class DetermineTypesTransformation {
 				symbolMap.declareVariable(parameter.name, parameter.type, parameter.line, parameter.column, SymbolScope.VariableKind.Parameter);
 			}
 
-			final Statement newStatement = visitStatement(node.statement);
-			return new FuncDeclaration(node.type, node.name, node.parameters, newStatement);
+			final StatementList newStatementList = visitStatementList(node.statementList);
+			return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 		}
 		finally {
 			symbolMap = outerSymbolMap;
