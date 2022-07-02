@@ -11,4 +11,6 @@ public interface ExpressionVisitor<O> {
 	O visitNumber(NumberLiteral node);
 
 	O visitVarRead(VarRead node);
+
+	O visitTypeCast(TypeCast node);
 }

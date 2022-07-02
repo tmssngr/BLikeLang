@@ -178,6 +178,11 @@ public class TreePrinter {
 			public List<String> visitVarRead(VarRead node) {
 				return getStrings(node);
 			}
+
+			@Override
+			public List<String> visitTypeCast(TypeCast node) {
+				return getStrings(node);
+			}
 		});
 	}
 
@@ -194,6 +199,13 @@ public class TreePrinter {
 
 	private List<String> getStrings(VarRead node) {
 		return Collections.singletonList("read var " + node.var);
+	}
+
+	private List<String> getStrings(TypeCast node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("cast to " + node.typeName);
+		append(getStrings(node.expression), false, strings);
+		return strings;
 	}
 
 	private List<String> getStrings(NumberLiteral node) {

@@ -121,6 +121,11 @@ public abstract class AbstractTransformation<H> {
 			public Expression visitVarRead(VarRead node) {
 				return node;
 			}
+
+			@Override
+			public Expression visitTypeCast(TypeCast node) {
+				return node;
+			}
 		});
 	}
 }

@@ -19,6 +19,14 @@ public class AstFactoryTest {
 		assertEquals("+- a : Foobar =\n" +
 				             "   +- literal 0\n", TreePrinter.print(AstFactory.parseString("Foobar a = 0;")));
 		assertEquals("+- a :=\n" +
+				             "   +- cast to u16\n" +
+				             "      +- literal 0\n", TreePrinter.print(AstFactory.parseString("var a = (u16)0;")));
+		assertEquals("+- a :=\n" +
+				             "   +- cast to i8\n" +
+				             "      +- operator +\n" +
+				             "         +- literal 0\n" +
+				             "         +- literal 1000\n", TreePrinter.print(AstFactory.parseString("var a = (i8)0 + 1000;")));
+		assertEquals("+- a :=\n" +
 				             "|  +- literal 0\n" +
 				             "+- b :=\n" +
 				             "   +- operator +\n" +
