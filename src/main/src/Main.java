@@ -20,7 +20,7 @@ public final class Main {
 
 		DeclarationList rootAst = AstFactory.parseFile(file);
 
-		DetermineTypesTransformation.run(rootAst, StringOutput.out);
+		DetermineTypesTransformation.transform(rootAst, StringOutput.out);
 
 
 		final TreePrinter printer = new TreePrinter();

@@ -62,7 +62,14 @@ public final class BinaryExpression extends Expression {
 	// Accessing ==============================================================
 
 	@NotNull
-	public BinaryExpression createNew(Expression left, Expression right) {
+	public BinaryExpression createNew(@NotNull Expression left, @NotNull Expression right) {
 		return new BinaryExpression(left, operator, right);
+	}
+
+	@NotNull
+	public BinaryExpression createNew(@NotNull Type type, @NotNull Expression left, @NotNull Expression right) {
+		final BinaryExpression binaryExpression = new BinaryExpression(left, operator, right);
+		binaryExpression.setType(type);
+		return binaryExpression;
 	}
 }

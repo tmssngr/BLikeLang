@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,15 +20,20 @@ public final class FuncCall extends Expression {
 
 	// Setup ==================================================================
 
-	public FuncCall(String name, FuncCallParameters parameters) {
+	public FuncCall(@NotNull String name, @NotNull FuncCallParameters parameters) {
 		this(name, parameters, -1, -1);
 	}
 
-	public FuncCall(String name, FuncCallParameters parameters, int line, int column) {
+	public FuncCall(@NotNull String name, @NotNull FuncCallParameters parameters, int line, int column) {
 		this.name = name;
 		this.line = line;
 		this.column = column;
 		this.parameters = Collections.unmodifiableList(new ArrayList<>(parameters.getExpressions()));
+	}
+
+	public FuncCall(@NotNull Type type, @NotNull String name, @NotNull FuncCallParameters parameters) {
+		this(name, parameters);
+		setType(type);
 	}
 
 	// Implemented ============================================================

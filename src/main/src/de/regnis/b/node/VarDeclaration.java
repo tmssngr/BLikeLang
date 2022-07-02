@@ -1,6 +1,6 @@
 package de.regnis.b.node;
 
-import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Thomas Singer
@@ -16,18 +16,19 @@ public final class VarDeclaration extends Statement {
 
 	// Setup ==================================================================
 
-	public VarDeclaration(String var, Expression expression) {
+	public VarDeclaration(@NotNull String var, @NotNull Expression expression) {
 		this(var, expression, -1, -1);
 	}
 
-	public VarDeclaration(String var, Expression expression, int line, int column) {
-		Objects.requireNonNull(var);
-		Objects.requireNonNull(expression);
-
+	public VarDeclaration(@NotNull String var, @NotNull Expression expression, int line, int column) {
 		this.var = var;
 		this.expression = expression;
 		this.line = line;
 		this.column = column;
+	}
+
+	public VarDeclaration(@NotNull String var, Type type, Expression expression) {
+		this(var, expression);
 	}
 
 	// Implemented ============================================================

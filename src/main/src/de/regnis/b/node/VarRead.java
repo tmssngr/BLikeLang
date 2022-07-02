@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
@@ -13,14 +15,21 @@ public final class VarRead extends Expression {
 
 	// Setup ==================================================================
 
-	public VarRead(String var) {
+	public VarRead(@NotNull String var) {
 		this(var, -1, -1);
 	}
 
-	public VarRead(String var, int line, int column) {
+	public VarRead(@NotNull String var, int line, int column) {
 		this.var = var;
 		this.line = line;
 		this.column = column;
+	}
+
+	public VarRead(@NotNull Type type, @NotNull String var) {
+		this.var = var;
+		setType(type);
+		line = -1;
+		column = -1;
 	}
 
 	// Implemented ============================================================

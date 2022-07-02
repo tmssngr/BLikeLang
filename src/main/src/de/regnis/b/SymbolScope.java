@@ -57,7 +57,7 @@ public final class SymbolScope {
 
 	// Accessing ==============================================================
 
-	public void declareVariable(@NotNull String name, @NotNull Type type, int line, int column, @NotNull VariableKind kind) {
+	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Type type, int line, int column) {
 		if (variables.containsKey(name)) {
 			throw new AlreadyDefinedException(msgVarAlreadyDeclared(name, line, column));
 		}
@@ -65,13 +65,13 @@ public final class SymbolScope {
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
-				    && scope.variables.containsKey(name)) {
+						&& scope.variables.containsKey(name)) {
 					throw new AlreadyDefinedException(msgVarAlreadyDeclaredAsParameter(name, line, column));
 				}
 			}
 		}
 
-		variables.put(name, new Variable(type, kind, line, column));
+		variables.put(name, new Variable(newName, type, line, column));
 	}
 
 	public void declareFunction(@NotNull String name, @NotNull Type type, @NotNull List<Type> parameterTypes) {
@@ -94,13 +94,13 @@ public final class SymbolScope {
 	 * @throws UndeclaredException
 	 */
 	@NotNull
-	public Type variableRead(@NotNull String name) {
+	public Variable variableRead(@NotNull String name) {
 		SymbolScope scope = this;
 		while (scope != null) {
 			final Variable variable = scope.variables.get(name);
 			if (variable != null) {
 				variable.used = true;
-				return variable.type;
+				return variable;
 			}
 
 			scope = scope.parentScope;
@@ -127,7 +127,7 @@ public final class SymbolScope {
 				final int column = variable.column;
 				output.print(scopeKind == ScopeKind.Parameter
 						             ? msgParamIsUnused(line, column, name)
-						             :msgVarIsUnused(line, column, name));
+						             : msgVarIsUnused(line, column, name));
 				output.println();
 			}
 		}
@@ -150,21 +150,17 @@ public final class SymbolScope {
 		Global, Parameter, Local
 	}
 
-	public enum VariableKind {
-		Global, Parameter, Local, Temp
-	}
-
-	private static final class Variable {
-		private final Type type;
-		private final VariableKind kind;
+	public static final class Variable {
+		public final String newName;
+		public final Type type;
 		private final int line;
 		private final int column;
 
 		private boolean used;
 
-		private Variable(@NotNull Type type, @NotNull VariableKind kind, int line, int column) {
+		private Variable(String newName, @NotNull Type type, int line, int column) {
+			this.newName = newName;
 			this.type = type;
-			this.kind = kind;
 			this.line = line;
 			this.column = column;
 		}
