@@ -20,8 +20,7 @@ public final class Main {
 
 		DeclarationList rootAst = AstFactory.parseFile(file);
 
-		DetermineTypesTransformation.transform(rootAst, StringOutput.out);
-
+		rootAst = DetermineTypesTransformation.transform(rootAst, StringOutput.out);
 
 		final TreePrinter printer = new TreePrinter();
 		printer.print(rootAst, StringOutput.out);
@@ -32,5 +31,4 @@ public final class Main {
 		rootAst = ConstantFoldingTransformation.transform(rootAst);
 		new CodePrinter().print(rootAst, StringOutput.out);
 	}
-
 }

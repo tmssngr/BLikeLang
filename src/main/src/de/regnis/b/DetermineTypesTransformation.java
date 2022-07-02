@@ -25,6 +25,11 @@ public final class DetermineTypesTransformation {
 		return determineTypes.visitDeclarationList(root);
 	}
 
+	@NotNull
+	public static String msgCantAssignType(int line, int column, String name, Type currentType, Type expectedType) {
+		return line + ":" + column + ": Variable " + name + ": Can't assign type " + currentType + " to " + expectedType;
+	}
+
 	// Fields =================================================================
 
 	private final StringOutput warningOutput;
@@ -66,15 +71,11 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-		final VarDeclaration varDeclaration = node.node;
-		final Expression newExpression = visitExpression(varDeclaration.expression);
-
 		final String newName = "g" + globalVarCount;
 		globalVarCount++;
 
-		final Type type = newExpression.getType();
-		symbolMap.declareVariable(varDeclaration.var, newName, type, varDeclaration.line, varDeclaration.column);
-		return new GlobalVarDeclaration(new VarDeclaration(newName, type, newExpression));
+		final VarDeclaration newVarDeclaration = visitVarDeclaration(node.node, newName);
+		return new GlobalVarDeclaration(newVarDeclaration);
 	}
 
 	private Declaration visitFunctionDeclaration(FuncDeclaration node) {
@@ -199,13 +200,32 @@ public final class DetermineTypesTransformation {
 	}
 
 	private VarDeclaration visitLocalVarDeclaration(VarDeclaration node) {
-		final Expression newExpression = visitExpression(node.expression);
-
 		final String newName = "v" + localVarCount;
 		localVarCount++;
 
-		final Type type = newExpression.getType();
-		symbolMap.declareVariable(node.var, newName, type, node.line, node.column);
+		return visitVarDeclaration(node, newName);
+	}
+
+	@NotNull
+	private VarDeclaration visitVarDeclaration(VarDeclaration varDeclaration, String newName) {
+		Type type = null;
+		if (varDeclaration.typeName != null) {
+			type = BasicTypes.getType(varDeclaration.typeName, false);
+		}
+
+		final Expression newExpression = visitExpression(varDeclaration.expression);
+
+		final Type expressionType = newExpression.getType();
+		if (type != null) {
+			if (!BasicTypes.canBeAssignedFrom(type, expressionType)) {
+				throw new InvalidTypeException(msgCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
+			}
+		}
+		else {
+			type = expressionType;
+		}
+
+		symbolMap.declareVariable(varDeclaration.name, newName, type, varDeclaration.line, varDeclaration.column);
 		return new VarDeclaration(newName, type, newExpression);
 	}
 

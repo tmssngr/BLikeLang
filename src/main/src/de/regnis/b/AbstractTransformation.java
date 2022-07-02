@@ -51,7 +51,7 @@ public abstract class AbstractTransformation<H> {
 
 	protected VarDeclaration handleVarDeclaration(VarDeclaration node, H helper) {
 		final Expression expression = handleExpression(node.expression, helper);
-		return new VarDeclaration(node.var, expression, node.line, node.column);
+		return node.derive(expression);
 	}
 
 	protected Statement handleReturn(ReturnStatement node, H helper) {
