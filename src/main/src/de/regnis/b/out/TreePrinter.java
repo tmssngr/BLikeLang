@@ -175,6 +175,11 @@ public class TreePrinter {
 			}
 
 			@Override
+			public List<String> visitBoolean(BooleanLiteral node) {
+				return getStrings(node);
+			}
+
+			@Override
 			public List<String> visitVarRead(VarRead node) {
 				return getStrings(node);
 			}
@@ -209,6 +214,10 @@ public class TreePrinter {
 	}
 
 	private List<String> getStrings(NumberLiteral node) {
+		return Collections.singletonList("literal " + node.value);
+	}
+
+	private List<String> getStrings(BooleanLiteral node) {
 		return Collections.singletonList("literal " + node.value);
 	}
 

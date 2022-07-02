@@ -14,6 +14,12 @@ public final class BinaryExpression extends Expression {
 	public static final String PLUS = "+";
 	public static final String MINUS = "-";
 	public static final String MULTIPLY = "*";
+	public static final String LT = "<";
+	public static final String LE = "<=";
+	public static final String EQ = "==";
+	public static final String GE = ">=";
+	public static final String GT = ">";
+	public static final String NE = "!=";
 
 	// Static =================================================================
 
@@ -27,6 +33,40 @@ public final class BinaryExpression extends Expression {
 
 	public static BinaryExpression createMultiply(Expression left, Expression right) {
 		return new BinaryExpression(left, MULTIPLY, right);
+	}
+
+	public static BinaryExpression createLt(Expression left, Expression right) {
+		return new BinaryExpression(left, LT, right);
+	}
+
+	public static BinaryExpression createLe(Expression left, Expression right) {
+		return new BinaryExpression(left, LE, right);
+	}
+
+	public static BinaryExpression createEq(Expression left, Expression right) {
+		return new BinaryExpression(left, EQ, right);
+	}
+
+	public static BinaryExpression createGe(Expression left, Expression right) {
+		return new BinaryExpression(left, GE, right);
+	}
+
+	public static BinaryExpression createGt(Expression left, Expression right) {
+		return new BinaryExpression(left, GT, right);
+	}
+
+	public static BinaryExpression createNe(Expression left, Expression right) {
+		return new BinaryExpression(left, NE, right);
+	}
+
+	public static boolean isComparison(String operator) {
+		return operator.equals(LT)
+				|| operator.equals(LE)
+				|| operator.equals(EQ)
+				|| operator.equals(GE)
+				|| operator.equals(GT)
+				|| operator.equals(NE)
+				;
 	}
 
 	// Fields =================================================================

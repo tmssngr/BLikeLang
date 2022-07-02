@@ -16,6 +16,8 @@ public class AstFactoryTest {
 	public void testAstFactory() {
 		assertEquals("+- a :=\n" +
 				             "   +- literal 0\n", TreePrinter.print(AstFactory.parseString("var a = 0;")));
+		assertEquals("+- a :=\n" +
+				             "   +- literal false\n", TreePrinter.print(AstFactory.parseString("var a = false;")));
 		assertEquals("+- a : Foobar =\n" +
 				             "   +- literal 0\n", TreePrinter.print(AstFactory.parseString("Foobar a = 0;")));
 		assertEquals("+- a :=\n" +
@@ -26,6 +28,10 @@ public class AstFactoryTest {
 				             "      +- operator +\n" +
 				             "         +- literal 0\n" +
 				             "         +- literal 1000\n", TreePrinter.print(AstFactory.parseString("var a = (i8)0 + 1000;")));
+		assertEquals("+- a :=\n" +
+				             "   +- operator <\n" +
+				             "      +- literal 0\n" +
+				             "      +- literal 1000\n", TreePrinter.print(AstFactory.parseString("var a = 0 < 1000;")));
 		assertEquals("+- a :=\n" +
 				             "|  +- literal 0\n" +
 				             "+- b :=\n" +

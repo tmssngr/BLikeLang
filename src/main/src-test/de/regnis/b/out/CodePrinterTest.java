@@ -34,5 +34,9 @@ public class CodePrinterTest {
 				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
 				                                                                                       new TypeCast("u8",
 				                                                                                                    new NumberLiteral(-1)))))));
+		Assert.assertEquals("a := false\n",
+		                    CodePrinter.print(new DeclarationList()
+				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
+				                                                                                       BooleanLiteral.FALSE)))));
 	}
 }

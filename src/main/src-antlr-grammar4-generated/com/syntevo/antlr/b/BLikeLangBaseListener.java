@@ -184,6 +184,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTypeCast(BLikeLangParser.TypeCastContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -227,6 +239,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

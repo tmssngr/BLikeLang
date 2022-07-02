@@ -13,7 +13,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	// Accessing ==============================================================
 
 	@Test
-	public void testSimpleCases() {
+	public void testKeepAsIs() {
 		assertEquals("a = 1", f -> f.
 				assignment("a", new NumberLiteral(1)));
 
@@ -45,6 +45,12 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				           BinaryExpression.createAdd(new NumberLiteral(1),
 				                                      BinaryExpression.createAdd(new NumberLiteral(2),
 				                                                                 new NumberLiteral(3)))));
+		assertEquals("$1 := 2 <= 3" + NL
+				             + "a = false == $1", f -> f.
+				assignment("a",
+				           BinaryExpression.createEq(BooleanLiteral.FALSE,
+				                                     BinaryExpression.createLe(new NumberLiteral(2),
+				                                                               new NumberLiteral(3)))));
 		assertEquals("$1 := 1 + 2" + NL
 				             + "a = $1 + 3", f -> f.
 				assignment("a",

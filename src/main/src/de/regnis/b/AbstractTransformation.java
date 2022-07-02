@@ -118,6 +118,11 @@ public abstract class AbstractTransformation<H> {
 			}
 
 			@Override
+			public Expression visitBoolean(BooleanLiteral node) {
+				return node;
+			}
+
+			@Override
 			public Expression visitVarRead(VarRead node) {
 				return node;
 			}

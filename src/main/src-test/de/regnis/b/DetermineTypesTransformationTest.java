@@ -22,27 +22,67 @@ public final class DetermineTypesTransformationTest {
 	public void testGlobalVars() {
 		final DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
 				                                                       "var A = -1;\n" +
-				                                                       "var b=a+A;");
+				                                                       "var b=a+A;\n" +
+				                                                       "var booF = false;");
 		final StringOutput out = new StringStringOutput();
 		final DeclarationList newRoot = DetermineTypesTransformation.transform(rootAst, out);
 		assertEquals("g0 : u8 = 1\n" +
 				             "g1 : i8 = -1\n" +
-				             "g2 : i8 = g0 + g1\n", CodePrinter.print(newRoot));
-		assertEquals(SymbolScope.msgVarIsUnused(3, 4, "b") + "\n", out.toString());
+				             "g2 : i8 = g0 + g1\n" +
+				             "g3 : boolean = false\n", CodePrinter.print(newRoot));
+		assertEquals(SymbolScope.msgVarIsUnused(3, 4, "b") + "\n" +
+				             SymbolScope.msgVarIsUnused(4, 4, "booF") + "\n", out.toString());
 	}
 
 	@Test
 	public void testLocalVars() {
-		final DeclarationList rootAst = AstFactory.parseString("int add(int a, int b) {\n" +
-				                                                       "var sum = a + b;\n" +
-				                                                       "return sum;\n" +
-				                                                       "}");
+		final DeclarationList rootAst = AstFactory.parseString(
+				"int add(int a, int b) {\n" +
+						"var sum = a + b;\n" +
+						"return sum;\n" +
+						"}\n" +
+						"boolean getFalse() {" +
+						"boolean v = false;" +
+						"return v;" +
+						"}");
 		final StringOutput out = new StringStringOutput();
 		final DeclarationList newRoot = DetermineTypesTransformation.transform(rootAst, out);
 		assertEquals("i16 add(i16 p0, i16 p1) {\n" +
 				             "  v0 : i16 = p0 + p1\n" +
 				             "  return v0\n" +
-				             "}\n", CodePrinter.print(newRoot));
+				             "}\n" +
+				             "boolean getFalse() {\n" +
+				             "  v0 : boolean = false\n" +
+				             "  return v0\n" +
+				             "}\n",
+		             CodePrinter.print(newRoot));
+		assertEquals("", out.toString());
+	}
+
+	@Test
+	public void testReturn() {
+		DeclarationList rootAst = AstFactory.parseString(
+				"boolean isEqual(int a, int b) {\n" +
+						"return a == b;\n" +
+						"}");
+		StringOutput out = new StringStringOutput();
+		DeclarationList newRoot = DetermineTypesTransformation.transform(rootAst, out);
+		assertEquals("boolean isEqual(i16 p0, i16 p1) {\n" +
+				             "  return p0 == p1\n" +
+				             "}\n",
+		             CodePrinter.print(newRoot));
+		assertEquals("", out.toString());
+
+		rootAst = AstFactory.parseString(
+				"boolean isSingleDigit(u16 a) {\n" +
+						"return a <= 10;\n" +
+						"}");
+		out = new StringStringOutput();
+		newRoot = DetermineTypesTransformation.transform(rootAst, out);
+		assertEquals("boolean isSingleDigit(u16 p0) {\n" +
+				             "  return p0 <= 10\n" +
+				             "}\n",
+		             CodePrinter.print(newRoot));
 		assertEquals("", out.toString());
 	}
 

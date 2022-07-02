@@ -103,6 +103,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAssignment(BLikeLangParser.AssignmentContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code binaryExpressionBool}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code typeCast}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -130,6 +137,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code booleanLiteral}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code expressionInParenthesis}
 	 * labeled alternative in {@link BLikeLangParser#expression}.

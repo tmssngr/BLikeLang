@@ -171,6 +171,22 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) {
+		final Expression left = (Expression) visit(ctx.left);
+		final Expression right = (Expression) visit(ctx.right);
+
+		return switch (ctx.operator.getType()) {
+			case BLikeLangLexer.Lt -> BinaryExpression.createLt(left, right);
+			case BLikeLangLexer.Le -> BinaryExpression.createLe(left, right);
+			case BLikeLangLexer.Eq -> BinaryExpression.createEq(left, right);
+			case BLikeLangLexer.Ge -> BinaryExpression.createGe(left, right);
+			case BLikeLangLexer.Gt -> BinaryExpression.createGt(left, right);
+			case BLikeLangLexer.Ne -> BinaryExpression.createNe(left, right);
+			default -> throw new ParseCancellationException();
+		};
+	}
+
+	@Override
 	public FuncCall visitFunctionCall(BLikeLangParser.FunctionCallContext ctx) {
 		final FuncCallParameters parameters = visitFunctionCallParameters(ctx.functionCallParameters());
 		return new FuncCall(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
@@ -221,6 +237,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		catch (NumberFormatException | BasicTypes.UnsupportedTypeException e) {
 			throw new ParseFailedException("Invalid number: " + text, number.getLine(), number.getCharPositionInLine());
 		}
+	}
+
+	@Override
+	public Node visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) {
+		final String text = ctx.value.getText();
+		return BooleanLiteral.get("true".equals(text));
 	}
 
 	@Override
