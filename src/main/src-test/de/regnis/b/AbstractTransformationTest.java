@@ -14,9 +14,9 @@ public abstract class AbstractTransformationTest {
 
 	// Constants ==============================================================
 
-	protected static final String PREFIX = "void test() {\n\t";
+	protected static final String PREFIX = "void test() {\n  ";
 	protected static final String SUFFIX = "\n}\n";
-	protected static final String NL = "\n\t";
+	protected static final String NL = "\n  ";
 
 	// Static =================================================================
 

@@ -185,7 +185,7 @@ public class CodePrinter {
 
 	private void printIndentation(int indentation, StringOutput output) {
 		for (int i = 0; i < indentation; i++) {
-			output.print("\t");
+			output.print("  ");
 		}
 	}
 }
