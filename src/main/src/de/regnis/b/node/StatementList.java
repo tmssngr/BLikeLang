@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.List;
  * @author Thomas Singer
  */
 public final class StatementList extends Statement {
+
+	// Static =================================================================
 
 	// Fields =================================================================
 
@@ -19,6 +23,12 @@ public final class StatementList extends Statement {
 	}
 
 	// Implemented ============================================================
+
+	@NotNull
+	@Override
+	public StatementList toStatementList() {
+		return this;
+	}
 
 	@Override
 	public String toString() {

@@ -19,7 +19,7 @@ public abstract class NodeVisitor<O> implements DeclarationVisitor<O>, Statement
 	@Nullable
 	@Override
 	public O visitFunctionDeclaration(FuncDeclaration node) {
-		node.statement.visit(this);
+		node.statementList.visit(this);
 		return null;
 	}
 

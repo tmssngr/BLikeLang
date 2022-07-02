@@ -12,15 +12,15 @@ public final class FuncDeclaration extends Declaration {
 	public final Type type;
 	public final String name;
 	public final FuncDeclarationParameters parameters;
-	public final Statement statement;
+	public final StatementList statementList;
 
 	// Setup ==================================================================
 
-	public FuncDeclaration(@NotNull Type type, @NotNull String name, @NotNull FuncDeclarationParameters parameters, @NotNull Statement statement) {
+	public FuncDeclaration(@NotNull Type type, @NotNull String name, @NotNull FuncDeclarationParameters parameters, @NotNull StatementList statementList) {
 		this.type = type;
 		this.name = name;
 		this.parameters = parameters;
-		this.statement = statement;
+		this.statementList = statementList;
 	}
 
 	// Implemented ============================================================
