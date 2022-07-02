@@ -6,7 +6,7 @@ int sqr(int a) {
 }
 
 i8 rnd() {
-    return 1;
+    return (i8)1;
 }
 
 int max(int a, int b) {
@@ -14,5 +14,5 @@ int max(int a, int b) {
 }
 
 int main() {
-    a = (a + b) * 2 - sqr(3) * rnd() + max(1, a);
+    int a = (a + b) * 2 - sqr(3) * rnd() + max(1, a);
 }
