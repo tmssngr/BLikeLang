@@ -140,8 +140,10 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public Node visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
-		final Expression expression = (Expression) visit(ctx.expression());
-		return new ReturnStatement(expression);
+		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
+		final Expression expression = (Expression) visit(expressionContext);
+		final Token start = expressionContext.getStart();
+		return new ReturnStatement(expression, start.getLine(), start.getCharPositionInLine());
 	}
 
 	@Override

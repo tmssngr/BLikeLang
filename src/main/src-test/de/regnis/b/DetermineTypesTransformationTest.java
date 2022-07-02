@@ -128,6 +128,33 @@ public final class DetermineTypesTransformationTest {
 			assertEquals(DetermineTypesTransformation.msgCantAssignType(2, 3, "a", BasicTypes.INT16, BasicTypes.UINT8), ex.getMessage());
 		}
 		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("int test() {\n" +
+					                                                              "u8 a = 0;\n" +
+					                                                              "int b = 0;\n" +
+					                                                              "a = a + b;\n" +
+					                                                              "return 0;\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgCantAssignType(4, 0, "a", BasicTypes.INT16, BasicTypes.UINT8), ex.getMessage());
+		}
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("i8 test() {\n" +
+					                                                              "return 128;\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgCantAssignReturnType(2, 7, BasicTypes.UINT8, BasicTypes.INT8), ex.getMessage());
+		}
+		assertEquals("", out.toString());
 	}
 
 	@Test
@@ -139,7 +166,6 @@ public final class DetermineTypesTransformationTest {
 		assertEquals("g0 : u8 = (u8) -1\n", CodePrinter.print(newRoot));
 		assertEquals(SymbolScope.msgVarIsUnused(1, 4, "a") + "\n", out.toString());
 
-
 		out = new StringStringOutput();
 		newRoot = DetermineTypesTransformation.transform(
 				AstFactory.parseString("u8 a = (u8)0;"),
@@ -147,7 +173,6 @@ public final class DetermineTypesTransformationTest {
 		assertEquals("g0 : u8 = (u8) 0\n", CodePrinter.print(newRoot));
 		assertEquals("Unnecessary cast to u8\n" +
 				             SymbolScope.msgVarIsUnused(1, 3, "a") + "\n", out.toString());
-
 
 		out = new StringStringOutput();
 		try {
