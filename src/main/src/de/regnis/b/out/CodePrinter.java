@@ -186,6 +186,15 @@ public class CodePrinter {
 				output.print(node.var);
 				return node;
 			}
+
+			@Override
+			public Object visitTypeCast(TypeCast node) {
+				output.print("(");
+				output.print(node.typeName);
+				output.print(") ");
+				print(node.expression, output);
+				return node;
+			}
 		});
 	}
 

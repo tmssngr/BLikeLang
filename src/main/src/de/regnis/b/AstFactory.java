@@ -226,6 +226,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		return new VarRead(ctx.var.getText(), ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
+	@Override
+	public TypeCast visitTypeCast(BLikeLangParser.TypeCastContext ctx) {
+		final String typeName = ctx.type.getText();
+		final Expression expression = (Expression) visit(ctx.expression());
+		return new TypeCast(typeName, expression);
+	}
+
 	// Utils ==================================================================
 
 	private static DeclarationList parse(CharStream charStream) {

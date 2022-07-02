@@ -29,5 +29,10 @@ public class CodePrinterTest {
 												                                             .createMultiply(new VarRead("x"),
 												                                                             new VarRead("x"))))))
 		                    ));
+		Assert.assertEquals("a := (u8) -1\n",
+		                    CodePrinter.print(new DeclarationList()
+				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
+				                                                                                       new TypeCast("u8",
+				                                                                                                    new NumberLiteral(-1)))))));
 	}
 }

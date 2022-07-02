@@ -262,6 +262,11 @@ public final class DetermineTypesTransformation {
 			public Expression visitVarRead(VarRead node) {
 				return DetermineTypesTransformation.this.visitVarRead(node);
 			}
+
+			@Override
+			public Expression visitTypeCast(TypeCast node) {
+				return DetermineTypesTransformation.this.visitTypeCast(node);
+			}
 		});
 	}
 
@@ -330,5 +335,16 @@ public final class DetermineTypesTransformation {
 	private VarRead visitVarRead(VarRead node) {
 		final SymbolScope.Variable typeName = symbolMap.variableRead(node.var);
 		return new VarRead(typeName.type, typeName.newName);
+	}
+
+	private TypeCast visitTypeCast(TypeCast node) {
+		final Expression newExpression = visitExpression(node.expression);
+		final Type expressionType = newExpression.getType();
+		final Type type = BasicTypes.getType(node.typeName, false);
+		if (expressionType == type || BasicTypes.canBeAssignedFrom(type, expressionType)) {
+			warningOutput.print("Unnecessary cast to " + type);
+			warningOutput.println();
+		}
+		return new TypeCast(type, newExpression);
 	}
 }

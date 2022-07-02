@@ -131,6 +131,36 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
+	public void testTypeCast() {
+		StringOutput out = new StringStringOutput();
+		DeclarationList newRoot = DetermineTypesTransformation.transform(
+				AstFactory.parseString("var a = (u8)-1;"),
+				out);
+		assertEquals("g0 : u8 = (u8) -1\n", CodePrinter.print(newRoot));
+		assertEquals(SymbolScope.msgVarIsUnused(1, 4, "a") + "\n", out.toString());
+
+
+		out = new StringStringOutput();
+		newRoot = DetermineTypesTransformation.transform(
+				AstFactory.parseString("u8 a = (u8)0;"),
+				out);
+		assertEquals("g0 : u8 = (u8) 0\n", CodePrinter.print(newRoot));
+		assertEquals("Unnecessary cast to u8\n" +
+				             SymbolScope.msgVarIsUnused(1, 3, "a") + "\n", out.toString());
+
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("var a = (Foo)0;"), out);
+			fail();
+		}
+		catch (BasicTypes.UnsupportedTypeException e) {
+			assertEquals("Foo", e.getMessage());
+		}
+		assertEquals("", out.toString());
+	}
+
+	@Test
 	public void testVarHidesParameter() {
 		DeclarationList rootAst = AstFactory.parseString("int func(int a) {\n" +
 				                                                 "var a = 0;\n" +

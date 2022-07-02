@@ -27,6 +27,7 @@ expression: value=Number                                                 #number
           |                 ParenOpen expression ParenClose              #expressionInParenthesis
           | left=expression operator=Multiply     right=expression       #binaryExpressionPoint
           | left=expression operator=(Plus|Minus) right=expression       #binaryExpressionDash
+          | ParenOpen type=Identifier ParenClose expression              #typeCast
           ;
 
 functionCallParameters: expression?
