@@ -64,7 +64,7 @@ public class TreePrinter {
 
 	public List<String> getStrings(ReturnStatement node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("return ");
+		strings.add("return");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}

@@ -32,7 +32,7 @@ public class AstFactoryTest {
 				             "|           +- literal 1\n" +
 				             "+- i16 getLength(i16 address)\n" +
 				             "   +- statementList\n" +
-				             "      +- return \n" +
+				             "      +- return\n" +
 				             "         +- literal 0\n", TreePrinter.print(AstFactory.parseString(
 				"void wom(int x) {\n" +
 						"var b = a + 1;\n" +
@@ -44,7 +44,7 @@ public class AstFactoryTest {
 				             "|  +- literal 1\n" +
 				             "+- i16 twice(i16 a)\n" +
 				             "|  +- statementList\n" +
-				             "|     +- return \n" +
+				             "|     +- return\n" +
 				             "|        +- operator *\n" +
 				             "|           +- read var a\n" +
 				             "|           +- literal 2\n" +
@@ -52,7 +52,7 @@ public class AstFactoryTest {
 				             "   +- statementList\n" +
 				             "      +- a :=\n" +
 				             "      |  +- literal 0\n" +
-				             "      +- return \n" +
+				             "      +- return\n" +
 				             "         +- read var a\n", TreePrinter.print(AstFactory.parseString(
 				"var a = 1;\n" +
 						"int twice(int a) return a * 2;\n" +
