@@ -16,6 +16,10 @@ statement: varDeclaration                         #localVarDeclaration
          | assignment                             #assignStatement
          | CurlyOpen (statement | NL)* CurlyClose #blockStatement
          | Return expression? End                 #returnStatement
+         | If expression
+             ifStatement=statement
+           (Else
+             elseStatement=statement)?            #ifStatement
          ;
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
@@ -56,6 +60,8 @@ ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
 
+Else: 'else';
+If: 'if';
 Return: 'return';
 Var: 'var';
 

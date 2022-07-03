@@ -50,6 +50,11 @@ public final class DetermineTypesTransformation {
 		return line + ":" + column + ": the call to function " + name  + " does not return any value";
 	}
 
+	@NotNull
+	public static String msgBooleanExpected(int line, int column, Type currentType) {
+		return line + ":" + column + ": a boolean expression was expected, but got " + currentType;
+	}
+
 	// Fields =================================================================
 
 	private final StringOutput warningOutput;
@@ -166,6 +171,11 @@ public final class DetermineTypesTransformation {
 			public Statement visitReturn(ReturnStatement node) {
 				return DetermineTypesTransformation.this.visitReturn(node);
 			}
+
+			@Override
+			public Statement visitIf(IfStatement node) {
+				return DetermineTypesTransformation.this.visitIf(node);
+			}
 		});
 	}
 
@@ -213,6 +223,12 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitReturn(ReturnStatement node) {
+				list.add(statement);
+				return node;
+			}
+
+			@Override
+			public Object visitIf(IfStatement node) {
 				list.add(statement);
 				return node;
 			}
@@ -391,6 +407,15 @@ public final class DetermineTypesTransformation {
 		}
 
 		return new ReturnStatement(newExpression);
+	}
+
+	private IfStatement visitIf(IfStatement node) {
+		final Expression newExpression = visitExpression(node.expression);
+		if (newExpression.getType() != BasicTypes.BOOLEAN) {
+			throw new InvalidTypeException(msgBooleanExpected(node.line, node.column, newExpression.getType()));
+		}
+
+		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
 	}
 
 	private VarRead visitVarRead(VarRead node) {

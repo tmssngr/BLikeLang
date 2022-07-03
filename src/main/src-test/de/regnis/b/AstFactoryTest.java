@@ -86,5 +86,50 @@ public class AstFactoryTest {
 						"var a = 0;\n" +
 						"return a;\n" +
 						"}")));
+		assertEquals("+- void test(i16 a)\n" +
+				             "   +- statementList\n" +
+				             "      +- if\n" +
+				             "      |  +- operator >\n" +
+				             "      |  |  +- read var a\n" +
+				             "      |  |  +- literal 0\n" +
+				             "      |  +- then\n" +
+				             "      |  |  +- a =\n" +
+				             "      |  |     +- operator -\n" +
+				             "      |  |        +- literal 0\n" +
+				             "      |  |        +- read var a\n" +
+				             "      |  +- else\n" +
+				             "      +- i :=\n" +
+				             "         +- function call print\n" +
+				             "            +- read var a\n", TreePrinter.print(AstFactory.parseString("void test(int a) {\n" +
+						                                                                                     "if (a > 0) a = 0 - a;\n" +
+						                                                                                     "var i = print(a);" +
+						                                                                                     "}")));
+		assertEquals("+- void printDigit(i16 v)\n" +
+				             "   +- statementList\n" +
+				             "      +- if\n" +
+				             "      |  +- operator >\n" +
+				             "      |  |  +- read var v\n" +
+				             "      |  |  +- literal 9\n" +
+				             "      |  +- then\n" +
+				             "      |  |  +- return\n" +
+				             "      |  +- else\n" +
+				             "      +- if\n" +
+				             "      |  +- operator <\n" +
+				             "      |  |  +- read var v\n" +
+				             "      |  |  +- literal 0\n" +
+				             "      |  +- then\n" +
+				             "      |  |  +- return\n" +
+				             "      |  +- else\n" +
+				             "      +- result :=\n" +
+				             "         +- function call print\n" +
+				             "            +- read var v\n", TreePrinter.print(AstFactory.parseString("void printDigit(int v) {\n" +
+						                                                                                     "if (v > 9) {\n" +
+						                                                                                     "return;\n" +
+						                                                                                     "}\n" +
+						                                                                                     "if (v < 0) {\n" +
+						                                                                                     "return;\n" +
+						                                                                                     "}\n" +
+						                                                                                     "var result = print(v);\n" +
+						                                                                                     "}")));
 	}
 }

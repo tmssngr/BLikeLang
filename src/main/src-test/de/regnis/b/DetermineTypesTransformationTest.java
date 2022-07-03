@@ -103,6 +103,29 @@ public final class DetermineTypesTransformationTest {
 		             CodePrinter.print(newRoot));
 		assertEquals(SymbolScope.msgParamIsUnused(1, 14, "a") + "\n" +
 				             SymbolScope.msgVarIsUnused(4, 4, "ignored") + "\n", out.toString());
+
+		rootAst = AstFactory.parseString(
+				"int max(int a, int b) {\n" +
+						"if (a > b) {\n" +
+						"return a;\n" +
+						"} else {\n" +
+						"return b;\n" +
+						"}\n" +
+						"}");
+		out = new StringStringOutput();
+		newRoot = DetermineTypesTransformation.transform(rootAst, out);
+		assertEquals("i16 max(i16 p0, i16 p1) {\n" +
+				             "  if p0 > p1\n" +
+				             "  {\n" +
+				             "    return p0\n" +
+				             "  }\n" +
+				             "  else\n" +
+				             "  {\n" +
+				             "    return p1\n" +
+				             "  }\n" +
+				             "}\n",
+		             CodePrinter.print(newRoot));
+		assertEquals("", out.toString());
 	}
 
 	@Test
@@ -253,6 +276,22 @@ public final class DetermineTypesTransformationTest {
 			assertEquals(DetermineTypesTransformation.msgFunctionDoesNotReturnAValue(5, 7, "nothing"), ex.getMessage());
 		}
 		assertEquals(SymbolScope.msgParamIsUnused(1, 17, "a") + "\n", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("int max(int a, int b) {\n" +
+					                                                              "if (1) {\n" +
+					                                                              "return a;\n" +
+					                                                              "} else {\n" +
+					                                                              "return b;\n" +
+					                                                              "}\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgBooleanExpected(2, 3, BasicTypes.UINT8), ex.getMessage());
+		}
+		assertEquals("", out.toString());
 	}
 
 	@Test

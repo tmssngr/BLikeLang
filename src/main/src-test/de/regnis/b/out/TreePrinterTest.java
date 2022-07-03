@@ -24,5 +24,20 @@ public class TreePrinterTest {
 		                            "+- literal 1"), printer.getStrings(new VarDeclaration("a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a :=",
 		                            "+- literal true"), printer.getStrings(new VarDeclaration("a", BooleanLiteral.TRUE)));
+		Assert.assertEquals(List.of("if",
+		                            "+- operator >",
+		                            "|  +- read var a",
+		                            "|  +- literal 0",
+		                            "+- then",
+		                            "|  +- b :=",
+		                            "|     +- literal 1",
+		                            "+- else",
+		                            "   +- return",
+		                            "      +- read var a"), printer.getStrings(new IfStatement(BinaryExpression.createGt(new VarRead("a"),
+		                                                                                                                 new NumberLiteral(0)),
+		                                                                                       new StatementList()
+				                                                                                       .add(new VarDeclaration("b", new NumberLiteral(1))),
+		                                                                                       new StatementList()
+				                                                                                       .add(new ReturnStatement(new VarRead("a"))))));
 	}
 }
