@@ -26,43 +26,48 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
-	public static String msgUndeclaredFunction(int line, int column, String name) {
+	public static String errorUndeclaredFunction(int line, int column, String name) {
 		return line + ":" + column + ": Call to undeclared function " + name;
 	}
 
 	@NotNull
-	public static String msgCantAssignType(int line, int column, String name, Type currentType, Type expectedType) {
+	public static String errorCantAssignType(int line, int column, String name, Type currentType, Type expectedType) {
 		return line + ":" + column + ": Variable " + name + ": Can't assign type " + currentType + " to " + expectedType;
 	}
 
 	@NotNull
-	public static String msgCantAssignReturnType(int line, int column, Type currentType, Type expectedType) {
+	public static String errorCantAssignReturnType(int line, int column, Type currentType, Type expectedType) {
 		return line + ":" + column + ": return statement: Can't assign type " + currentType + " to " + expectedType;
 	}
 
 	@NotNull
-	public static String msgNoReturnExpressionExpectedForVoid(int line, int column) {
+	public static String errorNoReturnExpressionExpectedForVoid(int line, int column) {
 		return line + ":" + column + ": return statement: no expression expected for void-method";
 	}
 
 	@NotNull
-	public static String msgReturnExpressionExpected(int line, int column, Type expectedType) {
+	public static String errorReturnExpressionExpected(int line, int column, Type expectedType) {
 		return line + ":" + column + ": return statement: expression of type " + expectedType + " expected";
 	}
 
 	@NotNull
-	public static String msgFunctionDoesNotReturnAValue(int line, int column, String name) {
+	public static String errorFunctionDoesNotReturnAValue(int line, int column, String name) {
 		return line + ":" + column + ": the call to function " + name  + " does not return any value";
 	}
 
 	@NotNull
-	public static String msgReturnValueIsIgnored(int line, int column, String name, Type functionReturnType) {
+	public static String errorBooleanExpected(int line, int column, Type currentType) {
+		return line + ":" + column + ": a boolean expression was expected, but got " + currentType;
+	}
+
+	@NotNull
+	public static String warningIgnoredReturnValue(int line, int column, String name, Type functionReturnType) {
 		return line + ":" + column + ": the call to function " + name  + " ignores its return value of type " + functionReturnType;
 	}
 
 	@NotNull
-	public static String msgBooleanExpected(int line, int column, Type currentType) {
-		return line + ":" + column + ": a boolean expression was expected, but got " + currentType;
+	public static String warningUnnecessaryCastTo(int line, int column, Type type) {
+		return line + ":" + column + ": Unnecessary cast to " + type;
 	}
 
 	// Fields =================================================================
@@ -104,22 +109,6 @@ public final class DetermineTypesTransformation {
 					return node;
 				}
 			});
-		}
-	}
-
-	public static final class Function {
-		public final Type type;
-		public final List<Type> parameterTypes;
-
-		private boolean used;
-
-		private Function(Type type, List<Type> parameterTypes) {
-			this.type = type;
-			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
-		}
-
-		public void setUsed() {
-			used = true;
 		}
 	}
 
@@ -312,7 +301,7 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		if (type != null) {
 			if (!BasicTypes.canBeAssignedFrom(type, expressionType)) {
-				throw new InvalidTypeException(msgCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
+				throw new InvalidTypeException(errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
 			}
 		}
 		else {
@@ -329,7 +318,7 @@ public final class DetermineTypesTransformation {
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new InvalidTypeException(msgCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
+			throw new InvalidTypeException(errorCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
 		}
 
 		return new Assignment(variable.newName, newExpression);
@@ -411,7 +400,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type == BasicTypes.VOID) {
-			throw new InvalidTypeException(msgFunctionDoesNotReturnAValue(node.line, node.column, node.name));
+			throw new InvalidTypeException(errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
 		}
 
 		return new FuncCall(function.type, node.name, newParameters);
@@ -423,7 +412,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type != BasicTypes.VOID) {
-			warningOutput.print(msgReturnValueIsIgnored(node.line, node.column, node.name, function.type));
+			warningOutput.print(warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
 			warningOutput.println();
 		}
 
@@ -441,7 +430,7 @@ public final class DetermineTypesTransformation {
 
 		final Function function = functions.get(name);
 		if (function == null) {
-			throw new UndeclaredException(msgUndeclaredFunction(line, column, name));
+			throw new UndeclaredException(errorUndeclaredFunction(line, column, name));
 		}
 
 		function.setUsed();
@@ -468,19 +457,19 @@ public final class DetermineTypesTransformation {
 
 		if (functionReturnType == BasicTypes.VOID) {
 			if (node.expression != null) {
-				throw new InvalidTypeException(msgNoReturnExpressionExpectedForVoid(node.line, node.column));
+				throw new InvalidTypeException(errorNoReturnExpressionExpectedForVoid(node.line, node.column));
 			}
 			return node;
 		}
 
 		if (node.expression == null) {
-			throw new InvalidTypeException(msgReturnExpressionExpected(node.line, node.column, functionReturnType));
+			throw new InvalidTypeException(errorReturnExpressionExpected(node.line, node.column, functionReturnType));
 		}
 
 		final Expression newExpression = visitExpression(node.expression);
 
 		if (!BasicTypes.canBeAssignedFrom(functionReturnType, newExpression.getType())) {
-			throw new InvalidTypeException(msgCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
+			throw new InvalidTypeException(errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
 		}
 
 		return new ReturnStatement(newExpression);
@@ -489,7 +478,7 @@ public final class DetermineTypesTransformation {
 	private IfStatement visitIf(IfStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
 		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new InvalidTypeException(msgBooleanExpected(node.line, node.column, newExpression.getType()));
+			throw new InvalidTypeException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
 		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
@@ -505,10 +494,28 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		final Type type = BasicTypes.getType(node.typeName, false);
 		if (expressionType == type || BasicTypes.canBeAssignedFrom(type, expressionType)) {
-			warningOutput.print("Unnecessary cast to " + type);
+			warningOutput.print(warningUnnecessaryCastTo(node.line, node.column, type));
 			warningOutput.println();
 		}
 		return new TypeCast(type, newExpression);
+	}
+
+	// Inner Classes ==========================================================
+
+	public static final class Function {
+		public final Type type;
+		public final List<Type> parameterTypes;
+
+		private boolean used;
+
+		private Function(Type type, List<Type> parameterTypes) {
+			this.type = type;
+			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
+		}
+
+		public void setUsed() {
+			used = true;
+		}
 	}
 
 	public static final class UndeclaredException extends RuntimeException {
