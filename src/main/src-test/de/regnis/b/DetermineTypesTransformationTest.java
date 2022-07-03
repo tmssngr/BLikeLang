@@ -19,6 +19,63 @@ public final class DetermineTypesTransformationTest {
 	// Accessing ==============================================================
 
 	@Test
+	public void testDeclaredFunctions() {
+		StringOutput out = new StringStringOutput();
+		DeclarationList newRoot = DetermineTypesTransformation.transform(
+				AstFactory.parseString("void init() {\n" +
+						                       "}\n" +
+						                       "void main() {\n" +
+						                       "init();\n" +
+						                       "}"
+				), out);
+		assertEquals("void init() {\n" +
+				             "}\n" +
+				             "void main() {\n" +
+				             "  init()\n" +
+				             "}\n", CodePrinter.print(newRoot));
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		newRoot = DetermineTypesTransformation.transform(
+				AstFactory.parseString("void main() {\n" +
+						                       "init();\n" +
+						                       "}\n" +
+						                       "void init() {\n" +
+						                       "}"),
+				out);
+		assertEquals("void main() {\n" +
+				             "  init()\n" +
+				             "}\n" +
+				             "void init() {\n" +
+				             "}\n", CodePrinter.print(newRoot));
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("void main() {\n" +
+									                       "init();\n" +
+									                       "}"), out);
+			fail();
+		}
+		catch (DetermineTypesTransformation.UndeclaredException e) {
+			assertEquals(DetermineTypesTransformation.msgUndeclaredFunction(2, 0, "init"), e.getMessage());
+		}
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("void main() {\n" +
+									                       "var foo = init();\n" +
+									                       "}"), out);
+			fail();
+		}
+		catch (DetermineTypesTransformation.UndeclaredException e) {
+			assertEquals(DetermineTypesTransformation.msgUndeclaredFunction(2, 10, "init"), e.getMessage());
+		}
+		assertEquals("", out.toString());
+	}
+
+	@Test
 	public void testGlobalVars() {
 		final DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
 				                                                       "var A = -1;\n" +
@@ -131,10 +188,10 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testCall() {
 		final DeclarationList rootAst = AstFactory.parseString("int one() return 1;\n" +
-				                                                 "int zero() {\n" +
-				                                                 "one();\n" +
-				                                                 "return 0;\n" +
-				                                                 "}");
+				                                                       "int zero() {\n" +
+				                                                       "one();\n" +
+				                                                       "return 0;\n" +
+				                                                       "}");
 		final StringOutput out = new StringStringOutput();
 		final DeclarationList newRoot = DetermineTypesTransformation.transform(rootAst, out);
 		assertEquals("i16 one() {\n" +

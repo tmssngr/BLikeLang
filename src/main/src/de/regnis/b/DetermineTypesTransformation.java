@@ -5,8 +5,7 @@ import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Thomas Singer
@@ -21,8 +20,14 @@ public final class DetermineTypesTransformation {
 	 */
 	@NotNull
 	public static DeclarationList transform(DeclarationList root, StringOutput warningOutput) {
-		final DetermineTypesTransformation determineTypes = new DetermineTypesTransformation(warningOutput);
-		return determineTypes.visitDeclarationList(root);
+		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
+		transformation.determineFunctions(root);
+		return transformation.visitDeclarationList(root);
+	}
+
+	@NotNull
+	public static String msgUndeclaredFunction(int line, int column, String name) {
+		return line + ":" + column + ": Call to undeclared function " + name;
 	}
 
 	@NotNull
@@ -62,6 +67,7 @@ public final class DetermineTypesTransformation {
 
 	// Fields =================================================================
 
+	private final Map<String, Function> functions = new HashMap<>();
 	private final StringOutput warningOutput;
 
 	private int globalVarCount;
@@ -77,6 +83,46 @@ public final class DetermineTypesTransformation {
 	}
 
 	// Utils ==================================================================
+
+	private void determineFunctions(DeclarationList root) {
+		for (Declaration declaration : root.getDeclarations()) {
+			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					return node;
+				}
+
+				@Override
+				public Object visitFunctionDeclaration(FuncDeclaration node) {
+					final List<Type> parameterTypes = getParameterTypes(node);
+					if (functions.containsKey(node.name)) {
+						throw new SymbolScope.AlreadyDefinedException(node.name);
+					}
+
+					functions.put(node.name, new Function(node.type, parameterTypes));
+
+					return node;
+				}
+			});
+		}
+	}
+
+	public static final class Function {
+		public final Type type;
+		public final List<Type> parameterTypes;
+
+		private boolean used;
+
+		private Function(Type type, List<Type> parameterTypes) {
+			this.type = type;
+			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
+		}
+
+		public void setUsed() {
+			used = true;
+		}
+	}
+
 
 	private DeclarationList visitDeclarationList(DeclarationList root) {
 		final DeclarationList newRoot = new DeclarationList();
@@ -109,10 +155,6 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Declaration visitFunctionDeclaration(FuncDeclaration node) {
-		final List<Type> parameterTypes = getParameterTypes(node);
-
-		symbolMap.declareFunction(node.name, node.type, parameterTypes);
-
 		final SymbolScope outerSymbolMap = symbolMap;
 		functionReturnType = node.type;
 		symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
@@ -366,7 +408,7 @@ public final class DetermineTypesTransformation {
 	private FuncCall visitFunctionCall(FuncCall node) {
 		final FuncCallParameters newParameters = new FuncCallParameters();
 
-		final SymbolScope.Function function = handleCall(node.name, node.getParameters(), newParameters);
+		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type == BasicTypes.VOID) {
 			throw new InvalidTypeException(msgFunctionDoesNotReturnAValue(node.line, node.column, node.name));
@@ -378,7 +420,7 @@ public final class DetermineTypesTransformation {
 	private CallStatement visitCall(CallStatement node) {
 		final FuncCallParameters newParameters = new FuncCallParameters();
 
-		final SymbolScope.Function function = handleCall(node.name, node.getParameters(), newParameters);
+		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type != BasicTypes.VOID) {
 			warningOutput.print(msgReturnValueIsIgnored(node.line, node.column, node.name, function.type));
@@ -389,7 +431,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
-	private SymbolScope.Function handleCall(String name, List<Expression> parameters, FuncCallParameters newParameters) {
+	private Function handleCall(String name, List<Expression> parameters, int line, int column, FuncCallParameters newParameters) {
 		final List<Expression> expressions = new ArrayList<>();
 		for (Expression expression : parameters) {
 			final Expression newExpression = visitExpression(expression);
@@ -397,7 +439,13 @@ public final class DetermineTypesTransformation {
 			newParameters.add(newExpression);
 		}
 
-		final SymbolScope.Function function = symbolMap.getFunction(name);
+		final Function function = functions.get(name);
+		if (function == null) {
+			throw new UndeclaredException(msgUndeclaredFunction(line, column, name));
+		}
+
+		function.setUsed();
+
 		final List<Type> parameterTypes = function.parameterTypes;
 		if (expressions.size() != parameterTypes.size()) {
 			throw new InvalidTypeException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
@@ -461,5 +509,11 @@ public final class DetermineTypesTransformation {
 			warningOutput.println();
 		}
 		return new TypeCast(type, newExpression);
+	}
+
+	public static final class UndeclaredException extends RuntimeException {
+		public UndeclaredException(String message) {
+			super(message);
+		}
 	}
 }

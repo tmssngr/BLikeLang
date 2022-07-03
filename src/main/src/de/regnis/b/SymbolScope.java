@@ -5,9 +5,7 @@ import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,7 +42,6 @@ public final class SymbolScope {
 	// Fields =================================================================
 
 	private final Map<String, Variable> variables = new HashMap<>();
-	private final Map<String, Function> functions = new HashMap<>();
 	private final SymbolScope parentScope;
 	private final ScopeKind scopeKind;
 
@@ -74,24 +71,12 @@ public final class SymbolScope {
 		variables.put(name, new Variable(newName, type, line, column));
 	}
 
-	public void declareFunction(@NotNull String name, @NotNull Type type, @NotNull List<Type> parameterTypes) {
-		if (scopeKind != ScopeKind.Global) {
-			throw new UnsupportedOperationException("functions only are allowed for the global scope");
-		}
-
-		if (functions.containsKey(name)) {
-			throw new AlreadyDefinedException(name);
-		}
-
-		functions.put(name, new Function(type, parameterTypes));
-	}
-
 	public SymbolScope createChildMap(ScopeKind scopeKind) {
 		return new SymbolScope(this, scopeKind);
 	}
 
 	/**
-	 * @throws UndeclaredException
+	 * @throws DetermineTypesTransformation.UndeclaredException
 	 */
 	@NotNull
 	public Variable variableRead(@NotNull String name) {
@@ -105,17 +90,7 @@ public final class SymbolScope {
 
 			scope = scope.parentScope;
 		}
-		throw new UndeclaredException(name);
-	}
-
-	@NotNull
-	public Function getFunction(@NotNull String name) {
-		final SymbolScope rootScope = getRootScope();
-		final Function function = rootScope.functions.get(name);
-		if (function == null) {
-			throw new UndeclaredException(name);
-		}
-		return function;
+		throw new DetermineTypesTransformation.UndeclaredException(name);
 	}
 
 	public void reportUnusedVariables(@NotNull StringOutput output) {
@@ -166,24 +141,8 @@ public final class SymbolScope {
 		}
 	}
 
-	public static final class Function {
-		public final Type type;
-		public final List<Type> parameterTypes;
-
-		private Function(Type type, List<Type> parameterTypes) {
-			this.type = type;
-			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
-		}
-	}
-
 	public static final class AlreadyDefinedException extends RuntimeException {
 		public AlreadyDefinedException(String message) {
-			super(message);
-		}
-	}
-
-	public static final class UndeclaredException extends RuntimeException {
-		public UndeclaredException(String message) {
 			super(message);
 		}
 	}
