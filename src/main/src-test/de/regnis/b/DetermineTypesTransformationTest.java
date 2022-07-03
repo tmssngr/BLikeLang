@@ -129,6 +129,25 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
+	public void testCall() {
+		final DeclarationList rootAst = AstFactory.parseString("int one() return 1;\n" +
+				                                                 "int zero() {\n" +
+				                                                 "one();\n" +
+				                                                 "return 0;\n" +
+				                                                 "}");
+		final StringOutput out = new StringStringOutput();
+		final DeclarationList newRoot = DetermineTypesTransformation.transform(rootAst, out);
+		assertEquals("i16 one() {\n" +
+				             "  return 1\n" +
+				             "}\n" +
+				             "i16 zero() {\n" +
+				             "  one()\n" +
+				             "  return 0\n" +
+				             "}\n", CodePrinter.print(newRoot));
+		assertEquals(DetermineTypesTransformation.msgReturnValueIsIgnored(3, 0, "one", BasicTypes.INT16) + "\n", out.toString());
+	}
+
+	@Test
 	public void testValidDuplicateDeclarations() {
 		DeclarationList rootAst = AstFactory.parseString("var a = 1;\n" +
 				                                                 "int twice(int a, int b) return a * 2;\n" +

@@ -54,6 +54,10 @@ public abstract class AbstractTransformation<H> {
 		return node.derive(expression);
 	}
 
+	protected Statement handleCall(CallStatement node, H helper) {
+		return node;
+	}
+
 	protected Statement handleReturn(ReturnStatement node, H helper) {
 		if (node.expression == null) {
 			return node;
@@ -100,6 +104,11 @@ public abstract class AbstractTransformation<H> {
 				@Override
 				public Statement visitLocalVarDeclaration(VarDeclaration node) {
 					return handleVarDeclaration(node, helper);
+				}
+
+				@Override
+				public Statement visitCall(CallStatement node) {
+					return handleCall(node, helper);
 				}
 
 				@Override

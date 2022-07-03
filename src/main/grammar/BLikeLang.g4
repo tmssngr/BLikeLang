@@ -14,6 +14,7 @@ parameterDeclaration: type=Identifier name=Identifier;
 
 statement: varDeclaration                         #localVarDeclaration
          | assignment                             #assignStatement
+         | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
          | CurlyOpen (statement | NL)* CurlyClose #blockStatement
          | Return expression? End                 #returnStatement
          | If expression
