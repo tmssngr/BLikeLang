@@ -138,9 +138,13 @@ public class CodePrinter {
 	private void print(ReturnStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		output.print("return ");
+		output.print("return");
 
-		print(node.expression, output);
+		if (node.expression != null) {
+			output.print(" ");
+
+			print(node.expression, output);
+		}
 
 		output.println();
 	}

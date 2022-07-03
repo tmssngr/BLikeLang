@@ -84,6 +84,25 @@ public final class DetermineTypesTransformationTest {
 				             "}\n",
 		             CodePrinter.print(newRoot));
 		assertEquals("", out.toString());
+
+		rootAst = AstFactory.parseString(
+				"int print(int a) {\n" +
+						"}\n" + // TODO tricky, needs to be handled later
+						"void anotherPrint(int a) {\n" +
+						"var ignored = print(a);\n" +
+						"return;\n" +
+						"}");
+		out = new StringStringOutput();
+		newRoot = DetermineTypesTransformation.transform(rootAst, out);
+		assertEquals("i16 print(i16 p0) {\n" +
+				             "}\n" +
+				             "void anotherPrint(i16 p0) {\n" +
+				             "  v0 : i16 = print(p0)\n" +
+				             "  return\n" +
+				             "}\n",
+		             CodePrinter.print(newRoot));
+		assertEquals(SymbolScope.msgParamIsUnused(1, 14, "a") + "\n" +
+				             SymbolScope.msgVarIsUnused(4, 4, "ignored") + "\n", out.toString());
 	}
 
 	@Test
@@ -193,6 +212,30 @@ public final class DetermineTypesTransformationTest {
 		}
 		catch (InvalidTypeException ex) {
 			assertEquals(DetermineTypesTransformation.msgCantAssignReturnType(2, 7, BasicTypes.UINT8, BasicTypes.INT8), ex.getMessage());
+		}
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("void test() {\n" +
+					                                                              "return 128;\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgNoReturnExpressionExpectedForVoid(2, 7), ex.getMessage());
+		}
+		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("int test() {\n" +
+					                                                              "return;\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgReturnExpressionExpected(2, 0, BasicTypes.INT16), ex.getMessage());
 		}
 		assertEquals("", out.toString());
 	}

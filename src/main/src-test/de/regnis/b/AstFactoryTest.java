@@ -56,6 +56,16 @@ public class AstFactoryTest {
 						"int getLength(int address) {\n" +
 						"return 0; // just for now\n" +
 						"}")));
+		assertEquals("+- void println()\n" +
+				             "   +- statementList\n" +
+				             "      +- ignored :=\n" +
+				             "      |  +- function call print\n" +
+				             "      |     +- literal 10\n" +
+				             "      +- return\n", TreePrinter.print(AstFactory.parseString(
+				"void println() {\n" +
+						"var ignored = print(10);\n" +
+						"return;\n" +
+						"}")));
 		assertEquals("+- a :=\n" +
 				             "|  +- literal 1\n" +
 				             "+- i16 twice(i16 a)\n" +
