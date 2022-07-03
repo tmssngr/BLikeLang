@@ -3,6 +3,8 @@ package de.regnis.b.out;
 import de.regnis.b.node.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * @author Thomas Singer
  */
@@ -99,6 +101,12 @@ public class CodePrinter {
 			}
 
 			@Override
+			public Object visitCall(CallStatement node) {
+				print(node, indentation, output);
+				return node;
+			}
+
+			@Override
 			public Object visitReturn(ReturnStatement node) {
 				print(node, indentation, output);
 				return node;
@@ -137,6 +145,14 @@ public class CodePrinter {
 		output.print(" = ");
 
 		print(node.expression, output);
+
+		output.println();
+	}
+
+	private void print(CallStatement node, int indentation, StringOutput output) {
+		printIndentation(indentation, output);
+
+		handleCall(node.name, node.getParameters(), output);
 
 		output.println();
 	}
@@ -184,19 +200,7 @@ public class CodePrinter {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				output.print(node.name);
-				output.print("(");
-				boolean isFirst = true;
-				for (Expression expressionNode : node.getParameters()) {
-					if (isFirst) {
-						isFirst = false;
-					}
-					else {
-						output.print(", ");
-					}
-					print(expressionNode, output);
-				}
-				output.print(")");
+				handleCall(node.name, node.getParameters(), output);
 				return node;
 			}
 
@@ -227,6 +231,22 @@ public class CodePrinter {
 				return node;
 			}
 		});
+	}
+
+	private void handleCall(String name, List<Expression> parameters, StringOutput output) {
+		output.print(name);
+		output.print("(");
+		boolean isFirst = true;
+		for (Expression expressionNode : parameters) {
+			if (isFirst) {
+				isFirst = false;
+			}
+			else {
+				output.print(", ");
+			}
+			print(expressionNode, output);
+		}
+		output.print(")");
 	}
 
 	private void printIndentation(int indentation, StringOutput output) {

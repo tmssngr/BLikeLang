@@ -51,6 +51,11 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
+	public static String msgReturnValueIsIgnored(int line, int column, String name, Type functionReturnType) {
+		return line + ":" + column + ": the call to function " + name  + " ignores its return value of type " + functionReturnType;
+	}
+
+	@NotNull
 	public static String msgBooleanExpected(int line, int column, Type currentType) {
 		return line + ":" + column + ": a boolean expression was expected, but got " + currentType;
 	}
@@ -168,6 +173,11 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
+			public Statement visitCall(CallStatement node) {
+				return DetermineTypesTransformation.this.visitCall(node);
+			}
+
+			@Override
 			public Statement visitReturn(ReturnStatement node) {
 				return DetermineTypesTransformation.this.visitReturn(node);
 			}
@@ -217,6 +227,12 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
+				list.add(statement);
+				return node;
+			}
+
+			@Override
+			public Object visitCall(CallStatement node) {
 				list.add(statement);
 				return node;
 			}
@@ -357,6 +373,19 @@ public final class DetermineTypesTransformation {
 		}
 
 		return new FuncCall(function.type, node.name, newParameters);
+	}
+
+	private CallStatement visitCall(CallStatement node) {
+		final FuncCallParameters newParameters = new FuncCallParameters();
+
+		final SymbolScope.Function function = handleCall(node.name, node.getParameters(), newParameters);
+
+		if (function.type != BasicTypes.VOID) {
+			warningOutput.print(msgReturnValueIsIgnored(node.line, node.column, node.name, function.type));
+			warningOutput.println();
+		}
+
+		return new CallStatement(node.name, newParameters);
 	}
 
 	@NotNull

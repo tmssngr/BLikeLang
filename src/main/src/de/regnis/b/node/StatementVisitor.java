@@ -10,6 +10,8 @@ public interface StatementVisitor<O> {
 
 	O visitLocalVarDeclaration(VarDeclaration node);
 
+	O visitCall(CallStatement node);
+
 	O visitReturn(ReturnStatement node);
 
 	O visitIf(IfStatement node);

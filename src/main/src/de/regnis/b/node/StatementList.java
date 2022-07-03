@@ -11,8 +11,6 @@ import java.util.List;
  */
 public final class StatementList extends Statement {
 
-	// Static =================================================================
-
 	// Fields =================================================================
 
 	private final List<Statement> statementList = new ArrayList<>();

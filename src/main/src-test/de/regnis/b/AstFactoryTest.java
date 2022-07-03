@@ -131,5 +131,11 @@ public class AstFactoryTest {
 						                                                                                     "}\n" +
 						                                                                                     "var result = print(v);\n" +
 						                                                                                     "}")));
+		assertEquals("+- void printNL()\n" +
+				             "   +- statementList\n" +
+				             "      +- call print\n" +
+				             "         +- literal 10\n", TreePrinter.print(AstFactory.parseString("void printNL() {\n" +
+				                                                          "print(10);\n" +
+				                                                          "}")));
 	}
 }
