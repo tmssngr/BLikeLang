@@ -55,6 +55,10 @@ public abstract class AbstractTransformation<H> {
 	}
 
 	protected Statement handleReturn(ReturnStatement node, H helper) {
+		if (node.expression == null) {
+			return node;
+		}
+
 		final Expression expression = handleExpression(node.expression, helper);
 		return new ReturnStatement(expression);
 	}

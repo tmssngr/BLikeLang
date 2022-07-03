@@ -35,6 +35,16 @@ public final class DetermineTypesTransformation {
 		return line + ":" + column + ": return statement: Can't assign type " + currentType + " to " + expectedType;
 	}
 
+	@NotNull
+	public static String msgNoReturnExpressionExpectedForVoid(int line, int column) {
+		return line + ":" + column + ": return statement: no expression expected for void-method";
+	}
+
+	@NotNull
+	public static String msgReturnExpressionExpected(int line, int column, Type expectedType) {
+		return line + ":" + column + ": return statement: expression of type " + expectedType + " expected";
+	}
+
 	// Fields =================================================================
 
 	private final StringOutput warningOutput;
@@ -345,6 +355,17 @@ public final class DetermineTypesTransformation {
 	private ReturnStatement visitReturn(ReturnStatement node) {
 		if (functionReturnType == null) {
 			throw new IllegalStateException("Missing function return type");
+		}
+
+		if (functionReturnType == BasicTypes.VOID) {
+			if (node.expression != null) {
+				throw new InvalidTypeException(msgNoReturnExpressionExpectedForVoid(node.line, node.column));
+			}
+			return node;
+		}
+
+		if (node.expression == null) {
+			throw new InvalidTypeException(msgReturnExpressionExpected(node.line, node.column, functionReturnType));
 		}
 
 		final Expression newExpression = visitExpression(node.expression);

@@ -1,5 +1,7 @@
 package de.regnis.b.node;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author Thomas Singer
  */
@@ -7,17 +9,18 @@ public final class ReturnStatement extends Statement {
 
 	// Fields =================================================================
 
+	@Nullable
 	public final Expression expression;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public ReturnStatement(Expression expression) {
+	public ReturnStatement(@Nullable Expression expression) {
 		this(expression, -1, -1);
 	}
 
-	public ReturnStatement(Expression expression, int line, int column) {
+	public ReturnStatement(@Nullable Expression expression, int line, int column) {
 		this.expression = expression;
 		this.line = line;
 		this.column = column;
