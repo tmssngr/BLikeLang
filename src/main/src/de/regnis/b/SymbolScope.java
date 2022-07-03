@@ -30,12 +30,12 @@ public final class SymbolScope {
 	}
 
 	@NotNull
-	public static String msgVarIsUnused(int line, int column, String name) {
+	public static String warningUnusedVar(int line, int column, String name) {
 		return line + ":" + column + ": Variable " + name + " is unused";
 	}
 
 	@NotNull
-	public static String msgParamIsUnused(int line, int column, String name) {
+	public static String warningUnusedParameter(int line, int column, String name) {
 		return line + ":" + column + ": Parameter " + name + " is unused";
 	}
 
@@ -101,8 +101,8 @@ public final class SymbolScope {
 				final int line = variable.line;
 				final int column = variable.column;
 				output.print(scopeKind == ScopeKind.Parameter
-						             ? msgParamIsUnused(line, column, name)
-						             : msgVarIsUnused(line, column, name));
+						             ? warningUnusedParameter(line, column, name)
+						             : warningUnusedVar(line, column, name));
 				output.println();
 			}
 		}

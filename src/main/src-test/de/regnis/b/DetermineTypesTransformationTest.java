@@ -48,12 +48,12 @@ public final class DetermineTypesTransformationTest {
 				                              "void init() {\n" +
 				                              "}");
 
-		assertUndeclaredException(DetermineTypesTransformation.msgUndeclaredFunction(2, 0, "init"),
+		assertUndeclaredException(DetermineTypesTransformation.errorUndeclaredFunction(2, 0, "init"),
 		                          NO_WARNING,
 		                          "void main() {\n" +
 				                          "init();\n" +
 				                          "}");
-		assertUndeclaredException(DetermineTypesTransformation.msgUndeclaredFunction(2, 10, "init"),
+		assertUndeclaredException(DetermineTypesTransformation.errorUndeclaredFunction(2, 10, "init"),
 		                          NO_WARNING,
 		                          "void main() {\n" +
 				                          "var foo = init();\n" +
@@ -66,8 +66,8 @@ public final class DetermineTypesTransformationTest {
 				                              "g1 : i8 = -1\n" +
 				                              "g2 : i8 = g0 + g1\n" +
 				                              "g3 : boolean = false\n",
-		                              SymbolScope.msgVarIsUnused(3, 4, "b") + "\n" +
-				                              SymbolScope.msgVarIsUnused(4, 4, "booF") + "\n",
+		                              SymbolScope.warningUnusedVar(3, 4, "b") + "\n" +
+				                              SymbolScope.warningUnusedVar(4, 4, "booF") + "\n",
 		                              "var a = 1;\n" +
 				                              "var A = -1;\n" +
 				                              "var b=a+A;\n" +
@@ -119,8 +119,8 @@ public final class DetermineTypesTransformationTest {
 				                              "  v0 : i16 = print(p0)\n" +
 				                              "  return\n" +
 				                              "}\n",
-		                              SymbolScope.msgParamIsUnused(1, 14, "a") + "\n" +
-				                              SymbolScope.msgVarIsUnused(4, 4, "ignored") + "\n",
+		                              SymbolScope.warningUnusedParameter(1, 14, "a") + "\n" +
+				                              SymbolScope.warningUnusedVar(4, 4, "ignored") + "\n",
 		                              "int print(int a) {\n" +
 				                              "}\n" + // TODO tricky, needs to be handled later
 				                              "void anotherPrint(int a) {\n" +
@@ -157,7 +157,7 @@ public final class DetermineTypesTransformationTest {
 				                              "  one()\n" +
 				                              "  return 0\n" +
 				                              "}\n",
-		                              DetermineTypesTransformation.msgReturnValueIsIgnored(3, 0, "one", BasicTypes.INT16) + "\n",
+		                              DetermineTypesTransformation.warningIgnoredReturnValue(3, 0, "one", BasicTypes.INT16) + "\n",
 		                              "int one() return 1;\n" +
 				                              "int zero() {\n" +
 				                              "one();\n" +
@@ -175,8 +175,8 @@ public final class DetermineTypesTransformationTest {
 				                              "  v0 : u8 = 0\n" +
 				                              "  return v0\n" +
 				                              "}\n",
-		                              SymbolScope.msgParamIsUnused(2, 21, "b") + "\n" +
-				                              SymbolScope.msgVarIsUnused(1, 4, "a") + "\n",
+		                              SymbolScope.warningUnusedParameter(2, 21, "b") + "\n" +
+				                              SymbolScope.warningUnusedVar(1, 4, "a") + "\n",
 		                              "var a = 1;\n" +
 				                              "int twice(int a, int b) return a * 2;\n" +
 				                              "int zero() {\n" +
@@ -195,8 +195,8 @@ public final class DetermineTypesTransformationTest {
 				                              "  v2 : u8 = 0\n" +
 				                              "  return v2\n" +
 				                              "}\n",
-		                              SymbolScope.msgParamIsUnused(2, 21, "b") + "\n" +
-				                              SymbolScope.msgVarIsUnused(1, 4, "a") + "\n",
+		                              SymbolScope.warningUnusedParameter(2, 21, "b") + "\n" +
+				                              SymbolScope.warningUnusedVar(1, 4, "a") + "\n",
 		                              "var a = 1;\n" +
 				                              "int twice(int a, int b) return a * 2;\n" +
 				                              "int zero() {\n" +
@@ -216,17 +216,17 @@ public final class DetermineTypesTransformationTest {
 		                               NO_WARNING,
 		                               "foobar a = 0;");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgCantAssignType(1, 3, "a", BasicTypes.INT8, BasicTypes.UINT8),
+		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(1, 3, "a", BasicTypes.INT8, BasicTypes.UINT8),
 		                           NO_WARNING,
 		                           "u8 a = -1;");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgCantAssignType(2, 3, "a", BasicTypes.INT16, BasicTypes.UINT8),
+		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(2, 3, "a", BasicTypes.INT16, BasicTypes.UINT8),
 		                           NO_WARNING,
 		                           "int test() {\n" +
 				                           "u8 a = 256;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgCantAssignType(4, 0, "a", BasicTypes.INT16, BasicTypes.UINT8),
+		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(4, 0, "a", BasicTypes.INT16, BasicTypes.UINT8),
 		                           NO_WARNING,
 		                           "int test() {\n" +
 				                           "u8 a = 0;\n" +
@@ -235,26 +235,26 @@ public final class DetermineTypesTransformationTest {
 				                           "return 0;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgCantAssignReturnType(2, 7, BasicTypes.UINT8, BasicTypes.INT8),
+		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignReturnType(2, 7, BasicTypes.UINT8, BasicTypes.INT8),
 		                           NO_WARNING,
 		                           "i8 test() {\n" +
 				                           "return 128;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgNoReturnExpressionExpectedForVoid(2, 7),
+		assertInvalidTypeException(DetermineTypesTransformation.errorNoReturnExpressionExpectedForVoid(2, 7),
 		                           NO_WARNING,
 		                           "void test() {\n" +
 				                           "return 128;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgReturnExpressionExpected(2, 0, BasicTypes.INT16),
+		assertInvalidTypeException(DetermineTypesTransformation.errorReturnExpressionExpected(2, 0, BasicTypes.INT16),
 		                           NO_WARNING,
 		                           "int test() {\n" +
 				                           "return;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgFunctionDoesNotReturnAValue(5, 7, "nothing"),
-		                           SymbolScope.msgParamIsUnused(1, 17, "a") + "\n",
+		assertInvalidTypeException(DetermineTypesTransformation.errorFunctionDoesNotReturnAValue(5, 7, "nothing"),
+		                           SymbolScope.warningUnusedParameter(1, 17, "a") + "\n",
 		                           "void nothing(int a) {\n" +
 				                           "return;\n" +
 				                           "}\n" +
@@ -262,8 +262,9 @@ public final class DetermineTypesTransformationTest {
 				                           "return nothing(1) + 2;\n" +
 				                           "}");
 
-		assertInvalidTypeException(DetermineTypesTransformation.msgBooleanExpected(2, 3, BasicTypes.UINT8),
-		                           NO_WARNING, "int max(int a, int b) {\n" +
+		assertInvalidTypeException(DetermineTypesTransformation.errorBooleanExpected(2, 3, BasicTypes.UINT8),
+		                           NO_WARNING,
+		                           "int max(int a, int b) {\n" +
 				                           "if (1) {\n" +
 				                           "return a;\n" +
 				                           "} else {\n" +
@@ -275,12 +276,12 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testTypeCast() {
 		assertSuccessfullyTransformed("g0 : u8 = (u8) -1\n",
-		                              SymbolScope.msgVarIsUnused(1, 4, "a") + "\n",
+		                              SymbolScope.warningUnusedVar(1, 4, "a") + "\n",
 		                              "var a = (u8)-1;");
 
 		assertSuccessfullyTransformed("g0 : u8 = (u8) 0\n",
-		                              "Unnecessary cast to u8\n" +
-				                              SymbolScope.msgVarIsUnused(1, 3, "a") + "\n",
+									  DetermineTypesTransformation.warningUnnecessaryCastTo(1, 8, BasicTypes.UINT8) + "\n" +
+				                              SymbolScope.warningUnusedVar(1, 3, "a") + "\n",
 		                              "u8 a = (u8)0;");
 
 		assertUnsupportedTypeException("Foo",
