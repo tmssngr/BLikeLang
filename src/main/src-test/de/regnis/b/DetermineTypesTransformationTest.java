@@ -238,6 +238,21 @@ public final class DetermineTypesTransformationTest {
 			assertEquals(DetermineTypesTransformation.msgReturnExpressionExpected(2, 0, BasicTypes.INT16), ex.getMessage());
 		}
 		assertEquals("", out.toString());
+
+		out = new StringStringOutput();
+		try {
+			DetermineTypesTransformation.transform(AstFactory.parseString("void nothing(int a) {\n" +
+					                                                              "return;\n" +
+					                                                              "}\n" +
+					                                                              "int test() {\n" +
+					                                                              "return nothing(1) + 2;\n" +
+					                                                              "}"), out);
+			fail();
+		}
+		catch (InvalidTypeException ex) {
+			assertEquals(DetermineTypesTransformation.msgFunctionDoesNotReturnAValue(5, 7, "nothing"), ex.getMessage());
+		}
+		assertEquals(SymbolScope.msgParamIsUnused(1, 17, "a") + "\n", out.toString());
 	}
 
 	@Test

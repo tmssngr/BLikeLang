@@ -45,6 +45,11 @@ public final class DetermineTypesTransformation {
 		return line + ":" + column + ": return statement: expression of type " + expectedType + " expected";
 	}
 
+	@NotNull
+	public static String msgFunctionDoesNotReturnAValue(int line, int column, String name) {
+		return line + ":" + column + ": the call to function " + name  + " does not return any value";
+	}
+
 	// Fields =================================================================
 
 	private final StringOutput warningOutput;
@@ -328,28 +333,39 @@ public final class DetermineTypesTransformation {
 
 	private FuncCall visitFunctionCall(FuncCall node) {
 		final FuncCallParameters newParameters = new FuncCallParameters();
+
+		final SymbolScope.Function function = handleCall(node.name, node.getParameters(), newParameters);
+
+		if (function.type == BasicTypes.VOID) {
+			throw new InvalidTypeException(msgFunctionDoesNotReturnAValue(node.line, node.column, node.name));
+		}
+
+		return new FuncCall(function.type, node.name, newParameters);
+	}
+
+	@NotNull
+	private SymbolScope.Function handleCall(String name, List<Expression> parameters, FuncCallParameters newParameters) {
 		final List<Expression> expressions = new ArrayList<>();
-		for (Expression expression : node.getParameters()) {
+		for (Expression expression : parameters) {
 			final Expression newExpression = visitExpression(expression);
 			expressions.add(newExpression);
 			newParameters.add(newExpression);
 		}
 
-		final SymbolScope.Function function = symbolMap.getFunction(node.name);
+		final SymbolScope.Function function = symbolMap.getFunction(name);
 		final List<Type> parameterTypes = function.parameterTypes;
 		if (expressions.size() != parameterTypes.size()) {
-			throw new InvalidTypeException("Function " + node.name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
+			throw new InvalidTypeException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
 		}
 
 		for (int i = 0; i < parameterTypes.size(); i++) {
 			final Type expressionType = expressions.get(i).getType();
 			final Type parameterType = parameterTypes.get(i);
 			if (!BasicTypes.canBeAssignedFrom(parameterType, expressionType)) {
-				throw new InvalidTypeException("Function " + node.name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
+				throw new InvalidTypeException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
 			}
 		}
-
-		return new FuncCall(function.type, node.name, newParameters);
+		return function;
 	}
 
 	private ReturnStatement visitReturn(ReturnStatement node) {
