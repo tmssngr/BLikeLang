@@ -76,9 +76,22 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(StatementList node) {
+	public List<String> getStrings(IfStatement node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("statementList");
+		strings.add("if");
+		append(getStrings(node.expression), true, strings);
+		append(getStrings("then", node.ifStatements), true, strings);
+		append(getStrings("else", node.elseStatements), false, strings);
+		return strings;
+	}
+
+	public List<String> getStrings(StatementList node) {
+		return getStrings("statementList", node);
+	}
+
+	public List<String> getStrings(String name, StatementList node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add(name);
 		final List<? extends Statement> statements = node.getStatements();
 		for (int i = 0, size = statements.size(); i < size; i++) {
 			final Statement statement = statements.get(i);
@@ -154,6 +167,11 @@ public class TreePrinter {
 
 			@Override
 			public List<String> visitReturn(ReturnStatement node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitIf(IfStatement node) {
 				return getStrings(node);
 			}
 		});

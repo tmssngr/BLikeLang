@@ -38,5 +38,27 @@ public class CodePrinterTest {
 		                    CodePrinter.print(new DeclarationList()
 				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
 				                                                                                       BooleanLiteral.FALSE)))));
+		Assert.assertEquals("i16 foo() {\n" +
+				                    "  if a > 0\n" +
+				                    "  {\n" +
+				                    "    b := 1\n" +
+				                    "  }\n" +
+				                    "  else\n" +
+				                    "  {\n" +
+				                    "    return a\n" +
+				                    "  }\n" +
+				                    "}\n",
+		                    CodePrinter.print(
+				                    new DeclarationList()
+						                    .add(new FuncDeclaration(BasicTypes.INT16, "foo",
+						                                             new FuncDeclarationParameters(),
+						                                             new StatementList()
+								                                             .add(new IfStatement(BinaryExpression.createGt(new VarRead("a"),
+								                                                                                            new NumberLiteral(0)),
+								                                                                  new StatementList()
+										                                                                  .add(new VarDeclaration("b", new NumberLiteral(1))),
+								                                                                  new StatementList()
+										                                                                  .add(new ReturnStatement(new VarRead("a"))))
+								                                             )))));
 	}
 }

@@ -103,6 +103,12 @@ public class CodePrinter {
 				print(node, indentation, output);
 				return node;
 			}
+
+			@Override
+			public Object visitIf(IfStatement node) {
+				print(node, indentation, output);
+				return node;
+			}
 		});
 	}
 
@@ -147,6 +153,21 @@ public class CodePrinter {
 		}
 
 		output.println();
+	}
+
+	private void print(IfStatement node, int indentation, StringOutput output) {
+		printIndentation(indentation, output);
+		output.print("if ");
+		print(node.expression, output);
+		output.println();
+
+		print(node.ifStatements, indentation, output);
+
+		printIndentation(indentation, output);
+		output.print("else");
+		output.println();
+
+		print(node.elseStatements, indentation, output);
 	}
 
 	private void print(Expression expression, StringOutput output) {

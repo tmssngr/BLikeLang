@@ -11,4 +11,6 @@ public interface StatementVisitor<O> {
 	O visitLocalVarDeclaration(VarDeclaration node);
 
 	O visitReturn(ReturnStatement node);
+
+	O visitIf(IfStatement node);
 }

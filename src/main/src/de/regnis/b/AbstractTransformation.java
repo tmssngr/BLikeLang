@@ -63,6 +63,13 @@ public abstract class AbstractTransformation<H> {
 		return new ReturnStatement(expression);
 	}
 
+	protected Statement handleIfStatement(IfStatement node, H helper) {
+		final Expression expression = handleExpression(node.expression, helper);
+		final StatementList ifStatements = handleStatementList(node.ifStatements);
+		final StatementList elseStatements = handleStatementList(node.elseStatements);
+		return new IfStatement(expression, ifStatements, elseStatements);
+	}
+
 	protected Expression handleBinary(BinaryExpression node, H helper) {
 		return node;
 	}
@@ -98,6 +105,11 @@ public abstract class AbstractTransformation<H> {
 				@Override
 				public Statement visitReturn(ReturnStatement node) {
 					return handleReturn(node, helper);
+				}
+
+				@Override
+				public Statement visitIf(IfStatement node) {
+					return handleIfStatement(node, helper);
 				}
 			}));
 		}
