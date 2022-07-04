@@ -114,15 +114,17 @@ public final class DetermineTypesTransformationTest {
 				                              "}");
 
 		assertSuccessfullyTransformed("i16 print(i16 p0) {\n" +
+				                              "  return 0\n" +
 				                              "}\n" +
 				                              "void anotherPrint(i16 p0) {\n" +
 				                              "  v0 : i16 = print(p0)\n" +
 				                              "  return\n" +
 				                              "}\n",
 		                              DetermineTypesTransformation.warningUnusedParameter(1, 14, "a") + "\n" +
-				                              DetermineTypesTransformation.warningUnusedVar(4, 4, "ignored") + "\n",
+				                              DetermineTypesTransformation.warningUnusedVar(5, 4, "ignored") + "\n",
 		                              "int print(int a) {\n" +
-				                              "}\n" + // TODO tricky, needs to be handled later
+				                              "return 0;\n" +
+				                              "}\n" +
 				                              "void anotherPrint(int a) {\n" +
 				                              "var ignored = print(a);\n" +
 				                              "return;\n" +
@@ -176,6 +178,11 @@ public final class DetermineTypesTransformationTest {
 				                              "return 0;\n" +
 				                              "var a = 0;\n" +
 				                              "}");
+
+		assertInvalidTypeException(DetermineTypesTransformation.errorMissingReturnStatement("test"),
+		                           NO_WARNING,
+		                           "int test() {\n" +
+				                           "}");
 	}
 
 	@Test

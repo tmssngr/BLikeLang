@@ -61,6 +61,21 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
+	public static String errorMissingReturnStatement(String functionName) {
+		return "Function " + functionName + ": missing return statement";
+	}
+
+	@NotNull
+	public static String errorVarAlreadyDeclared(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": variable " + name + " already declared";
+	}
+
+	@NotNull
+	public static String errorVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": local variable " + name + " already declared as parameter";
+	}
+
+	@NotNull
 	public static String warningIgnoredReturnValue(int line, int column, String name, Type functionReturnType) {
 		return line + ":" + column + ": the call to function " + name + " ignores its return value of type " + functionReturnType;
 	}
@@ -73,6 +88,16 @@ public final class DetermineTypesTransformation {
 	@NotNull
 	public static String warningStatementAfterReturn() {
 		return "Ignored statements after return";
+	}
+
+	@NotNull
+	public static String warningUnusedVar(int line, int column, String name) {
+		return line + ":" + column + ": Variable " + name + " is unused";
+	}
+
+	@NotNull
+	public static String warningUnusedParameter(int line, int column, String name) {
+		return line + ":" + column + ": Parameter " + name + " is unused";
 	}
 
 	// Fields =================================================================
@@ -90,26 +115,6 @@ public final class DetermineTypesTransformation {
 
 	private DetermineTypesTransformation(StringOutput warningOutput) {
 		this.warningOutput = warningOutput;
-	}
-
-	@NotNull
-	public static String errorVarAlreadyDeclared(@NotNull String name, int line, int column) {
-		return line + ":" + column + ": variable " + name + " already declared";
-	}
-
-	@NotNull
-	public static String errorVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
-		return line + ":" + column + ": local variable " + name + " already declared as parameter";
-	}
-
-	@NotNull
-	public static String warningUnusedVar(int line, int column, String name) {
-		return line + ":" + column + ": Variable " + name + " is unused";
-	}
-
-	@NotNull
-	public static String warningUnusedParameter(int line, int column, String name) {
-		return line + ":" + column + ": Parameter " + name + " is unused";
 	}
 
 	// Utils ==================================================================
@@ -178,12 +183,38 @@ public final class DetermineTypesTransformation {
 			final StatementList newStatementList = visitStatementList(node.statementList);
 			symbolMap.reportUnusedVariables(warningOutput);
 
+			if (functionReturnType != BasicTypes.VOID) {
+				if (!hasReturnStatement(newStatementList)) {
+					throw new InvalidTypeException(errorMissingReturnStatement(node.name));
+				}
+			}
+
 			return new FuncDeclaration(node.type, node.name, renamedParameters, newStatementList);
 		}
 		finally {
 			symbolMap = outerSymbolMap;
 			functionReturnType = null;
 		}
+	}
+
+	private boolean hasReturnStatement(StatementList statementList) {
+		final List<? extends Statement> statements = statementList.getStatements();
+		if (statements.isEmpty()) {
+			return false;
+		}
+
+		final Statement lastStatement = statements.get(statements.size() - 1);
+		if (lastStatement instanceof ReturnStatement) {
+			return true;
+		}
+
+		if (lastStatement instanceof IfStatement) {
+			final IfStatement ifStatement = (IfStatement) lastStatement;
+			return hasReturnStatement(ifStatement.ifStatements)
+					&& hasReturnStatement(ifStatement.elseStatements);
+		}
+
+		return false;
 	}
 
 	@NotNull
