@@ -19,26 +19,6 @@ public final class SymbolScope {
 		return new SymbolScope(null, ScopeKind.Global);
 	}
 
-	@NotNull
-	public static String msgVarAlreadyDeclared(@NotNull String name, int line, int column) {
-		return line + ":" + column + ": variable " + name + " already declared";
-	}
-
-	@NotNull
-	public static String msgVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
-		return line + ":" + column + ": local variable " + name + " already declared as parameter";
-	}
-
-	@NotNull
-	public static String warningUnusedVar(int line, int column, String name) {
-		return line + ":" + column + ": Variable " + name + " is unused";
-	}
-
-	@NotNull
-	public static String warningUnusedParameter(int line, int column, String name) {
-		return line + ":" + column + ": Parameter " + name + " is unused";
-	}
-
 	// Fields =================================================================
 
 	private final Map<String, Variable> variables = new HashMap<>();
@@ -56,14 +36,14 @@ public final class SymbolScope {
 
 	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Type type, int line, int column) {
 		if (variables.containsKey(name)) {
-			throw new AlreadyDefinedException(msgVarAlreadyDeclared(name, line, column));
+			throw new AlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclared(name, line, column));
 		}
 
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
 						&& scope.variables.containsKey(name)) {
-					throw new AlreadyDefinedException(msgVarAlreadyDeclaredAsParameter(name, line, column));
+					throw new AlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(name, line, column));
 				}
 			}
 		}
@@ -101,8 +81,8 @@ public final class SymbolScope {
 				final int line = variable.line;
 				final int column = variable.column;
 				output.print(scopeKind == ScopeKind.Parameter
-						             ? warningUnusedParameter(line, column, name)
-						             : warningUnusedVar(line, column, name));
+						             ? DetermineTypesTransformation.warningUnusedParameter(line, column, name)
+						             : DetermineTypesTransformation.warningUnusedVar(line, column, name));
 				output.println();
 			}
 		}

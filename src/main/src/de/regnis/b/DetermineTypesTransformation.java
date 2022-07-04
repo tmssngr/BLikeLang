@@ -52,7 +52,7 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	public static String errorFunctionDoesNotReturnAValue(int line, int column, String name) {
-		return line + ":" + column + ": the call to function " + name  + " does not return any value";
+		return line + ":" + column + ": the call to function " + name + " does not return any value";
 	}
 
 	@NotNull
@@ -62,12 +62,17 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	public static String warningIgnoredReturnValue(int line, int column, String name, Type functionReturnType) {
-		return line + ":" + column + ": the call to function " + name  + " ignores its return value of type " + functionReturnType;
+		return line + ":" + column + ": the call to function " + name + " ignores its return value of type " + functionReturnType;
 	}
 
 	@NotNull
 	public static String warningUnnecessaryCastTo(int line, int column, Type type) {
 		return line + ":" + column + ": Unnecessary cast to " + type;
+	}
+
+	@NotNull
+	public static String warningStatementAfterReturn() {
+		return "Ignored statements after return";
 	}
 
 	// Fields =================================================================
@@ -85,6 +90,26 @@ public final class DetermineTypesTransformation {
 
 	private DetermineTypesTransformation(StringOutput warningOutput) {
 		this.warningOutput = warningOutput;
+	}
+
+	@NotNull
+	public static String errorVarAlreadyDeclared(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": variable " + name + " already declared";
+	}
+
+	@NotNull
+	public static String errorVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
+		return line + ":" + column + ": local variable " + name + " already declared as parameter";
+	}
+
+	@NotNull
+	public static String warningUnusedVar(int line, int column, String name) {
+		return line + ":" + column + ": Variable " + name + " is unused";
+	}
+
+	@NotNull
+	public static String warningUnusedParameter(int line, int column, String name) {
+		return line + ":" + column + ": Parameter " + name + " is unused";
 	}
 
 	// Utils ==================================================================
@@ -111,7 +136,6 @@ public final class DetermineTypesTransformation {
 			});
 		}
 	}
-
 
 	private DeclarationList visitDeclarationList(DeclarationList root) {
 		final DeclarationList newRoot = new DeclarationList();
@@ -224,11 +248,24 @@ public final class DetermineTypesTransformation {
 		final SymbolScope outerSymbolMap = symbolMap;
 		symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Local);
 		try {
-			final StatementList newList = new StatementList();
-
+			final List<Statement> newStatements = new ArrayList<>();
 			for (Statement statement : list.getStatements()) {
 				final Statement newStatement = visitStatement(statement);
-				flattenNestedStatementList(newStatement, newList);
+				flattenNestedStatementList(newStatement, newStatements);
+			}
+
+			final StatementList newList = new StatementList();
+			boolean wasReturn = false;
+			for (Statement newStatement : newStatements) {
+				if (wasReturn) {
+					warning(warningStatementAfterReturn());
+					break;
+				}
+
+				newList.add(newStatement);
+				if (newStatement instanceof ReturnStatement) {
+					wasReturn = true;
+				}
 			}
 
 			symbolMap.reportUnusedVariables(warningOutput);
@@ -240,7 +277,7 @@ public final class DetermineTypesTransformation {
 		}
 	}
 
-	private void flattenNestedStatementList(Statement statement, StatementList list) {
+	private void flattenNestedStatementList(Statement statement, List<Statement> list) {
 		statement.visit(new StatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
@@ -250,9 +287,7 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitStatementList(StatementList node) {
-				for (Statement subStatement : node.getStatements()) {
-					list.add(subStatement);
-				}
+				list.addAll(node.getStatements());
 				return node;
 			}
 
@@ -376,7 +411,7 @@ public final class DetermineTypesTransformation {
 		if (left instanceof final BasicTypes.NumericType lnt
 				&& right instanceof final BasicTypes.NumericType rnt) {
 			if (BinaryExpression.isComparison(operator)) {
-			return BasicTypes.BOOLEAN;
+				return BasicTypes.BOOLEAN;
 			}
 
 			if (lnt.isSigned() || rnt.isSigned()) {
@@ -412,8 +447,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type != BasicTypes.VOID) {
-			warningOutput.print(warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
-			warningOutput.println();
+			warning(warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
 		}
 
 		return new CallStatement(node.name, newParameters);
@@ -494,10 +528,14 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		final Type type = BasicTypes.getType(node.typeName, false);
 		if (expressionType == type || BasicTypes.canBeAssignedFrom(type, expressionType)) {
-			warningOutput.print(warningUnnecessaryCastTo(node.line, node.column, type));
-			warningOutput.println();
+			warning(warningUnnecessaryCastTo(node.line, node.column, type));
 		}
 		return new TypeCast(type, newExpression);
+	}
+
+	private void warning(String message) {
+		warningOutput.print(message);
+		warningOutput.println();
 	}
 
 	// Inner Classes ==========================================================
