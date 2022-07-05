@@ -76,7 +76,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final FuncDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
 		final Statement statement = (Statement) visit(ctx.statement());
 		final StatementList statementList = statement.toStatementList();
-		declarationList.add(new FuncDeclaration(type, name, parameters, statementList));
+		declarationList.add(new FuncDeclaration(type, name, parameters, statementList, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
 		return null;
 	}
 

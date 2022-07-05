@@ -22,7 +22,11 @@ public final class DetermineTypesTransformation {
 	public static DeclarationList transform(DeclarationList root, StringOutput warningOutput) {
 		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
 		transformation.determineFunctions(root);
-		return transformation.visitDeclarationList(root);
+		transformation.reportMissingMainFunction();
+
+		final DeclarationList newRoot = transformation.visitDeclarationList(root);
+		transformation.reportUnusedFunctions();
+		return newRoot;
 	}
 
 	@NotNull
@@ -61,6 +65,11 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
+	public static String errorMissingMain() {
+		return "Missing function 'void main()'";
+	}
+
+	@NotNull
 	public static String errorMissingReturnStatement(String functionName) {
 		return "Function " + functionName + ": missing return statement";
 	}
@@ -91,6 +100,11 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
+	public static String warningUnusedFunction(int line, int column, String name) {
+		return line + ":" + column + ": Function " + name + " is unused";
+	}
+
+	@NotNull
 	public static String warningUnusedVar(int line, int column, String name) {
 		return line + ":" + column + ": Variable " + name + " is unused";
 	}
@@ -102,7 +116,7 @@ public final class DetermineTypesTransformation {
 
 	// Fields =================================================================
 
-	private final Map<String, Function> functions = new HashMap<>();
+	private final Map<String, Function> functions = new LinkedHashMap<>();
 	private final StringOutput warningOutput;
 
 	private int globalVarCount;
@@ -134,7 +148,7 @@ public final class DetermineTypesTransformation {
 						throw new SymbolScope.AlreadyDefinedException(node.name);
 					}
 
-					functions.put(node.name, new Function(node.type, parameterTypes));
+					functions.put(node.name, new Function(node.type, parameterTypes, node.line, node.column));
 
 					return node;
 				}
@@ -517,7 +531,7 @@ public final class DetermineTypesTransformation {
 
 	private ReturnStatement visitReturn(ReturnStatement node) {
 		if (functionReturnType == null) {
-			throw new IllegalStateException("Missing function return type");
+			throw new IllegalStateException();
 		}
 
 		if (functionReturnType == BasicTypes.VOID) {
@@ -564,6 +578,35 @@ public final class DetermineTypesTransformation {
 		return new TypeCast(type, newExpression);
 	}
 
+	private void reportMissingMainFunction() {
+		for (Map.Entry<String, Function> entry : functions.entrySet()) {
+			final String name = entry.getKey();
+			final Function function = entry.getValue();
+			if (isMainFunction(name, function)) {
+				function.setUsed();
+				return;
+			}
+		}
+
+		throw new InvalidTypeException(errorMissingMain());
+	}
+
+	private void reportUnusedFunctions() {
+		for (Map.Entry<String, Function> entry : functions.entrySet()) {
+			final String name = entry.getKey();
+			final Function function = entry.getValue();
+			if (!function.used) {
+				warning(warningUnusedFunction(function.line, function.column, name));
+			}
+		}
+	}
+
+	private boolean isMainFunction(String name, Function function) {
+		return "main".equals(name)
+				&& function.type == BasicTypes.VOID
+				&& function.parameterTypes.isEmpty();
+	}
+
 	private void warning(String message) {
 		warningOutput.print(message);
 		warningOutput.println();
@@ -574,12 +617,16 @@ public final class DetermineTypesTransformation {
 	public static final class Function {
 		public final Type type;
 		public final List<Type> parameterTypes;
+		private final int line;
+		private final int column;
 
 		private boolean used;
 
-		private Function(Type type, List<Type> parameterTypes) {
+		private Function(Type type, List<Type> parameterTypes, int line, int column) {
 			this.type = type;
 			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
+			this.line = line;
+			this.column = column;
 		}
 
 		public void setUsed() {
