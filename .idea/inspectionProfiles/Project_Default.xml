@@ -106,9 +106,6 @@
     <inspection_tool class="CheckValidXmlInScriptTagBody" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="CheckXmlFileWithXercesValidator" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="CheckedExceptionClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ClassComplexity" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="80" />
-    </inspection_tool>
     <inspection_tool class="ClassIndependentOfModule" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassInitializer" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassLoaderInstantiation" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -184,6 +181,7 @@
     <inspection_tool class="DollarSignInName" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DoubleLiteralMayBeFloatLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DriverManagerGetConnection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="DuplicatedCode" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="DynamicRegexReplaceableByCompiledPattern" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="EmptyCatchBlock" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_includeComments" value="true" />
@@ -283,6 +281,7 @@
     <inspection_tool class="IgnoredJUnitTest" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ImplicitDefaultCharsetUsage" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InconsistentLanguageLevel" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="InconsistentTextBlockIndent" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="IncrementDecrementUsedAsExpression" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InnerClassOnInterface" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreInnerInterfaces" value="false" />
@@ -300,7 +299,6 @@
     <inspection_tool class="InstanceofIncompatibleInterface" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InstanceofThis" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="IntLiteralMayBeLongLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="InterfaceMayBeAnnotatedFunctional" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InterfaceNeverImplemented" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreInterfacesThatOnlyDeclareConstants" value="false" />
     </inspection_tool>
@@ -628,9 +626,6 @@
       <option name="m_limit" value="20" />
     </inspection_tool>
     <inspection_tool class="SwitchStatementWithConfusingDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="SwitchStatementWithTooManyBranches" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="10" />
-    </inspection_tool>
     <inspection_tool class="SynchronizationOnStaticField" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SynchronizeOnLock" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SynchronizeOnThis" enabled="true" level="WARNING" enabled_by_default="true" />
