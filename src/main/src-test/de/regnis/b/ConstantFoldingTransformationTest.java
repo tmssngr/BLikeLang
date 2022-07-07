@@ -54,8 +54,13 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		                "a = (u8) 1 + 2;");
 		assertStatement("return 1 + 2",
 		                "return 1 + 2;");
-		assertStatement("if 1 + 2\n  {\n  }\n  else\n  {\n  }",
-		                "if (1 + 2) { }");
+		assertStatement("""
+				                if 1 + 2
+				                  {
+				                  }
+				                  else
+				                  {
+				                  }""", "if (1 + 2) { }");
 	}
 
 	@Test
