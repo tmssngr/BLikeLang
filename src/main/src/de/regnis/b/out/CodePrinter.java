@@ -117,6 +117,12 @@ public class CodePrinter {
 				print(node, indentation, output);
 				return node;
 			}
+
+			@Override
+			public Object visitWhile(WhileStatement node) {
+				print(node, indentation, output);
+				return node;
+			}
 		});
 	}
 
@@ -184,6 +190,15 @@ public class CodePrinter {
 		output.println();
 
 		print(node.elseStatements, indentation, output);
+	}
+
+	private void print(WhileStatement node, int indentation, StringOutput output) {
+		printIndentation(indentation, output);
+		output.print("while ");
+		print(node.expression, output);
+		output.println();
+
+		print(node.statements, indentation, output);
 	}
 
 	private void print(Expression expression, StringOutput output) {

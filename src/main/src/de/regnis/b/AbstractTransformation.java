@@ -74,6 +74,12 @@ public abstract class AbstractTransformation<H> {
 		return new IfStatement(expression, ifStatements, elseStatements);
 	}
 
+	protected Statement handleWhileStatement(WhileStatement node, H helper) {
+		final Expression expression = handleExpression(node.expression, helper);
+		final StatementList statements = handleStatementList(node.statements);
+		return new WhileStatement(expression, statements);
+	}
+
 	protected Expression handleBinary(BinaryExpression node, H helper) {
 		return node;
 	}
@@ -119,6 +125,11 @@ public abstract class AbstractTransformation<H> {
 				@Override
 				public Statement visitIf(IfStatement node) {
 					return handleIfStatement(node, helper);
+				}
+
+				@Override
+				public Statement visitWhile(WhileStatement node) {
+					return handleWhileStatement(node, helper);
 				}
 			}));
 		}

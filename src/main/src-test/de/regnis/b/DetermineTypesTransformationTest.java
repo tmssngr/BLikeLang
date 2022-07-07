@@ -386,6 +386,15 @@ public final class DetermineTypesTransformationTest {
 				                             }
 				                           }
 				                           """ + VOID_MAIN);
+
+		assertInvalidTypeException(DetermineTypesTransformation.errorBooleanExpected(2, 8, BasicTypes.UINT8),
+		                           NO_WARNING,
+		                           """
+				                           int max(int a, int b) {
+				                             while (1) {
+				                             }
+				                           }
+				                           """ + VOID_MAIN);
 	}
 
 	@Test

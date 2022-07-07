@@ -15,4 +15,6 @@ public interface StatementVisitor<O> {
 	O visitReturn(ReturnStatement node);
 
 	O visitIf(IfStatement node);
+
+	O visitWhile(WhileStatement node);
 }

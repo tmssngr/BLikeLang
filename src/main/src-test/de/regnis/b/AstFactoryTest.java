@@ -167,5 +167,26 @@ public class AstFactoryTest {
 						                                                           void printNL() {
 						                                                             print(10);
 						                                                           }""")));
+		assertEquals("""
+				             +- void main()
+				                +- statementList
+				                   +- i :=
+				                   |  +- literal 0
+				                   +- While
+				                      +- operator <
+				                      |  +- read var i
+				                      |  +- literal 10
+				                      +- do
+				                         +- i =
+				                            +- operator +
+				                               +- read var i
+				                               +- literal 1
+				             """, TreePrinter.print(AstFactory.parseString("""
+						                                                           void main() {
+						                                                             var i = 0;
+						                                                             while (i < 10) {
+						                                                               i = i + 1;
+						                                                             }
+						                                                           }""")));
 	}
 }

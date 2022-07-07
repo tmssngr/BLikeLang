@@ -96,6 +96,14 @@ public class TreePrinter {
 		return strings;
 	}
 
+	public List<String> getStrings(WhileStatement node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add("While");
+		append(getStrings(node.expression), true, strings);
+		append(getStrings("do", node.statements), false, strings);
+		return strings;
+	}
+
 	public List<String> getStrings(StatementList node) {
 		return getStrings("statementList", node);
 	}
@@ -188,6 +196,11 @@ public class TreePrinter {
 
 			@Override
 			public List<String> visitIf(IfStatement node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitWhile(WhileStatement node) {
 				return getStrings(node);
 			}
 		});

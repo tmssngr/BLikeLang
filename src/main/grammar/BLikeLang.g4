@@ -21,6 +21,7 @@ statement: varDeclaration                         #localVarDeclaration
              ifStatement=statement
            (Else
              elseStatement=statement)?            #ifStatement
+         | While expression statement             #whileStatement
          ;
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
@@ -65,6 +66,7 @@ Else: 'else';
 If: 'if';
 Return: 'return';
 Var: 'var';
+While: 'while';
 
 BooleanLiteral: 'true' | 'false';
 
