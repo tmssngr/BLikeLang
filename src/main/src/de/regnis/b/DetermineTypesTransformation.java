@@ -14,10 +14,6 @@ public final class DetermineTypesTransformation {
 
 	// Static =================================================================
 
-	/**
-	 * @throws InvalidTypeException
-	 * @throws SymbolScope.AlreadyDefinedException
-	 */
 	@NotNull
 	public static DeclarationList transform(DeclarationList root, StringOutput warningOutput) {
 		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
@@ -75,12 +71,22 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
-	public static String errorVarAlreadyDeclared(@NotNull String name, int line, int column) {
+	public static String errorFunctionAlreadyDeclared(int line, int column, String name) {
+		return line + ":" + column + ": function " + name + " already declared";
+	}
+
+	@NotNull
+	public static String errorParameterAlreadyDeclared(int line, int column, String name) {
+		return line + ":" + column + ": parameter " + name + " already declared";
+	}
+
+	@NotNull
+	public static String errorVarAlreadyDeclared(int line, int column, @NotNull String name) {
 		return line + ":" + column + ": variable " + name + " already declared";
 	}
 
 	@NotNull
-	public static String errorVarAlreadyDeclaredAsParameter(@NotNull String name, int line, int column) {
+	public static String errorVarAlreadyDeclaredAsParameter(int line, int column, @NotNull String name) {
 		return line + ":" + column + ": local variable " + name + " already declared as parameter";
 	}
 
@@ -145,7 +151,7 @@ public final class DetermineTypesTransformation {
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final List<Type> parameterTypes = getParameterTypes(node);
 					if (functions.containsKey(node.name)) {
-						throw new SymbolScope.AlreadyDefinedException(node.name);
+						throw new TransformationFailedException(errorFunctionAlreadyDeclared(node.line, node.column, node.name));
 					}
 
 					functions.put(node.name, new Function(node.type, parameterTypes, node.line, node.column));
@@ -199,7 +205,7 @@ public final class DetermineTypesTransformation {
 
 			if (functionReturnType != BasicTypes.VOID) {
 				if (!hasReturnStatement(newStatementList)) {
-					throw new InvalidTypeException(errorMissingReturnStatement(node.name));
+					throw new TransformationFailedException(errorMissingReturnStatement(node.name));
 				}
 			}
 
@@ -392,7 +398,7 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		if (type != null) {
 			if (!BasicTypes.canBeAssignedFrom(type, expressionType)) {
-				throw new InvalidTypeException(errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
+				throw new TransformationFailedException(errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
 			}
 		}
 		else {
@@ -409,7 +415,7 @@ public final class DetermineTypesTransformation {
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new InvalidTypeException(errorCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
+			throw new TransformationFailedException(errorCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
 		}
 
 		return new Assignment(variable.newName, newExpression);
@@ -457,7 +463,7 @@ public final class DetermineTypesTransformation {
 		final Type rightType = newRight.getType();
 		final Type type = getBinaryExpressionType(leftType, node.operator, rightType);
 		if (type == null) {
-			throw new InvalidTypeException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
+			throw new TransformationFailedException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
 		}
 		return node.createNew(type, newLeft, newRight);
 	}
@@ -491,7 +497,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type == BasicTypes.VOID) {
-			throw new InvalidTypeException(errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
+			throw new TransformationFailedException(errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
 		}
 
 		return new FuncCall(function.type, node.name, newParameters);
@@ -520,21 +526,21 @@ public final class DetermineTypesTransformation {
 
 		final Function function = functions.get(name);
 		if (function == null) {
-			throw new UndeclaredException(errorUndeclaredFunction(line, column, name));
+			throw new TransformationFailedException(errorUndeclaredFunction(line, column, name));
 		}
 
 		function.setUsed();
 
 		final List<Type> parameterTypes = function.parameterTypes;
 		if (expressions.size() != parameterTypes.size()) {
-			throw new InvalidTypeException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
+			throw new TransformationFailedException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
 		}
 
 		for (int i = 0; i < parameterTypes.size(); i++) {
 			final Type expressionType = expressions.get(i).getType();
 			final Type parameterType = parameterTypes.get(i);
 			if (!BasicTypes.canBeAssignedFrom(parameterType, expressionType)) {
-				throw new InvalidTypeException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
+				throw new TransformationFailedException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
 			}
 		}
 		return function;
@@ -547,19 +553,19 @@ public final class DetermineTypesTransformation {
 
 		if (functionReturnType == BasicTypes.VOID) {
 			if (node.expression != null) {
-				throw new InvalidTypeException(errorNoReturnExpressionExpectedForVoid(node.line, node.column));
+				throw new TransformationFailedException(errorNoReturnExpressionExpectedForVoid(node.line, node.column));
 			}
 			return node;
 		}
 
 		if (node.expression == null) {
-			throw new InvalidTypeException(errorReturnExpressionExpected(node.line, node.column, functionReturnType));
+			throw new TransformationFailedException(errorReturnExpressionExpected(node.line, node.column, functionReturnType));
 		}
 
 		final Expression newExpression = visitExpression(node.expression);
 
 		if (!BasicTypes.canBeAssignedFrom(functionReturnType, newExpression.getType())) {
-			throw new InvalidTypeException(errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
+			throw new TransformationFailedException(errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
 		}
 
 		return new ReturnStatement(newExpression);
@@ -568,7 +574,7 @@ public final class DetermineTypesTransformation {
 	private IfStatement visitIf(IfStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
 		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new InvalidTypeException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
+			throw new TransformationFailedException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
 		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
@@ -577,7 +583,7 @@ public final class DetermineTypesTransformation {
 	private WhileStatement visitWhile(WhileStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
 		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new InvalidTypeException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
+			throw new TransformationFailedException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
 		return new WhileStatement(newExpression, visitStatementList(node.statements));
@@ -608,7 +614,7 @@ public final class DetermineTypesTransformation {
 			}
 		}
 
-		throw new InvalidTypeException(errorMissingMain());
+		throw new TransformationFailedException(errorMissingMain());
 	}
 
 	private void reportUnusedFunctions() {
@@ -651,12 +657,6 @@ public final class DetermineTypesTransformation {
 
 		public void setUsed() {
 			used = true;
-		}
-	}
-
-	public static final class UndeclaredException extends RuntimeException {
-		public UndeclaredException(String message) {
-			super(message);
 		}
 	}
 }

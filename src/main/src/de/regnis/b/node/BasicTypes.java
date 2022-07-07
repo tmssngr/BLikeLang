@@ -1,5 +1,6 @@
 package de.regnis.b.node;
 
+import de.regnis.b.TransformationFailedException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -131,9 +132,9 @@ public final class BasicTypes {
 		}
 	}
 
-	public static class UnsupportedTypeException extends RuntimeException {
-		public UnsupportedTypeException(@NotNull String name) {
-			super(name);
+	public static class UnsupportedTypeException extends TransformationFailedException {
+		public UnsupportedTypeException(@NotNull String message) {
+			super(message);
 		}
 	}
 }
