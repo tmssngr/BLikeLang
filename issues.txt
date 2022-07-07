@@ -1,5 +1,4 @@
 todo:
-- pure function detection
 - check if global var initialized from non-pure function
 - linearize AST (IR) to basic blocks
 - determine needed/provided local variables
@@ -8,3 +7,4 @@ todo:
 
 done:
 - while loop
+- pure function detection
