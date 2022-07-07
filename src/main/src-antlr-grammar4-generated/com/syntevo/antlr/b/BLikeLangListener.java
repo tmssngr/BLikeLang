@@ -154,6 +154,18 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitIfStatement(BLikeLangParser.IfStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code whileStatement}
+	 * labeled alternative in {@link BLikeLangParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStatement(BLikeLangParser.WhileStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code whileStatement}
+	 * labeled alternative in {@link BLikeLangParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStatement(BLikeLangParser.WhileStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code inferVarDeclaration}
 	 * labeled alternative in {@link BLikeLangParser#varDeclaration}.
 	 * @param ctx the parse tree

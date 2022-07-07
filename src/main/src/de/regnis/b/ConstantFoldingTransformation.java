@@ -83,6 +83,11 @@ public final class ConstantFoldingTransformation {
 				public Statement visitIf(IfStatement node) {
 					return node;
 				}
+
+				@Override
+				public Statement visitWhile(WhileStatement node) {
+					return node;
+				}
 			}));
 		}
 		return newStatementList;

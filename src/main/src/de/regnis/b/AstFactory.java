@@ -179,6 +179,18 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitWhileStatement(BLikeLangParser.WhileStatementContext ctx) {
+		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
+		final Expression expression = (Expression) visit(expressionContext);
+
+		final Statement statement = (Statement) visit(ctx.statement());
+		final StatementList statementList = statement.toStatementList();
+
+		final Token start = expressionContext.getStart();
+		return new WhileStatement(expression, statementList, start.getLine(), start.getCharPositionInLine());
+	}
+
+	@Override
 	public Node visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);

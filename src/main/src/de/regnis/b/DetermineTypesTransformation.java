@@ -286,6 +286,11 @@ public final class DetermineTypesTransformation {
 			public Statement visitIf(IfStatement node) {
 				return DetermineTypesTransformation.this.visitIf(node);
 			}
+
+			@Override
+			public Statement visitWhile(WhileStatement node) {
+				return DetermineTypesTransformation.this.visitWhile(node);
+			}
 		});
 	}
 
@@ -356,6 +361,12 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitIf(IfStatement node) {
+				list.add(statement);
+				return node;
+			}
+
+			@Override
+			public Object visitWhile(WhileStatement node) {
 				list.add(statement);
 				return node;
 			}
@@ -561,6 +572,15 @@ public final class DetermineTypesTransformation {
 		}
 
 		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
+	}
+
+	private WhileStatement visitWhile(WhileStatement node) {
+		final Expression newExpression = visitExpression(node.expression);
+		if (newExpression.getType() != BasicTypes.BOOLEAN) {
+			throw new InvalidTypeException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
+		}
+
+		return new WhileStatement(newExpression, visitStatementList(node.statements));
 	}
 
 	private VarRead visitVarRead(VarRead node) {
