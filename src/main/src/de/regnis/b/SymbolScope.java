@@ -36,14 +36,16 @@ public final class SymbolScope {
 
 	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Type type, int line, int column) {
 		if (variables.containsKey(name)) {
-			throw new AlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclared(name, line, column));
+			throw new TransformationFailedException(scopeKind == ScopeKind.Parameter
+					                                  ? DetermineTypesTransformation.errorParameterAlreadyDeclared(line, column, name)
+					                                  : DetermineTypesTransformation.errorVarAlreadyDeclared(line, column, name));
 		}
 
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
 						&& scope.variables.containsKey(name)) {
-					throw new AlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(name, line, column));
+					throw new TransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(line, column, name));
 				}
 			}
 		}
@@ -55,9 +57,6 @@ public final class SymbolScope {
 		return new SymbolScope(this, scopeKind);
 	}
 
-	/**
-	 * @throws DetermineTypesTransformation.UndeclaredException
-	 */
 	@NotNull
 	public Variable variableRead(@NotNull String name) {
 		SymbolScope scope = this;
@@ -70,7 +69,7 @@ public final class SymbolScope {
 
 			scope = scope.parentScope;
 		}
-		throw new DetermineTypesTransformation.UndeclaredException(name);
+		throw new TransformationFailedException(name);
 	}
 
 	public void reportUnusedVariables(@NotNull StringOutput output) {
@@ -86,17 +85,6 @@ public final class SymbolScope {
 				output.println();
 			}
 		}
-	}
-
-	// Utils ==================================================================
-
-	@NotNull
-	private SymbolScope getRootScope() {
-		SymbolScope scope = this;
-		while (scope.parentScope != null) {
-			scope = scope.parentScope;
-		}
-		return scope;
 	}
 
 	// Inner Classes ==========================================================
@@ -118,12 +106,6 @@ public final class SymbolScope {
 			this.type = type;
 			this.line = line;
 			this.column = column;
-		}
-	}
-
-	public static final class AlreadyDefinedException extends RuntimeException {
-		public AlreadyDefinedException(String message) {
-			super(message);
 		}
 	}
 }

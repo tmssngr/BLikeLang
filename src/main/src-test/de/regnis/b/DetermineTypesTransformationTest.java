@@ -2,7 +2,6 @@ package de.regnis.b;
 
 import de.regnis.b.node.BasicTypes;
 import de.regnis.b.node.DeclarationList;
-import de.regnis.b.node.InvalidTypeException;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
@@ -54,15 +53,11 @@ public final class DetermineTypesTransformationTest {
 				                              void init() {
 				                              }""");
 
-		assertUndeclaredException(DetermineTypesTransformation.errorUndeclaredFunction(2, 2, "init"),
-		                          NO_WARNING,
-		                          """
+		assertTransformationFailedException(DetermineTypesTransformation.errorUndeclaredFunction(2, 2, "init"), NO_WARNING, """
 				                          void main() {
 				                            init();
 				                          }""");
-		assertUndeclaredException(DetermineTypesTransformation.errorUndeclaredFunction(2, 12, "init"),
-		                          NO_WARNING,
-		                          """
+		assertTransformationFailedException(DetermineTypesTransformation.errorUndeclaredFunction(2, 12, "init"), NO_WARNING, """
 				                          void main() {
 				                            var foo = init();
 				                          }""");
@@ -224,9 +219,7 @@ public final class DetermineTypesTransformationTest {
 				                              """ +
 				                              VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingReturnStatement("test"),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingReturnStatement("test"), NO_WARNING, """
 				                           int test() {
 				                           }
 				                           """ + VOID_MAIN);
@@ -313,25 +306,17 @@ public final class DetermineTypesTransformationTest {
 
 	@Test
 	public void testInvalidTypes() {
-		assertUnsupportedTypeException("foobar",
-		                               NO_WARNING,
-		                               "foobar a = 0;\n" + VOID_MAIN);
+		assertTransformationFailedException("foobar", NO_WARNING, "foobar a = 0;\n" + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(1, 3, "a", BasicTypes.INT8, BasicTypes.UINT8),
-		                           NO_WARNING,
-		                           "u8 a = -1;\n" + VOID_MAIN);
+		assertTransformationFailedException(DetermineTypesTransformation.errorCantAssignType(1, 3, "a", BasicTypes.INT8, BasicTypes.UINT8), NO_WARNING, "u8 a = -1;\n" + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(2, 5, "a", BasicTypes.INT16, BasicTypes.UINT8),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorCantAssignType(2, 5, "a", BasicTypes.INT16, BasicTypes.UINT8), NO_WARNING, """
 				                           int test() {
 				                             u8 a = 256;
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignType(4, 2, "a", BasicTypes.INT16, BasicTypes.UINT8),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorCantAssignType(4, 2, "a", BasicTypes.INT16, BasicTypes.UINT8), NO_WARNING, """
 				                           int test() {
 				                             u8 a = 0;
 				                             int b = 0;
@@ -340,33 +325,25 @@ public final class DetermineTypesTransformationTest {
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorCantAssignReturnType(2, 9, BasicTypes.UINT8, BasicTypes.INT8),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorCantAssignReturnType(2, 9, BasicTypes.UINT8, BasicTypes.INT8), NO_WARNING, """
 				                           i8 test() {
 				                             return 128;
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorNoReturnExpressionExpectedForVoid(2, 9),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorNoReturnExpressionExpectedForVoid(2, 9), NO_WARNING, """
 				                           void test() {
 				                             return 128;
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorReturnExpressionExpected(2, 2, BasicTypes.INT16),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorReturnExpressionExpected(2, 2, BasicTypes.INT16), NO_WARNING, """
 				                           int test() {
 				                             return;
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorFunctionDoesNotReturnAValue(5, 9, "nothing"),
-		                           DetermineTypesTransformation.warningUnusedParameter(1, 17, "a") + "\n",
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorFunctionDoesNotReturnAValue(5, 9, "nothing"), DetermineTypesTransformation.warningUnusedParameter(1, 17, "a") + "\n", """
 				                           void nothing(int a) {
 				                             return;
 				                           }
@@ -375,9 +352,7 @@ public final class DetermineTypesTransformationTest {
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorBooleanExpected(2, 5, BasicTypes.UINT8),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorBooleanExpected(2, 5, BasicTypes.UINT8), NO_WARNING, """
 				                           int max(int a, int b) {
 				                             if (1) {
 				                               return a;
@@ -387,9 +362,7 @@ public final class DetermineTypesTransformationTest {
 				                           }
 				                           """ + VOID_MAIN);
 
-		assertInvalidTypeException(DetermineTypesTransformation.errorBooleanExpected(2, 8, BasicTypes.UINT8),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorBooleanExpected(2, 8, BasicTypes.UINT8), NO_WARNING, """
 				                           int max(int a, int b) {
 				                             while (1) {
 				                             }
@@ -408,32 +381,60 @@ public final class DetermineTypesTransformationTest {
 				                              DetermineTypesTransformation.warningUnusedVar(1, 3, "a") + "\n",
 		                              "u8 a = (u8)0;\n" + VOID_MAIN);
 
-		assertUnsupportedTypeException("Foo",
-		                               NO_WARNING,
-		                               "var a = (Foo)0;\n" + VOID_MAIN);
+		assertTransformationFailedException("Foo", NO_WARNING, "var a = (Foo)0;\n" + VOID_MAIN);
 	}
 
 	@Test
-	public void testVarHidesParameter() {
-		assertAlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter("a", 2, 6),
-		                              NO_WARNING,
-		                              """
+	public void testDuplicateDeclaration() {
+		assertTransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclared(2, 4, "a"),
+		                                    NO_WARNING,
+		                                    """
+				                              var a = 1;
+				                              var a = 2;
+				                              """ + VOID_MAIN);
+
+		assertTransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclared(3, 6, "a"),
+		                                    NO_WARNING,
+		                                    """
+                                            void main() {
+				                              var a = 1;
+				                              var a = 2;
+				                            }""");
+
+		assertTransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(2, 6, "a"),
+		                                    NO_WARNING,
+		                                    """
 				                              int func(int a) {
 				                                var a = 0;
 				                              }
 				                              """ + VOID_MAIN);
 
-		assertAlreadyDefinedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter("a", 4, 7),
-		                              NO_WARNING,
-		                              """
+		assertTransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(4, 7, "a"),
+		                                    NO_WARNING,
+		                                    """
 				                              int func(int a) {
 				                                var b = 0;
 				                                {
 				                              	  var a = 1;
 				                                }
 				                              }
-				                              """ +
-				                              VOID_MAIN);
+				                              """ + VOID_MAIN);
+
+		assertTransformationFailedException(DetermineTypesTransformation.errorParameterAlreadyDeclared(1, 20, "a"),
+		                                    NO_WARNING,
+		                                    """
+				                              int func(int a, int a) {
+				                              }
+				                              """ + VOID_MAIN);
+
+		assertTransformationFailedException(DetermineTypesTransformation.errorFunctionAlreadyDeclared(3, 5, "main"),
+		                                    NO_WARNING,
+		                                    """
+				                              void main() {
+				                              }
+				                              void main() {
+				                              }
+				                              """);
 	}
 
 	@Test
@@ -441,25 +442,15 @@ public final class DetermineTypesTransformationTest {
 		assertSuccessfullyTransformed(VOID_MAIN,
 		                              NO_WARNING,
 		                              VOID_MAIN);
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingMain(),
-		                           NO_WARNING,
-		                           "");
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingMain(),
-		                           NO_WARNING,
-		                           "var global = 1;");
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingMain(),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingMain(), NO_WARNING, "");
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingMain(), NO_WARNING, "var global = 1;");
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingMain(), NO_WARNING, """
 				                           void foo() {
 				                           }""");
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingMain(),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingMain(), NO_WARNING, """
 				                           int main() {
 				                           }""");
-		assertInvalidTypeException(DetermineTypesTransformation.errorMissingMain(),
-		                           NO_WARNING,
-		                           """
+		assertTransformationFailedException(DetermineTypesTransformation.errorMissingMain(), NO_WARNING, """
 				                           void main(int a) {
 				                           }""");
 	}
@@ -474,54 +465,14 @@ public final class DetermineTypesTransformationTest {
 		assertEquals(expectedWarnings, out.toString());
 	}
 
-	@SuppressWarnings("SameParameterValue")
-	private void assertAlreadyDefinedException(String expectedExceptionMsg, String expectedWarnings, String code) {
+	private void assertTransformationFailedException(String expectedExceptionMsg, String expectedWarnings, String code) {
 		final StringOutput out = new StringStringOutput();
-		final DeclarationList rootAst = AstFactory.parseString(code);
 		try {
-			DetermineTypesTransformation.transform(rootAst, out);
+			DetermineTypesTransformation.transform(AstFactory.parseString(code), out);
 			fail();
 		}
-		catch (SymbolScope.AlreadyDefinedException ex) {
+		catch (TransformationFailedException ex) {
 			assertEquals(expectedExceptionMsg, ex.getMessage());
-		}
-		assertEquals(expectedWarnings, out.toString());
-	}
-
-	private void assertInvalidTypeException(String expectedExceptionMsg, String expectedWarnings, String code) {
-		final StringOutput out = new StringStringOutput();
-		try {
-			DetermineTypesTransformation.transform(AstFactory.parseString(code), out);
-			fail();
-		}
-		catch (InvalidTypeException ex) {
-			assertEquals(expectedExceptionMsg, ex.getMessage());
-		}
-		assertEquals(expectedWarnings, out.toString());
-	}
-
-	@SuppressWarnings("SameParameterValue")
-	private void assertUndeclaredException(String expectedExceptionMsg, String expectedWarnings, String code) {
-		final StringOutput out = new StringStringOutput();
-		try {
-			DetermineTypesTransformation.transform(AstFactory.parseString(code), out);
-			fail();
-		}
-		catch (DetermineTypesTransformation.UndeclaredException e) {
-			assertEquals(expectedExceptionMsg, e.getMessage());
-		}
-		assertEquals(expectedWarnings, out.toString());
-	}
-
-	@SuppressWarnings("SameParameterValue")
-	private void assertUnsupportedTypeException(String expectedExceptionMsg, String expectedWarnings, String code) {
-		final StringOutput out = new StringStringOutput();
-		try {
-			DetermineTypesTransformation.transform(AstFactory.parseString(code), out);
-			fail();
-		}
-		catch (BasicTypes.UnsupportedTypeException e) {
-			assertEquals(expectedExceptionMsg, e.getMessage());
 		}
 		assertEquals(expectedWarnings, out.toString());
 	}
