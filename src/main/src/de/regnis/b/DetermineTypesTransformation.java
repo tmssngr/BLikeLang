@@ -642,7 +642,7 @@ public final class DetermineTypesTransformation {
 
 	// Inner Classes ==========================================================
 
-	public static final class Function {
+	private static final class Function {
 		public final Type type;
 		public final List<Type> parameterTypes;
 		private final int line;

@@ -21,6 +21,9 @@ public final class BinaryExpression extends Expression {
 	public static final String GE = ">=";
 	public static final String GT = ">";
 	public static final String NE = "!=";
+	public static final String AND = "&";
+	public static final String OR = "|";
+	public static final String XOR = "^";
 
 	// Static =================================================================
 
@@ -59,6 +62,17 @@ public final class BinaryExpression extends Expression {
 	public static BinaryExpression createNe(Expression left, Expression right) {
 		return new BinaryExpression(left, NE, right);
 	}
+
+	public static BinaryExpression createBitAnd(Expression left, Expression right) {
+		return new BinaryExpression(left, AND, right);
+	}
+	public static BinaryExpression createBitOr(Expression left, Expression right) {
+		return new BinaryExpression(left, OR, right);
+	}
+	public static BinaryExpression createBitXor(Expression left, Expression right) {
+		return new BinaryExpression(left, XOR, right);
+	}
+
 
 	public static boolean isComparison(String operator) {
 		return operator.equals(LT)

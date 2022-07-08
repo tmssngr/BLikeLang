@@ -48,12 +48,27 @@ public class AstFactoryTest {
 				             +- a :=
 				             |  +- literal 0
 				             +- b :=
-				                +- operator +
-				                   +- read var a
+				             |  +- operator +
+				             |     +- read var a
+				             |     +- literal 1
+				             +- c :=
+				             |  +- operator &
+				             |     +- read var b
+				             |     +- literal 15
+				             +- d :=
+				             |  +- operator |
+				             |     +- read var c
+				             |     +- literal 16
+				             +- e :=
+				                +- operator ^
+				                   +- read var d
 				                   +- literal 1
 				             """, TreePrinter.print(AstFactory.parseString("""
 						                                                           var a = 0;
 						                                                           var b = a + 1;
+						                                                           var c = b & 15;
+						                                                           var d = c | 16;
+						                                                           var e = d ^ 1;
 						                                                           """)));
 		assertEquals("""
 				             +- void wom(i16 x)
