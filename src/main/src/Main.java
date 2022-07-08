@@ -2,7 +2,7 @@ import de.regnis.b.AstFactory;
 import de.regnis.b.ConstantFoldingTransformation;
 import de.regnis.b.DetermineTypesTransformation;
 import de.regnis.b.SplitExpressionsTransformation;
-import de.regnis.b.node.DeclarationList;
+import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.TreePrinter;

@@ -1,6 +1,6 @@
 package de.regnis.b;
 
-import de.regnis.b.node.*;
+import de.regnis.b.ast.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

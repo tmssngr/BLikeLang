@@ -1,6 +1,6 @@
 package de.regnis.b.out;
 
-import de.regnis.b.node.*;
+import de.regnis.b.ast.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

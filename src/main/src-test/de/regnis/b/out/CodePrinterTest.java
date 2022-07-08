@@ -1,6 +1,7 @@
 package de.regnis.b.out;
 
-import de.regnis.b.node.*;
+import de.regnis.b.ast.*;
+import de.regnis.b.type.BasicTypes;
 import org.junit.Assert;
 import org.junit.Test;
 

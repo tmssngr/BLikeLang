@@ -1,7 +1,9 @@
 package de.regnis.b;
 
-import de.regnis.b.node.*;
+import de.regnis.b.ast.*;
 import de.regnis.b.out.StringOutput;
+import de.regnis.b.type.BasicTypes;
+import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
