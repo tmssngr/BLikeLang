@@ -1,6 +1,6 @@
 package de.regnis.b;
 
-import de.regnis.b.node.Type;
+import de.regnis.b.type.Type;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

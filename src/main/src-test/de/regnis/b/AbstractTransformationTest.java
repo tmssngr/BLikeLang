@@ -1,7 +1,8 @@
 package de.regnis.b;
 
-import de.regnis.b.node.*;
+import de.regnis.b.ast.*;
 import de.regnis.b.out.CodePrinter;
+import de.regnis.b.type.BasicTypes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 

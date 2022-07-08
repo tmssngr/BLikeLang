@@ -1,7 +1,7 @@
 package de.regnis.b;
 
-import de.regnis.b.node.BasicTypes;
-import de.regnis.b.node.DeclarationList;
+import de.regnis.b.type.BasicTypes;
+import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
