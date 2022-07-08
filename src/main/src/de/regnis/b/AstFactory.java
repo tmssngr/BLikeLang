@@ -217,6 +217,19 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public Node visitBinaryExpressionBits(BLikeLangParser.BinaryExpressionBitsContext ctx) {
+		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
+		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
+
+		return switch (ctx.operator.getType()) {
+			case BLikeLangLexer.BitAnd -> BinaryExpression.createBitAnd(left, right);
+			case BLikeLangLexer.BitOr -> BinaryExpression.createBitOr(left, right);
+			case BLikeLangLexer.BitXor -> BinaryExpression.createBitXor(left, right);
+			default -> throw new ParseCancellationException();
+		};
+	}
+
+	@Override
 	public Node visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);

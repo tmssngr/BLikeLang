@@ -136,6 +136,9 @@ public final class ConstantFoldingTransformation {
 				case BinaryExpression.PLUS -> new NumberLiteral(left + right);
 				case BinaryExpression.MINUS -> new NumberLiteral(left - right);
 				case BinaryExpression.MULTIPLY -> new NumberLiteral(left * right);
+				case BinaryExpression.AND -> new NumberLiteral(left & right);
+				case BinaryExpression.OR -> new NumberLiteral(left | right);
+				case BinaryExpression.XOR -> new NumberLiteral(left ^ right);
 				case BinaryExpression.LT -> BooleanLiteral.get(left < right);
 				case BinaryExpression.LE -> BooleanLiteral.get(left <= right);
 				case BinaryExpression.EQ -> BooleanLiteral.get(left == right);
@@ -165,6 +168,11 @@ public final class ConstantFoldingTransformation {
 				// put constant on right side
 				return node.createNew(node.right, node.left);
 			}
+			if (node.operator.equals(BinaryExpression.AND)) {
+				if (left == 0) {
+					return new NumberLiteral(0);
+				}
+			}
 		}
 
 		if (node.right instanceof NumberLiteral) {
@@ -180,6 +188,11 @@ public final class ConstantFoldingTransformation {
 					return node.left;
 				}
 				if (right == 0 && node.left instanceof VarRead) {
+					return new NumberLiteral(0);
+				}
+			}
+			else if (node.operator.equals(BinaryExpression.AND)) {
+				if (right == 0) {
 					return new NumberLiteral(0);
 				}
 			}
@@ -204,6 +217,15 @@ public final class ConstantFoldingTransformation {
 
 			if (Objects.equals(left, right)) {
 				if (node.operator.equals(BinaryExpression.MINUS)) {
+					return new NumberLiteral(0);
+				}
+				if (node.operator.equals(BinaryExpression.AND)) {
+					return node.left;
+				}
+				if (node.operator.equals(BinaryExpression.OR)) {
+					return node.left;
+				}
+				if (node.operator.equals(BinaryExpression.XOR)) {
 					return new NumberLiteral(0);
 				}
 				if (node.operator.equals(BinaryExpression.LT)) {
