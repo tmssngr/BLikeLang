@@ -1,6 +1,7 @@
 package de.regnis.b;
 
 import de.regnis.b.ast.*;
+import de.regnis.b.out.StringStringOutput;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -30,11 +31,11 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		assertEquals("a = foo(1)", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
-						                                     .add(new NumberLiteral(1)))));
+						                             .add(new NumberLiteral(1)))));
 		assertEquals("a = foo(b)", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
-						                                     .add(new VarRead("b")))));
+						                             .add(new VarRead("b")))));
 	}
 
 	@Test
@@ -72,16 +73,16 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
-						                                     .add(new FuncCall("bar",
-						                                                       new FuncCallParameters()
-								                                                               .add(new NumberLiteral(1)))))));
+						                             .add(new FuncCall("bar",
+						                                               new FuncCallParameters()
+								                                               .add(new NumberLiteral(1)))))));
 		assertEquals("""
 				             $1 := 1 - 2
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
-						                                     .add(BinaryExpression.createSub(new NumberLiteral(1),
-						                                                                     new NumberLiteral(2))))));
+						                             .add(BinaryExpression.createSub(new NumberLiteral(1),
+						                                                             new NumberLiteral(2))))));
 	}
 
 	@Test
@@ -103,10 +104,21 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				varDeclaration("a",
 				               new FuncCall("foo",
 				                            new FuncCallParameters()
-						                                    .add(BinaryExpression.createAdd(new NumberLiteral(1),
-						                                                                    new VarRead("b")))
-						                                    .add(BinaryExpression.createMultiply(new NumberLiteral(3),
-						                                                                         new NumberLiteral(4))))));
+						                            .add(BinaryExpression.createAdd(new NumberLiteral(1),
+						                                                            new VarRead("b")))
+						                            .add(BinaryExpression.createMultiply(new NumberLiteral(3),
+						                                                                 new NumberLiteral(4))))));
+		assertEquals("""
+				             void main() {
+				               $1 := 2 * 3
+				               $2 := 10 + $1
+				               call($2)
+				             }
+				             """, SplitExpressionsTransformation.transform(
+				AstFactory.parseString("""
+						                       void main() {
+						                         call(10 + 2 * 3);
+						                       }""")));
 	}
 
 	@Test
@@ -115,6 +127,30 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             $1 := 2 * 3
 				             a := 10 + $1
 				             """, SplitExpressionsTransformation.transform(AstFactory.parseString("var a = 10 + 2 * 3;")));
+	}
+
+	@Test
+	public void testDefineType() {
+		assertEquals("""
+				             i16 call(i16 p0) {
+				               return p0
+				             }
+				             void main() {
+				               $1 : u8 = 2 * 3
+				               $2 : u8 = 10 + $1
+				               $3 : i16 = call(1)
+				               v0 : i16 = $2 + $3
+				             }
+				             """,
+		             SplitExpressionsTransformation.transform(
+				             DetermineTypesTransformation.transform(
+						             AstFactory.parseString("""
+                                                                    int call(int a) {
+                                                                      return a;
+                                                                    }
+								                                    void main() {
+								                                      var a = 10 + 2 * 3 + call(1);
+								                                    }"""), new StringStringOutput())));
 	}
 
 	// Utils ==================================================================
