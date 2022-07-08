@@ -28,7 +28,7 @@ public abstract class Expression extends Node {
 		return type;
 	}
 
-	boolean hasType() {
+	public boolean hasType() {
 		return type != null;
 	}
 

@@ -1,5 +1,4 @@
 todo:
-- detect type of temp variables
 - detect constant variables and inline them
 - check if global var initialized from non-pure function
 - linearize AST (IR) to basic blocks
