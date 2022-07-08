@@ -13,6 +13,6 @@ int max(int a, int b) {
     return a; // if
 }
 
-int main() {
+void main() {
     int a = (a + b) * 2 - sqr(3) * rnd() + max(1, a);
 }
