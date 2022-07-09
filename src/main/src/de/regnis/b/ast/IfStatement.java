@@ -3,7 +3,7 @@ package de.regnis.b.ast;
 /**
  * @author Thomas Singer
  */
-public final class IfStatement extends Statement {
+public final class IfStatement extends ControlFlowStatement {
 
 	// Fields =================================================================
 

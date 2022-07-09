@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Thomas Singer
  */
-public final class VarDeclaration extends Statement {
+public final class VarDeclaration extends SimpleStatement {
 
 	// Static =================================================================
 

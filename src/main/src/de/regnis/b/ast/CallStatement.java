@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class CallStatement extends Statement {
+public final class CallStatement extends SimpleStatement {
 
 	// Fields =================================================================
 

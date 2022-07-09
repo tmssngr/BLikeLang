@@ -3,7 +3,7 @@ package de.regnis.b.ast;
 /**
  * @author Thomas Singer
  */
-public final class WhileStatement extends Statement {
+public final class WhileStatement extends ControlFlowStatement {
 
 	// Fields =================================================================
 

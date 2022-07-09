@@ -1,6 +1,7 @@
 package de.regnis.b.ast;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,5 +30,31 @@ public final class DeclarationList extends Node {
 
 	public List<Declaration> getDeclarations() {
 		return Collections.unmodifiableList(declarations);
+	}
+
+	@Nullable
+	public FuncDeclaration getFunction(String name) {
+		for (Declaration declaration : declarations) {
+			final FuncDeclaration found = declaration.visit(new DeclarationVisitor<FuncDeclaration>() {
+				@Nullable
+				@Override
+				public FuncDeclaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					return null;
+				}
+
+				@Nullable
+				@Override
+				public FuncDeclaration visitFunctionDeclaration(FuncDeclaration node) {
+					if (node.name.equals(name)) {
+						return node;
+					}
+					return null;
+				}
+			});
+			if (found != null) {
+				return found;
+			}
+		}
+		return null;
 	}
 }
