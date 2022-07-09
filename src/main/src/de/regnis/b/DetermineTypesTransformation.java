@@ -23,8 +23,7 @@ public final class DetermineTypesTransformation {
 		transformation.reportMissingMainFunction();
 
 		final DeclarationList newRoot = transformation.visitDeclarationList(root);
-		transformation.reportUnusedFunctions();
-		return newRoot;
+		return transformation.reportAndRemoveUnusedFunctions(newRoot);
 	}
 
 	@NotNull
@@ -619,14 +618,40 @@ public final class DetermineTypesTransformation {
 		throw new TransformationFailedException(errorMissingMain());
 	}
 
-	private void reportUnusedFunctions() {
-		for (Map.Entry<String, Function> entry : functions.entrySet()) {
-			final String name = entry.getKey();
-			final Function function = entry.getValue();
-			if (!function.used) {
-				warning(warningUnusedFunction(function.line, function.column, name));
-			}
+	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
+		final List<GlobalVarDeclaration> varDeclarations = new ArrayList<>();
+		final List<FuncDeclaration> functionDeclarations = new ArrayList<>();
+
+		for (Declaration declaration : root.getDeclarations()) {
+			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					varDeclarations.add(node);
+					return node;
+				}
+
+				@Override
+				public Object visitFunctionDeclaration(FuncDeclaration node) {
+					final Function function = functions.get(node.name);
+					if (function.used) {
+						functionDeclarations.add(node);
+					}
+					else {
+						warning(warningUnusedFunction(function.line, function.column, node.name));
+					}
+					return node;
+				}
+			});
 		}
+
+		final DeclarationList newRoot = new DeclarationList();
+		for (GlobalVarDeclaration declaration : varDeclarations) {
+			newRoot.add(declaration);
+		}
+		for (FuncDeclaration declaration : functionDeclarations) {
+			newRoot.add(declaration);
+		}
+		return newRoot;
 	}
 
 	private boolean isMainFunction(String name, Function function) {
