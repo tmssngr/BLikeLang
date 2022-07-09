@@ -2,7 +2,7 @@ grammar BLikeLang;
 
 root: declarations;
 
-declarations: (declaration | NL)* ;
+declarations: declaration* ;
 declaration: varDeclaration      #globalVarDeclaration
            | functionDeclaration #funcDeclaration
            ;
@@ -15,7 +15,7 @@ parameterDeclaration: type=Identifier name=Identifier;
 statement: varDeclaration                         #localVarDeclaration
          | assignment                             #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
-         | CurlyOpen (statement | NL)* CurlyClose #blockStatement
+         | CurlyOpen statement* CurlyClose #blockStatement
          | Return expression? End                 #returnStatement
          | If expression
              ifStatement=statement
@@ -93,17 +93,19 @@ Whitespace
 	;
 
 NL
-	: '\r' '\n'?
-	| '\n'
+	: ('\r' '\n'?
+	  | '\n'
+	  )
+	-> skip
 	;
 
 LineComment
 	: ('//' ~[\r\n]*
-	  ) NL?
+	  )
 	  -> skip
 	;
 
 BlockComment
-	: '/*' .*? '*/' NL?
+	: '/*' .*? '*/'
 	  -> skip
 	;
