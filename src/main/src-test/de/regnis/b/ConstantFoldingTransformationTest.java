@@ -88,6 +88,10 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		assertChanged("a", "a & a");
 		assertChanged("a", "a | a");
 		assertChanged("0", "a ^ a");
+		assertChanged("1", "1 << 0");
+		assertChanged("4", "1 << 2");
+		assertChanged("b", "b << 0");
+		assertChanged("b", "b >> 0");
 	}
 
 	@Test

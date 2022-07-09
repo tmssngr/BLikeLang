@@ -51,7 +51,7 @@ public final class ConstantFoldingTransformation {
 		final StatementList newStatementList = new StatementList();
 
 		for (Statement statement : statementList.getStatements()) {
-			newStatementList.add(statement.visit(new StatementVisitor<>() {
+			final Statement newStatement = statement.visit(new StatementVisitor<>() {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					final Expression expression = handleExpression(node.expression);
@@ -88,7 +88,8 @@ public final class ConstantFoldingTransformation {
 				public Statement visitWhile(WhileStatement node) {
 					return node;
 				}
-			}));
+			});
+			newStatementList.add(newStatement);
 		}
 		return newStatementList;
 	}
@@ -136,6 +137,8 @@ public final class ConstantFoldingTransformation {
 				case BinaryExpression.PLUS -> new NumberLiteral(left + right);
 				case BinaryExpression.MINUS -> new NumberLiteral(left - right);
 				case BinaryExpression.MULTIPLY -> new NumberLiteral(left * right);
+				case BinaryExpression.SHIFT_L -> new NumberLiteral(left << right);
+				case BinaryExpression.SHIFT_R -> new NumberLiteral(left >> right);
 				case BinaryExpression.AND -> new NumberLiteral(left & right);
 				case BinaryExpression.OR -> new NumberLiteral(left | right);
 				case BinaryExpression.XOR -> new NumberLiteral(left ^ right);
@@ -177,6 +180,7 @@ public final class ConstantFoldingTransformation {
 
 		if (node.right instanceof NumberLiteral) {
 			final int right = ((NumberLiteral) node.right).value;
+			//noinspection IfCanBeSwitch
 			if (node.operator.equals(BinaryExpression.PLUS)
 					|| node.operator.equals(BinaryExpression.MINUS)) {
 				if (right == 0) {
@@ -189,6 +193,12 @@ public final class ConstantFoldingTransformation {
 				}
 				if (right == 0 && node.left instanceof VarRead) {
 					return new NumberLiteral(0);
+				}
+			}
+			else if (node.operator.equals(BinaryExpression.SHIFT_L)
+					|| node.operator.equals(BinaryExpression.SHIFT_R)) {
+				if (right == 0) {
+					return node.left;
 				}
 			}
 			else if (node.operator.equals(BinaryExpression.AND)) {

@@ -41,6 +41,18 @@ public class AstFactoryTest {
 				                   +- literal 4
 				             """, TreePrinter.print(AstFactory.parseString("var a = 2 * 4;")));
 		assertEquals("""
+				             +- a :=
+				                +- operator <<
+				                   +- literal 1
+				                   +- literal 4
+				             """, TreePrinter.print(AstFactory.parseString("var a = 1 << 4;")));
+		assertEquals("""
+				             +- a :=
+				                +- operator >>
+				                   +- literal 192
+				                   +- literal 4
+				             """, TreePrinter.print(AstFactory.parseString("var a = 192 >> 4;")));
+		assertEquals("""
 				             +- a : Foobar =
 				                +- literal 0
 				             """, TreePrinter.print(AstFactory.parseString("Foobar a = 0;")));
