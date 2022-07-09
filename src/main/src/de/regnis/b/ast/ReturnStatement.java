@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Thomas Singer
  */
-public final class ReturnStatement extends Statement {
+public final class ReturnStatement extends ControlFlowStatement {
 
 	// Fields =================================================================
 

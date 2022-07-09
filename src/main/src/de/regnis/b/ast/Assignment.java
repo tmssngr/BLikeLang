@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * @author Thomas Singer
  */
-public final class Assignment extends Statement {
+public final class Assignment extends SimpleStatement {
 
 	// Fields =================================================================
 

@@ -18,6 +18,10 @@ public class CodePrinter {
 		return output.toString();
 	}
 
+	public static void print(Statement statement, StringOutput output) {
+		print(statement, 0, output);
+	}
+
 	// Accessing ==============================================================
 
 	public void print(DeclarationList listNode, StringOutput output) {
@@ -64,7 +68,7 @@ public class CodePrinter {
 		print(declaration.statementList, 0, output);
 	}
 
-	private void print(StatementList listNode, int indentation, StringOutput output) {
+	private static void print(StatementList listNode, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("{");
 		output.println();
@@ -80,7 +84,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(Statement statement, int indentation, StringOutput output) {
+	private static void print(Statement statement, int indentation, StringOutput output) {
 		statement.visit(new StatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
@@ -126,7 +130,7 @@ public class CodePrinter {
 		});
 	}
 
-	private void print(VarDeclaration node, int indentation, StringOutput output) {
+	private static void print(VarDeclaration node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		output.print(node.name);
@@ -144,7 +148,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(Assignment node, int indentation, StringOutput output) {
+	private static void print(Assignment node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		output.print(node.name);
@@ -155,7 +159,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(CallStatement node, int indentation, StringOutput output) {
+	private static void print(CallStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		handleCall(node.name, node.getParameters(), output);
@@ -163,7 +167,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(ReturnStatement node, int indentation, StringOutput output) {
+	private static void print(ReturnStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
 		output.print("return");
@@ -177,7 +181,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private void print(IfStatement node, int indentation, StringOutput output) {
+	private static void print(IfStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("if ");
 		print(node.expression, output);
@@ -192,7 +196,7 @@ public class CodePrinter {
 		print(node.elseStatements, indentation, output);
 	}
 
-	private void print(WhileStatement node, int indentation, StringOutput output) {
+	private static void print(WhileStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("while ");
 		print(node.expression, output);
@@ -201,7 +205,7 @@ public class CodePrinter {
 		print(node.statements, indentation, output);
 	}
 
-	private void print(Expression expression, StringOutput output) {
+	private static void print(Expression expression, StringOutput output) {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
@@ -248,7 +252,7 @@ public class CodePrinter {
 		});
 	}
 
-	private void handleCall(String name, List<Expression> parameters, StringOutput output) {
+	private static void handleCall(String name, List<Expression> parameters, StringOutput output) {
 		output.print(name);
 		output.print("(");
 		boolean isFirst = true;
@@ -264,7 +268,7 @@ public class CodePrinter {
 		output.print(")");
 	}
 
-	private void printIndentation(int indentation, StringOutput output) {
+	private static void printIndentation(int indentation, StringOutput output) {
 		for (int i = 0; i < indentation; i++) {
 			output.print("  ");
 		}
