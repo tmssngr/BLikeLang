@@ -23,6 +23,24 @@ public class AstFactoryTest {
 				                +- literal false
 				             """, TreePrinter.print(AstFactory.parseString("var a = false;")));
 		assertEquals("""
+				             +- a :=
+				                +- operator +
+				                   +- literal 1
+				                   +- literal 2
+				             """, TreePrinter.print(AstFactory.parseString("var a = 1 + 2;")));
+		assertEquals("""
+				             +- a :=
+				                +- operator -
+				                   +- literal 1
+				                   +- literal 2
+				             """, TreePrinter.print(AstFactory.parseString("var a = 1 - 2;")));
+		assertEquals("""
+				             +- a :=
+				                +- operator *
+				                   +- literal 2
+				                   +- literal 4
+				             """, TreePrinter.print(AstFactory.parseString("var a = 2 * 4;")));
+		assertEquals("""
 				             +- a : Foobar =
 				                +- literal 0
 				             """, TreePrinter.print(AstFactory.parseString("Foobar a = 0;")));
