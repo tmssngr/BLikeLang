@@ -27,16 +27,16 @@ varDeclaration: Var             var=Identifier Assign expression End #inferVarDe
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
               ;
 assignment    :     var=Identifier Assign expression End;
-expression: value=Number                                                    #numberLiteral
-          | value=BooleanLiteral                                            #booleanLiteral
-          | var=Identifier                                                  #readVariable
-          | func=Identifier ParenOpen functionCallParameters ParenClose     #functionCall
-          |                 ParenOpen expression ParenClose                 #expressionInParenthesis
-          | left=expression operator=(BitAnd|BitOr|BitXor) right=expression #binaryExpressionBits
-          | left=expression operator=Multiply     right=expression          #binaryExpressionPoint
-          | left=expression operator=(Plus|Minus) right=expression          #binaryExpressionDash
-          | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression   #binaryExpressionBool
-          | ParenOpen type=Identifier ParenClose expression                 #typeCast
+expression: value=Number                                                       #numberLiteral
+          | value=BooleanLiteral                                               #booleanLiteral
+          | var=Identifier                                                     #readVariable
+          | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
+          |                 ParenOpen expression ParenClose                    #expressionInParenthesis
+          | left=expression operator=(BitAnd|BitOr|BitXor) right=expression    #binaryExpressionBits
+          | left=expression operator=(Multiply|ShiftL|ShiftR) right=expression #binaryExpressionPoint
+          | left=expression operator=(Plus|Minus) right=expression             #binaryExpressionDash
+          | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression      #binaryExpressionBool
+          | ParenOpen type=Identifier ParenClose expression                    #typeCast
           ;
 
 functionCallParameters: expression?
@@ -50,6 +50,8 @@ Assign: '=' ;
 Plus    : '+';
 Minus   : '-';
 Multiply: '*';
+ShiftL  : '<<';
+ShiftR  : '>>';
 
 Lt : '<' ;
 Le : '<=';

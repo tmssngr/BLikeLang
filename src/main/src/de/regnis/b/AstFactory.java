@@ -209,9 +209,10 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
 		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
 
-		//noinspection SwitchStatementWithTooFewBranches
 		return switch (ctx.operator.getType()) {
 			case BLikeLangLexer.Multiply -> BinaryExpression.createMultiply(left, right);
+			case BLikeLangLexer.ShiftL -> BinaryExpression.createShiftL(left, right);
+			case BLikeLangLexer.ShiftR -> BinaryExpression.createShiftR(left, right);
 			default -> throw new ParseCancellationException();
 		};
 	}
