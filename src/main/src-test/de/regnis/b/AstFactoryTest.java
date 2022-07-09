@@ -174,6 +174,39 @@ public class AstFactoryTest {
 						                                                             var i = print(a);
 						                                                           }""")));
 		assertEquals("""
+				             +- void printHex4(u8 i)
+				                +- statementList
+				                   +- i =
+				                   |  +- operator &
+				                   |     +- read var i
+				                   |     +- literal 15
+				                   +- if
+				                      +- operator <
+				                      |  +- read var i
+				                      |  +- literal 10
+				                      +- then
+				                      |  +- call print
+				                      |     +- operator +
+				                      |        +- read var i
+				                      |        +- literal 48
+				                      +- else
+				                         +- call print
+				                            +- operator +
+				                               +- operator -
+				                               |  +- read var i
+				                               |  +- literal 10
+				                               +- literal 65
+				             """, TreePrinter.print(AstFactory.parseString("""
+						                                                           void printHex4(u8 i) {
+						                                                             i = i & 15;
+						                                                             if (i < 10) {
+						                                                               print(i + 48);
+						                                                             }
+						                                                             else {
+						                                                               print(i - 10 + 65);
+						                                                             }
+						                                                           }""")));
+		assertEquals("""
 				             +- void printDigit(i16 v)
 				                +- statementList
 				                   +- if
