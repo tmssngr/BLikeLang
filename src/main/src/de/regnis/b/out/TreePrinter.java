@@ -91,8 +91,8 @@ public class TreePrinter {
 		final List<String> strings = new ArrayList<>();
 		strings.add("if");
 		append(getStrings(node.expression), true, strings);
-		append(getStrings("then", node.ifStatements), true, strings);
-		append(getStrings("else", node.elseStatements), false, strings);
+		append(getStrings("then", node.trueStatements), true, strings);
+		append(getStrings("else", node.falseStatements), false, strings);
 		return strings;
 	}
 

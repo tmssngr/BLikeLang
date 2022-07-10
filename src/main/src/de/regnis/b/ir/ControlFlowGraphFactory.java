@@ -59,8 +59,8 @@ public class ControlFlowGraphFactory {
 			@Override
 			public BasicBlock visitIf(IfStatement node) {
 				final IfBlock ifBlock = new IfBlock(basicBlock, node);
-				final BasicBlock trueBlock = processStatements(new BasicBlock(ifBlock), node.ifStatements.getStatements());
-				final BasicBlock falseBlock = processStatements(new BasicBlock(ifBlock), node.elseStatements.getStatements());
+				final BasicBlock trueBlock = processStatements(new BasicBlock(ifBlock), node.trueStatements.getStatements());
+				final BasicBlock falseBlock = processStatements(new BasicBlock(ifBlock), node.falseStatements.getStatements());
 				basicBlock = new BasicBlock(trueBlock, falseBlock);
 				return basicBlock;
 			}

@@ -165,20 +165,20 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
 		final Expression expression = (Expression) visit(expressionContext);
 
-		final Statement ifStatement = (Statement) visit(ctx.ifStatement);
-		final StatementList ifStatementList = ifStatement.toStatementList();
+		final Statement trueStatement = (Statement) visit(ctx.trueStatement);
+		final StatementList trueStatements = trueStatement.toStatementList();
 
-		final StatementList elseStatementList;
-		if (ctx.elseStatement != null) {
-			final Statement elseStatement = (Statement) visit(ctx.elseStatement);
-			elseStatementList = elseStatement.toStatementList();
+		final StatementList falseStatements;
+		if (ctx.falseStatement != null) {
+			final Statement falseStatement = (Statement) visit(ctx.falseStatement);
+			falseStatements = falseStatement.toStatementList();
 		}
 		else {
-			elseStatementList = new StatementList();
+			falseStatements = new StatementList();
 		}
 
 		final Token start = expressionContext.getStart();
-		return new IfStatement(expression, ifStatementList, elseStatementList, start.getLine(), start.getCharPositionInLine());
+		return new IfStatement(expression, trueStatements, falseStatements, start.getLine(), start.getCharPositionInLine());
 	}
 
 	@Override
