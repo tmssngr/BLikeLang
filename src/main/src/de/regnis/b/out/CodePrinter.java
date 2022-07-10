@@ -147,7 +147,7 @@ public class CodePrinter {
 	private void print(Assignment node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		output.print(node.var);
+		output.print(node.name);
 		output.print(" = ");
 
 		print(node.expression, output);
@@ -233,7 +233,7 @@ public class CodePrinter {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				output.print(node.var);
+				output.print(node.name);
 				return node;
 			}
 

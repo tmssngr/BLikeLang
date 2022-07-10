@@ -10,24 +10,24 @@ public final class VarRead extends Expression {
 
 	// Fields =================================================================
 
-	public final String var;
+	public final String name;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public VarRead(@NotNull String var) {
-		this(var, -1, -1);
+	public VarRead(@NotNull String name) {
+		this(name, -1, -1);
 	}
 
-	public VarRead(@NotNull String var, int line, int column) {
-		this.var = var;
+	public VarRead(@NotNull String name, int line, int column) {
+		this.name = name;
 		this.line = line;
 		this.column = column;
 	}
 
-	public VarRead(@NotNull Type type, @NotNull String var) {
-		this.var = var;
+	public VarRead(@NotNull Type type, @NotNull String name) {
+		this.name = name;
 		setType(type);
 		line = -1;
 		column = -1;
@@ -37,7 +37,7 @@ public final class VarRead extends Expression {
 
 	@Override
 	public String toString() {
-		return var;
+		return name;
 	}
 
 	@Override

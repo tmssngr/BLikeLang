@@ -191,7 +191,7 @@ public final class PureFunctionDetection {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				if (globalVariables.contains(node.var)) {
+				if (globalVariables.contains(node.name)) {
 					nonPureFunctions.add(currentFunction);
 				}
 				return node;

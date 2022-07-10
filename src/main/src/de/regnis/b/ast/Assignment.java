@@ -9,22 +9,22 @@ public final class Assignment extends Statement {
 
 	// Fields =================================================================
 
-	public final String var;
+	public final String name;
 	public final Expression expression;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public Assignment(String var, Expression expression) {
-		this(var, expression, -1, -1);
+	public Assignment(String name, Expression expression) {
+		this(name, expression, -1, -1);
 	}
 
-	public Assignment(String var, Expression expression, int line, int column) {
-		Objects.requireNonNull(var);
+	public Assignment(String name, Expression expression, int line, int column) {
+		Objects.requireNonNull(name);
 		Objects.requireNonNull(expression);
 
-		this.var = var;
+		this.name = name;
 		this.expression = expression;
 		this.line = line;
 		this.column = column;
@@ -34,7 +34,7 @@ public final class Assignment extends Statement {
 
 	@Override
 	public String toString() {
-		return "set(" + var + ", " + expression + ")";
+		return "set(" + name + ", " + expression + ")";
 	}
 
 	@Override
