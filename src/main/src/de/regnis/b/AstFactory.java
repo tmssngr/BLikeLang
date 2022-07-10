@@ -6,6 +6,7 @@ import com.syntevo.antlr.b.BLikeLangParser;
 import de.regnis.b.ast.*;
 import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
+import de.regnis.utils.Utils;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jetbrains.annotations.Nullable;
@@ -303,6 +304,22 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		catch (NumberFormatException | BasicTypes.UnsupportedTypeException e) {
 			throw new ParseFailedException("Invalid number: " + text, number.getLine(), number.getCharPositionInLine());
 		}
+	}
+
+	@Override
+	public Node visitCharLiteral(BLikeLangParser.CharLiteralContext ctx) {
+		final String text = ctx.getText();
+		final String parsed = Utils.parseString(text, '\'');
+		if (parsed == null || parsed.length() != 1) {
+			throw new ParseFailedException("invalid char " + text, ctx.start.getLine(), ctx.start.getCharPositionInLine());
+		}
+
+		final char chr = parsed.charAt(0);
+		if (chr >= 0x80) {
+			throw new ParseFailedException("char out of bounds " + text, ctx.start.getLine(), ctx.start.getCharPositionInLine());
+		}
+
+		return new NumberLiteral(chr, BasicTypes.UINT8);
 	}
 
 	@Override

@@ -20,6 +20,10 @@ public class AstFactoryTest {
 				             """, TreePrinter.print(AstFactory.parseString("var a = 0;")));
 		assertEquals("""
 				             +- a :=
+				                +- literal 65
+				             """, TreePrinter.print(AstFactory.parseString("var a = 'A';")));
+		assertEquals("""
+				             +- a :=
 				                +- literal false
 				             """, TreePrinter.print(AstFactory.parseString("var a = false;")));
 		assertEquals("""

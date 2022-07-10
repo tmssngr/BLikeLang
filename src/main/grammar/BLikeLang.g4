@@ -29,6 +29,7 @@ varDeclaration: Var             var=Identifier Assign expression End #inferVarDe
               ;
 assignment    :     var=Identifier Assign expression End;
 expression: value=Number                                                       #numberLiteral
+          | value=CharLiteral                                                  #charLiteral
           | value=BooleanLiteral                                               #booleanLiteral
           | var=Identifier                                                     #readVariable
           | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
@@ -76,6 +77,14 @@ If    : 'if';
 Return: 'return';
 Var   : 'var';
 While : 'while';
+
+fragment SingleQuote : ['];
+
+fragment Char: ~[\\]
+             | [\\] ['nrt\\]
+             ;
+
+CharLiteral: SingleQuote Char SingleQuote;
 
 BooleanLiteral: 'true' | 'false';
 

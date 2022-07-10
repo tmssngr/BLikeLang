@@ -166,6 +166,13 @@ public interface BLikeLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code charLiteral}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCharLiteral(BLikeLangParser.CharLiteralContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code binaryExpressionBits}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
