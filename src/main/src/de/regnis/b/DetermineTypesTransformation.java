@@ -27,106 +27,6 @@ public final class DetermineTypesTransformation {
 		return transformation.reportAndRemoveUnusedFunctions(newRoot);
 	}
 
-	@NotNull
-	public static String errorUndeclaredFunction(int line, int column, String name) {
-		return line + ":" + column + ": Call to undeclared function " + name;
-	}
-
-	@NotNull
-	public static String errorCantAssignType(int line, int column, String name, Type currentType, Type expectedType) {
-		return line + ":" + column + ": Variable " + name + ": Can't assign type " + currentType + " to " + expectedType;
-	}
-
-	@NotNull
-	public static String errorCantAssignReturnType(int line, int column, Type currentType, Type expectedType) {
-		return line + ":" + column + ": return statement: Can't assign type " + currentType + " to " + expectedType;
-	}
-
-	@NotNull
-	public static String errorNoReturnExpressionExpectedForVoid(int line, int column) {
-		return line + ":" + column + ": return statement: no expression expected for void-method";
-	}
-
-	@NotNull
-	public static String errorReturnExpressionExpected(int line, int column, Type expectedType) {
-		return line + ":" + column + ": return statement: expression of type " + expectedType + " expected";
-	}
-
-	@NotNull
-	public static String errorFunctionDoesNotReturnAValue(int line, int column, String name) {
-		return line + ":" + column + ": the call to function " + name + " does not return any value";
-	}
-
-	@NotNull
-	public static String errorBooleanExpected(int line, int column, Type currentType) {
-		return line + ":" + column + ": a boolean expression was expected, but got " + currentType;
-	}
-
-	@NotNull
-	public static String errorMissingMain() {
-		return "Missing function 'void main()'";
-	}
-
-	@NotNull
-	public static String errorMissingReturnStatement(String functionName) {
-		return "Function " + functionName + ": missing return statement";
-	}
-
-	@NotNull
-	public static String errorFunctionAlreadyDeclared(int line, int column, String name) {
-		return line + ":" + column + ": function " + name + " already declared";
-	}
-
-	@NotNull
-	public static String errorParameterAlreadyDeclared(int line, int column, String name) {
-		return line + ":" + column + ": parameter " + name + " already declared";
-	}
-
-	@NotNull
-	public static String errorVarAlreadyDeclared(int line, int column, @NotNull String name) {
-		return line + ":" + column + ": variable " + name + " already declared";
-	}
-
-	@NotNull
-	public static String errorVarAlreadyDeclaredAsParameter(int line, int column, @NotNull String name) {
-		return line + ":" + column + ": local variable " + name + " already declared as parameter";
-	}
-
-	@NotNull
-	public static String warningIgnoredReturnValue(int line, int column, String name, Type functionReturnType) {
-		return line + ":" + column + ": the call to function " + name + " ignores its return value of type " + functionReturnType;
-	}
-
-	@NotNull
-	public static String warningUnnecessaryCastTo(int line, int column, Type type) {
-		return line + ":" + column + ": Unnecessary cast to " + type;
-	}
-
-	@NotNull
-	public static String warningStatementAfterBreak() {
-		return "Ignored statements after break";
-	}
-
-	@NotNull
-	public static String warningStatementAfterReturn() {
-		return "Ignored statements after return";
-	}
-
-	@NotNull
-	public static String warningUnusedFunction(int line, int column, String name) {
-		return line + ":" + column + ": Function " + name + " is unused";
-	}
-
-	@NotNull
-	public static String warningUnusedVar(int line, int column, String name) {
-		return line + ":" + column + ": Variable " + name + " is unused";
-	}
-
-	@NotNull
-	public static String warningUnusedParameter(int line, int column, String name) {
-		return line + ":" + column + ": Parameter " + name + " is unused";
-	}
-
 	// Fields =================================================================
 
 	private final Map<String, Function> functions = new LinkedHashMap<>();
@@ -158,7 +58,7 @@ public final class DetermineTypesTransformation {
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final List<Type> parameterTypes = getParameterTypes(node);
 					if (functions.containsKey(node.name)) {
-						throw new TransformationFailedException(errorFunctionAlreadyDeclared(node.line, node.column, node.name));
+						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.line, node.column, node.name));
 					}
 
 					functions.put(node.name, new Function(node.type, parameterTypes, node.line, node.column));
@@ -212,7 +112,7 @@ public final class DetermineTypesTransformation {
 
 			if (functionReturnType != BasicTypes.VOID) {
 				if (!hasReturnStatement(newStatementList)) {
-					throw new TransformationFailedException(errorMissingReturnStatement(node.name));
+					throw new TransformationFailedException(Messages.errorMissingReturnStatement(node.name));
 				}
 			}
 
@@ -327,12 +227,12 @@ public final class DetermineTypesTransformation {
 			boolean wasBreak = false;
 			for (Statement newStatement : newStatements) {
 				if (wasBreak) {
-					warning(warningStatementAfterBreak());
+					warning(Messages.warningStatementAfterBreak());
 					break;
 				}
 
 				if (wasReturn) {
-					warning(warningStatementAfterReturn());
+					warning(Messages.warningStatementAfterReturn());
 					break;
 				}
 
@@ -425,7 +325,7 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		if (type != null) {
 			if (!BasicTypes.canBeAssignedFrom(type, expressionType)) {
-				throw new TransformationFailedException(errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
+				throw new TransformationFailedException(Messages.errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
 			}
 		}
 		else {
@@ -442,7 +342,7 @@ public final class DetermineTypesTransformation {
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new TransformationFailedException(errorCantAssignType(node.line, node.column, node.name, expressionType, variable.type));
+			throw new TransformationFailedException(Messages.errorCantAssignType(node.line, node.column, node.name, expressionType, variable.type));
 		}
 
 		return new Assignment(variable.newName, newExpression);
@@ -524,7 +424,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type == BasicTypes.VOID) {
-			throw new TransformationFailedException(errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
+			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
 		}
 
 		return new FuncCall(function.type, node.name, newParameters);
@@ -536,7 +436,7 @@ public final class DetermineTypesTransformation {
 		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
 
 		if (function.type != BasicTypes.VOID) {
-			warning(warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
+			warning(Messages.warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
 		}
 
 		return new CallStatement(node.name, newParameters);
@@ -553,7 +453,7 @@ public final class DetermineTypesTransformation {
 
 		final Function function = functions.get(name);
 		if (function == null) {
-			throw new TransformationFailedException(errorUndeclaredFunction(line, column, name));
+			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
 		}
 
 		function.setUsed();
@@ -580,19 +480,19 @@ public final class DetermineTypesTransformation {
 
 		if (functionReturnType == BasicTypes.VOID) {
 			if (node.expression != null) {
-				throw new TransformationFailedException(errorNoReturnExpressionExpectedForVoid(node.line, node.column));
+				throw new TransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(node.line, node.column));
 			}
 			return node;
 		}
 
 		if (node.expression == null) {
-			throw new TransformationFailedException(errorReturnExpressionExpected(node.line, node.column, functionReturnType));
+			throw new TransformationFailedException(Messages.errorReturnExpressionExpected(node.line, node.column, functionReturnType));
 		}
 
 		final Expression newExpression = visitExpression(node.expression);
 
 		if (!BasicTypes.canBeAssignedFrom(functionReturnType, newExpression.getType())) {
-			throw new TransformationFailedException(errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
+			throw new TransformationFailedException(Messages.errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
 		}
 
 		return new ReturnStatement(newExpression);
@@ -601,7 +501,7 @@ public final class DetermineTypesTransformation {
 	private IfStatement visitIf(IfStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
 		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new TransformationFailedException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
+			throw new TransformationFailedException(Messages.errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
 		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
@@ -610,7 +510,7 @@ public final class DetermineTypesTransformation {
 	private WhileStatement visitWhile(WhileStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
 		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new TransformationFailedException(errorBooleanExpected(node.line, node.column, newExpression.getType()));
+			throw new TransformationFailedException(Messages.errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
 		return new WhileStatement(newExpression, visitStatementList(node.statements));
@@ -626,7 +526,7 @@ public final class DetermineTypesTransformation {
 		final Type expressionType = newExpression.getType();
 		final Type type = BasicTypes.getType(node.typeName, false);
 		if (expressionType == type || BasicTypes.canBeAssignedFrom(type, expressionType)) {
-			warning(warningUnnecessaryCastTo(node.line, node.column, type));
+			warning(Messages.warningUnnecessaryCastTo(node.line, node.column, type));
 		}
 		return new TypeCast(type, newExpression);
 	}
@@ -641,7 +541,7 @@ public final class DetermineTypesTransformation {
 			}
 		}
 
-		throw new TransformationFailedException(errorMissingMain());
+		throw new TransformationFailedException(Messages.errorMissingMain());
 	}
 
 	private void reportIllegalBreakStatement(DeclarationList root) {
@@ -729,7 +629,7 @@ public final class DetermineTypesTransformation {
 						functionDeclarations.add(node);
 					}
 					else {
-						warning(warningUnusedFunction(function.line, function.column, node.name));
+						warning(Messages.warningUnusedFunction(function.line, function.column, node.name));
 					}
 					return node;
 				}
