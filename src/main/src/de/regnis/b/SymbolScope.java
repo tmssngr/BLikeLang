@@ -37,15 +37,15 @@ public final class SymbolScope {
 	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Type type, int line, int column) {
 		if (variables.containsKey(name)) {
 			throw new TransformationFailedException(scopeKind == ScopeKind.Parameter
-					                                  ? DetermineTypesTransformation.errorParameterAlreadyDeclared(line, column, name)
-					                                  : DetermineTypesTransformation.errorVarAlreadyDeclared(line, column, name));
+					                                  ? Messages.errorParameterAlreadyDeclared(line, column, name)
+					                                  : Messages.errorVarAlreadyDeclared(line, column, name));
 		}
 
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
 						&& scope.variables.containsKey(name)) {
-					throw new TransformationFailedException(DetermineTypesTransformation.errorVarAlreadyDeclaredAsParameter(line, column, name));
+					throw new TransformationFailedException(Messages.errorVarAlreadyDeclaredAsParameter(line, column, name));
 				}
 			}
 		}
@@ -80,8 +80,8 @@ public final class SymbolScope {
 				final int line = variable.line;
 				final int column = variable.column;
 				output.print(scopeKind == ScopeKind.Parameter
-						             ? DetermineTypesTransformation.warningUnusedParameter(line, column, name)
-						             : DetermineTypesTransformation.warningUnusedVar(line, column, name));
+						             ? Messages.warningUnusedParameter(line, column, name)
+						             : Messages.warningUnusedVar(line, column, name));
 				output.println();
 			}
 		}
