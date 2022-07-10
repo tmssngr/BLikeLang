@@ -395,6 +395,59 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
+	public void testBreak() {
+		assertSuccessfullyTransformed("""
+				                              void main() {
+				                                v0 : i16 = 0
+				                                while true
+				                                {
+				                                  v0 = v0 + 1
+				                                  if v0 == 10
+				                                  {
+				                                    break
+				                                  }
+				                                  else
+				                                  {
+				                                  }
+				                                }
+				                              }
+				                              """,
+		                              DetermineTypesTransformation.warningStatementAfterBreak() + "\n",
+		                              """
+				                              void main() {
+				                                int i = 0;
+				                                while (true) {
+				                                  i = i + 1;
+				                                  if (i == 10) {
+				                                    break;
+				                                    i = 0;
+				                                  }
+				                                }
+				                              }""");
+
+		assertTransformationFailedException(Messages.errorBreakStatementNotInWhile(2, 2), NO_WARNING, """
+				void main() {
+				  break;
+				}""");
+
+		assertTransformationFailedException(Messages.errorBreakStatementNotInWhile(3, 4), NO_WARNING, """
+				void main() {
+				  if (true) {
+				    break;
+				  }
+				}""");
+
+		assertTransformationFailedException(Messages.errorBreakStatementNotInWhile(5, 4), NO_WARNING, """
+				void main() {
+				  if (false) {
+				  }
+				  else {
+				    break;
+				  }
+				}""");
+	}
+
+	@Test
 	public void testTypeCast() {
 		assertSuccessfullyTransformed("g0 : u8 = (u8) -1\n" + VOID_MAIN,
 		                              DetermineTypesTransformation.warningUnusedVar(1, 4, "a") + "\n",

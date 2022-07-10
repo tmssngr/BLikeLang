@@ -96,7 +96,7 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(WhileStatement node) {
+	private List<String> getStrings(WhileStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("While");
 		append(getStrings(node.expression), true, strings);
@@ -104,11 +104,11 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(StatementList node) {
+	private List<String> getStrings(StatementList node) {
 		return getStrings("statementList", node);
 	}
 
-	public List<String> getStrings(String name, StatementList node) {
+	private List<String> getStrings(String name, StatementList node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add(name);
 		final List<? extends Statement> statements = node.getStatements();
@@ -202,6 +202,11 @@ public class TreePrinter {
 			@Override
 			public List<String> visitWhile(WhileStatement node) {
 				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitBreak(BreakStatement node) {
+				return List.of("break");
 			}
 		});
 	}

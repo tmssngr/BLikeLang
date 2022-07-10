@@ -128,6 +128,11 @@ public final class SplitExpressionsTransformation {
 				public Statement visitWhile(WhileStatement node) {
 					return handleWhileStatement(node, tempVarFactory);
 				}
+
+				@Override
+				public Statement visitBreak(BreakStatement node) {
+					return node;
+				}
 			});
 			newStatementList.add(newStatement);
 		}

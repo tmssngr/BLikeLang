@@ -1,5 +1,4 @@
 todo:
-- break statement
 - string constants
 - +=, -=, *=, <<=, >>=
 - detect constant variables and inline them
@@ -12,3 +11,4 @@ done:
 - pure function detection
 - linearize AST (IR) to basic blocks
 - determine needed/provided local variables
+- break statement

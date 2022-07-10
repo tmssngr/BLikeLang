@@ -15,13 +15,14 @@ parameterDeclaration: type=Identifier name=Identifier;
 statement: varDeclaration                         #localVarDeclaration
          | assignment                             #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
-         | CurlyOpen statement* CurlyClose #blockStatement
+         | CurlyOpen statement* CurlyClose        #blockStatement
          | Return expression? End                 #returnStatement
          | If expression
              ifStatement=statement
            (Else
              elseStatement=statement)?            #ifStatement
          | While expression statement             #whileStatement
+         | Break End                              #breakStatement
          ;
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
@@ -69,11 +70,12 @@ ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
 
-Else: 'else';
-If: 'if';
+Break : 'break';
+Else  : 'else';
+If    : 'if';
 Return: 'return';
-Var: 'var';
-While: 'while';
+Var   : 'var';
+While : 'while';
 
 BooleanLiteral: 'true' | 'false';
 

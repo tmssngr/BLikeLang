@@ -266,5 +266,42 @@ public class AstFactoryTest {
 						                                                               i = i + 1;
 						                                                             }
 						                                                           }""")));
+		assertEquals("""
+				             +- void main()
+				                +- statementList
+				                   +- i :=
+				                   |  +- literal 0
+				                   +- While
+				                   |  +- literal true
+				                   |  +- do
+				                   |     +- call print
+				                   |     |  +- operator +
+				                   |     |     +- read var i
+				                   |     |     +- literal 65
+				                   |     +- i =
+				                   |     |  +- operator +
+				                   |     |     +- read var i
+				                   |     |     +- literal 1
+				                   |     +- if
+				                   |        +- operator ==
+				                   |        |  +- read var i
+				                   |        |  +- literal 10
+				                   |        +- then
+				                   |        |  +- break
+				                   |        +- else
+				                   +- call print
+				                      +- literal 13
+				             """, TreePrinter.print(AstFactory.parseString("""
+				                                                          void main() {
+				                                                            var i = 0;
+				                                                            while (true) {
+				                                                              print(i + 65);
+				                                                              i = i + 1;
+				                                                              if (i == 10) {
+				                                                                break;
+				                                                              }
+				                                                            }
+				                                                            print(13);
+				                                                          }""")));
 	}
 }

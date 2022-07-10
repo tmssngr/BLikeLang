@@ -17,4 +17,6 @@ public interface StatementVisitor<O> {
 	O visitIf(IfStatement node);
 
 	O visitWhile(WhileStatement node);
+
+	O visitBreak(BreakStatement node);
 }

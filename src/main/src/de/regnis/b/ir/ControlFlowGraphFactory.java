@@ -69,6 +69,11 @@ public class ControlFlowGraphFactory {
 			public BasicBlock visitWhile(WhileStatement node) {
 				return basicBlock;
 			}
+
+			@Override
+			public BasicBlock visitBreak(BreakStatement node) {
+				return null;
+			}
 		};
 		BasicBlock block = firstBlock;
 		for (Statement statement : statements) {

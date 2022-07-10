@@ -160,6 +160,11 @@ public final class PureFunctionDetection {
 					visitStatements(node.statements);
 					return node;
 				}
+
+				@Override
+				public Object visitBreak(BreakStatement node) {
+					return node;
+				}
 			});
 		}
 	}
