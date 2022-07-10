@@ -50,7 +50,7 @@ public class TreePrinter {
 
 	public List<String> getStrings(Assignment node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.var + " =");
+		strings.add(node.name + " =");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
@@ -252,7 +252,7 @@ public class TreePrinter {
 	}
 
 	private List<String> getStrings(VarRead node) {
-		return Collections.singletonList("read var " + node.var);
+		return Collections.singletonList("read var " + node.name);
 	}
 
 	private List<String> getStrings(TypeCast node) {

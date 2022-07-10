@@ -411,12 +411,12 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Assignment visitAssignment(Assignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.var);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
 		final Expression newExpression = visitExpression(node.expression);
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new TransformationFailedException(errorCantAssignType(node.line, node.column, node.var, expressionType, variable.type));
+			throw new TransformationFailedException(errorCantAssignType(node.line, node.column, node.name, expressionType, variable.type));
 		}
 
 		return new Assignment(variable.newName, newExpression);
@@ -591,7 +591,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private VarRead visitVarRead(VarRead node) {
-		final SymbolScope.Variable typeName = symbolMap.variableRead(node.var);
+		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name);
 		return new VarRead(typeName.type, typeName.newName);
 	}
 

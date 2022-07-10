@@ -55,7 +55,7 @@ public final class ConstantFoldingTransformation {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					final Expression expression = handleExpression(node.expression);
-					return new Assignment(node.var, expression, node.line, node.column);
+					return new Assignment(node.name, expression, node.line, node.column);
 				}
 
 				@Override
@@ -222,8 +222,8 @@ public final class ConstantFoldingTransformation {
 
 		if (node.left instanceof VarRead
 				&& node.right instanceof VarRead) {
-			final String left = ((VarRead) node.left).var;
-			final String right = ((VarRead) node.right).var;
+			final String left = ((VarRead) node.left).name;
+			final String right = ((VarRead) node.right).name;
 
 			if (Objects.equals(left, right)) {
 				if (node.operator.equals(BinaryExpression.MINUS)) {
