@@ -1,4 +1,7 @@
 todo:
+- break statement
+- string constants
+- +=, -=, *=, <<=, >>=
 - detect constant variables and inline them
 - check if global var initialized from non-pure function
 - limit number of local variables
