@@ -127,6 +127,12 @@ public class CodePrinter {
 				print(node, indentation, output);
 				return node;
 			}
+
+			@Override
+			public Object visitBreak(BreakStatement node) {
+				print(node, indentation, output);
+				return node;
+			}
 		});
 	}
 
@@ -203,6 +209,12 @@ public class CodePrinter {
 		output.println();
 
 		print(node.statements, indentation, output);
+	}
+
+	private static void print(BreakStatement ignoredNode, int indentation, StringOutput output) {
+		printIndentation(indentation, output);
+		output.print("break");
+		output.println();
 	}
 
 	private static void print(Expression expression, StringOutput output) {

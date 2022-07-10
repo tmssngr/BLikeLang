@@ -82,6 +82,11 @@ public final class BasicBlock extends AbstractBlock {
 				public Object visitWhile(WhileStatement node) {
 					throw new IllegalStateException();
 				}
+
+				@Override
+				public Object visitBreak(BreakStatement node) {
+					throw new IllegalStateException();
+				}
 			});
 		}
 	}

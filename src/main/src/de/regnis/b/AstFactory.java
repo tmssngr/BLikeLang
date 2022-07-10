@@ -110,6 +110,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final StatementList statementList = new StatementList();
 		for (BLikeLangParser.StatementContext statementCtx : ctx.statement()) {
 			final Statement statement = (Statement) visit(statementCtx);
+			Objects.requireNonNull(statement);
 			statementList.add(statement);
 		}
 		return statementList;
@@ -190,6 +191,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		final Token start = expressionContext.getStart();
 		return new WhileStatement(expression, statementList, start.getLine(), start.getCharPositionInLine());
+	}
+
+	@Override
+	public Node visitBreakStatement(BLikeLangParser.BreakStatementContext ctx) {
+		return new BreakStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
 	}
 
 	@Override

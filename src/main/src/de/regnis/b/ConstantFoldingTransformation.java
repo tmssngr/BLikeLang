@@ -88,6 +88,11 @@ public final class ConstantFoldingTransformation {
 				public Statement visitWhile(WhileStatement node) {
 					return node;
 				}
+
+				@Override
+				public Statement visitBreak(BreakStatement node) {
+					return node;
+				}
 			});
 			newStatementList.add(newStatement);
 		}

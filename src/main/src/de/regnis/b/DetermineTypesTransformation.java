@@ -21,6 +21,7 @@ public final class DetermineTypesTransformation {
 		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
 		transformation.determineFunctions(root);
 		transformation.reportMissingMainFunction();
+		transformation.reportIllegalBreakStatement(root);
 
 		final DeclarationList newRoot = transformation.visitDeclarationList(root);
 		return transformation.reportAndRemoveUnusedFunctions(newRoot);
@@ -99,6 +100,11 @@ public final class DetermineTypesTransformation {
 	@NotNull
 	public static String warningUnnecessaryCastTo(int line, int column, Type type) {
 		return line + ":" + column + ": Unnecessary cast to " + type;
+	}
+
+	@NotNull
+	public static String warningStatementAfterBreak() {
+		return "Ignored statements after break";
 	}
 
 	@NotNull
@@ -298,6 +304,11 @@ public final class DetermineTypesTransformation {
 			public Statement visitWhile(WhileStatement node) {
 				return DetermineTypesTransformation.this.visitWhile(node);
 			}
+
+			@Override
+			public Statement visitBreak(BreakStatement node) {
+				return node;
+			}
 		});
 	}
 
@@ -313,14 +324,23 @@ public final class DetermineTypesTransformation {
 
 			final StatementList newList = new StatementList();
 			boolean wasReturn = false;
+			boolean wasBreak = false;
 			for (Statement newStatement : newStatements) {
+				if (wasBreak) {
+					warning(warningStatementAfterBreak());
+					break;
+				}
+
 				if (wasReturn) {
 					warning(warningStatementAfterReturn());
 					break;
 				}
 
 				newList.add(newStatement);
-				if (newStatement instanceof ReturnStatement) {
+				if (newStatement instanceof BreakStatement) {
+					wasBreak = true;
+				}
+				else if (newStatement instanceof ReturnStatement) {
 					wasReturn = true;
 				}
 			}
@@ -374,6 +394,12 @@ public final class DetermineTypesTransformation {
 
 			@Override
 			public Object visitWhile(WhileStatement node) {
+				list.add(statement);
+				return node;
+			}
+
+			@Override
+			public Object visitBreak(BreakStatement node) {
 				list.add(statement);
 				return node;
 			}
@@ -616,6 +642,72 @@ public final class DetermineTypesTransformation {
 		}
 
 		throw new TransformationFailedException(errorMissingMain());
+	}
+
+	private void reportIllegalBreakStatement(DeclarationList root) {
+		for (Declaration declaration : root.getDeclarations()) {
+			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					return node;
+				}
+
+				@Override
+				public Object visitFunctionDeclaration(FuncDeclaration node) {
+					reportIllegalBreakStatement(node.statementList);
+					return node;
+				}
+			});
+		}
+	}
+
+	private void reportIllegalBreakStatement(StatementList statementList) {
+		for (Statement statement : statementList.getStatements()) {
+			statement.visit(new StatementVisitor<>() {
+				@Override
+				public Object visitAssignment(Assignment node) {
+					return node;
+				}
+
+				@Override
+				public Object visitStatementList(StatementList node) {
+					reportIllegalBreakStatement(node);
+					return node;
+				}
+
+				@Override
+				public Object visitLocalVarDeclaration(VarDeclaration node) {
+					return node;
+				}
+
+				@Override
+				public Object visitCall(CallStatement node) {
+					return node;
+				}
+
+				@Override
+				public Object visitReturn(ReturnStatement node) {
+					return node;
+				}
+
+				@Override
+				public Object visitIf(IfStatement node) {
+					reportIllegalBreakStatement(node.ifStatements);
+					reportIllegalBreakStatement(node.elseStatements);
+					return node;
+				}
+
+				@Override
+				public Object visitWhile(WhileStatement node) {
+					return node;
+				}
+
+				@Override
+				public Object visitBreak(BreakStatement node) {
+					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.line, node.column));
+				}
+			});
+		}
 	}
 
 	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
