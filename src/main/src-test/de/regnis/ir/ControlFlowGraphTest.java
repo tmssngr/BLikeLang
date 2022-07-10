@@ -15,6 +15,7 @@ import de.regnis.utils.Utils;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -32,12 +33,14 @@ public class ControlFlowGraphTest {
 												
 						void printHex4(u8 i) {
 						  i = i & 15;
+						  var chr = 0;
 						  if (i < 10) {
-						    print(i + 48);
+						    chr = i + 48;
 						  }
 						  else {
-						    print(i - 10 + 65);
+						    chr = i - 10 + 65;
 						  }
+						  print(chr);
 						}
 												
 						void printHex8(u8 i) {
@@ -60,21 +63,21 @@ public class ControlFlowGraphTest {
 				             }
 				             void printHex4(u8 p0) {
 				               p0 = p0 & 15
+				               v0 : u8 = 0
 				               if p0 < 10
 				               {
-				                 $1 : u8 = p0 + 48
-				                 print($1)
+				                 v0 = p0 + 48
 				               }
 				               else
 				               {
-				                 $2 : u8 = p0 - 10
-				                 $3 : u8 = $2 + 65
-				                 print($3)
+				                 $1 : u8 = p0 - 10
+				                 v0 = $1 + 65
 				               }
+				               print(v0)
 				             }
 				             void printHex8(u8 p0) {
-				               $4 : u8 = p0 >> 4
-				               printHex4($4)
+				               $2 : u8 = p0 >> 4
+				               printHex4($2)
 				               printHex4(p0)
 				             }
 				             void printHex16(u16 p0) {
@@ -89,8 +92,13 @@ public class ControlFlowGraphTest {
 		final FuncDeclaration printHex4 = Utils.notNull(root.getFunction("printHex4"));
 		final BasicBlock firstBlock = new ControlFlowGraphFactory().createGraph(printHex4);
 
-		assertEquals("p0 = p0 & 15\n", firstBlock.toString(new StringStringOutput()).toString());
+		assertEquals("""
+				             p0 = p0 & 15
+				             v0 : u8 = 0
+				             """, firstBlock.toString(new StringStringOutput()).toString());
 		assertTrue(firstBlock.getPrev().isEmpty());
+		assertEquals(Set.of("p0"), firstBlock.getInput());
+		assertEquals(Set.of("p0"), firstBlock.getOutput());
 
 		final List<AbstractBlock> next = firstBlock.getNext();
 
@@ -106,11 +114,12 @@ public class ControlFlowGraphTest {
 
 		final BasicBlock trueBlock = (BasicBlock) trueFalseBlocks.get(0);
 		assertEquals("""
-				             $1 : u8 = p0 + 48
-				             print($1)
+				             v0 = p0 + 48
 				             """,
 		             trueBlock.toString(new StringStringOutput()).toString());
 		assertEquals(List.of(ifBlock), trueBlock.getPrev());
+		assertEquals(Set.of("p0"), trueBlock.getInput());
+		assertEquals(Set.of("v0"), trueBlock.getOutput());
 
 		final List<AbstractBlock> trueNext = trueBlock.getNext();
 
@@ -120,17 +129,20 @@ public class ControlFlowGraphTest {
 
 		final BasicBlock falseBlock = (BasicBlock) trueFalseBlocks.get(1);
 		assertEquals("""
-				             $2 : u8 = p0 - 10
-				             $3 : u8 = $2 + 65
-				             print($3)
+				             $1 : u8 = p0 - 10
+				             v0 = $1 + 65
 				             """, falseBlock.toString(new StringStringOutput()).toString());
 		assertEquals(List.of(ifBlock), falseBlock.getPrev());
+		assertEquals(Set.of("p0"), falseBlock.getInput());
+		assertEquals(Set.of("v0"), falseBlock.getOutput());
 
 		final List<AbstractBlock> falseNext = falseBlock.getNext();
 
 		assertEquals(trueNext, falseNext);
-		assertEquals("", postIfBlock.toString(new StringStringOutput()).toString());
+		assertEquals("print(v0)\n", postIfBlock.toString(new StringStringOutput()).toString());
 		assertEquals(List.of(trueBlock, falseBlock), postIfBlock.getPrev());
 		assertEquals(List.of(), postIfBlock.getNext());
+		assertEquals(Set.of("v0"), postIfBlock.getInput());
+		assertEquals(Set.of(), postIfBlock.getOutput());
 	}
 }
