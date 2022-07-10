@@ -8,21 +8,21 @@ public final class IfStatement extends ControlFlowStatement {
 	// Fields =================================================================
 
 	public final Expression expression;
-	public final StatementList ifStatements;
-	public final StatementList elseStatements;
+	public final StatementList trueStatements;
+	public final StatementList falseStatements;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public IfStatement(Expression expression, StatementList ifStatements, StatementList elseStatements) {
-		this(expression, ifStatements, elseStatements, -1, -1);
+	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements) {
+		this(expression, trueStatements, falseStatements, -1, -1);
 	}
 
-	public IfStatement(Expression expression, StatementList ifStatements, StatementList elseStatements, int line, int column) {
+	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements, int line, int column) {
 		this.expression = expression;
-		this.ifStatements = ifStatements;
-		this.elseStatements = elseStatements;
+		this.trueStatements = trueStatements;
+		this.falseStatements = falseStatements;
 		this.line = line;
 		this.column = column;
 	}

@@ -137,8 +137,8 @@ public final class DetermineTypesTransformation {
 
 		if (lastStatement instanceof IfStatement) {
 			final IfStatement ifStatement = (IfStatement) lastStatement;
-			return hasReturnStatement(ifStatement.ifStatements)
-					&& hasReturnStatement(ifStatement.elseStatements);
+			return hasReturnStatement(ifStatement.trueStatements)
+					&& hasReturnStatement(ifStatement.falseStatements);
 		}
 
 		return false;
@@ -504,7 +504,7 @@ public final class DetermineTypesTransformation {
 			throw new TransformationFailedException(Messages.errorBooleanExpected(node.line, node.column, newExpression.getType()));
 		}
 
-		return new IfStatement(newExpression, visitStatementList(node.ifStatements), visitStatementList(node.elseStatements));
+		return new IfStatement(newExpression, visitStatementList(node.trueStatements), visitStatementList(node.falseStatements));
 	}
 
 	private WhileStatement visitWhile(WhileStatement node) {
@@ -592,8 +592,8 @@ public final class DetermineTypesTransformation {
 
 				@Override
 				public Object visitIf(IfStatement node) {
-					reportIllegalBreakStatement(node.ifStatements);
-					reportIllegalBreakStatement(node.elseStatements);
+					reportIllegalBreakStatement(node.trueStatements);
+					reportIllegalBreakStatement(node.falseStatements);
 					return node;
 				}
 

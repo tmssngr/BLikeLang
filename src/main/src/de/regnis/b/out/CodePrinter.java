@@ -193,13 +193,13 @@ public class CodePrinter {
 		print(node.expression, output);
 		output.println();
 
-		print(node.ifStatements, indentation, output);
+		print(node.trueStatements, indentation, output);
 
 		printIndentation(indentation, output);
 		output.print("else");
 		output.println();
 
-		print(node.elseStatements, indentation, output);
+		print(node.falseStatements, indentation, output);
 	}
 
 	private static void print(WhileStatement node, int indentation, StringOutput output) {

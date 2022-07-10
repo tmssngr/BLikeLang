@@ -18,9 +18,9 @@ statement: varDeclaration                         #localVarDeclaration
          | CurlyOpen statement* CurlyClose        #blockStatement
          | Return expression? End                 #returnStatement
          | If expression
-             ifStatement=statement
+             trueStatement=statement
            (Else
-             elseStatement=statement)?            #ifStatement
+             falseStatement=statement)?           #ifStatement
          | While expression statement             #whileStatement
          | Break End                              #breakStatement
          ;

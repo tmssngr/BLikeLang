@@ -76,8 +76,8 @@ public final class SplitExpressionsTransformation {
 
 	private Statement handleIfStatement(IfStatement node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		final StatementList ifStatements = handleStatementList(node.ifStatements);
-		final StatementList elseStatements = handleStatementList(node.elseStatements);
+		final StatementList ifStatements = handleStatementList(node.trueStatements);
+		final StatementList elseStatements = handleStatementList(node.falseStatements);
 		return new IfStatement(expression, ifStatements, elseStatements);
 	}
 

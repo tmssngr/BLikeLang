@@ -656,8 +656,8 @@ public class BLikeLangParser extends Parser {
 		}
 	}
 	public static class IfStatementContext extends StatementContext {
-		public StatementContext ifStatement;
-		public StatementContext elseStatement;
+		public StatementContext trueStatement;
+		public StatementContext falseStatement;
 		public TerminalNode If() { return getToken(BLikeLangParser.If, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -778,7 +778,7 @@ public class BLikeLangParser extends Parser {
 				setState(78);
 				expression(0);
 				setState(79);
-				((IfStatementContext)_localctx).ifStatement = statement();
+				((IfStatementContext)_localctx).trueStatement = statement();
 				setState(82);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
@@ -787,7 +787,7 @@ public class BLikeLangParser extends Parser {
 					setState(80);
 					match(Else);
 					setState(81);
-					((IfStatementContext)_localctx).elseStatement = statement();
+					((IfStatementContext)_localctx).falseStatement = statement();
 					}
 					break;
 				}

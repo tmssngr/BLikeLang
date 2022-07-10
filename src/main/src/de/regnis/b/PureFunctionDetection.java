@@ -149,8 +149,8 @@ public final class PureFunctionDetection {
 				@Override
 				public Object visitIf(IfStatement node) {
 					visitExpression(node.expression);
-					visitStatements(node.ifStatements);
-					visitStatements(node.elseStatements);
+					visitStatements(node.trueStatements);
+					visitStatements(node.falseStatements);
 					return node;
 				}
 
