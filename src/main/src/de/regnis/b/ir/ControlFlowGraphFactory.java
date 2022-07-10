@@ -2,7 +2,10 @@ package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Thomas Singer
@@ -13,7 +16,9 @@ public class ControlFlowGraphFactory {
 
 	public BasicBlock createGraph(FuncDeclaration declaration) {
 		final BasicBlock firstBlock = new BasicBlock();
-		processStatements(firstBlock, declaration.statementList.getStatements());
+		final BasicBlock lastBlock = processStatements(firstBlock, declaration.statementList.getStatements());
+		detectRequiredAndProvidedVars(firstBlock);
+		detectInputOutputVars(lastBlock);
 		return firstBlock;
 	}
 
@@ -70,5 +75,39 @@ public class ControlFlowGraphFactory {
 			block = statement.visit(visitor);
 		}
 		return block;
+	}
+
+	private void detectRequiredAndProvidedVars(AbstractBlock firstBlock) {
+		final List<AbstractBlock> blocks = new ArrayList<>();
+		blocks.add(firstBlock);
+
+		final Set<AbstractBlock> processedBlocks = new HashSet<>();
+
+		while (blocks.size() > 0) {
+			final AbstractBlock block = blocks.remove(0);
+			if (!processedBlocks.add(block)) {
+				continue;
+			}
+
+			block.detectRequiredVars();
+			blocks.addAll(block.getNext());
+		}
+	}
+
+	private void detectInputOutputVars(BasicBlock lastBlock) {
+		final List<AbstractBlock> blocks = new ArrayList<>();
+		blocks.add(lastBlock);
+
+		final Set<AbstractBlock> processedBlocks = new HashSet<>();
+
+		while (blocks.size() > 0) {
+			final AbstractBlock block = blocks.remove(0);
+			if (!processedBlocks.add(block)) {
+				continue;
+			}
+
+			block.detectInputOutputVars();
+			blocks.addAll(block.getPrev());
+		}
 	}
 }

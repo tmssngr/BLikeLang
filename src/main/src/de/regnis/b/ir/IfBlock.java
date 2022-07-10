@@ -18,4 +18,11 @@ public final class IfBlock extends ControlFlowBlock {
 		super(prevBlock);
 		this.node = node;
 	}
+
+	// Implemented ============================================================
+
+	@Override
+	public void detectRequiredVars() {
+		detectRequiredVars(node.expression);
+	}
 }
