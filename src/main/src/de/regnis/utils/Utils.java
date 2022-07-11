@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -56,5 +57,22 @@ public final class Utils {
 			buffer.append(chr);
 		}
 		return wasBackslash ? null : buffer.toString();
+	}
+
+	public static void appendCommaSeparated(Iterable<String> collection, StringBuilder buffer) {
+		appendCommaSeparated(collection, s -> s, buffer);
+	}
+
+	public static <O> void appendCommaSeparated(Iterable<? extends O> collection, Function<O, String> function, StringBuilder buffer) {
+		boolean isFirst = true;
+		for (O obj : collection) {
+			if (isFirst) {
+				isFirst = false;
+			}
+			else {
+				buffer.append(", ");
+			}
+			buffer.append(function.apply(obj));
+		}
 	}
 }

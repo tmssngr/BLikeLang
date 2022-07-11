@@ -1,6 +1,6 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.ast.IfStatement;
+import de.regnis.b.ast.WhileStatement;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
@@ -8,51 +8,43 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class IfBlock extends ControlFlowBlock {
+public final class WhileBlock extends ControlFlowBlock {
 
 	// Fields =================================================================
 
-	private final IfStatement node;
-	private final BasicBlock trueBlock;
-	private final BasicBlock falseBlock;
+	private final WhileStatement node;
+	private final BasicBlock innerBlock;
+	private final BasicBlock leaveBlock;
 
 	// Setup ==================================================================
 
-	public IfBlock(@NotNull BasicBlock prevBlock, @NotNull IfStatement node, @NotNull Integer labelIndex) {
-		super("if_" + labelIndex, prevBlock);
+	public WhileBlock(@NotNull BasicBlock prev, @NotNull WhileStatement node, @NotNull Integer labelIndex) {
+		super("while_" + labelIndex, prev);
 		this.node = node;
-
-		trueBlock = new BasicBlock("then_" + labelIndex, this);
-		falseBlock = new BasicBlock("else_" + labelIndex, this);
+		innerBlock = new BasicBlock("do_" + labelIndex, this);
+		leaveBlock = new BasicBlock("after_while_" + labelIndex, this);
 	}
 
 	// Implemented ============================================================
 
 	@Override
 	public void visit(@NotNull BlockVisitor visitor) {
-		visitor.visitIf(this);
-	}
-
-	@Override
-	public void detectRequiredVars() {
-		detectRequiredVars(node.expression);
+		visitor.visitWhile(this);
 	}
 
 	// Accessing ==============================================================
 
-	@NotNull
-	public BasicBlock getTrueBlock() {
-		return trueBlock;
+	public BasicBlock getInnerBlock() {
+		return innerBlock;
 	}
 
-	@NotNull
-	public BasicBlock getFalseBlock() {
-		return falseBlock;
+	public BasicBlock getLeaveBlock() {
+		return leaveBlock;
 	}
 
 	public void print(String indentation, StringOutput output) {
 		output.print(indentation);
-		output.print("if ");
+		output.print("while ");
 		CodePrinter.print(node.expression, output);
 		output.println();
 	}
