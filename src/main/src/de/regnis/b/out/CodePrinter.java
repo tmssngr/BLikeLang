@@ -217,7 +217,7 @@ public class CodePrinter {
 		output.println();
 	}
 
-	private static void print(Expression expression, StringOutput output) {
+	public static void print(Expression expression, StringOutput output) {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {

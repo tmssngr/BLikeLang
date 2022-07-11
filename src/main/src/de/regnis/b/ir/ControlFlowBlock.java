@@ -1,5 +1,6 @@
 package de.regnis.b.ir;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -9,7 +10,7 @@ public abstract class ControlFlowBlock extends AbstractBlock {
 
 	// Setup ==================================================================
 
-	protected ControlFlowBlock(@Nullable BasicBlock prev) {
-		super(prev);
+	protected ControlFlowBlock(@NotNull String label, @Nullable BasicBlock prev) {
+		super(label, prev);
 	}
 }
