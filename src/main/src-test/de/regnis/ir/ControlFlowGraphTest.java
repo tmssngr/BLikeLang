@@ -91,30 +91,33 @@ public class ControlFlowGraphTest {
 		final FuncDeclaration printHex4 = Utils.notNull(root.getFunction("printHex4"));
 		final ControlFlowGraph graph = new ControlFlowGraph(printHex4);
 
-		assertEquals("""
-				             start:
-				                 p0 = p0 & 15
-				                 v0 : u8 = 0
-				             if_1:
-				                 if p0 < 10
-				                 if ! goto else_1
-				             then_1:
-				                 v0 = p0 + 48
-				             after_if_1:
-				                 print(v0)
-				                 goto exit
+		final String expectedOutput = """
+				start:
+				    p0 = p0 & 15
+				    v0 : u8 = 0
+				if_1:
+				    if p0 < 10
+				    if ! goto else_1
+				then_1:
+				    v0 = p0 + 48
+				after_if_1:
+				    print(v0)
+				    goto exit
 
-				             else_1:
-				                 $1 : u8 = p0 - 10
-				                 v0 = $1 + 65
-				                 goto after_if_1
+				else_1:
+				    $1 : u8 = p0 - 10
+				    v0 = $1 + 65
+				    goto after_if_1
 
-				             exit:
-				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
+				exit:
+				    return
+				""";
+		assertEquals(expectedOutput, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
+		graph.compact();
+		assertEquals(expectedOutput, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
 		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
-		final BasicBlock firstBlock = graph.getFirstBlock();
+		final BasicBlock firstBlock = (BasicBlock) graph.getFirstBlock();
 
 		assertEquals("""
 				             p0 = p0 & 15
@@ -271,9 +274,36 @@ public class ControlFlowGraphTest {
 				             exit:
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
+		graph.compact();
+		assertEquals("""
+				             start:
+				                 v0 : i16 = rnd()
+				             while_1:
+				                 while true
+				             do_1:
+				                 v1 : i16 = getNumber()
+				             if_2:
+				                 if v1 == v0
+				                 if ! goto if_3
+				                 goto exit
+
+				             if_3:
+				                 if v1 < v0
+				                 if ! goto else_3
+				             then_3:
+				                 print(60)
+				                 goto while_1
+
+				             else_3:
+				                 print(62)
+				                 goto while_1
+
+				             exit:
+				                 return
+				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
 		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
-		final BasicBlock firstBlock = graph.getFirstBlock();
+		final BasicBlock firstBlock = (BasicBlock) graph.getFirstBlock();
 
 		assertEquals("v0 : i16 = rnd()\n", firstBlock.print(new StringStringOutput()).toString());
 		assertTrue(firstBlock.getPrev().isEmpty());
