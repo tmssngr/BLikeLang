@@ -48,6 +48,17 @@ public final class ControlFlowGraph {
 
 	// Accessing ==============================================================
 
+	public String getVarInputOutput() {
+		final StringBuilder buffer = new StringBuilder();
+		iterate(block -> {
+			buffer.append(block.label);
+			buffer.append(": ");
+			block.getVarInputOutput(buffer);
+			buffer.append('\n');
+		});
+		return buffer.toString();
+	}
+
 	public AbstractBlock getFirstBlock() {
 		return firstBlock;
 	}

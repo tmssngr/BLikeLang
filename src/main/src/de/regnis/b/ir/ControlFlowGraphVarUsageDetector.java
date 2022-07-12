@@ -17,7 +17,8 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	public static void detectVarUsage(@NotNull ControlFlowGraph graph) {
 		detectRequiredAndProvidedVars(graph);
-		detectInputOutputVars(graph.getExitBlock());
+		propagateInputToPrev(graph.getExitBlock());
+		removeUnused(graph);
 	}
 
 	// Utils ==================================================================
@@ -141,22 +142,33 @@ public final class ControlFlowGraphVarUsageDetector {
 		});
 	}
 
-	private static void detectInputOutputVars(ExitBlock lastBlock) {
-		final List<AbstractBlock> blocks = new ArrayList<>();
-		blocks.add(lastBlock);
+	private static void propagateInputToPrev(ExitBlock lastBlock) {
+		boolean repeat = true;
+		while (repeat) {
+			final List<AbstractBlock> blocks = new ArrayList<>();
+			blocks.add(lastBlock);
 
-		final Set<AbstractBlock> processedBlocks = new HashSet<>();
+			repeat = false;
 
-		while (blocks.size() > 0) {
-			final AbstractBlock block = blocks.remove(0);
-			if (!processedBlocks.add(block)) {
-				continue;
-			}
+			final Set<AbstractBlock> processedBlocks = new HashSet<>();
 
-			final boolean changed = block.updateInputOutputFromNextBlocks();
-			if (changed || processedBlocks.add(block)) {
+			while (blocks.size() > 0) {
+				final AbstractBlock block = blocks.remove(0);
+
+				if (!processedBlocks.add(block)) {
+					continue;
+				}
+
+				if (block.addUsedFromNext()) {
+					repeat = true;
+				}
+
 				blocks.addAll(block.getPrev());
 			}
 		}
+	}
+
+	private static void removeUnused(ControlFlowGraph graph) {
+		graph.iterate(AbstractBlock::removeUnusedFromNext);
 	}
 }

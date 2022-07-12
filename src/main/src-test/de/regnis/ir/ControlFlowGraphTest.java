@@ -12,9 +12,9 @@ import de.regnis.utils.Utils;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Singer
@@ -116,7 +116,6 @@ public class ControlFlowGraphTest {
 		graph.compact();
 		assertEquals(expectedOutput, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
-		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
 		final BasicBlock firstBlock = (BasicBlock) graph.getFirstBlock();
 
 		assertEquals("""
@@ -124,8 +123,6 @@ public class ControlFlowGraphTest {
 				             v0 : u8 = 0
 				             """, firstBlock.print(new StringStringOutput()).toString());
 		assertTrue(firstBlock.getPrev().isEmpty());
-		assertEquals(Set.of("p0"), firstBlock.getInput());
-		assertEquals(Set.of("p0", "v0"), firstBlock.getOutput());
 
 		final IfBlock ifBlock = (IfBlock) firstBlock.getSingleNext();
 
@@ -141,8 +138,6 @@ public class ControlFlowGraphTest {
 				             """,
 		             trueBlock.print(new StringStringOutput()).toString());
 		assertEquals(List.of(ifBlock), trueBlock.getPrev());
-		assertEquals(Set.of("p0"), trueBlock.getInput());
-		assertEquals(Set.of("v0"), trueBlock.getOutput());
 
 		final List<AbstractBlock> trueNext = trueBlock.getNext();
 
@@ -156,8 +151,6 @@ public class ControlFlowGraphTest {
 				             v0 = $1 + 65
 				             """, falseBlock.print(new StringStringOutput()).toString());
 		assertEquals(List.of(ifBlock), falseBlock.getPrev());
-		assertEquals(Set.of("p0"), falseBlock.getInput());
-		assertEquals(Set.of("$1", "v0"), falseBlock.getOutput());
 
 		final List<AbstractBlock> falseNext = falseBlock.getNext();
 
@@ -167,12 +160,18 @@ public class ControlFlowGraphTest {
 
 		final AbstractBlock exitBlock = postIfBlock.getSingleNext();
 
-		assertEquals(Set.of("v0"), postIfBlock.getInput());
-		assertEquals(Set.of(), postIfBlock.getOutput());
-
 		assertEquals(List.of(), exitBlock.getNext());
-		assertEquals(Set.of(), exitBlock.getInput());
-		assertEquals(Set.of(), exitBlock.getOutput());
+
+		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
+
+		assertEquals("""
+				             start: in: [p0], out: [p0], tunnel: []
+				             if_1: in: [p0], out: [], tunnel: [p0]
+				             then_1: in: [p0], out: [v0], tunnel: []
+				             else_1: in: [p0], out: [v0], tunnel: []
+				             after_if_1: in: [v0], out: [], tunnel: []
+				             exit: in: [], out: [], tunnel: []
+				             """, graph.getVarInputOutput());
 	}
 
 	@Test
@@ -303,16 +302,18 @@ public class ControlFlowGraphTest {
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
 		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
-		final BasicBlock firstBlock = (BasicBlock) graph.getFirstBlock();
 
-		assertEquals("v0 : i16 = rnd()\n", firstBlock.print(new StringStringOutput()).toString());
-		assertTrue(firstBlock.getPrev().isEmpty());
-		assertEquals(Set.of(), firstBlock.getInput());
-		assertEquals(Set.of("v0"), firstBlock.getOutput());
-
-		final WhileBlock loopBlock = (WhileBlock) firstBlock.getSingleNext();
-
-		assertEquals(2, loopBlock.getPrev().size());
-		assertTrue(loopBlock.getPrev().contains(firstBlock));
+		assertEquals("""
+				             start: in: [], out: [v0], tunnel: []
+				             while_1: in: [], out: [], tunnel: [v0]
+				             do_1: in: [], out: [v1], tunnel: [v0]
+				             exit: in: [], out: [], tunnel: []
+				             if_2: in: [v1, v0], out: [], tunnel: [v0, v1]
+				             if_3: in: [v1, v0], out: [], tunnel: [v0]
+				             then_3: in: [], out: [], tunnel: [v0]
+				             else_3: in: [], out: [], tunnel: [v0]
+				             """, graph.getVarInputOutput());
 	}
+
+	// Utils ==================================================================
 }
