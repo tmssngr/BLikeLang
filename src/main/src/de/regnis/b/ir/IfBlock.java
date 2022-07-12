@@ -14,17 +14,17 @@ public final class IfBlock extends ControlFlowBlock {
 	// Fields =================================================================
 
 	private final IfStatement node;
-	private final BasicBlock trueBlock;
-	private final BasicBlock falseBlock;
 
 	// Setup ==================================================================
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public IfBlock(@NotNull BasicBlock prevBlock, @NotNull IfStatement node, @NotNull Integer labelIndex) {
 		super("if_" + labelIndex, prevBlock);
 		this.node = node;
 
-		trueBlock = new BasicBlock("then_" + labelIndex, this);
-		falseBlock = new BasicBlock("else_" + labelIndex, this);
+		// they might get replaced by direct links during compacting
+		new BasicBlock("then_" + labelIndex, this);
+		new BasicBlock("else_" + labelIndex, this);
 	}
 
 	// Implemented ============================================================
@@ -42,13 +42,13 @@ public final class IfBlock extends ControlFlowBlock {
 	}
 
 	@NotNull
-	public BasicBlock getTrueBlock() {
-		return trueBlock;
+	public AbstractBlock getTrueBlock() {
+		return getNext().get(0);
 	}
 
 	@NotNull
-	public BasicBlock getFalseBlock() {
-		return falseBlock;
+	public AbstractBlock getFalseBlock() {
+		return getNext().get(1);
 	}
 
 	public void print(String indentation, StringOutput output) {

@@ -118,6 +118,20 @@ public abstract class AbstractBlock {
 		}
 	}
 
+	public final void remove() {
+		if (next.size() != 1) {
+			return;
+		}
+
+		final AbstractBlock singleNext = next.get(0);
+		for (AbstractBlock block : prev) {
+			block.replaceNext(this, singleNext);
+		}
+
+		singleNext.prev.remove(this);
+		singleNext.prev.addAll(prev);
+	}
+
 	// Utils ==================================================================
 
 	private void checkNoDuplicate(@NotNull List<AbstractBlock> blocks) {
@@ -125,5 +139,15 @@ public abstract class AbstractBlock {
 		if (uniqueBlocks.size() != blocks.size()) {
 			throw new IllegalStateException(label + ": duplicate entry");
 		}
+	}
+
+	private void replaceNext(AbstractBlock oldBlock, AbstractBlock newBlock) {
+		final int index = next.indexOf(oldBlock);
+		if (index < 0) {
+			throw new IllegalStateException();
+		}
+
+		next.remove(index);
+		next.add(index, newBlock);
 	}
 }

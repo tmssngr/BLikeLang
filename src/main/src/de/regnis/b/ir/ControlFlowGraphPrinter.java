@@ -24,12 +24,7 @@ public final class ControlFlowGraphPrinter {
 
 				block.print(indentation, output);
 
-				final AbstractBlock next = block.getSingleNext();
-				if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
-					output.print(indentation + "goto " + next.label);
-					output.println();
-					output.println();
-				}
+				printGoto(block, block.getSingleNext());
 			}
 
 			@Override
@@ -39,6 +34,7 @@ public final class ControlFlowGraphPrinter {
 				block.print(indentation, output);
 				output.print(indentation + "if ! goto " + block.getFalseBlock().label);
 				output.println();
+				printGoto(block, block.getTrueBlock());
 			}
 
 			@Override
@@ -54,6 +50,14 @@ public final class ControlFlowGraphPrinter {
 
 				output.print(indentation + "return");
 				output.println();
+			}
+
+			private void printGoto(AbstractBlock block, AbstractBlock next) {
+				if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
+					output.print(indentation + "goto " + next.label);
+					output.println();
+					output.println();
+				}
 			}
 
 			private void printLabel(AbstractBlock block) {

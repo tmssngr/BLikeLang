@@ -14,16 +14,16 @@ public final class WhileBlock extends ControlFlowBlock {
 	// Fields =================================================================
 
 	private final WhileStatement node;
-	private final BasicBlock innerBlock;
-	private final BasicBlock leaveBlock;
 
 	// Setup ==================================================================
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public WhileBlock(@NotNull BasicBlock prev, @NotNull WhileStatement node, @NotNull Integer labelIndex) {
 		super("while_" + labelIndex, prev);
 		this.node = node;
-		innerBlock = new BasicBlock("do_" + labelIndex, this);
-		leaveBlock = new BasicBlock("after_while_" + labelIndex, this);
+
+		new BasicBlock("do_" + labelIndex, this);
+		new BasicBlock("after_while_" + labelIndex, this);
 	}
 
 	// Implemented ============================================================
@@ -41,13 +41,13 @@ public final class WhileBlock extends ControlFlowBlock {
 	}
 
 	@NotNull
-	public BasicBlock getInnerBlock() {
-		return innerBlock;
+	public AbstractBlock getInnerBlock() {
+		return getNext().get(0);
 	}
 
 	@NotNull
-	public BasicBlock getLeaveBlock() {
-		return leaveBlock;
+	public AbstractBlock getLeaveBlock() {
+		return getNext().get(1);
 	}
 
 	public void print(String indentation, StringOutput output) {
