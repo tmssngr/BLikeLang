@@ -1,5 +1,6 @@
 package de.regnis.b.ir;
 
+import de.regnis.b.ast.Expression;
 import de.regnis.b.ast.WhileStatement;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
@@ -34,10 +35,17 @@ public final class WhileBlock extends ControlFlowBlock {
 
 	// Accessing ==============================================================
 
+	@NotNull
+	public Expression getCondition() {
+		return node.expression;
+	}
+
+	@NotNull
 	public BasicBlock getInnerBlock() {
 		return innerBlock;
 	}
 
+	@NotNull
 	public BasicBlock getLeaveBlock() {
 		return leaveBlock;
 	}
