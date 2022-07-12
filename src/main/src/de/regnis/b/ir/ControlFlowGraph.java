@@ -39,6 +39,8 @@ public final class ControlFlowGraph {
 		if (lastBlock != null) {
 			exitBlock.addPrev(lastBlock);
 		}
+
+		checkIntegrity();
 	}
 
 	// Accessing ==============================================================
@@ -66,6 +68,12 @@ public final class ControlFlowGraph {
 			consumer.accept(block);
 			blocks.addAll(block.getNext());
 		}
+	}
+
+	// Utils ==================================================================
+
+	private void checkIntegrity() {
+		iterate(AbstractBlock::checkIntegrity);
 	}
 
 	// Inner Classes ==========================================================

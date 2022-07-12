@@ -101,4 +101,29 @@ public abstract class AbstractBlock {
 
 		return changed;
 	}
+
+	public final void checkIntegrity() {
+		checkNoDuplicate(prev);
+		checkNoDuplicate(next);
+
+		for (AbstractBlock block : prev) {
+			if (!block.next.contains(this)) {
+				throw new IllegalStateException(label + ": missing next link from " + block.label);
+			}
+		}
+		for (AbstractBlock block : next) {
+			if (!block.prev.contains(this)) {
+				throw new IllegalStateException(label + ": missing prev link from " + block.label);
+			}
+		}
+	}
+
+	// Utils ==================================================================
+
+	private void checkNoDuplicate(@NotNull List<AbstractBlock> blocks) {
+		final Set<AbstractBlock> uniqueBlocks = new HashSet<>(blocks);
+		if (uniqueBlocks.size() != blocks.size()) {
+			throw new IllegalStateException(label + ": duplicate entry");
+		}
+	}
 }
