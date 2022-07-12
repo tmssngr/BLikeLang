@@ -21,6 +21,7 @@ public abstract class AbstractBlock {
 	private final List<AbstractBlock> next = new ArrayList<>();
 	private final Set<String> input = new LinkedHashSet<>();
 	private final Set<String> output = new LinkedHashSet<>();
+	private final Set<String> tunnel = new LinkedHashSet<>();
 	public final String label;
 
 	// Setup ==================================================================
@@ -43,11 +44,8 @@ public abstract class AbstractBlock {
 
 		final StringBuilder buffer = new StringBuilder();
 		buffer.append(label);
-		buffer.append(" (");
-		Utils.appendCommaSeparated(input, buffer);
-		buffer.append(") -> (");
-		Utils.appendCommaSeparated(output, buffer);
-		buffer.append(")");
+		buffer.append(" ");
+		getVarInputOutput(buffer);
 		return buffer.toString();
 	}
 
@@ -74,6 +72,10 @@ public abstract class AbstractBlock {
 		return Collections.unmodifiableSet(output);
 	}
 
+	public final Set<String> getTunnel() {
+		return Collections.unmodifiableSet(tunnel);
+	}
+
 	public final void addReadVar(String name) {
 		if (!output.contains(name)) {
 			input.add(name);
@@ -84,22 +86,44 @@ public abstract class AbstractBlock {
 		output.add(name);
 	}
 
-	public final boolean updateInputOutputFromNextBlocks() {
-		final Set<String> requiredByNext = new HashSet<>();
-		for (AbstractBlock nextBlock : next) {
-			requiredByNext.addAll(nextBlock.input);
-		}
+	public final boolean addUsedFromNext() {
+		final Set<String> requiredByNext = getRequiredByAllNext();
 
-		boolean changed = output.retainAll(requiredByNext);
-
+		boolean changed = false;
 		for (String required : requiredByNext) {
-			if (output.add(required)) {
+			if (!output.contains(required) && !tunnel.contains(required)) {
 				changed = true;
-				input.add(required);
+				tunnel.add(required);
 			}
 		}
 
 		return changed;
+	}
+
+	public final void removeUnusedFromNext() {
+		final Set<String> requiredByNext = getRequiredByAllNext();
+
+		output.retainAll(requiredByNext);
+	}
+
+	@NotNull
+	private Set<String> getRequiredByAllNext() {
+		final Set<String> requiredByNext = new HashSet<>();
+		for (AbstractBlock nextBlock : next) {
+			requiredByNext.addAll(nextBlock.input);
+			requiredByNext.addAll(nextBlock.tunnel);
+		}
+		return requiredByNext;
+	}
+
+	public final void getVarInputOutput(StringBuilder buffer) {
+		buffer.append("in: [");
+		Utils.appendCommaSeparated(input, buffer);
+		buffer.append("], out: [");
+		Utils.appendCommaSeparated(output, buffer);
+		buffer.append("], tunnel: [");
+		Utils.appendCommaSeparated(tunnel, buffer);
+		buffer.append("]");
 	}
 
 	public final void checkIntegrity() {
