@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -48,6 +49,23 @@ public final class ControlFlowGraph {
 
 	public ExitBlock getExitBlock() {
 		return exitBlock;
+	}
+
+	public void iterate(@NotNull Consumer<AbstractBlock> consumer) {
+		final List<AbstractBlock> blocks = new ArrayList<>();
+		blocks.add(firstBlock);
+
+		final Set<AbstractBlock> processedBlocks = new HashSet<>();
+
+		while (blocks.size() > 0) {
+			final AbstractBlock block = blocks.remove(0);
+			if (!processedBlocks.add(block)) {
+				continue;
+			}
+
+			consumer.accept(block);
+			blocks.addAll(block.getNext());
+		}
 	}
 
 	// Inner Classes ==========================================================

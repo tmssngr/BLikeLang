@@ -1,6 +1,5 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.ast.*;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,56 +74,17 @@ public abstract class AbstractBlock {
 		return Collections.unmodifiableSet(output);
 	}
 
-	protected final void addProvides(@NotNull String name) {
+	public final void addReadVar(String name) {
+		if (!output.contains(name)) {
+			input.add(name);
+		}
+	}
+
+	public final void addWrittenVar(@NotNull String name) {
 		output.add(name);
 	}
 
-	public void detectRequiredVars() {
-	}
-
-	protected final void detectRequiredVars(Expression expression) {
-		expression.visit(new ExpressionVisitor<>() {
-			@Override
-			public Object visitBinary(BinaryExpression node) {
-				detectRequiredVars(node.left);
-				detectRequiredVars(node.right);
-				return node;
-			}
-
-			@Override
-			public Object visitFunctionCall(FuncCall node) {
-				for (Expression parameter : node.getParameters()) {
-					detectRequiredVars(parameter);
-				}
-				return node;
-			}
-
-			@Override
-			public Object visitNumber(NumberLiteral node) {
-				return node;
-			}
-
-			@Override
-			public Object visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
-			public Object visitVarRead(VarRead node) {
-				if (!output.contains(node.name)) {
-					input.add(node.name);
-				}
-				return node;
-			}
-
-			@Override
-			public Object visitTypeCast(TypeCast node) {
-				return node;
-			}
-		});
-	}
-
-	protected final boolean detectInputOutputVars() {
+	public final boolean updateInputOutputFromNextBlocks() {
 		final Set<String> requiredByNext = new HashSet<>();
 		for (AbstractBlock nextBlock : next) {
 			requiredByNext.addAll(nextBlock.input);

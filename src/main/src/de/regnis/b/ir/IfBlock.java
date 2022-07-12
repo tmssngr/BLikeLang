@@ -1,5 +1,6 @@
 package de.regnis.b.ir;
 
+import de.regnis.b.ast.Expression;
 import de.regnis.b.ast.IfStatement;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
@@ -33,12 +34,12 @@ public final class IfBlock extends ControlFlowBlock {
 		visitor.visitIf(this);
 	}
 
-	@Override
-	public void detectRequiredVars() {
-		detectRequiredVars(node.expression);
-	}
-
 	// Accessing ==============================================================
+
+	@NotNull
+	public Expression getCondition() {
+		return node.expression;
+	}
 
 	@NotNull
 	public BasicBlock getTrueBlock() {

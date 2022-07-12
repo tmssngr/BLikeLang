@@ -4,9 +4,9 @@ import de.regnis.b.ast.*;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,67 +39,14 @@ public final class BasicBlock extends AbstractBlock {
 		visitor.visitBasic(this);
 	}
 
-	@Override
-	public void detectRequiredVars() {
-		for (SimpleStatement statement : statements) {
-			statement.visit(new StatementVisitor<>() {
-				@Override
-				public Object visitAssignment(Assignment node) {
-					detectRequiredVars(node.expression);
-					addProvides(node.name);
-					return node;
-				}
-
-				@Override
-				public Object visitStatementList(StatementList node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
-				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					detectRequiredVars(node.expression);
-					addProvides(node.name);
-					return node;
-				}
-
-				@Override
-				public Object visitCall(CallStatement node) {
-					for (Expression parameter : node.getParameters()) {
-						detectRequiredVars(parameter);
-					}
-					return node;
-				}
-
-				@Override
-				public Object visitReturn(ReturnStatement node) {
-					if (node.expression != null) {
-						detectRequiredVars(node.expression);
-					}
-					return node;
-				}
-
-				@Override
-				public Object visitIf(IfStatement node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
-				public Object visitWhile(WhileStatement node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
-				public Object visitBreak(BreakStatement node) {
-					throw new IllegalStateException();
-				}
-			});
-		}
-	}
-
 	// Accessing ==============================================================
 
 	public void add(@NotNull SimpleStatement statement) {
 		statements.add(statement);
+	}
+
+	public List<? extends SimpleStatement> getStatements() {
+		return Collections.unmodifiableList(statements);
 	}
 
 	public StringOutput print(StringOutput output) {
