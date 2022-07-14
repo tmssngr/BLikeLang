@@ -112,6 +112,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterAssignStatement(BLikeLangParser.AssignStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}

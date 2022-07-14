@@ -127,6 +127,12 @@ public final class ControlFlowGraph {
 		}
 
 		@Override
+		public BasicBlock visitMemAssignment(MemAssignment node) {
+			basicBlock.add(node);
+			return basicBlock;
+		}
+
+		@Override
 		public BasicBlock visitLocalVarDeclaration(VarDeclaration node) {
 			basicBlock.add(node);
 			return basicBlock;

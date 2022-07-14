@@ -55,6 +55,11 @@ public final class SplitExpressionsTransformation {
 		return new Assignment(node.name, expression, node.line, node.column);
 	}
 
+	private Statement handleMemAssignment(MemAssignment node, TempVarFactory tempVarFactory) {
+		final Expression expression = handleExpression(node.expression, tempVarFactory);
+		return new MemAssignment(node.name, expression, node.line, node.column);
+	}
+
 	private VarDeclaration handleVarDeclaration(VarDeclaration node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
 		return node.derive(expression);
@@ -97,6 +102,11 @@ public final class SplitExpressionsTransformation {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					return handleAssignment(node, tempVarFactory);
+				}
+
+				@Override
+				public Statement visitMemAssignment(MemAssignment node) {
+					return handleMemAssignment(node, tempVarFactory);
 				}
 
 				@Override
