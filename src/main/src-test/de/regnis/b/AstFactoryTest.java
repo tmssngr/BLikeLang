@@ -83,6 +83,15 @@ public class AstFactoryTest {
 				                +- read mem address
 				             """, TreePrinter.print(AstFactory.parseString("var a = address[];")));
 		assertEquals("""
+				             +- void test()
+				                +- statementList
+				                   +- address[] =
+				                      +- literal 0
+				             """, TreePrinter.print(AstFactory.parseString("""
+						                                                           void test() {
+						                                                             address[] = 0;
+						                                                           }""")));
+		assertEquals("""
 				             +- a :=
 				             |  +- literal 0
 				             +- b :=
@@ -300,16 +309,16 @@ public class AstFactoryTest {
 				                   +- call print
 				                      +- literal 13
 				             """, TreePrinter.print(AstFactory.parseString("""
-				                                                          void main() {
-				                                                            var i = 0;
-				                                                            while (true) {
-				                                                              print(i + 65);
-				                                                              i = i + 1;
-				                                                              if (i == 10) {
-				                                                                break;
-				                                                              }
-				                                                            }
-				                                                            print(13);
-				                                                          }""")));
+						                                                           void main() {
+						                                                             var i = 0;
+						                                                             while (true) {
+						                                                               print(i + 65);
+						                                                               i = i + 1;
+						                                                               if (i == 10) {
+						                                                                 break;
+						                                                               }
+						                                                             }
+						                                                             print(13);
+						                                                           }""")));
 	}
 }

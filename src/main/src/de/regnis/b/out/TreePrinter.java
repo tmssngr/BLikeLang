@@ -55,6 +55,13 @@ public class TreePrinter {
 		return strings;
 	}
 
+	public List<String> getStrings(MemAssignment node) {
+		final List<String> strings = new ArrayList<>();
+		strings.add(node.name + "[] =");
+		append(getStrings(node.expression), false, strings);
+		return strings;
+	}
+
 	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
 		if (node.typeName != null) {
@@ -171,6 +178,11 @@ public class TreePrinter {
 		return node.visit(new StatementVisitor<>() {
 			@Override
 			public List<String> visitAssignment(Assignment node) {
+				return getStrings(node);
+			}
+
+			@Override
+			public List<String> visitMemAssignment(MemAssignment node) {
 				return getStrings(node);
 			}
 

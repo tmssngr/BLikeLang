@@ -176,6 +176,11 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
+			public Statement visitMemAssignment(MemAssignment node) {
+				return DetermineTypesTransformation.this.visitMemAssignment(node);
+			}
+
+			@Override
 			public Statement visitStatementList(StatementList node) {
 				return DetermineTypesTransformation.this.visitStatementList(node);
 			}
@@ -258,6 +263,12 @@ public final class DetermineTypesTransformation {
 		statement.visit(new StatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
+				list.add(statement);
+				return node;
+			}
+
+			@Override
+			public Object visitMemAssignment(MemAssignment node) {
 				list.add(statement);
 				return node;
 			}
@@ -346,6 +357,22 @@ public final class DetermineTypesTransformation {
 		}
 
 		return new Assignment(variable.newName, newExpression);
+	}
+
+	private MemAssignment visitMemAssignment(MemAssignment node) {
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
+		if (variable.type != BasicTypes.UINT16) {
+			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
+		}
+
+		final Expression newExpression = visitExpression(node.expression);
+
+		final Type expressionType = newExpression.getType();
+		if (expressionType != BasicTypes.UINT8) {
+			throw new TransformationFailedException(Messages.errorMemWriteNeedsU8(node.line, node.column, expressionType));
+		}
+
+		return new MemAssignment(variable.newName, newExpression);
 	}
 
 	private Expression visitExpression(Expression expression) {
@@ -580,6 +607,11 @@ public final class DetermineTypesTransformation {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
+					return node;
+				}
+
+				@Override
+				public Object visitMemAssignment(MemAssignment node) {
 					return node;
 				}
 

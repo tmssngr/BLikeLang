@@ -57,6 +57,12 @@ public final class ControlFlowGraphVarUsageDetector {
 				}
 
 				@Override
+				public Object visitMemAssignment(MemAssignment node) {
+					detectRequiredVars(node.expression, block);
+					return node;
+				}
+
+				@Override
 				public Object visitStatementList(StatementList node) {
 					throw new IllegalStateException();
 				}

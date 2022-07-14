@@ -121,6 +121,12 @@ public final class PureFunctionDetection {
 				}
 
 				@Override
+				public Object visitMemAssignment(MemAssignment node) {
+					visitExpression(node.expression);
+					return node;
+				}
+
+				@Override
 				public Object visitStatementList(StatementList node) {
 					visitStatements(statementList);
 					return node;

@@ -6,6 +6,8 @@ package de.regnis.b.ast;
 public interface StatementVisitor<O> {
 	O visitAssignment(Assignment node);
 
+	O visitMemAssignment(MemAssignment node);
+
 	O visitStatementList(StatementList node);
 
 	O visitLocalVarDeclaration(VarDeclaration node);

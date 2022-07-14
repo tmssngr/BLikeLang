@@ -12,17 +12,18 @@ parameterDeclarations: parameterDeclaration?
                      | parameterDeclaration (Comma parameterDeclaration)+;
 parameterDeclaration: type=Identifier name=Identifier;
 
-statement: varDeclaration                         #localVarDeclaration
-         | var=Identifier Assign expression End   #assignStatement
+statement: varDeclaration                                                   #localVarDeclaration
+         | var=Identifier Deref Assign expression End                       #memoryAssignStatement
+         | var=Identifier Assign expression End                             #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
-         | CurlyOpen statement* CurlyClose        #blockStatement
-         | Return expression? End                 #returnStatement
+         | CurlyOpen statement* CurlyClose                                  #blockStatement
+         | Return expression? End                                           #returnStatement
          | If expression
              trueStatement=statement
            (Else
-             falseStatement=statement)?           #ifStatement
-         | While expression statement             #whileStatement
-         | Break End                              #breakStatement
+             falseStatement=statement)?                                     #ifStatement
+         | While expression statement                                       #whileStatement
+         | Break End                                                        #breakStatement
          ;
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
