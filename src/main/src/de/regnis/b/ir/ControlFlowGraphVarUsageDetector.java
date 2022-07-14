@@ -136,6 +136,12 @@ public final class ControlFlowGraphVarUsageDetector {
 			}
 
 			@Override
+			public Object visitMemRead(MemRead node) {
+				block.addReadVar(node.name);
+				return node;
+			}
+
+			@Override
 			public Object visitTypeCast(TypeCast node) {
 				return node;
 			}

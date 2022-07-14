@@ -239,6 +239,11 @@ public class TreePrinter {
 			}
 
 			@Override
+			public List<String> visitMemRead(MemRead node) {
+				return getStrings(node);
+			}
+
+			@Override
 			public List<String> visitTypeCast(TypeCast node) {
 				return getStrings(node);
 			}
@@ -258,6 +263,10 @@ public class TreePrinter {
 
 	private List<String> getStrings(VarRead node) {
 		return Collections.singletonList("read var " + node.name);
+	}
+
+	private List<String> getStrings(MemRead node) {
+		return Collections.singletonList("read mem " + node.name);
 	}
 
 	private List<String> getStrings(TypeCast node) {

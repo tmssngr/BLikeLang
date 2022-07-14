@@ -1,5 +1,6 @@
 package de.regnis.b;
 
+import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,11 @@ public final class Messages {
 	@NotNull
 	public static String errorFunctionDoesNotReturnAValue(int line, int column, String name) {
 		return line + ":" + column + ": the call to function " + name + " does not return any value";
+	}
+
+	@NotNull
+	public static String errorMemAccessNeedsU16(int line, int column, String varName, Type type) {
+		return line + ":" + column + ": accessing memory needs type " + BasicTypes.UINT16 + ", but variable " + varName + " is of type " + type;
 	}
 
 	@NotNull

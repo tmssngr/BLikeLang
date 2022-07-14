@@ -376,6 +376,11 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
+			public Expression visitMemRead(MemRead node) {
+				return DetermineTypesTransformation.this.visitMemRead(node);
+			}
+
+			@Override
 			public Expression visitTypeCast(TypeCast node) {
 				return DetermineTypesTransformation.this.visitTypeCast(node);
 			}
@@ -519,6 +524,15 @@ public final class DetermineTypesTransformation {
 	private VarRead visitVarRead(VarRead node) {
 		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name);
 		return new VarRead(typeName.type, typeName.newName);
+	}
+
+	private MemRead visitMemRead(MemRead node) {
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
+		if (variable.type != BasicTypes.UINT16) {
+			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
+		}
+
+		return new MemRead(BasicTypes.UINT8, variable.newName);
 	}
 
 	private TypeCast visitTypeCast(TypeCast node) {
