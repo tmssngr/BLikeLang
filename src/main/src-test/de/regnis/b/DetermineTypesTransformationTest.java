@@ -392,6 +392,13 @@ public final class DetermineTypesTransformationTest {
 				  }
 				}
 				""" + VOID_MAIN);
+
+		assertTransformationFailedException(Messages.errorMemAccessNeedsU16(3, 13, "addr", BasicTypes.UINT8),
+		                                    NO_WARNING, """
+				                                    void main() {
+				                                      u8 addr = 0;
+				                                      var byte = addr[];
+				                                    }""");
 	}
 
 	@Test
@@ -512,6 +519,22 @@ public final class DetermineTypesTransformationTest {
 				                                    void main() {
 				                                    }
 				                                    """);
+	}
+
+	@Test
+	public void memRead() {
+		assertSuccessfullyTransformed("""
+				                              void main() {
+				                                v0 : u16 = 32768
+				                                v1 : u8 = v0[]
+				                              }
+				                              """,
+		                              Messages.warningUnusedVar(3, 6, "byte") + "\n",
+		                              """
+				                              void main() {
+				                                var address = 32768;
+				                                var byte = address[];
+				                              }""");
 	}
 
 	@Test

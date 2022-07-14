@@ -254,6 +254,13 @@ public class CodePrinter {
 			}
 
 			@Override
+			public Object visitMemRead(MemRead node) {
+				output.print(node.name);
+				output.print("[]");
+				return node;
+			}
+
+			@Override
 			public Object visitTypeCast(TypeCast node) {
 				output.print("(");
 				output.print(node.typeName);

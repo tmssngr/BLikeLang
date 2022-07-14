@@ -274,6 +274,18 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitCharLiteral(BLikeLangParser.CharLiteralContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code readMemory}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code readMemory}
+	 * labeled alternative in {@link BLikeLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionBits}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree

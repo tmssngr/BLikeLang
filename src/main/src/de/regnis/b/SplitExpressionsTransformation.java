@@ -167,6 +167,11 @@ public final class SplitExpressionsTransformation {
 			}
 
 			@Override
+			public Expression visitMemRead(MemRead node) {
+				return node;
+			}
+
+			@Override
 			public Expression visitTypeCast(TypeCast node) {
 				return node;
 			}
@@ -227,6 +232,11 @@ public final class SplitExpressionsTransformation {
 
 			@Override
 			public Expression visitVarRead(VarRead node) {
+				return node;
+			}
+
+			@Override
+			public Expression visitMemRead(MemRead node) {
 				return node;
 			}
 

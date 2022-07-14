@@ -127,6 +127,11 @@ public final class ConstantFoldingTransformation {
 			}
 
 			@Override
+			public Expression visitMemRead(MemRead node) {
+				return node;
+			}
+
+			@Override
 			public Expression visitTypeCast(TypeCast node) {
 				return node;
 			}

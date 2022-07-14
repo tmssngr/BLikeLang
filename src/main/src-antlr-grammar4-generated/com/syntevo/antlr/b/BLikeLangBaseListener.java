@@ -292,6 +292,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBinaryExpressionBits(BLikeLangParser.BinaryExpressionBitsContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -330,6 +330,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public MemRead visitReadMemory(BLikeLangParser.ReadMemoryContext ctx) {
+		final Token varName = ctx.Identifier().getSymbol();
+		return new MemRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
+	}
+
+	@Override
 	public TypeCast visitTypeCast(BLikeLangParser.TypeCastContext ctx) {
 		final String typeName = ctx.type.getText();
 		final Expression expression = (Expression) visit(ctx.expression());

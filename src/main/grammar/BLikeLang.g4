@@ -31,6 +31,7 @@ expression: Number                                                             #
           | CharLiteral                                                        #charLiteral
           | BooleanLiteral                                                     #booleanLiteral
           | Identifier                                                         #readVariable
+          | Identifier Deref                                                   #readMemory
           | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
           |                 ParenOpen expression ParenClose                    #expressionInParenthesis
           | left=expression operator=(BitAnd|BitOr|BitXor) right=expression    #binaryExpressionBits
@@ -69,6 +70,8 @@ ParenOpen : '(';
 ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
+
+Deref: '[]';
 
 Break : 'break';
 Else  : 'else';
