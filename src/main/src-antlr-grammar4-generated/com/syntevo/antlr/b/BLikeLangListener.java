@@ -202,16 +202,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitTypeVarDeclaration(BLikeLangParser.TypeVarDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BLikeLangParser#assignment}.
-	 * @param ctx the parse tree
-	 */
-	void enterAssignment(BLikeLangParser.AssignmentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BLikeLangParser#assignment}.
-	 * @param ctx the parse tree
-	 */
-	void exitAssignment(BLikeLangParser.AssignmentContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionBool}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree

@@ -119,18 +119,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public Node visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
-		return visitAssignment(ctx.assignment());
+		final Expression expression = (Expression) visit(ctx.expression());
+		return new Assignment(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
 	public VarDeclaration visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
 		return (VarDeclaration) visit(ctx.varDeclaration());
-	}
-
-	@Override
-	public Assignment visitAssignment(BLikeLangParser.AssignmentContext ctx) {
-		final Expression expression = (Expression) visit(ctx.expression());
-		return new Assignment(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
@@ -277,7 +272,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public NumberLiteral visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) {
-		final Token number = ctx.value;
+		final Token number = ctx.Number().getSymbol();
 		final String text = number.getText();
 		try {
 			final int suffixPos = text.indexOf('_');
@@ -324,13 +319,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public Node visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) {
-		final String text = ctx.value.getText();
+		final String text = ctx.BooleanLiteral().getText();
 		return BooleanLiteral.get("true".equals(text));
 	}
 
 	@Override
 	public VarRead visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
-		return new VarRead(ctx.var.getText(), ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		final Token varName = ctx.Identifier().getSymbol();
+		return new VarRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
 	}
 
 	@Override
