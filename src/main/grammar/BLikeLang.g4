@@ -13,7 +13,7 @@ parameterDeclarations: parameterDeclaration?
 parameterDeclaration: type=Identifier name=Identifier;
 
 statement: varDeclaration                         #localVarDeclaration
-         | assignment                             #assignStatement
+         | var=Identifier Assign expression End   #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
          | CurlyOpen statement* CurlyClose        #blockStatement
          | Return expression? End                 #returnStatement
@@ -27,11 +27,10 @@ statement: varDeclaration                         #localVarDeclaration
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
               ;
-assignment    :     var=Identifier Assign expression End;
-expression: value=Number                                                       #numberLiteral
-          | value=CharLiteral                                                  #charLiteral
-          | value=BooleanLiteral                                               #booleanLiteral
-          | var=Identifier                                                     #readVariable
+expression: Number                                                             #numberLiteral
+          | CharLiteral                                                        #charLiteral
+          | BooleanLiteral                                                     #booleanLiteral
+          | Identifier                                                         #readVariable
           | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
           |                 ParenOpen expression ParenClose                    #expressionInParenthesis
           | left=expression operator=(BitAnd|BitOr|BitXor) right=expression    #binaryExpressionBits

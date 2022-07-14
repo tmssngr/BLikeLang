@@ -136,13 +136,6 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAssignment(BLikeLangParser.AssignmentContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
