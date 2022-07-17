@@ -1,6 +1,7 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
+import de.regnis.b.out.StringOutput;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,15 +17,14 @@ public final class ControlFlowGraphVarUsageDetector {
 	@NotNull
 	public static ControlFlowGraphVarUsageDetector detectVarUsage(@NotNull ControlFlowGraph graph) {
 		final ControlFlowGraphVarUsageDetector detector = new ControlFlowGraphVarUsageDetector(graph);
-		detector.detectRequiredAndProvidedVars();
-		detector.propagateInputToPrev();
-		detector.removeUnused();
+		detector.propagateLiveToPrev();
 		return detector;
 	}
 
 	// Fields =================================================================
 
 	private final Map<AbstractBlock, Usages> usageMap = new HashMap<>();
+	private final Map<SimpleStatement, Set<String>> liveVars = new HashMap<>();
 	private final ControlFlowGraph graph;
 
 	// Setup ==================================================================
@@ -35,44 +35,41 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	// Accessing ==============================================================
 
-	public String getVarInputOutput() {
-		final StringBuilder buffer = new StringBuilder();
-		graph.iterate(block -> {
-			buffer.append(block.label);
-			buffer.append(": ");
-			final Usages usages = getUsages(block);
-			usages.getVarInputOutput(buffer);
-			buffer.append('\n');
-		});
-		return buffer.toString();
+	public ControlFlowGraphPrinter createPrinter(StringOutput output) {
+		return new ControlFlowGraphPrinter(graph, output) {
+			@Override
+			protected void printBefore(String indentation, AbstractBlock block) {
+				print(indentation, getUsages(block).lifeBefore);
+			}
+
+			@Override
+			protected void print(String indentation, SimpleStatement statement) {
+				super.print(indentation, statement);
+
+				final Set<String> liveVars = ControlFlowGraphVarUsageDetector.this.liveVars.get(statement);
+				print(indentation, liveVars);
+			}
+
+			private void print(String indentation, Set<String> strings) {
+				final List<String> sortedStrings = new ArrayList<>(strings);
+				sortedStrings.sort(String::compareTo);
+
+				output.print(indentation);
+				output.print("// [");
+				output.print(Utils.appendCommaSeparated(sortedStrings, new StringBuilder()).toString());
+				output.print("]");
+				output.println();
+			}
+		};
 	}
 
 	// Utils ==================================================================
 
-	private void detectRequiredAndProvidedVars() {
-		graph.iterate(block -> block.visit(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				detectRequiredAndProvidedVars(block);
-			}
-
-			@Override
-			public void visitIf(IfBlock block) {
-				detectRequiredVars(block.getCondition(), block);
-			}
-
-			@Override
-			public void visitWhile(WhileBlock block) {
-				detectRequiredVars(block.getCondition(), block);
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
-			}
-		}));
+	private Usages getUsages(AbstractBlock block) {
+		return usageMap.computeIfAbsent(block, block1 -> new Usages());
 	}
 
-	private void propagateInputToPrev() {
+	private void propagateLiveToPrev() {
 		boolean repeat = true;
 		while (repeat) {
 			final List<AbstractBlock> blocks = new ArrayList<>();
@@ -89,7 +86,7 @@ public final class ControlFlowGraphVarUsageDetector {
 					continue;
 				}
 
-				if (addUsedFromNext(block)) {
+				if (process(block)) {
 					repeat = true;
 				}
 
@@ -98,73 +95,72 @@ public final class ControlFlowGraphVarUsageDetector {
 		}
 	}
 
-	private Usages getUsages(AbstractBlock block) {
-		return usageMap.computeIfAbsent(block, block1 -> new Usages());
-	}
-
-	private boolean addUsedFromNext(AbstractBlock block) {
-		final Set<String> requiredByNext = getRequiredByAllNext(block);
+	private boolean process(AbstractBlock block) {
+		final Set<String> live = getLifeFromAllNext(block);
 
 		final Usages usages = getUsages(block);
+		boolean changed = usages.lifeAfter.addAll(live);
 
-		boolean changed = false;
-		for (String required : requiredByNext) {
-			if (!usages.output.contains(required) && !usages.tunnel.contains(required)) {
-				changed = true;
-				usages.tunnel.add(required);
+		block.visit(new BlockVisitor() {
+			@Override
+			public void visitBasic(BasicBlock block) {
+				detectRequiredAndProvidedVars(block, live);
 			}
+
+			@Override
+			public void visitIf(IfBlock block) {
+				detectRequiredVars(block.getCondition(), live);
+			}
+
+			@Override
+			public void visitWhile(WhileBlock block) {
+				detectRequiredVars(block.getCondition(), live);
+			}
+
+			@Override
+			public void visitExit(ExitBlock block) {
+			}
+		});
+
+		if (usages.lifeBefore.addAll(live)) {
+			changed = true;
 		}
 
 		return changed;
 	}
 
 	@NotNull
-	private Set<String> getRequiredByAllNext(AbstractBlock block) {
-		final Set<String> requiredByNext = new HashSet<>();
+	private Set<String> getLifeFromAllNext(AbstractBlock block) {
+		final Set<String> lifeFromNext = new HashSet<>();
 		for (AbstractBlock nextBlock : block.getNext()) {
 			final Usages nextUsages = getUsages(nextBlock);
-			requiredByNext.addAll(nextUsages.input);
-			requiredByNext.addAll(nextUsages.tunnel);
+			lifeFromNext.addAll(nextUsages.lifeBefore);
 		}
-		return requiredByNext;
+		return lifeFromNext;
 	}
 
-	private void removeUnused() {
-		graph.iterate(this::removeUnusedFromNext);
+	private void setLiveVars(SimpleStatement node, Set<String> live) {
+		liveVars.put(node, new HashSet<>(live));
 	}
 
-	private void removeUnusedFromNext(AbstractBlock block) {
-		final Set<String> requiredByNext = getRequiredByAllNext(block);
+	private void detectRequiredAndProvidedVars(BasicBlock block, Set<String> live) {
+		final List<? extends SimpleStatement> statements = new ArrayList<>(block.getStatements());
+		Collections.reverse(statements);
+		for (SimpleStatement statement : statements) {
+			setLiveVars(statement, live);
 
-		final Usages usages = getUsages(block);
-		usages.output.retainAll(requiredByNext);
-	}
-
-	private void addWrittenVar(String name, BasicBlock block) {
-		final Usages usages = getUsages(block);
-		usages.output.add(name);
-	}
-
-	private void addReadVar(String name, AbstractBlock block) {
-		final Usages usages = getUsages(block);
-		if (!usages.output.contains(name)) {
-			usages.input.add(name);
-		}
-	}
-
-	private void detectRequiredAndProvidedVars(BasicBlock block) {
-		for (SimpleStatement statement : block.getStatements()) {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
-					detectRequiredVars(node.expression, block);
-					addWrittenVar(node.name, block);
+					live.remove(node.name);
+					detectRequiredVars(node.expression, live);
 					return node;
 				}
 
 				@Override
 				public Object visitMemAssignment(MemAssignment node) {
-					detectRequiredVars(node.expression, block);
+					live.add(node.name);
+					detectRequiredVars(node.expression, live);
 					return node;
 				}
 
@@ -175,15 +171,15 @@ public final class ControlFlowGraphVarUsageDetector {
 
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					detectRequiredVars(node.expression, block);
-					addWrittenVar(node.name, block);
+					live.remove(node.name);
+					detectRequiredVars(node.expression, live);
 					return node;
 				}
 
 				@Override
 				public Object visitCall(CallStatement node) {
 					for (Expression parameter : node.getParameters()) {
-						detectRequiredVars(parameter, block);
+						detectRequiredVars(parameter, live);
 					}
 					return node;
 				}
@@ -191,7 +187,7 @@ public final class ControlFlowGraphVarUsageDetector {
 				@Override
 				public Object visitReturn(ReturnStatement node) {
 					if (node.expression != null) {
-						detectRequiredVars(node.expression, block);
+						detectRequiredVars(node.expression, live);
 					}
 					return node;
 				}
@@ -214,19 +210,19 @@ public final class ControlFlowGraphVarUsageDetector {
 		}
 	}
 
-	private void detectRequiredVars(Expression expression, AbstractBlock block) {
+	private void detectRequiredVars(Expression expression, Set<String> live) {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				detectRequiredVars(node.left, block);
-				detectRequiredVars(node.right, block);
+				detectRequiredVars(node.left, live);
+				detectRequiredVars(node.right, live);
 				return node;
 			}
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
 				for (Expression parameter : node.getParameters()) {
-					detectRequiredVars(parameter, block);
+					detectRequiredVars(parameter, live);
 				}
 				return node;
 			}
@@ -243,13 +239,13 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				addReadVar(node.name, block);
+				live.add(node.name);
 				return node;
 			}
 
 			@Override
 			public Object visitMemRead(MemRead node) {
-				addReadVar(node.name, block);
+				live.add(node.name);
 				return node;
 			}
 
@@ -263,9 +259,8 @@ public final class ControlFlowGraphVarUsageDetector {
 	// Inner Classes ==========================================================
 
 	public static final class Usages {
-		private final Set<String> input = new LinkedHashSet<>();
-		private final Set<String> output = new LinkedHashSet<>();
-		private final Set<String> tunnel = new LinkedHashSet<>();
+		private final Set<String> lifeBefore = new LinkedHashSet<>();
+		private final Set<String> lifeAfter = new LinkedHashSet<>();
 
 		public Usages() {
 		}
@@ -277,25 +272,11 @@ public final class ControlFlowGraphVarUsageDetector {
 			return buffer.toString();
 		}
 
-		public Set<String> getInput() {
-			return Collections.unmodifiableSet(input);
-		}
-
-		public Set<String> getOutput() {
-			return Collections.unmodifiableSet(output);
-		}
-
-		public Set<String> getTunnel() {
-			return Collections.unmodifiableSet(tunnel);
-		}
-
 		public void getVarInputOutput(StringBuilder buffer) {
 			buffer.append("in: [");
-			Utils.appendCommaSeparated(input, buffer);
+			Utils.appendCommaSeparated(lifeBefore, buffer);
 			buffer.append("], out: [");
-			Utils.appendCommaSeparated(output, buffer);
-			buffer.append("], tunnel: [");
-			Utils.appendCommaSeparated(tunnel, buffer);
+			Utils.appendCommaSeparated(lifeAfter, buffer);
 			buffer.append("]");
 		}
 	}
