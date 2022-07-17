@@ -1,6 +1,5 @@
 package de.regnis.b.ir;
 
-import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,9 +18,6 @@ public abstract class AbstractBlock {
 
 	private final List<AbstractBlock> prev = new ArrayList<>();
 	private final List<AbstractBlock> next = new ArrayList<>();
-	private final Set<String> input = new LinkedHashSet<>();
-	private final Set<String> output = new LinkedHashSet<>();
-	private final Set<String> tunnel = new LinkedHashSet<>();
 	public final String label;
 
 	// Setup ==================================================================
@@ -38,15 +34,7 @@ public abstract class AbstractBlock {
 
 	@Override
 	public String toString() {
-		if (input.isEmpty() && output.isEmpty()) {
-			return label;
-		}
-
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append(label);
-		buffer.append(" ");
-		getVarInputOutput(buffer);
-		return buffer.toString();
+		return label;
 	}
 
 	// Accessing ==============================================================
@@ -62,68 +50,6 @@ public abstract class AbstractBlock {
 
 	public final List<AbstractBlock> getNext() {
 		return Collections.unmodifiableList(next);
-	}
-
-	public final Set<String> getInput() {
-		return Collections.unmodifiableSet(input);
-	}
-
-	public final Set<String> getOutput() {
-		return Collections.unmodifiableSet(output);
-	}
-
-	public final Set<String> getTunnel() {
-		return Collections.unmodifiableSet(tunnel);
-	}
-
-	public final void addReadVar(String name) {
-		if (!output.contains(name)) {
-			input.add(name);
-		}
-	}
-
-	public final void addWrittenVar(@NotNull String name) {
-		output.add(name);
-	}
-
-	public final boolean addUsedFromNext() {
-		final Set<String> requiredByNext = getRequiredByAllNext();
-
-		boolean changed = false;
-		for (String required : requiredByNext) {
-			if (!output.contains(required) && !tunnel.contains(required)) {
-				changed = true;
-				tunnel.add(required);
-			}
-		}
-
-		return changed;
-	}
-
-	public final void removeUnusedFromNext() {
-		final Set<String> requiredByNext = getRequiredByAllNext();
-
-		output.retainAll(requiredByNext);
-	}
-
-	@NotNull
-	private Set<String> getRequiredByAllNext() {
-		final Set<String> requiredByNext = new HashSet<>();
-		for (AbstractBlock nextBlock : next) {
-			requiredByNext.addAll(nextBlock.input);
-			requiredByNext.addAll(nextBlock.tunnel);
-		}
-		return requiredByNext;
-	}
-
-	public final void getVarInputOutput(StringBuilder buffer) {
-		buffer.append("in: [");
-		Utils.appendCommaSeparated(input, buffer);
-		buffer.append("], out: [");
-		Utils.appendCommaSeparated(output, buffer);
-		buffer.append("], tunnel: [");
-		Utils.appendCommaSeparated(tunnel, buffer);
-		buffer.append("]");
 	}
 
 	public final void checkIntegrity() {
