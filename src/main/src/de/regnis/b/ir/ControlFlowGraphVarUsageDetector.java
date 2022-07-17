@@ -1,12 +1,10 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Thomas Singer
@@ -15,15 +13,43 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	// Static =================================================================
 
-	public static void detectVarUsage(@NotNull ControlFlowGraph graph) {
-		detectRequiredAndProvidedVars(graph);
-		propagateInputToPrev(graph.getExitBlock());
-		removeUnused(graph);
+	@NotNull
+	public static ControlFlowGraphVarUsageDetector detectVarUsage(@NotNull ControlFlowGraph graph) {
+		final ControlFlowGraphVarUsageDetector detector = new ControlFlowGraphVarUsageDetector(graph);
+		detector.detectRequiredAndProvidedVars();
+		detector.propagateInputToPrev();
+		detector.removeUnused();
+		return detector;
+	}
+
+	// Fields =================================================================
+
+	private final Map<AbstractBlock, Usages> usageMap = new HashMap<>();
+	private final ControlFlowGraph graph;
+
+	// Setup ==================================================================
+
+	private ControlFlowGraphVarUsageDetector(ControlFlowGraph graph) {
+		this.graph = graph;
+	}
+
+	// Accessing ==============================================================
+
+	public String getVarInputOutput() {
+		final StringBuilder buffer = new StringBuilder();
+		graph.iterate(block -> {
+			buffer.append(block.label);
+			buffer.append(": ");
+			final Usages usages = getUsages(block);
+			usages.getVarInputOutput(buffer);
+			buffer.append('\n');
+		});
+		return buffer.toString();
 	}
 
 	// Utils ==================================================================
 
-	private static void detectRequiredAndProvidedVars(ControlFlowGraph graph) {
+	private void detectRequiredAndProvidedVars() {
 		graph.iterate(block -> block.visit(new BlockVisitor() {
 			@Override
 			public void visitBasic(BasicBlock block) {
@@ -46,13 +72,93 @@ public final class ControlFlowGraphVarUsageDetector {
 		}));
 	}
 
-	private static void detectRequiredAndProvidedVars(BasicBlock block) {
+	private void propagateInputToPrev() {
+		boolean repeat = true;
+		while (repeat) {
+			final List<AbstractBlock> blocks = new ArrayList<>();
+			blocks.add(graph.getExitBlock());
+
+			repeat = false;
+
+			final Set<AbstractBlock> processedBlocks = new HashSet<>();
+
+			while (blocks.size() > 0) {
+				final AbstractBlock block = blocks.remove(0);
+
+				if (!processedBlocks.add(block)) {
+					continue;
+				}
+
+				if (addUsedFromNext(block)) {
+					repeat = true;
+				}
+
+				blocks.addAll(block.getPrev());
+			}
+		}
+	}
+
+	private Usages getUsages(AbstractBlock block) {
+		return usageMap.computeIfAbsent(block, block1 -> new Usages());
+	}
+
+	private boolean addUsedFromNext(AbstractBlock block) {
+		final Set<String> requiredByNext = getRequiredByAllNext(block);
+
+		final Usages usages = getUsages(block);
+
+		boolean changed = false;
+		for (String required : requiredByNext) {
+			if (!usages.output.contains(required) && !usages.tunnel.contains(required)) {
+				changed = true;
+				usages.tunnel.add(required);
+			}
+		}
+
+		return changed;
+	}
+
+	@NotNull
+	private Set<String> getRequiredByAllNext(AbstractBlock block) {
+		final Set<String> requiredByNext = new HashSet<>();
+		for (AbstractBlock nextBlock : block.getNext()) {
+			final Usages nextUsages = getUsages(nextBlock);
+			requiredByNext.addAll(nextUsages.input);
+			requiredByNext.addAll(nextUsages.tunnel);
+		}
+		return requiredByNext;
+	}
+
+	private void removeUnused() {
+		graph.iterate(this::removeUnusedFromNext);
+	}
+
+	private void removeUnusedFromNext(AbstractBlock block) {
+		final Set<String> requiredByNext = getRequiredByAllNext(block);
+
+		final Usages usages = getUsages(block);
+		usages.output.retainAll(requiredByNext);
+	}
+
+	private void addWrittenVar(String name, BasicBlock block) {
+		final Usages usages = getUsages(block);
+		usages.output.add(name);
+	}
+
+	private void addReadVar(String name, AbstractBlock block) {
+		final Usages usages = getUsages(block);
+		if (!usages.output.contains(name)) {
+			usages.input.add(name);
+		}
+	}
+
+	private void detectRequiredAndProvidedVars(BasicBlock block) {
 		for (SimpleStatement statement : block.getStatements()) {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
 					detectRequiredVars(node.expression, block);
-					block.addWrittenVar(node.name);
+					addWrittenVar(node.name, block);
 					return node;
 				}
 
@@ -70,7 +176,7 @@ public final class ControlFlowGraphVarUsageDetector {
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
 					detectRequiredVars(node.expression, block);
-					block.addWrittenVar(node.name);
+					addWrittenVar(node.name, block);
 					return node;
 				}
 
@@ -108,7 +214,7 @@ public final class ControlFlowGraphVarUsageDetector {
 		}
 	}
 
-	private static void detectRequiredVars(Expression expression, AbstractBlock block) {
+	private void detectRequiredVars(Expression expression, AbstractBlock block) {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
@@ -137,13 +243,13 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				block.addReadVar(node.name);
+				addReadVar(node.name, block);
 				return node;
 			}
 
 			@Override
 			public Object visitMemRead(MemRead node) {
-				block.addReadVar(node.name);
+				addReadVar(node.name, block);
 				return node;
 			}
 
@@ -154,33 +260,43 @@ public final class ControlFlowGraphVarUsageDetector {
 		});
 	}
 
-	private static void propagateInputToPrev(ExitBlock lastBlock) {
-		boolean repeat = true;
-		while (repeat) {
-			final List<AbstractBlock> blocks = new ArrayList<>();
-			blocks.add(lastBlock);
+	// Inner Classes ==========================================================
 
-			repeat = false;
+	public static final class Usages {
+		private final Set<String> input = new LinkedHashSet<>();
+		private final Set<String> output = new LinkedHashSet<>();
+		private final Set<String> tunnel = new LinkedHashSet<>();
 
-			final Set<AbstractBlock> processedBlocks = new HashSet<>();
-
-			while (blocks.size() > 0) {
-				final AbstractBlock block = blocks.remove(0);
-
-				if (!processedBlocks.add(block)) {
-					continue;
-				}
-
-				if (block.addUsedFromNext()) {
-					repeat = true;
-				}
-
-				blocks.addAll(block.getPrev());
-			}
+		public Usages() {
 		}
-	}
 
-	private static void removeUnused(ControlFlowGraph graph) {
-		graph.iterate(AbstractBlock::removeUnusedFromNext);
+		@Override
+		public String toString() {
+			final StringBuilder buffer = new StringBuilder();
+			getVarInputOutput(buffer);
+			return buffer.toString();
+		}
+
+		public Set<String> getInput() {
+			return Collections.unmodifiableSet(input);
+		}
+
+		public Set<String> getOutput() {
+			return Collections.unmodifiableSet(output);
+		}
+
+		public Set<String> getTunnel() {
+			return Collections.unmodifiableSet(tunnel);
+		}
+
+		public void getVarInputOutput(StringBuilder buffer) {
+			buffer.append("in: [");
+			Utils.appendCommaSeparated(input, buffer);
+			buffer.append("], out: [");
+			Utils.appendCommaSeparated(output, buffer);
+			buffer.append("], tunnel: [");
+			Utils.appendCommaSeparated(tunnel, buffer);
+			buffer.append("]");
+		}
 	}
 }

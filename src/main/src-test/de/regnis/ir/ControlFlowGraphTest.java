@@ -162,7 +162,7 @@ public class ControlFlowGraphTest {
 
 		assertEquals(List.of(), exitBlock.getNext());
 
-		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
+		final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
 
 		assertEquals("""
 				             start: in: [p0], out: [p0], tunnel: []
@@ -171,7 +171,7 @@ public class ControlFlowGraphTest {
 				             else_1: in: [p0], out: [v0], tunnel: []
 				             after_if_1: in: [v0], out: [], tunnel: []
 				             exit: in: [], out: [], tunnel: []
-				             """, graph.getVarInputOutput());
+				             """, detector.getVarInputOutput());
 	}
 
 	@Test
@@ -301,7 +301,7 @@ public class ControlFlowGraphTest {
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
-		ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
+		final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
 
 		assertEquals("""
 				             start: in: [], out: [v0], tunnel: []
@@ -312,8 +312,6 @@ public class ControlFlowGraphTest {
 				             if_3: in: [v1, v0], out: [], tunnel: [v0]
 				             then_3: in: [], out: [], tunnel: [v0]
 				             else_3: in: [], out: [], tunnel: [v0]
-				             """, graph.getVarInputOutput());
+				             """, detector.getVarInputOutput());
 	}
-
-	// Utils ==================================================================
 }
