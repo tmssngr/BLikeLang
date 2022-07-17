@@ -162,16 +162,43 @@ public class ControlFlowGraphTest {
 
 		assertEquals(List.of(), exitBlock.getNext());
 
-		final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
-
 		assertEquals("""
-				             start: in: [p0], out: [p0], tunnel: []
-				             if_1: in: [p0], out: [], tunnel: [p0]
-				             then_1: in: [p0], out: [v0], tunnel: []
-				             else_1: in: [p0], out: [v0], tunnel: []
-				             after_if_1: in: [v0], out: [], tunnel: []
-				             exit: in: [], out: [], tunnel: []
-				             """, detector.getVarInputOutput());
+				             start:
+				                 // [p0]
+				                 p0 = p0 & 15
+				                 // [p0]
+				                 v0 : u8 = 0
+				                 // [p0]
+				             if_1:
+				                 // [p0]
+				                 if p0 < 10
+				                 if ! goto else_1
+				             then_1:
+				                 // [p0]
+				                 v0 = p0 + 48
+				                 // [v0]
+				             after_if_1:
+				                 // [v0]
+				                 print(v0)
+				                 // []
+				                 goto exit
+
+				             else_1:
+				                 // [p0]
+				                 $1 : u8 = p0 - 10
+				                 // [$1]
+				                 v0 = $1 + 65
+				                 // [v0]
+				                 goto after_if_1
+
+				             exit:
+				                 return
+				             """,
+		             ControlFlowGraphVarUsageDetector
+				             .detectVarUsage(graph)
+				             .createPrinter(new StringStringOutput())
+				             .print()
+				             .toString());
 	}
 
 	@Test
@@ -274,44 +301,48 @@ public class ControlFlowGraphTest {
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 		graph.compact();
+
 		assertEquals("""
 				             start:
+				                 // []
 				                 v0 : i16 = rnd()
+				                 // [v0]
 				             while_1:
+				                 // [v0]
 				                 while true
 				             do_1:
+				                 // [v0]
 				                 v1 : i16 = getNumber()
+				                 // [v0, v1]
 				             if_2:
+				                 // [v0, v1]
 				                 if v1 == v0
 				                 if ! goto if_3
 				                 goto exit
 
 				             if_3:
+				                 // [v0, v1]
 				                 if v1 < v0
 				                 if ! goto else_3
 				             then_3:
+				                 // [v0]
 				                 print(60)
+				                 // [v0]
 				                 goto while_1
 
 				             else_3:
+				                 // [v0]
 				                 print(62)
+				                 // [v0]
 				                 goto while_1
 
 				             exit:
 				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
-
-		final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsage(graph);
-
-		assertEquals("""
-				             start: in: [], out: [v0], tunnel: []
-				             while_1: in: [], out: [], tunnel: [v0]
-				             do_1: in: [], out: [v1], tunnel: [v0]
-				             exit: in: [], out: [], tunnel: []
-				             if_2: in: [v1, v0], out: [], tunnel: [v0, v1]
-				             if_3: in: [v1, v0], out: [], tunnel: [v0]
-				             then_3: in: [], out: [], tunnel: [v0]
-				             else_3: in: [], out: [], tunnel: [v0]
-				             """, detector.getVarInputOutput());
+				             """,
+		             ControlFlowGraphVarUsageDetector
+				             .detectVarUsage(graph)
+				             .createPrinter(new StringStringOutput())
+				             .print()
+				             .toString());
 	}
 }

@@ -59,11 +59,11 @@ public final class Utils {
 		return wasBackslash ? null : buffer.toString();
 	}
 
-	public static void appendCommaSeparated(Iterable<String> collection, StringBuilder buffer) {
-		appendCommaSeparated(collection, s -> s, buffer);
+	public static StringBuilder appendCommaSeparated(Iterable<String> collection, StringBuilder buffer) {
+		return appendCommaSeparated(collection, s -> s, buffer);
 	}
 
-	public static <O> void appendCommaSeparated(Iterable<? extends O> collection, Function<O, String> function, StringBuilder buffer) {
+	public static <O> StringBuilder appendCommaSeparated(Iterable<? extends O> collection, Function<O, String> function, StringBuilder buffer) {
 		boolean isFirst = true;
 		for (O obj : collection) {
 			if (isFirst) {
@@ -74,5 +74,7 @@ public final class Utils {
 			}
 			buffer.append(function.apply(obj));
 		}
+
+		return buffer;
 	}
 }
