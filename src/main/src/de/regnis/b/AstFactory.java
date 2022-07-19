@@ -285,11 +285,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 			final int value;
 			final BasicTypes.NumericType type;
 			if (suffixPos < 0) {
-				value = Integer.parseInt(text);
+				value = parseInt(text);
 				type = BasicTypes.determineType(value);
 			}
 			else {
-				value = Integer.parseInt(text.substring(0, suffixPos));
+				value = parseInt(text.substring(0, suffixPos));
 				final String suffix = text.substring(suffixPos + 1);
 				type = BasicTypes.getNumbericType(suffix);
 			}
@@ -349,6 +349,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	// Utils ==================================================================
+
+	private int parseInt(String text) {
+		final String hexPrefix = "0x";
+		if (text.startsWith(hexPrefix)) {
+			return Integer.parseInt(text.substring(hexPrefix.length()), 16);
+		}
+		return Integer.parseInt(text);
+	}
 
 	private static DeclarationList parse(CharStream charStream) {
 		final BLikeLangLexer lexer = new BLikeLangLexer(charStream);

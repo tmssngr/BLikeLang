@@ -91,11 +91,9 @@ CharLiteral: SingleQuote Char SingleQuote;
 
 BooleanLiteral: 'true' | 'false';
 
-fragment DecimalNumber
-    : [0-9]+
-    ;
-
-Number: [-]? DecimalNumber ('_' [ui] ('8' | '16'))?;
+Number: ( [-]? [0-9]+
+        | '0x' [0-9A-Fa-f]+
+        ) ('_' [ui] ('8' | '16'))?;
 
 Identifier
     : [a-zA-Z] [0-9a-zA-Z_]*

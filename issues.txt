@@ -9,6 +9,7 @@ todo:
 - output ASM
 
 done:
+- hex numbers
 - while loop
 - pure function detection
 - linearize AST (IR) to basic blocks
