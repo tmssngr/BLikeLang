@@ -1,12 +1,23 @@
 todo:
-- detect/remove unused assignments
+- continue
 - limit number of local variables
 - string constants
-- +=, -=, *=, <<=, >>=
 - detect constant variables and inline them
-- move assignments the most way down
+	example:
+	var columns = 40;
+	var rows = 24;
+	var charsPerScreen = columns * rows;
 - check if global var initialized from non-pure function
 - output ASM
+
+nice-to-have:
+- &&, ||
+- / %
+- optimize sum: 1 + a + 2 -> a + 3
+- move assignments the most way down
+- +=, -=, *=, <<=, >>=
+- detect/remove unused assignments
+- import
 
 done:
 - fix cast
