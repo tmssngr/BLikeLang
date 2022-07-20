@@ -58,7 +58,7 @@ public final class SymbolScope {
 	}
 
 	@NotNull
-	public Variable variableRead(@NotNull String name) {
+	public Variable variableRead(@NotNull String name, int line, int column) {
 		SymbolScope scope = this;
 		while (scope != null) {
 			final Variable variable = scope.variables.get(name);
@@ -69,7 +69,7 @@ public final class SymbolScope {
 
 			scope = scope.parentScope;
 		}
-		throw new TransformationFailedException(name);
+		throw new TransformationFailedException(Messages.errorUndeclaredVariable(line, column, name));
 	}
 
 	public void reportUnusedVariables(@NotNull StringOutput output) {
