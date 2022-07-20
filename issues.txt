@@ -19,6 +19,7 @@ nice-to-have:
 - import
 
 done:
+- more complex, realistic example
 - / %
 - fix cast
 - hex numbers
