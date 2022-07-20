@@ -153,6 +153,8 @@ public final class ConstantFoldingTransformation {
 				case BinaryExpression.PLUS -> new NumberLiteral(left + right);
 				case BinaryExpression.MINUS -> new NumberLiteral(left - right);
 				case BinaryExpression.MULTIPLY -> new NumberLiteral(left * right);
+				case BinaryExpression.DIVIDE -> new NumberLiteral(left / right);
+				case BinaryExpression.MODULO -> new NumberLiteral(left % right);
 				case BinaryExpression.SHIFT_L -> new NumberLiteral(left << right);
 				case BinaryExpression.SHIFT_R -> new NumberLiteral(left >> right);
 				case BinaryExpression.AND -> new NumberLiteral(left & right);
@@ -209,6 +211,11 @@ public final class ConstantFoldingTransformation {
 				}
 				if (right == 0 && node.left instanceof VarRead) {
 					return new NumberLiteral(0);
+				}
+			}
+			else if (node.operator.equals(BinaryExpression.DIVIDE)) {
+				if (right == 1) {
+					return node.left;
 				}
 			}
 			else if (node.operator.equals(BinaryExpression.SHIFT_L)

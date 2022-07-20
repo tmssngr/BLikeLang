@@ -15,6 +15,8 @@ public final class BinaryExpression extends Expression {
 	public static final String PLUS = "+";
 	public static final String MINUS = "-";
 	public static final String MULTIPLY = "*";
+	public static final String DIVIDE = "/";
+	public static final String MODULO = "%";
 	public static final String SHIFT_L = "<<";
 	public static final String SHIFT_R = ">>";
 	public static final String LT = "<";
@@ -39,6 +41,14 @@ public final class BinaryExpression extends Expression {
 
 	public static BinaryExpression createMultiply(Expression left, Expression right) {
 		return new BinaryExpression(left, MULTIPLY, right);
+	}
+
+	public static BinaryExpression createDivide(Expression left, Expression right) {
+		return new BinaryExpression(left, DIVIDE, right);
+	}
+
+	public static BinaryExpression createModulo(Expression left, Expression right) {
+		return new BinaryExpression(left, MODULO, right);
 	}
 
 	public static BinaryExpression createShiftL(Expression left, Expression right) {

@@ -38,7 +38,7 @@ subexpr: Number                                                             #num
        ;
 expression: subexpr                                                            #subExpression
           | left=expression operator=(BitAnd|BitOr|BitXor) right=expression    #binaryExpressionBits
-          | left=expression operator=(Multiply|ShiftL|ShiftR) right=expression #binaryExpressionPoint
+          | left=expression operator=(Multiply|Divide|Modulo|ShiftL|ShiftR) right=expression #binaryExpressionPoint
           | left=expression operator=(Plus|Minus) right=expression             #binaryExpressionDash
           | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression      #binaryExpressionBool
           | ParenOpen type=Identifier ParenClose subexpr                       #typeCast
@@ -55,6 +55,8 @@ Assign: '=' ;
 Plus    : '+';
 Minus   : '-';
 Multiply: '*';
+Divide  : '/';
+Modulo  : '%';
 ShiftL  : '<<';
 ShiftR  : '>>';
 
