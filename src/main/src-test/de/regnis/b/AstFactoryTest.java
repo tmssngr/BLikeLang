@@ -71,10 +71,10 @@ public class AstFactoryTest {
 				             """, TreePrinter.print(AstFactory.parseString("var a = (u16)0;")));
 		assertEquals("""
 				             +- a :=
-				                +- cast to i8
-				                   +- operator +
-				                      +- literal 0
-				                      +- literal 1000
+				                +- operator +
+				                   +- cast to i8
+				                   |  +- literal 0
+				                   +- literal 1000
 				             """, TreePrinter.print(AstFactory.parseString("var a = (i8)0 + 1000;")));
 		assertEquals("""
 				             +- a :=

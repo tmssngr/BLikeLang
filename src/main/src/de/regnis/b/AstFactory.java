@@ -277,6 +277,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
+	public Expression visitSubExpression(BLikeLangParser.SubExpressionContext ctx) {
+		return (Expression) visitChildren(ctx);
+	}
+
+	@Override
 	public NumberLiteral visitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx) {
 		final Token number = ctx.Number().getSymbol();
 		final String text = number.getText();
@@ -344,7 +349,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Override
 	public TypeCast visitTypeCast(BLikeLangParser.TypeCastContext ctx) {
 		final String typeName = ctx.type.getText();
-		final Expression expression = (Expression) visit(ctx.expression());
+		final Expression expression = (Expression) visit(ctx.subexpr());
 		return new TypeCast(typeName, expression, ctx.type.getLine(), ctx.type.getCharPositionInLine());
 	}
 

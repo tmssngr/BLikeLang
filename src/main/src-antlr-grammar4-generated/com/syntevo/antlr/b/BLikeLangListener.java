@@ -214,6 +214,90 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitTypeVarDeclaration(BLikeLangParser.TypeVarDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code numberLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code numberLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code charLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterCharLiteral(BLikeLangParser.CharLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code charLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitCharLiteral(BLikeLangParser.CharLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code booleanLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code booleanLiteral}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code readVariable}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterReadVariable(BLikeLangParser.ReadVariableContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code readVariable}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitReadVariable(BLikeLangParser.ReadVariableContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code readMemory}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code readMemory}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCall(BLikeLangParser.FunctionCallContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code functionCall}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCall(BLikeLangParser.FunctionCallContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code expressionInParenthesis}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code expressionInParenthesis}
+	 * labeled alternative in {@link BLikeLangParser#subexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionBool}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -238,30 +322,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitTypeCast(BLikeLangParser.TypeCastContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code readVariable}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterReadVariable(BLikeLangParser.ReadVariableContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code readVariable}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitReadVariable(BLikeLangParser.ReadVariableContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code functionCall}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterFunctionCall(BLikeLangParser.FunctionCallContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code functionCall}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitFunctionCall(BLikeLangParser.FunctionCallContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionPoint}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
@@ -273,30 +333,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code charLiteral}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCharLiteral(BLikeLangParser.CharLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code charLiteral}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCharLiteral(BLikeLangParser.CharLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code readMemory}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code readMemory}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionBits}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
@@ -310,41 +346,17 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitBinaryExpressionBits(BLikeLangParser.BinaryExpressionBitsContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code booleanLiteral}
+	 * Enter a parse tree produced by the {@code subExpression}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
+	void enterSubExpression(BLikeLangParser.SubExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code booleanLiteral}
+	 * Exit a parse tree produced by the {@code subExpression}
 	 * labeled alternative in {@link BLikeLangParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code expressionInParenthesis}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code expressionInParenthesis}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpressionInParenthesis(BLikeLangParser.ExpressionInParenthesisContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code numberLiteral}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code numberLiteral}
-	 * labeled alternative in {@link BLikeLangParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitNumberLiteral(BLikeLangParser.NumberLiteralContext ctx);
+	void exitSubExpression(BLikeLangParser.SubExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code binaryExpressionDash}
 	 * labeled alternative in {@link BLikeLangParser#expression}.

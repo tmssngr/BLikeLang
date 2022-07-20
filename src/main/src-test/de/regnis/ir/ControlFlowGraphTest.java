@@ -48,7 +48,7 @@ public class ControlFlowGraphTest {
 						}
 
 						void printHex16(u16 i) {
-						  printHex8((u8)i >> 8);
+						  printHex8((u8)(i >> 8));
 						  printHex8((u8)i);
 						}
 												
@@ -80,7 +80,8 @@ public class ControlFlowGraphTest {
 				               printHex4(p0)
 				             }
 				             void printHex16(u16 p0) {
-				               printHex8((u8) p0 >> 8)
+				               $3 : u8 = p0 >> 8
+				               printHex8((u8) $3)
 				               printHex8((u8) p0)
 				             }
 				             void main() {
