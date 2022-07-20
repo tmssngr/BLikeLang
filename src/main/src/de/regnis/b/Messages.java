@@ -78,6 +78,10 @@ public final class Messages {
 		return line + ":" + column + ": Call to undeclared function " + name;
 	}
 
+	public static String errorUndeclaredVariable(int line, int column, String name) {
+		return line + ":" + column + ": undeclared variable " + name;
+	}
+
 	@NotNull
 	public static String errorVarAlreadyDeclared(int line, int column, @NotNull String name) {
 		return line + ":" + column + ": variable " + name + " already declared";

@@ -348,7 +348,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private Assignment visitAssignment(Assignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
 		final Expression newExpression = visitExpression(node.expression);
 
 		final Type expressionType = newExpression.getType();
@@ -360,7 +360,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private MemAssignment visitMemAssignment(MemAssignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
 		if (variable.type != BasicTypes.UINT16) {
 			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
 		}
@@ -549,12 +549,12 @@ public final class DetermineTypesTransformation {
 	}
 
 	private VarRead visitVarRead(VarRead node) {
-		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name);
+		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name, node.line, node.column);
 		return new VarRead(typeName.type, typeName.newName);
 	}
 
 	private MemRead visitMemRead(MemRead node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
 		if (variable.type != BasicTypes.UINT16) {
 			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
 		}
