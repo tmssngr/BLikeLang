@@ -214,11 +214,11 @@ public final class SplitExpressionsTransformation {
 		return expressionNode.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final BinaryExpression ben = handleBinary(node, tempVarFactory);
+				final BinaryExpression tempExpression = handleBinary(node, tempVarFactory);
 				if (node.hasType()) {
-					ben.setType(node.getType());
+					tempExpression.setType(node.getType());
 				}
-				return tempVarFactory.createTempVarDeclaration(ben);
+				return tempVarFactory.createTempVarDeclaration(tempExpression);
 			}
 
 			@Override
@@ -252,6 +252,14 @@ public final class SplitExpressionsTransformation {
 
 			@Override
 			public Expression visitTypeCast(TypeCast node) {
+				if (node.expression instanceof final BinaryExpression expression) {
+					final BinaryExpression tempExpression = handleBinary(expression, tempVarFactory);
+					if (expression.hasType()) {
+						tempExpression.setType(node.getType());
+					}
+					final Expression newExpression = tempVarFactory.createTempVarDeclaration(tempExpression);
+					return new TypeCast(node.typeName, newExpression);
+				}
 				return node;
 			}
 		});

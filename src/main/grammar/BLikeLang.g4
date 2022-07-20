@@ -28,18 +28,20 @@ statement: varDeclaration                                                   #loc
 varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
               | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
               ;
-expression: Number                                                             #numberLiteral
-          | CharLiteral                                                        #charLiteral
-          | BooleanLiteral                                                     #booleanLiteral
-          | Identifier                                                         #readVariable
-          | Identifier Deref                                                   #readMemory
-          | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
-          |                 ParenOpen expression ParenClose                    #expressionInParenthesis
+subexpr: Number                                                             #numberLiteral
+       | CharLiteral                                                        #charLiteral
+       | BooleanLiteral                                                     #booleanLiteral
+       | Identifier                                                         #readVariable
+       | Identifier Deref                                                   #readMemory
+       | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
+       |                 ParenOpen expression ParenClose                    #expressionInParenthesis
+       ;
+expression: subexpr                                                            #subExpression
           | left=expression operator=(BitAnd|BitOr|BitXor) right=expression    #binaryExpressionBits
           | left=expression operator=(Multiply|ShiftL|ShiftR) right=expression #binaryExpressionPoint
           | left=expression operator=(Plus|Minus) right=expression             #binaryExpressionDash
           | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression      #binaryExpressionBool
-          | ParenOpen type=Identifier ParenClose expression                    #typeCast
+          | ParenOpen type=Identifier ParenClose subexpr                       #typeCast
           ;
 
 functionCallParameters: expression?

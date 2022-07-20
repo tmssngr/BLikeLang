@@ -9,6 +9,7 @@ todo:
 - output ASM
 
 done:
+- fix cast
 - hex numbers
 - while loop
 - pure function detection

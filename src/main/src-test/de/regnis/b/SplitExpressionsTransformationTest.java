@@ -2,6 +2,7 @@ package de.regnis.b;
 
 import de.regnis.b.ast.*;
 import de.regnis.b.out.StringStringOutput;
+import de.regnis.b.type.BasicTypes;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -36,6 +37,10 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new VarRead("b")))));
+		assertEquals("a = foo((u8) b)", f -> f.
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                             .add(new TypeCast(BasicTypes.UINT8, new VarRead("b"))))));
 	}
 
 	@Test
@@ -83,6 +88,13 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				                             new FuncCallParameters()
 						                             .add(BinaryExpression.createSub(new NumberLiteral(1),
 						                                                             new NumberLiteral(2))))));
+		assertEquals("""
+						             $1 := 1 - 2
+						               a = foo((i8) $1)""", f -> f.
+				assignment("a", new FuncCall("foo",
+				                             new FuncCallParameters()
+						                             .add(new TypeCast(BasicTypes.INT8, BinaryExpression.createSub(new NumberLiteral(1),
+						                                                                                           new NumberLiteral(2)))))));
 	}
 
 	@Test
@@ -145,9 +157,9 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		             SplitExpressionsTransformation.transform(
 				             DetermineTypesTransformation.transform(
 						             AstFactory.parseString("""
-                                                                    int call(int a) {
-                                                                      return a;
-                                                                    }
+								                                                            int call(int a) {
+								                                                              return a;
+								                                                            }
 								                                    void main() {
 								                                      var a = 10 + 2 * 3 + call(1);
 								                                    }"""), new StringStringOutput())));
