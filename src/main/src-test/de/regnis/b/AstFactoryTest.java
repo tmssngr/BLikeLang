@@ -50,6 +50,18 @@ public class AstFactoryTest {
 				             """, TreePrinter.print(AstFactory.parseString("var a = 2 * 4;")));
 		assertEquals("""
 				             +- a :=
+				                +- operator /
+				                   +- literal 10
+				                   +- literal 2
+				             """, TreePrinter.print(AstFactory.parseString("var a = 10 / 2;")));
+		assertEquals("""
+				             +- a :=
+				                +- operator %
+				                   +- literal 16
+				                   +- literal 6
+				             """, TreePrinter.print(AstFactory.parseString("var a = 16 % 6;")));
+		assertEquals("""
+				             +- a :=
 				                +- operator <<
 				                   +- literal 1
 				                   +- literal 4

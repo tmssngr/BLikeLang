@@ -18,6 +18,8 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		assertUnchanged("b - 4");
 		assertUnchanged("4 - b");
 		assertUnchanged("b * 2");
+		assertUnchanged("b / 2");
+		assertUnchanged("2500 / a");
 		assertUnchanged("foo()");
 		assertUnchanged("foo(1)");
 		assertUnchanged("foo(b)");
@@ -75,10 +77,14 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		assertChanged("b", "b + 0");
 		assertChanged("b", "0 + b");
 		assertChanged("b", "b - 0");
+		assertChanged("20", "10 * 2");
 		assertChanged("0", "b * 0");
 		assertChanged("0", "0 * b");
 		assertChanged("b", "b * 1");
 		assertChanged("b", "1 * b");
+		assertChanged("7", "15 / 2");
+		assertChanged("b", "b / 1");
+		assertChanged("3", "15 % 4");
 		assertChanged("0", "b - b");
 		assertChanged("2", "3 & 2");
 		assertChanged("6", "4 | 2");

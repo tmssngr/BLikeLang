@@ -12,7 +12,6 @@ todo:
 
 nice-to-have:
 - &&, ||
-- / %
 - optimize sum: 1 + a + 2 -> a + 3
 - move assignments the most way down
 - +=, -=, *=, <<=, >>=
@@ -20,6 +19,7 @@ nice-to-have:
 - import
 
 done:
+- / %
 - fix cast
 - hex numbers
 - while loop
