@@ -712,7 +712,7 @@ public class ControlFlowGraphTest {
 				                 $13 : i16 = $12 + 4
 				                 // [$13]
 				                 $14 : i16 = $13 % 7
-				                 // []
+				                 // [$14]
 				                 result = (u8) $14
 				                 // []
 				             exit:
