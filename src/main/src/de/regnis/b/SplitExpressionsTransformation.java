@@ -253,7 +253,7 @@ public final class SplitExpressionsTransformation {
 
 			@Override
 			public Expression visitMemRead(MemRead node) {
-				return node;
+				return tempVarFactory.createTempVarDeclaration(node);
 			}
 
 			@Override

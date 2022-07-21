@@ -104,6 +104,17 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new TypeCast(BasicTypes.UINT8, new VarRead("b"))))));
+		assertEquals("""
+				             $1 := b[]
+				               a = $1 + 1""", f -> f.
+				assignment("a", BinaryExpression.createAdd(new MemRead("b"),
+				                                           new NumberLiteral(1))));
+		assertEquals("""
+				             $1 := b[]
+				               $2 := c[]
+				               a = $1 + $2""", f -> f.
+				assignment("a", BinaryExpression.createAdd(new MemRead("b"),
+				                                           new MemRead("c"))));
 	}
 
 	@Test
