@@ -149,16 +149,16 @@ public final class SplitExpressionsTransformation {
 		return newStatementList;
 	}
 
-	private Expression handleExpression(Expression expression, TempVarFactory parameter) {
+	private Expression handleExpression(Expression expression, TempVarFactory tempVarFactory) {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				return handleBinary(node, parameter);
+				return handleBinary(node, tempVarFactory);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				return handleFunctionCall(node, parameter);
+				return handleFunctionCall(node, tempVarFactory);
 			}
 
 			@Override
@@ -183,7 +183,7 @@ public final class SplitExpressionsTransformation {
 
 			@Override
 			public Expression visitTypeCast(TypeCast node) {
-				return node;
+				return handleTypeCast(node, tempVarFactory);
 			}
 		});
 	}
@@ -207,6 +207,12 @@ public final class SplitExpressionsTransformation {
 			newParameters.add(simplifiedParameter);
 		}
 		return newParameters;
+	}
+
+	@NotNull
+	private TypeCast handleTypeCast(TypeCast node, TempVarFactory tempVarFactory) {
+		final Expression simplifiedExpression = splitInnerExpression(node.expression, tempVarFactory);
+		return new TypeCast(node.typeName, simplifiedExpression);
 	}
 
 	@NotNull
@@ -252,15 +258,8 @@ public final class SplitExpressionsTransformation {
 
 			@Override
 			public Expression visitTypeCast(TypeCast node) {
-				if (node.expression instanceof final BinaryExpression expression) {
-					final BinaryExpression tempExpression = handleBinary(expression, tempVarFactory);
-					if (expression.hasType()) {
-						tempExpression.setType(node.getType());
-					}
-					final Expression newExpression = tempVarFactory.createTempVarDeclaration(tempExpression);
-					return new TypeCast(node.typeName, newExpression);
-				}
-				return node;
+				final TypeCast expression = handleTypeCast(node, tempVarFactory);
+				return tempVarFactory.createTempVarDeclaration(expression);
 			}
 		});
 	}

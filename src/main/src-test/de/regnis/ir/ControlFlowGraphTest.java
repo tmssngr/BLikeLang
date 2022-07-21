@@ -80,9 +80,11 @@ public class ControlFlowGraphTest {
 				               printHex4(p0)
 				             }
 				             void printHex16(u16 p0) {
-				               $3 : u8 = p0 >> 8
-				               printHex8((u8) $3)
-				               printHex8((u8) p0)
+				               $3 : u16 = p0 >> 8
+				               $4 := (u8) $3
+				               printHex8($4)
+				               $5 := (u8) p0
+				               printHex8($5)
 				             }
 				             void main() {
 				               printHex16(192)
@@ -585,13 +587,19 @@ public class ControlFlowGraphTest {
 				                 {
 				                 }
 				               }
-				               return (u8) v4 + p0 + v2 + v6 + 4 % 7
+				               $10 : i8 = v4 + p0
+				               $11 : i16 = $10 + v2
+				               $12 : i16 = $11 + v6
+				               $13 : i16 = $12 + 4
+				               $14 : i16 = $13 % 7
+				               return (u8) $14
 				             }
 				             void print(u8 p0) {
 				             }
 				             void main() {
-				               $10 : u8 = calculate(9, 1, (u16) 2001)
-				               print($10)
+				               $15 := (u16) 2001
+				               $16 : u8 = calculate(9, 1, $15)
+				               print($16)
 				             }
 				             """, CodePrinter.print(root));
 
@@ -601,101 +609,111 @@ public class ControlFlowGraphTest {
 
 		assertEquals("""
 				             start:
-				                 // [p1, p2]
+				                 // [p0, p1, p2]
 				                 v0 : u16 = p2 / 100
-				                 // [p1, p2, v0]
+				                 // [p0, p1, p2, v0]
 				                 v1 : i16 = p2 / 400
-				                 // [p1, p2, v0, v1]
+				                 // [p0, p1, p2, v0, v1]
 				                 $1 : u16 = p2 / 4
-				                 // [$1, p1, p2, v0, v1]
+				                 // [$1, p0, p1, p2, v0, v1]
 				                 $2 : u16 = p2 + $1
-				                 // [$2, p1, p2, v0, v1]
+				                 // [$2, p0, p1, p2, v0, v1]
 				                 $3 : u16 = $2 - v0
-				                 // [$3, p1, p2, v1]
+				                 // [$3, p0, p1, p2, v1]
 				                 $4 : i16 = $3 + v1
-				                 // [$4, p1, p2]
+				                 // [$4, p0, p1, p2]
 				                 $5 : i16 = $4 + 1
-				                 // [$5, p1, p2]
+				                 // [$5, p0, p1, p2]
 				                 v2 : i16 = $5 % 7
-				                 // [p1, p2]
+				                 // [p0, p1, p2, v2]
 				                 v3 : u16 = p2 % 4
-				                 // [p1, p2, v3]
+				                 // [p0, p1, p2, v2, v3]
 				                 v0 = p2 % 100
-				                 // [p1, p2, v0, v3]
+				                 // [p0, p1, p2, v0, v2, v3]
 				                 v1 = p2 % 400
-				                 // [p1, v0, v1, v3]
+				                 // [p0, p1, v0, v1, v2, v3]
 				             if_1:
-				                 // [p1, v0, v1, v3]
+				                 // [p0, p1, v0, v1, v2, v3]
 				                 if v0 == 0
 				                 if ! goto if_2
 				             then_1:
-				                 // [p1, v1, v3]
+				                 // [p0, p1, v1, v2, v3]
 				                 v3 = v3 + 1
-				                 // [p1, v1, v3]
+				                 // [p0, p1, v1, v2, v3]
 				             if_2:
-				                 // [p1, v1, v3]
+				                 // [p0, p1, v1, v2, v3]
 				                 if v1 == 0
 				                 if ! goto after_if_2
 				             then_2:
-				                 // [p1, v3]
+				                 // [p0, p1, v2, v3]
 				                 v3 = v3 - 1
-				                 // [p1, v3]
+				                 // [p0, p1, v2, v3]
 				             after_if_2:
-				                 // [p1, v3]
+				                 // [p0, p1, v2, v3]
 				                 v4 : i8 = -30
-				                 // [p1, v3, v4]
+				                 // [p0, p1, v2, v3, v4]
 				                 v5 : u8 = 1
-				                 // [p1, v3, v4, v5]
+				                 // [p0, p1, v2, v3, v4, v5]
 				                 v6 : u8 = 0
-				                 // [p1, v3, v4, v5, v6]
+				                 // [p0, p1, v2, v3, v4, v5, v6]
 				             if_3:
-				                 // [p1, v3, v4, v5, v6]
+				                 // [p0, p1, v2, v3, v4, v5, v6]
 				                 if v3 > 0
 				                 if ! goto if_4
 				             then_3:
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5]
 				                 v6 = 1
-				                 // [p1, v4, v5, v6]
+				                 // [p0, p1, v2, v4, v5, v6]
 				             if_4:
-				                 // [p1, v4, v5, v6]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 > 2
 				                 if ! goto if_5
 				             then_4:
-				                 // [p1, v4, v5, v6]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 $6 : i8 = v4 - 1
-				                 // [$6, p1, v5, v6]
+				                 // [$6, p0, p1, v2, v5, v6]
 				                 v4 = $6 - v6
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				             if_5:
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 > 8
 				                 if ! goto while_6
 				             then_5:
-				                 // [p1, v4]
+				                 // [p0, p1, v2, v4, v6]
 				                 v5 = 2
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				             while_6:
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 while true
 				             do_6:
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 $7 : i8 = v4 + 30
-				                 // [$7, p1, v5]
+				                 // [$7, p0, p1, v2, v5, v6]
 				                 $8 : i8 = $7 + p1
-				                 // [$8, p1, v5]
+				                 // [$8, p0, p1, v2, v5, v6]
 				                 $9 : u8 = v5 % 2
-				                 // [$8, $9, p1, v5]
+				                 // [$8, $9, p0, p1, v2, v5, v6]
 				                 v4 = $8 + $9
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 p1 = p1 - 1
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				             if_7:
-				                 // [p1, v4, v5]
+				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 <= 0
 				                 if ! goto while_6
 				             after_while_6:
+				                 // [p0, v2, v4, v6]
+				                 $10 : i8 = v4 + p0
+				                 // [$10, v2, v6]
+				                 $11 : i16 = $10 + v2
+				                 // [$11, v6]
+				                 $12 : i16 = $11 + v6
+				                 // [$12]
+				                 $13 : i16 = $12 + 4
+				                 // [$13]
+				                 $14 : i16 = $13 % 7
 				                 // []
-				                 result = (u8) v4 + p0 + v2 + v6 + 4 % 7
+				                 result = (u8) $14
 				                 // []
 				             exit:
 				                 return

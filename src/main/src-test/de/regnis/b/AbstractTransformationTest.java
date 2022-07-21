@@ -34,6 +34,11 @@ public abstract class AbstractTransformationTest {
 			public void varDeclaration(String name, Expression expression) {
 				statementList.add(new VarDeclaration(name, expression));
 			}
+
+			@Override
+			public void returnStm(Expression expression) {
+				statementList.add(new ReturnStatement(expression));
+			}
 		});
 
 		final DeclarationList root = new DeclarationList();
@@ -52,5 +57,7 @@ public abstract class AbstractTransformationTest {
 		void assignment(String name, Expression expression);
 
 		void varDeclaration(String name, Expression expression);
+
+		void returnStm(Expression expression);
 	}
 }
