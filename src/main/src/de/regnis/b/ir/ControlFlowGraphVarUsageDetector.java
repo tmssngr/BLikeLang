@@ -251,6 +251,7 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitTypeCast(TypeCast node) {
+				detectRequiredVars(node.expression, live);
 				return node;
 			}
 		});
