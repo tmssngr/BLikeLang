@@ -25,9 +25,9 @@ public final class BinaryExpression extends Expression {
 	public static final String GE = ">=";
 	public static final String GT = ">";
 	public static final String NE = "!=";
-	public static final String AND = "&";
-	public static final String OR = "|";
-	public static final String XOR = "^";
+	public static final String BIT_AND = "&";
+	public static final String BIT_OR = "|";
+	public static final String BIT_XOR = "^";
 
 	// Static =================================================================
 
@@ -84,13 +84,13 @@ public final class BinaryExpression extends Expression {
 	}
 
 	public static BinaryExpression createBitAnd(Expression left, Expression right) {
-		return new BinaryExpression(left, AND, right);
+		return new BinaryExpression(left, BIT_AND, right);
 	}
 	public static BinaryExpression createBitOr(Expression left, Expression right) {
-		return new BinaryExpression(left, OR, right);
+		return new BinaryExpression(left, BIT_OR, right);
 	}
 	public static BinaryExpression createBitXor(Expression left, Expression right) {
-		return new BinaryExpression(left, XOR, right);
+		return new BinaryExpression(left, BIT_XOR, right);
 	}
 
 
