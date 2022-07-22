@@ -240,7 +240,7 @@ public class CodePrinter {
 			public Object visitBinary(BinaryExpression node) {
 				print(node.left, output);
 				output.print(" ");
-				output.print(node.operator);
+				output.print(node.operator.text);
 				output.print(" ");
 				print(node.right, output);
 				return node;

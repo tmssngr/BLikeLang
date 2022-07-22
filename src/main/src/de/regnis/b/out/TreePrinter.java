@@ -42,7 +42,7 @@ public class TreePrinter {
 
 	public List<String> getStrings(BinaryExpression node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("operator " + node.operator);
+		strings.add("operator " + node.operator.text);
 		append(getStrings(node.left), true, strings);
 		append(getStrings(node.right), false, strings);
 		return strings;

@@ -27,7 +27,7 @@ public class CodePrinterTest {
 						                                             new StatementList()
 								                                             .add(new ReturnStatement(
 										                                             new BinaryExpression(new VarRead("x"),
-										                                                                  BinaryExpression.MULTIPLY,
+										                                                                  BinaryExpression.Op.multiply,
 										                                                                  new VarRead("x"))))))
 		                    ));
 		Assert.assertEquals("a := (u8) -1\n",
@@ -55,7 +55,7 @@ public class CodePrinterTest {
 						                                             new FuncDeclarationParameters(),
 						                                             new StatementList()
 								                                             .add(new IfStatement(new BinaryExpression(new VarRead("a"),
-								                                                                                       BinaryExpression.GT,
+								                                                                                       BinaryExpression.Op.greaterThan,
 								                                                                                       new NumberLiteral(0)),
 								                                                                  new StatementList()
 										                                                                  .add(new VarDeclaration("b", new NumberLiteral(1))),
