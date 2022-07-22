@@ -177,7 +177,7 @@ public final class ConstantFoldingTransformation {
 					return node.right;
 				}
 				// put constant on right side
-				return node.createNew(node.right, node.left);
+				return new BinaryExpression(node.right, node.operator, node.left);
 			}
 			if (node.operator.equals(BinaryExpression.MULTIPLY)) {
 				if (left == 1) {
@@ -187,7 +187,7 @@ public final class ConstantFoldingTransformation {
 					return new NumberLiteral(0);
 				}
 				// put constant on right side
-				return node.createNew(node.right, node.left);
+				return new BinaryExpression(node.right, node.operator, node.left);
 			}
 			if (node.operator.equals(BinaryExpression.BIT_AND)) {
 				if (left == 0) {

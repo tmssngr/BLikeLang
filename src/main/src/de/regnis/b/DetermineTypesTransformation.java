@@ -424,7 +424,7 @@ public final class DetermineTypesTransformation {
 		if (type == null) {
 			throw new TransformationFailedException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
 		}
-		return node.createNew(type, newLeft, newRight);
+		return new BinaryExpression(newLeft, node.operator, newRight, type);
 	}
 
 	@Nullable

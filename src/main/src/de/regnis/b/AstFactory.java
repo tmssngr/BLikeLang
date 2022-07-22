@@ -205,11 +205,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);
 
-		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.Plus -> BinaryExpression.createAdd(left, right);
-			case BLikeLangLexer.Minus -> BinaryExpression.createSub(left, right);
-			default -> throw new ParseCancellationException();
-		};
+		return new BinaryExpression(left,
+		                            switch (ctx.operator.getType()) {
+			                            case BLikeLangLexer.Plus -> BinaryExpression.PLUS;
+			                            case BLikeLangLexer.Minus -> BinaryExpression.MINUS;
+			                            default -> throw new ParseCancellationException();
+		                            },
+		                            right);
 	}
 
 	@Override
@@ -217,14 +219,16 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
 		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
 
-		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.Multiply -> BinaryExpression.createMultiply(left, right);
-			case BLikeLangLexer.Divide -> BinaryExpression.createDivide(left, right);
-			case BLikeLangLexer.Modulo -> BinaryExpression.createModulo(left, right);
-			case BLikeLangLexer.ShiftL -> BinaryExpression.createShiftL(left, right);
-			case BLikeLangLexer.ShiftR -> BinaryExpression.createShiftR(left, right);
-			default -> throw new ParseCancellationException();
-		};
+		return new BinaryExpression(left,
+		                            switch (ctx.operator.getType()) {
+			                            case BLikeLangLexer.Multiply -> BinaryExpression.MULTIPLY;
+			                            case BLikeLangLexer.Divide -> BinaryExpression.DIVIDE;
+			                            case BLikeLangLexer.Modulo -> BinaryExpression.MODULO;
+			                            case BLikeLangLexer.ShiftL -> BinaryExpression.SHIFT_L;
+			                            case BLikeLangLexer.ShiftR -> BinaryExpression.SHIFT_R;
+			                            default -> throw new ParseCancellationException();
+		                            },
+		                            right);
 	}
 
 	@Override
@@ -232,12 +236,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
 		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
 
-		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.BitAnd -> BinaryExpression.createBitAnd(left, right);
-			case BLikeLangLexer.BitOr -> BinaryExpression.createBitOr(left, right);
-			case BLikeLangLexer.BitXor -> BinaryExpression.createBitXor(left, right);
-			default -> throw new ParseCancellationException();
-		};
+		return new BinaryExpression(left,
+		                            switch (ctx.operator.getType()) {
+			                            case BLikeLangLexer.BitAnd -> BinaryExpression.BIT_AND;
+			                            case BLikeLangLexer.BitOr -> BinaryExpression.BIT_OR;
+			                            case BLikeLangLexer.BitXor -> BinaryExpression.BIT_XOR;
+			                            default -> throw new ParseCancellationException();
+		                            },
+		                            right);
 	}
 
 	@Override
@@ -245,15 +251,17 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);
 
-		return switch (ctx.operator.getType()) {
-			case BLikeLangLexer.Lt -> BinaryExpression.createLt(left, right);
-			case BLikeLangLexer.Le -> BinaryExpression.createLe(left, right);
-			case BLikeLangLexer.Eq -> BinaryExpression.createEq(left, right);
-			case BLikeLangLexer.Ge -> BinaryExpression.createGe(left, right);
-			case BLikeLangLexer.Gt -> BinaryExpression.createGt(left, right);
-			case BLikeLangLexer.Ne -> BinaryExpression.createNe(left, right);
-			default -> throw new ParseCancellationException();
-		};
+		return new BinaryExpression(left,
+		                            switch (ctx.operator.getType()) {
+			                            case BLikeLangLexer.Lt -> BinaryExpression.LT;
+			                            case BLikeLangLexer.Le -> BinaryExpression.LE;
+			                            case BLikeLangLexer.Eq -> BinaryExpression.EQ;
+			                            case BLikeLangLexer.Ge -> BinaryExpression.GE;
+			                            case BLikeLangLexer.Gt -> BinaryExpression.GT;
+			                            case BLikeLangLexer.Ne -> BinaryExpression.NE;
+			                            default -> throw new ParseCancellationException();
+		                            },
+		                            right);
 	}
 
 	@Override
