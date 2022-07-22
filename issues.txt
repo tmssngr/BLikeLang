@@ -12,7 +12,11 @@ todo:
 
 nice-to-have:
 - &&, ||
-- optimize sum: 1 + a + 2 -> a + 3
+- optimize:
+	- copy propagation (inline unchanged variables like `int a = b;`)
+	- constant propagation (inline constants)
+	- sum: 1 + a + 2 -> a + 3
+	- if: move common part from begin of if/else basic block to previous basic block
 - move assignments the most way down
 - +=, -=, *=, <<=, >>=
 - detect/remove unused assignments
