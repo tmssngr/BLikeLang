@@ -8,52 +8,33 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class BinaryExpression extends Expression {
 
-	// Constants ==============================================================
-
-	public static final String PLUS = "+";
-	public static final String MINUS = "-";
-	public static final String MULTIPLY = "*";
-	public static final String DIVIDE = "/";
-	public static final String MODULO = "%";
-	public static final String SHIFT_L = "<<";
-	public static final String SHIFT_R = ">>";
-	public static final String LT = "<";
-	public static final String LE = "<=";
-	public static final String EQ = "==";
-	public static final String GE = ">=";
-	public static final String GT = ">";
-	public static final String NE = "!=";
-	public static final String BIT_AND = "&";
-	public static final String BIT_OR = "|";
-	public static final String BIT_XOR = "^";
-
 	// Static =================================================================
 
-	public static boolean isComparison(String operator) {
-		return operator.equals(LT)
-				|| operator.equals(LE)
-				|| operator.equals(EQ)
-				|| operator.equals(GE)
-				|| operator.equals(GT)
-				|| operator.equals(NE)
+	public static boolean isComparison(Op operator) {
+		return operator == Op.lessThan
+				|| operator == Op.lessEqual
+				|| operator == Op.equal
+				|| operator == Op.greaterEqual
+				|| operator == Op.greaterThan
+				|| operator == Op.notEqual
 				;
 	}
 
 	// Fields =================================================================
 
 	public final Expression left;
-	public final String operator;
+	public final Op operator;
 	public final Expression right;
 
 	// Setup ==================================================================
 
-	public BinaryExpression(@NotNull Expression left, @NotNull String operator, @NotNull Expression right) {
+	public BinaryExpression(@NotNull Expression left, @NotNull Op operator, @NotNull Expression right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
 	}
 
-	public BinaryExpression(@NotNull Expression left, @NotNull String operator, @NotNull Expression right, @NotNull Type type) {
+	public BinaryExpression(@NotNull Expression left, @NotNull Op operator, @NotNull Expression right, @NotNull Type type) {
 		this(left, operator, right);
 		setType(type);
 	}
@@ -68,5 +49,19 @@ public final class BinaryExpression extends Expression {
 	@Override
 	public <O> O visit(ExpressionVisitor<O> visitor) {
 		return visitor.visitBinary(this);
+	}
+
+	// Inner Classes ==========================================================
+
+	public enum Op {
+		plus("+"), minus("-"), multiply("*"), divide("/"), modulo("%"), shiftL("<<"), shiftR(">>"),
+		lessThan("<"), lessEqual("<="), equal("=="), greaterEqual(">="), greaterThan(">"), notEqual("!="),
+		bitAnd("&"), bitOr("|"), bitXor("^");
+
+		public final String text;
+
+		Op(String text) {
+			this.text = text;
+		}
 	}
 }

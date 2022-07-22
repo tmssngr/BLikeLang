@@ -18,7 +18,7 @@ public class TreePrinterTest {
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
 		                            "+- literal 5"), printer.getStrings(new BinaryExpression(new VarRead("a"),
-		                                                                                     BinaryExpression.PLUS,
+		                                                                                     BinaryExpression.Op.plus,
 		                                                                                     new NumberLiteral(5))));
 		Assert.assertEquals(List.of("a =",
 		                            "+- literal 1"), printer.getStrings(new Assignment("a", new NumberLiteral(1))));
@@ -36,7 +36,7 @@ public class TreePrinterTest {
 		                            "+- else",
 		                            "   +- return",
 		                            "      +- read var a"), printer.getStrings(new IfStatement(new BinaryExpression(new VarRead("a"),
-		                                                                                                            BinaryExpression.GT,
+		                                                                                                            BinaryExpression.Op.greaterThan,
 		                                                                                                            new NumberLiteral(0)),
 		                                                                                       new StatementList()
 				                                                                                       .add(new VarDeclaration("b", new NumberLiteral(1))),

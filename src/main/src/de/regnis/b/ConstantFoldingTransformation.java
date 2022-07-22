@@ -150,36 +150,35 @@ public final class ConstantFoldingTransformation {
 			final int left = ((NumberLiteral) node.left).value;
 			final int right = ((NumberLiteral) node.right).value;
 			return switch (node.operator) {
-				case BinaryExpression.PLUS -> new NumberLiteral(left + right);
-				case BinaryExpression.MINUS -> new NumberLiteral(left - right);
-				case BinaryExpression.MULTIPLY -> new NumberLiteral(left * right);
-				case BinaryExpression.DIVIDE -> new NumberLiteral(left / right);
-				case BinaryExpression.MODULO -> new NumberLiteral(left % right);
-				case BinaryExpression.SHIFT_L -> new NumberLiteral(left << right);
-				case BinaryExpression.SHIFT_R -> new NumberLiteral(left >> right);
-				case BinaryExpression.BIT_AND -> new NumberLiteral(left & right);
-				case BinaryExpression.BIT_OR -> new NumberLiteral(left | right);
-				case BinaryExpression.BIT_XOR -> new NumberLiteral(left ^ right);
-				case BinaryExpression.LT -> BooleanLiteral.get(left < right);
-				case BinaryExpression.LE -> BooleanLiteral.get(left <= right);
-				case BinaryExpression.EQ -> BooleanLiteral.get(left == right);
-				case BinaryExpression.GE -> BooleanLiteral.get(left >= right);
-				case BinaryExpression.GT -> BooleanLiteral.get(left > right);
-				case BinaryExpression.NE -> BooleanLiteral.get(left != right);
-				default -> node;
+				case plus -> new NumberLiteral(left + right);
+				case minus -> new NumberLiteral(left - right);
+				case multiply -> new NumberLiteral(left * right);
+				case divide -> new NumberLiteral(left / right);
+				case modulo -> new NumberLiteral(left % right);
+				case shiftL -> new NumberLiteral(left << right);
+				case shiftR -> new NumberLiteral(left >> right);
+				case bitAnd -> new NumberLiteral(left & right);
+				case bitOr -> new NumberLiteral(left | right);
+				case bitXor -> new NumberLiteral(left ^ right);
+				case lessThan -> BooleanLiteral.get(left < right);
+				case lessEqual -> BooleanLiteral.get(left <= right);
+				case equal -> BooleanLiteral.get(left == right);
+				case greaterEqual -> BooleanLiteral.get(left >= right);
+				case greaterThan -> BooleanLiteral.get(left > right);
+				case notEqual -> BooleanLiteral.get(left != right);
 			};
 		}
 
 		if (node.left instanceof NumberLiteral) {
 			final int left = ((NumberLiteral) node.left).value;
-			if (node.operator.equals(BinaryExpression.PLUS)) {
+			if (node.operator == BinaryExpression.Op.plus) {
 				if (left == 0) {
 					return node.right;
 				}
 				// put constant on right side
 				return new BinaryExpression(node.right, node.operator, node.left);
 			}
-			if (node.operator.equals(BinaryExpression.MULTIPLY)) {
+			if (node.operator == BinaryExpression.Op.multiply) {
 				if (left == 1) {
 					return node.right;
 				}
@@ -189,7 +188,7 @@ public final class ConstantFoldingTransformation {
 				// put constant on right side
 				return new BinaryExpression(node.right, node.operator, node.left);
 			}
-			if (node.operator.equals(BinaryExpression.BIT_AND)) {
+			if (node.operator == BinaryExpression.Op.bitAnd) {
 				if (left == 0) {
 					return new NumberLiteral(0);
 				}
@@ -199,13 +198,13 @@ public final class ConstantFoldingTransformation {
 		if (node.right instanceof NumberLiteral) {
 			final int right = ((NumberLiteral) node.right).value;
 			//noinspection IfCanBeSwitch
-			if (node.operator.equals(BinaryExpression.PLUS)
-					|| node.operator.equals(BinaryExpression.MINUS)) {
+			if (node.operator == BinaryExpression.Op.plus
+					|| node.operator == BinaryExpression.Op.minus) {
 				if (right == 0) {
 					return node.left;
 				}
 			}
-			else if (node.operator.equals(BinaryExpression.MULTIPLY)) {
+			else if (node.operator == BinaryExpression.Op.multiply) {
 				if (right == 1) {
 					return node.left;
 				}
@@ -213,18 +212,18 @@ public final class ConstantFoldingTransformation {
 					return new NumberLiteral(0);
 				}
 			}
-			else if (node.operator.equals(BinaryExpression.DIVIDE)) {
+			else if (node.operator == BinaryExpression.Op.divide) {
 				if (right == 1) {
 					return node.left;
 				}
 			}
-			else if (node.operator.equals(BinaryExpression.SHIFT_L)
-					|| node.operator.equals(BinaryExpression.SHIFT_R)) {
+			else if (node.operator == BinaryExpression.Op.shiftL
+					|| node.operator == BinaryExpression.Op.shiftR) {
 				if (right == 0) {
 					return node.left;
 				}
 			}
-			else if (node.operator.equals(BinaryExpression.BIT_AND)) {
+			else if (node.operator == BinaryExpression.Op.bitAnd) {
 				if (right == 0) {
 					return new NumberLiteral(0);
 				}
@@ -235,10 +234,10 @@ public final class ConstantFoldingTransformation {
 				&& node.right instanceof BooleanLiteral) {
 			final boolean left = ((BooleanLiteral) node.left).value;
 			final boolean right = ((BooleanLiteral) node.right).value;
-			if (node.operator.equals(BinaryExpression.EQ)) {
+			if (node.operator == BinaryExpression.Op.equal) {
 				return BooleanLiteral.get(left == right);
 			}
-			if (node.operator.equals(BinaryExpression.NE)) {
+			if (node.operator == BinaryExpression.Op.notEqual) {
 				return BooleanLiteral.get(left != right);
 			}
 		}
@@ -249,34 +248,34 @@ public final class ConstantFoldingTransformation {
 			final String right = ((VarRead) node.right).name;
 
 			if (Objects.equals(left, right)) {
-				if (node.operator.equals(BinaryExpression.MINUS)) {
+				if (node.operator == BinaryExpression.Op.minus) {
 					return new NumberLiteral(0);
 				}
-				if (node.operator.equals(BinaryExpression.BIT_AND)) {
+				if (node.operator == BinaryExpression.Op.bitAnd) {
 					return node.left;
 				}
-				if (node.operator.equals(BinaryExpression.BIT_OR)) {
+				if (node.operator == BinaryExpression.Op.bitOr) {
 					return node.left;
 				}
-				if (node.operator.equals(BinaryExpression.BIT_XOR)) {
+				if (node.operator == BinaryExpression.Op.bitXor) {
 					return new NumberLiteral(0);
 				}
-				if (node.operator.equals(BinaryExpression.LT)) {
+				if (node.operator == BinaryExpression.Op.lessThan) {
 					return BooleanLiteral.FALSE;
 				}
-				if (node.operator.equals(BinaryExpression.LE)) {
+				if (node.operator == BinaryExpression.Op.lessEqual) {
 					return BooleanLiteral.TRUE;
 				}
-				if (node.operator.equals(BinaryExpression.EQ)) {
+				if (node.operator == BinaryExpression.Op.equal) {
 					return BooleanLiteral.TRUE;
 				}
-				if (node.operator.equals(BinaryExpression.GE)) {
+				if (node.operator == BinaryExpression.Op.greaterEqual) {
 					return BooleanLiteral.TRUE;
 				}
-				if (node.operator.equals(BinaryExpression.GT)) {
+				if (node.operator == BinaryExpression.Op.greaterThan) {
 					return BooleanLiteral.FALSE;
 				}
-				if (node.operator.equals(BinaryExpression.NE)) {
+				if (node.operator == BinaryExpression.Op.notEqual) {
 					return BooleanLiteral.FALSE;
 				}
 			}

@@ -25,7 +25,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 		assertEquals("a = 1 + 2", f -> f.
 				assignment("a",
 				           new BinaryExpression(new NumberLiteral(1),
-				                                BinaryExpression.PLUS,
+				                                BinaryExpression.Op.plus,
 				                                new NumberLiteral(2))));
 		assertEquals("a = foo()", f -> f.
 				assignment("a", new FuncCall("foo", new FuncCallParameters())));
@@ -51,27 +51,27 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				               a = 1 + $1""", f -> f.
 				assignment("a",
 				           new BinaryExpression(new NumberLiteral(1),
-				                                BinaryExpression.PLUS,
+				                                BinaryExpression.Op.plus,
 				                                new BinaryExpression(new NumberLiteral(2),
-				                                                     BinaryExpression.PLUS,
+				                                                     BinaryExpression.Op.plus,
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
 				             $1 := 2 <= 3
 				               a = false == $1""", f -> f.
 				assignment("a",
 				           new BinaryExpression(BooleanLiteral.FALSE,
-				                                BinaryExpression.EQ,
+				                                BinaryExpression.Op.equal,
 				                                new BinaryExpression(new NumberLiteral(2),
-				                                                     BinaryExpression.LE,
+				                                                     BinaryExpression.Op.lessEqual,
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
 				             $1 := 1 + 2
 				               a = $1 + 3""", f -> f.
 				assignment("a",
 				           new BinaryExpression(new BinaryExpression(new NumberLiteral(1),
-				                                                     BinaryExpression.PLUS,
+				                                                     BinaryExpression.Op.plus,
 				                                                     new NumberLiteral(2)),
-				                                BinaryExpression.PLUS,
+				                                BinaryExpression.Op.plus,
 				                                new NumberLiteral(3))));
 		assertEquals("""
 				             $1 := foo()
@@ -79,7 +79,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a",
 				           new BinaryExpression(new FuncCall("foo",
 				                                             new FuncCallParameters()),
-				                                BinaryExpression.PLUS,
+				                                BinaryExpression.Op.plus,
 				                                new NumberLiteral(3))));
 		assertEquals("""
 				             $1 := bar(1)
@@ -95,19 +95,19 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new BinaryExpression(new NumberLiteral(1),
-						                                                       BinaryExpression.MINUS,
+						                                                       BinaryExpression.Op.minus,
 						                                                       new NumberLiteral(2))))));
 		assertEquals("""
 				             $1 := 1 - 2
 				               a = (u8) $1""", f -> f.
 				assignment("a", new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                                    BinaryExpression.MINUS,
+				                                                                    BinaryExpression.Op.minus,
 				                                                                    new NumberLiteral(2)))));
 		assertEquals("""
 				             $1 := 1 - 2
 				               return (u8) $1""", f -> f.
 				returnStm(new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                              BinaryExpression.MINUS,
+				                                                              BinaryExpression.Op.minus,
 				                                                              new NumberLiteral(2)))));
 		assertEquals("""
 				             $1 := (u8) b
@@ -119,14 +119,14 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             $1 := b[]
 				               a = $1 + 1""", f -> f.
 				assignment("a", new BinaryExpression(new MemRead("b"),
-				                                     BinaryExpression.PLUS,
+				                                     BinaryExpression.Op.plus,
 				                                     new NumberLiteral(1))));
 		assertEquals("""
 				             $1 := b[]
 				               $2 := c[]
 				               a = $1 + $2""", f -> f.
 				assignment("a", new BinaryExpression(new MemRead("b"),
-				                                     BinaryExpression.PLUS,
+				                                     BinaryExpression.Op.plus,
 				                                     new MemRead("c"))));
 	}
 
@@ -138,12 +138,12 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				               a := $1 + $2""", f -> f.
 				varDeclaration("a",
 				               new BinaryExpression(new BinaryExpression(new NumberLiteral(1),
-				                                                         BinaryExpression.MULTIPLY,
+				                                                         BinaryExpression.Op.multiply,
 				                                                         new NumberLiteral(2)),
-				                                    BinaryExpression.PLUS,
+				                                    BinaryExpression.Op.plus,
 				                                    new BinaryExpression(new NumberLiteral(3),
-				                                                                                                                            BinaryExpression.MULTIPLY,
-				                                                                                                                            new NumberLiteral(4)))));
+				                                                         BinaryExpression.Op.multiply,
+				                                                         new NumberLiteral(4)))));
 
 		assertEquals("""
 				             $1 := 1 + b
@@ -153,10 +153,10 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				               new FuncCall("foo",
 				                            new FuncCallParameters()
 						                            .add(new BinaryExpression(new NumberLiteral(1),
-						                                                      BinaryExpression.PLUS,
+						                                                      BinaryExpression.Op.plus,
 						                                                      new VarRead("b")))
 						                            .add(new BinaryExpression(new NumberLiteral(3),
-						                                                      BinaryExpression.MULTIPLY,
+						                                                      BinaryExpression.Op.multiply,
 						                                                      new NumberLiteral(4))))));
 		assertEquals("""
 				             void main() {
@@ -176,7 +176,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new TypeCast(BasicTypes.INT8, new BinaryExpression(new NumberLiteral(1),
-						                                                                                     BinaryExpression.MINUS,
+						                                                                                     BinaryExpression.Op.minus,
 						                                                                                     new NumberLiteral(2)))))));
 	}
 

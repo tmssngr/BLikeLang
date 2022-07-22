@@ -428,7 +428,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	@Nullable
-	private Type getBinaryExpressionType(Type left, String operator, Type right) {
+	private Type getBinaryExpressionType(Type left, BinaryExpression.Op operator, Type right) {
 		if (left instanceof final BasicTypes.NumericType lnt
 				&& right instanceof final BasicTypes.NumericType rnt) {
 			if (BinaryExpression.isComparison(operator)) {
@@ -442,7 +442,7 @@ public final class DetermineTypesTransformation {
 		}
 
 		if (left == BasicTypes.BOOLEAN && right == BasicTypes.BOOLEAN) {
-			if (operator.equals(BinaryExpression.EQ) || operator.equals(BinaryExpression.NE)) {
+			if (operator == BinaryExpression.Op.equal || operator == BinaryExpression.Op.notEqual) {
 				return BasicTypes.BOOLEAN;
 			}
 		}

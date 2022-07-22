@@ -207,8 +207,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return new BinaryExpression(left,
 		                            switch (ctx.operator.getType()) {
-			                            case BLikeLangLexer.Plus -> BinaryExpression.PLUS;
-			                            case BLikeLangLexer.Minus -> BinaryExpression.MINUS;
+			                            case BLikeLangLexer.Plus -> BinaryExpression.Op.plus;
+			                            case BLikeLangLexer.Minus -> BinaryExpression.Op.minus;
 			                            default -> throw new ParseCancellationException();
 		                            },
 		                            right);
@@ -221,11 +221,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return new BinaryExpression(left,
 		                            switch (ctx.operator.getType()) {
-			                            case BLikeLangLexer.Multiply -> BinaryExpression.MULTIPLY;
-			                            case BLikeLangLexer.Divide -> BinaryExpression.DIVIDE;
-			                            case BLikeLangLexer.Modulo -> BinaryExpression.MODULO;
-			                            case BLikeLangLexer.ShiftL -> BinaryExpression.SHIFT_L;
-			                            case BLikeLangLexer.ShiftR -> BinaryExpression.SHIFT_R;
+			                            case BLikeLangLexer.Multiply -> BinaryExpression.Op.multiply;
+			                            case BLikeLangLexer.Divide -> BinaryExpression.Op.divide;
+			                            case BLikeLangLexer.Modulo -> BinaryExpression.Op.modulo;
+			                            case BLikeLangLexer.ShiftL -> BinaryExpression.Op.shiftL;
+			                            case BLikeLangLexer.ShiftR -> BinaryExpression.Op.shiftR;
 			                            default -> throw new ParseCancellationException();
 		                            },
 		                            right);
@@ -238,9 +238,9 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return new BinaryExpression(left,
 		                            switch (ctx.operator.getType()) {
-			                            case BLikeLangLexer.BitAnd -> BinaryExpression.BIT_AND;
-			                            case BLikeLangLexer.BitOr -> BinaryExpression.BIT_OR;
-			                            case BLikeLangLexer.BitXor -> BinaryExpression.BIT_XOR;
+			                            case BLikeLangLexer.BitAnd -> BinaryExpression.Op.bitAnd;
+			                            case BLikeLangLexer.BitOr -> BinaryExpression.Op.bitOr;
+			                            case BLikeLangLexer.BitXor -> BinaryExpression.Op.bitXor;
 			                            default -> throw new ParseCancellationException();
 		                            },
 		                            right);
@@ -253,12 +253,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return new BinaryExpression(left,
 		                            switch (ctx.operator.getType()) {
-			                            case BLikeLangLexer.Lt -> BinaryExpression.LT;
-			                            case BLikeLangLexer.Le -> BinaryExpression.LE;
-			                            case BLikeLangLexer.Eq -> BinaryExpression.EQ;
-			                            case BLikeLangLexer.Ge -> BinaryExpression.GE;
-			                            case BLikeLangLexer.Gt -> BinaryExpression.GT;
-			                            case BLikeLangLexer.Ne -> BinaryExpression.NE;
+			                            case BLikeLangLexer.Lt -> BinaryExpression.Op.lessThan;
+			                            case BLikeLangLexer.Le -> BinaryExpression.Op.lessEqual;
+			                            case BLikeLangLexer.Eq -> BinaryExpression.Op.equal;
+			                            case BLikeLangLexer.Ge -> BinaryExpression.Op.greaterEqual;
+			                            case BLikeLangLexer.Gt -> BinaryExpression.Op.greaterThan;
+			                            case BLikeLangLexer.Ne -> BinaryExpression.Op.notEqual;
 			                            default -> throw new ParseCancellationException();
 		                            },
 		                            right);
