@@ -3,8 +3,6 @@ package de.regnis.b.ast;
 import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 /**
  * @author Thomas Singer
  */
@@ -31,69 +29,6 @@ public final class BinaryExpression extends Expression {
 
 	// Static =================================================================
 
-	public static BinaryExpression createAdd(Expression left, Expression right) {
-		return new BinaryExpression(left, PLUS, right);
-	}
-
-	public static BinaryExpression createSub(Expression left, Expression right) {
-		return new BinaryExpression(left, MINUS, right);
-	}
-
-	public static BinaryExpression createMultiply(Expression left, Expression right) {
-		return new BinaryExpression(left, MULTIPLY, right);
-	}
-
-	public static BinaryExpression createDivide(Expression left, Expression right) {
-		return new BinaryExpression(left, DIVIDE, right);
-	}
-
-	public static BinaryExpression createModulo(Expression left, Expression right) {
-		return new BinaryExpression(left, MODULO, right);
-	}
-
-	public static BinaryExpression createShiftL(Expression left, Expression right) {
-		return new BinaryExpression(left, SHIFT_L, right);
-	}
-
-	public static BinaryExpression createShiftR(Expression left, Expression right) {
-		return new BinaryExpression(left, SHIFT_R, right);
-	}
-
-	public static BinaryExpression createLt(Expression left, Expression right) {
-		return new BinaryExpression(left, LT, right);
-	}
-
-	public static BinaryExpression createLe(Expression left, Expression right) {
-		return new BinaryExpression(left, LE, right);
-	}
-
-	public static BinaryExpression createEq(Expression left, Expression right) {
-		return new BinaryExpression(left, EQ, right);
-	}
-
-	public static BinaryExpression createGe(Expression left, Expression right) {
-		return new BinaryExpression(left, GE, right);
-	}
-
-	public static BinaryExpression createGt(Expression left, Expression right) {
-		return new BinaryExpression(left, GT, right);
-	}
-
-	public static BinaryExpression createNe(Expression left, Expression right) {
-		return new BinaryExpression(left, NE, right);
-	}
-
-	public static BinaryExpression createBitAnd(Expression left, Expression right) {
-		return new BinaryExpression(left, BIT_AND, right);
-	}
-	public static BinaryExpression createBitOr(Expression left, Expression right) {
-		return new BinaryExpression(left, BIT_OR, right);
-	}
-	public static BinaryExpression createBitXor(Expression left, Expression right) {
-		return new BinaryExpression(left, BIT_XOR, right);
-	}
-
-
 	public static boolean isComparison(String operator) {
 		return operator.equals(LT)
 				|| operator.equals(LE)
@@ -112,14 +47,15 @@ public final class BinaryExpression extends Expression {
 
 	// Setup ==================================================================
 
-	private BinaryExpression(Expression left, String operator, Expression right) {
-		Objects.requireNonNull(left);
-		Objects.requireNonNull(operator);
-		Objects.requireNonNull(right);
-
+	public BinaryExpression(@NotNull Expression left, @NotNull String operator, @NotNull Expression right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
+	}
+
+	public BinaryExpression(@NotNull Expression left, @NotNull String operator, @NotNull Expression right, @NotNull Type type) {
+		this(left, operator, right);
+		setType(type);
 	}
 
 	// Implemented ============================================================
@@ -132,19 +68,5 @@ public final class BinaryExpression extends Expression {
 	@Override
 	public <O> O visit(ExpressionVisitor<O> visitor) {
 		return visitor.visitBinary(this);
-	}
-
-	// Accessing ==============================================================
-
-	@NotNull
-	public BinaryExpression createNew(@NotNull Expression left, @NotNull Expression right) {
-		return new BinaryExpression(left, operator, right);
-	}
-
-	@NotNull
-	public BinaryExpression createNew(@NotNull Type type, @NotNull Expression left, @NotNull Expression right) {
-		final BinaryExpression binaryExpression = new BinaryExpression(left, operator, right);
-		binaryExpression.setType(type);
-		return binaryExpression;
 	}
 }

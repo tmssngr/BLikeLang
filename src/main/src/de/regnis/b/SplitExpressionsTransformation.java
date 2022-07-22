@@ -191,7 +191,7 @@ public final class SplitExpressionsTransformation {
 	private BinaryExpression handleBinary(BinaryExpression node, TempVarFactory tempVarFactory) {
 		final Expression left = splitInnerExpression(node.left, tempVarFactory);
 		final Expression right = splitInnerExpression(node.right, tempVarFactory);
-		return node.createNew(left, right);
+		return new BinaryExpression(left, node.operator, right);
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {

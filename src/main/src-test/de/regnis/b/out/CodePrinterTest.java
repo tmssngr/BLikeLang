@@ -26,9 +26,9 @@ public class CodePrinterTest {
 								                                             .add(new FuncDeclarationParameter(BasicTypes.INT16, "x")),
 						                                             new StatementList()
 								                                             .add(new ReturnStatement(
-										                                             BinaryExpression
-												                                             .createMultiply(new VarRead("x"),
-												                                                             new VarRead("x"))))))
+										                                             new BinaryExpression(new VarRead("x"),
+										                                                                  BinaryExpression.MULTIPLY,
+										                                                                  new VarRead("x"))))))
 		                    ));
 		Assert.assertEquals("a := (u8) -1\n",
 		                    CodePrinter.print(new DeclarationList()
@@ -54,8 +54,9 @@ public class CodePrinterTest {
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "foo",
 						                                             new FuncDeclarationParameters(),
 						                                             new StatementList()
-								                                             .add(new IfStatement(BinaryExpression.createGt(new VarRead("a"),
-								                                                                                            new NumberLiteral(0)),
+								                                             .add(new IfStatement(new BinaryExpression(new VarRead("a"),
+								                                                                                       BinaryExpression.GT,
+								                                                                                       new NumberLiteral(0)),
 								                                                                  new StatementList()
 										                                                                  .add(new VarDeclaration("b", new NumberLiteral(1))),
 								                                                                  new StatementList()
