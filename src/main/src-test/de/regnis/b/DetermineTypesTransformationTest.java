@@ -453,10 +453,25 @@ public final class DetermineTypesTransformationTest {
 		                              Messages.warningUnusedVar(1, 4, "a") + "\n",
 		                              "var a = (u8)-1;\n" + VOID_MAIN);
 
-		assertSuccessfullyTransformed("g0 : u8 = (u8) 0\n" + VOID_MAIN,
+		assertSuccessfullyTransformed("g0 : u8 = 0\n" + VOID_MAIN,
 		                              Messages.warningUnnecessaryCastTo(1, 8, BasicTypes.UINT8) + "\n" +
 				                              Messages.warningUnusedVar(1, 3, "a") + "\n",
 		                              "u8 a = (u8)0;\n" + VOID_MAIN);
+
+		assertSuccessfullyTransformed("""
+				                              void main() {
+				                                v0 : u8 = 10
+				                                v1 : u8 = v0
+				                              }
+				                              """,
+		                              Messages.warningUnnecessaryCastTo(3, 11, BasicTypes.UINT8) + "\n" +
+				                              Messages.warningUnusedVar(3, 6, "b") + "\n",
+		                              """
+				                              void main() {
+				                                u8  a = 10;
+				                                var b = (u8) a;
+				                              }
+				                              """);
 
 		assertTransformationFailedException("Foo", NO_WARNING, "var a = (Foo)0;\n" + VOID_MAIN);
 	}

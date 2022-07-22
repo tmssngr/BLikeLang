@@ -562,13 +562,19 @@ public final class DetermineTypesTransformation {
 		return new MemRead(BasicTypes.UINT8, variable.newName);
 	}
 
-	private TypeCast visitTypeCast(TypeCast node) {
+	private Expression visitTypeCast(TypeCast node) {
 		final Expression newExpression = visitExpression(node.expression);
 		final Type expressionType = newExpression.getType();
 		final Type type = BasicTypes.getType(node.typeName, false);
-		if (expressionType == type || BasicTypes.canBeAssignedFrom(type, expressionType)) {
+		if (expressionType == type) {
+			warning(Messages.warningUnnecessaryCastTo(node.line, node.column, type));
+			return newExpression;
+		}
+
+		if (BasicTypes.canBeAssignedFrom(type, expressionType)) {
 			warning(Messages.warningUnnecessaryCastTo(node.line, node.column, type));
 		}
+
 		return new TypeCast(type, newExpression);
 	}
 
