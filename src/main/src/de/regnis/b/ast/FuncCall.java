@@ -14,10 +14,10 @@ public final class FuncCall extends Expression {
 
 	// Fields =================================================================
 
+	private final List<Expression> parameters;
 	public final String name;
 	public final int line;
 	public final int column;
-	private final List<Expression> parameters;
 
 	// Setup ==================================================================
 
@@ -42,6 +42,11 @@ public final class FuncCall extends Expression {
 	@Override
 	public <O> O visit(ExpressionVisitor<O> visitor) {
 		return visitor.visitFunctionCall(this);
+	}
+
+	@Override
+	public String toString() {
+		return "func call " + name;
 	}
 
 	// Accessing ==============================================================

@@ -110,7 +110,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				                                                              BinaryExpression.Op.minus,
 				                                                              new NumberLiteral(2)))));
 		assertEquals("""
-				             $1 := (u8) b
+				             $1 : u8 = (u8) b
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
@@ -171,7 +171,7 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						                       }""")));
 		assertEquals("""
 				             $1 := 1 - 2
-				               $2 := (i8) $1
+				               $2 : i8 = (i8) $1
 				               a = foo($2)""", f -> f.
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()

@@ -1,5 +1,6 @@
 package de.regnis.ir;
 
+import de.regnis.b.AssertTypes;
 import de.regnis.b.AstFactory;
 import de.regnis.b.DetermineTypesTransformation;
 import de.regnis.b.SplitExpressionsTransformation;
@@ -81,9 +82,9 @@ public class ControlFlowGraphTest {
 				             }
 				             void printHex16(u16 p0) {
 				               $3 : u16 = p0 >> 8
-				               $4 := (u8) $3
+				               $4 : u8 = (u8) $3
 				               printHex8($4)
-				               $5 := (u8) p0
+				               $5 : u8 = (u8) p0
 				               printHex8($5)
 				             }
 				             void main() {
@@ -236,6 +237,8 @@ public class ControlFlowGraphTest {
 						  }
 						}"""
 		), new StringStringOutput()));
+
+		AssertTypes.assertAllExpressionsHaveType(root);
 
 		assertEquals("""
 				             i16 getNumber() {
@@ -597,7 +600,7 @@ public class ControlFlowGraphTest {
 				             void print(u8 p0) {
 				             }
 				             void main() {
-				               $15 := (u16) 2001
+				               $15 : u16 = (u16) 2001
 				               $16 : u8 = calculate(9, 1, $15)
 				               print($16)
 				             }
