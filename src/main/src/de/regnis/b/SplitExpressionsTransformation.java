@@ -191,12 +191,22 @@ public final class SplitExpressionsTransformation {
 	private BinaryExpression handleBinary(BinaryExpression node, TempVarFactory tempVarFactory) {
 		final Expression left = splitInnerExpression(node.left, tempVarFactory);
 		final Expression right = splitInnerExpression(node.right, tempVarFactory);
-		return new BinaryExpression(left, node.operator, right);
+		final BinaryExpression expression = new BinaryExpression(left, node.operator, right);
+		copyType(node, expression);
+		return expression;
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
-		return new FuncCall(node.name, parameters, node.line, node.column);
+		final FuncCall funcCall = new FuncCall(node.name, parameters, node.line, node.column);
+		copyType(node, funcCall);
+		return funcCall;
+	}
+
+	private void copyType(Expression from, Expression to) {
+		if (from.hasType()) {
+			to.setType(from.getType());
+		}
 	}
 
 	@NotNull
@@ -212,7 +222,9 @@ public final class SplitExpressionsTransformation {
 	@NotNull
 	private TypeCast handleTypeCast(TypeCast node, TempVarFactory tempVarFactory) {
 		final Expression simplifiedExpression = splitInnerExpression(node.expression, tempVarFactory);
-		return new TypeCast(node.typeName, simplifiedExpression);
+		final TypeCast typeCast = new TypeCast(node.typeName, simplifiedExpression);
+		copyType(node, typeCast);
+		return typeCast;
 	}
 
 	@NotNull
@@ -221,18 +233,14 @@ public final class SplitExpressionsTransformation {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
 				final BinaryExpression tempExpression = handleBinary(node, tempVarFactory);
-				if (node.hasType()) {
-					tempExpression.setType(node.getType());
-				}
+				copyType(node, tempExpression);
 				return tempVarFactory.createTempVarDeclaration(tempExpression);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
 				final FuncCall fcn = handleFunctionCall(node, tempVarFactory);
-				if (node.hasType()) {
-					fcn.setType(node.getType());
-				}
+				copyType(node, fcn);
 				return tempVarFactory.createTempVarDeclaration(fcn);
 			}
 
@@ -268,7 +276,9 @@ public final class SplitExpressionsTransformation {
 		return expression -> {
 			final String tempVar = getNextTempVarName();
 			newDeclarationList.add(new GlobalVarDeclaration(VarDeclaration.createTempVarDeclaration(tempVar, expression)));
-			return new VarRead(tempVar, -1, -1);
+			final VarRead varRead = new VarRead(tempVar, -1, -1);
+			copyType(expression, varRead);
+			return varRead;
 		};
 	}
 
@@ -276,7 +286,9 @@ public final class SplitExpressionsTransformation {
 		return expression -> {
 			final String tempVar = getNextTempVarName();
 			newStatementList.add(VarDeclaration.createTempVarDeclaration(tempVar, expression));
-			return new VarRead(tempVar, -1, -1);
+			final VarRead varRead = new VarRead(tempVar, -1, -1);
+			copyType(expression, varRead);
+			return varRead;
 		};
 	}
 

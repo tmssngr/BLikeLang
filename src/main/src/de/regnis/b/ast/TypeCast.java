@@ -42,4 +42,9 @@ public final class TypeCast extends Expression {
 	public <O> O visit(ExpressionVisitor<O> visitor) {
 		return visitor.visitTypeCast(this);
 	}
+
+	@Override
+	public String toString() {
+		return "cast to " + typeName;
+	}
 }
