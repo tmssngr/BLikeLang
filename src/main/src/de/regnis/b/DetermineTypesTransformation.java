@@ -23,8 +23,11 @@ public final class DetermineTypesTransformation {
 		transformation.reportMissingMainFunction();
 		transformation.reportIllegalBreakStatement(root);
 
-		final DeclarationList newRoot = transformation.visitDeclarationList(root);
-		return transformation.reportAndRemoveUnusedFunctions(newRoot);
+		DeclarationList newRoot = transformation.visitDeclarationList(root);
+		AssertTypes.assertAllExpressionsHaveType(newRoot);
+		newRoot = transformation.reportAndRemoveUnusedFunctions(newRoot);
+		AssertTypes.assertAllExpressionsHaveType(newRoot);
+		return newRoot;
 	}
 
 	// Fields =================================================================
