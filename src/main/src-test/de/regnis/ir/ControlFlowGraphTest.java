@@ -30,7 +30,7 @@ public class ControlFlowGraphTest {
 				"""
 						void print(u8 chr) {
 						}
-												
+
 						void printHex4(u8 i) {
 						  i = i & 15;
 						  var chr = 0;
@@ -42,7 +42,7 @@ public class ControlFlowGraphTest {
 						  }
 						  print(chr);
 						}
-												
+
 						void printHex8(u8 i) {
 						  printHex4(i >> 4);
 						  printHex4(i);
@@ -52,7 +52,7 @@ public class ControlFlowGraphTest {
 						  printHex8((u8)(i >> 8));
 						  printHex8((u8)i);
 						}
-												
+
 						void main() {
 						  printHex16(192);
 						}"""
@@ -212,14 +212,14 @@ public class ControlFlowGraphTest {
 						int getNumber() {
 						  return 10;
 						}
-												
+
 						int rnd() {
 						  return 5;
 						}
-												
+
 						void print(u8 char) {
 						}
-												
+
 						void main() {
 						  var secret = rnd();
 						  while (true) {
@@ -514,7 +514,7 @@ public class ControlFlowGraphTest {
 						  }
 						  return (u8) ((d + day + z + a + 4) % 7);
 						}
-						
+
 						void print(u8 value) {
 						}
 
