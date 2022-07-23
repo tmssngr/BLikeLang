@@ -479,13 +479,6 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	private Function handleCall(String name, List<Expression> parameters, int line, int column, FuncCallParameters newParameters) {
-		final List<Expression> expressions = new ArrayList<>();
-		for (Expression expression : parameters) {
-			final Expression newExpression = visitExpression(expression);
-			expressions.add(newExpression);
-			newParameters.add(newExpression);
-		}
-
 		final Function function = functions.get(name);
 		if (function == null) {
 			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
@@ -494,16 +487,28 @@ public final class DetermineTypesTransformation {
 		function.setUsed();
 
 		final List<Type> parameterTypes = function.parameterTypes;
-		if (expressions.size() != parameterTypes.size()) {
-			throw new TransformationFailedException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + expressions.size());
+		if (parameters.size() != parameterTypes.size()) {
+			throw new TransformationFailedException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + parameters.size());
 		}
 
 		for (int i = 0; i < parameterTypes.size(); i++) {
-			final Type expressionType = expressions.get(i).getType();
+			final Expression parameter = parameters.get(i);
+			Expression typedExpression = visitExpression(parameter);
+			final Type expressionType = typedExpression.getType();
 			final Type parameterType = parameterTypes.get(i);
 			if (!BasicTypes.canBeAssignedFrom(parameterType, expressionType)) {
 				throw new TransformationFailedException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
 			}
+
+			if (expressionType != parameterType) {
+				if (typedExpression instanceof TypeCast cast) {
+					typedExpression = cast.expression;
+				}
+				if (!(typedExpression instanceof NumberLiteral)) {
+					typedExpression = new TypeCast(parameterType, typedExpression);
+				}
+			}
+			newParameters.add(typedExpression);
 		}
 		return function;
 	}

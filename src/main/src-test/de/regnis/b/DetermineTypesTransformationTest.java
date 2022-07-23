@@ -473,6 +473,42 @@ public final class DetermineTypesTransformationTest {
 				                              }
 				                              """);
 
+		assertSuccessfullyTransformed("""
+				                              void print(i16 p0) {
+				                              }
+				                              void main() {
+				                                v0 : u8 = 10
+				                                print((i16) v0)
+				                              }
+				                              """,
+		                              Messages.warningUnusedParameter(1, 27, "value") + "\n",
+		                              """
+                                              void print(i16 value) {
+                                              }
+				                              void main() {
+				                                u8  a = 10;
+				                                print(a);
+				                              }
+				                              """);
+
+		assertSuccessfullyTransformed("""
+				                              void print(i16 p0) {
+				                              }
+				                              void main() {
+				                                v0 : u8 = 10
+				                                print((i16) v0)
+				                              }
+				                              """,
+		                              Messages.warningUnusedParameter(1, 27, "value") + "\n",
+		                              """
+                                              void print(i16 value) {
+                                              }
+				                              void main() {
+				                                u8  a = 10;
+				                                print((i8) a);
+				                              }
+				                              """);
+
 		assertTransformationFailedException("Foo", NO_WARNING, "var a = (Foo)0;\n" + VOID_MAIN);
 	}
 
