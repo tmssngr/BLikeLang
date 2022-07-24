@@ -124,6 +124,9 @@ public final class AssertTypes {
 			public Object visitBinary(BinaryExpression node) {
 				assertAllExpressionsHaveType(node.left);
 				assertAllExpressionsHaveType(node.right);
+				if (!(node.right instanceof NumberLiteral) && node.left.getType() != node.right.getType()) {
+					throw new IllegalStateException("not the same type left and right for expression " + node);
+				}
 				return node;
 			}
 
