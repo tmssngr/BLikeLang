@@ -14,7 +14,13 @@ public final class AssertTypes {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
 				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+					if (node.node.type == null) {
+						throw new IllegalStateException("var declaration without type: " + node.node);
+					}
 					assertAllExpressionsHaveType(node.node.expression);
+					if (!(node.node.expression instanceof NumberLiteral) && node.node.type != node.node.expression.getType()) {
+						throw new IllegalStateException("var declaration type differs: " + node.node);
+					}
 					return node;
 				}
 
@@ -38,7 +44,13 @@ public final class AssertTypes {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
+					if (node.type == null) {
+						throw new IllegalStateException("assignment without type: " + node);
+					}
 					assertAllExpressionsHaveType(node.expression);
+					if (!(node.expression instanceof NumberLiteral) && node.type != node.expression.getType()) {
+						throw new IllegalStateException("assignment type differs: " + node);
+					}
 					return node;
 				}
 
@@ -56,7 +68,13 @@ public final class AssertTypes {
 
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
+					if (node.type == null) {
+						throw new IllegalStateException("var declaration without type: " + node);
+					}
 					assertAllExpressionsHaveType(node.expression);
+					if (!(node.expression instanceof NumberLiteral) && node.type != node.expression.getType()) {
+						throw new IllegalStateException("var declaration type differs: " + node);
+					}
 					return node;
 				}
 

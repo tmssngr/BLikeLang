@@ -352,14 +352,15 @@ public final class DetermineTypesTransformation {
 
 	private Assignment visitAssignment(Assignment node) {
 		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
-		final Expression newExpression = visitExpression(node.expression);
+		Expression newExpression = visitExpression(node.expression);
 
 		final Type expressionType = newExpression.getType();
 		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
 			throw new TransformationFailedException(Messages.errorCantAssignType(node.line, node.column, node.name, expressionType, variable.type));
 		}
 
-		return new Assignment(variable.newName, newExpression);
+		newExpression = convertToType(newExpression, variable.type);
+		return new Assignment(variable.newName, newExpression, variable.type);
 	}
 
 	private MemAssignment visitMemAssignment(MemAssignment node) {
@@ -500,17 +501,22 @@ public final class DetermineTypesTransformation {
 				throw new TransformationFailedException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
 			}
 
-			if (expressionType != parameterType) {
-				if (typedExpression instanceof TypeCast cast) {
-					typedExpression = cast.expression;
-				}
-				if (!(typedExpression instanceof NumberLiteral)) {
-					typedExpression = new TypeCast(parameterType, typedExpression);
-				}
-			}
+			typedExpression = convertToType(typedExpression, parameterType);
 			newParameters.add(typedExpression);
 		}
 		return function;
+	}
+
+	private static Expression convertToType(Expression expression, Type expectedType) {
+		if (expression.getType() != expectedType) {
+			if (expression instanceof TypeCast cast) {
+				expression = cast.expression;
+			}
+			if (!(expression instanceof NumberLiteral)) {
+				expression = new TypeCast(expectedType, expression);
+			}
+		}
+		return expression;
 	}
 
 	private ReturnStatement visitReturn(ReturnStatement node) {
