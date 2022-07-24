@@ -1,6 +1,6 @@
 package de.regnis.b.ast;
 
-import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Thomas Singer
@@ -16,14 +16,11 @@ public final class MemAssignment extends SimpleStatement {
 
 	// Setup ==================================================================
 
-	public MemAssignment(String name, Expression expression) {
+	public MemAssignment(@NotNull String name, @NotNull Expression expression) {
 		this(name, expression, -1, -1);
 	}
 
-	public MemAssignment(String name, Expression expression, int line, int column) {
-		Objects.requireNonNull(name);
-		Objects.requireNonNull(expression);
-
+	public MemAssignment(@NotNull String name, @NotNull Expression expression, int line, int column) {
 		this.name = name;
 		this.expression = expression;
 		this.line = line;
