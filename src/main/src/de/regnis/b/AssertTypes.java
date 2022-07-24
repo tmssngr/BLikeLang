@@ -97,12 +97,15 @@ public final class AssertTypes {
 				@Override
 				public Object visitIf(IfStatement node) {
 					assertAllExpressionsHaveType(node.expression);
+					assertAllExpressionsHaveType(node.trueStatements);
+					assertAllExpressionsHaveType(node.falseStatements);
 					return node;
 				}
 
 				@Override
 				public Object visitWhile(WhileStatement node) {
 					assertAllExpressionsHaveType(node.expression);
+					assertAllExpressionsHaveType(node.statements);
 					return node;
 				}
 
