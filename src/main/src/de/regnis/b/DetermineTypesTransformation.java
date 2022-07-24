@@ -419,14 +419,18 @@ public final class DetermineTypesTransformation {
 	}
 
 	private BinaryExpression visitBinary(BinaryExpression node) {
-		final Expression newLeft = visitExpression(node.left);
-		final Expression newRight = visitExpression(node.right);
+		Expression newLeft = visitExpression(node.left);
+		Expression newRight = visitExpression(node.right);
 
 		final Type leftType = newLeft.getType();
 		final Type rightType = newRight.getType();
 		final Type type = getBinaryExpressionType(leftType, node.operator, rightType);
 		if (type == null) {
 			throw new TransformationFailedException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
+		}
+		if (type instanceof BasicTypes.NumericType) {
+			newLeft = convertToType(newLeft, type);
+			newRight = convertToType(newRight, type);
 		}
 		return new BinaryExpression(newLeft, node.operator, newRight, type);
 	}

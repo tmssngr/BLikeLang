@@ -68,7 +68,7 @@ public final class DetermineTypesTransformationTest {
 		assertSuccessfullyTransformed("""
 				                              g0 : u8 = 1
 				                              g1 : i8 = -1
-				                              g2 : i8 = g0 + g1
+				                              g2 : i8 = (i8) g0 + g1
 				                              g3 : boolean = false
 				                              """ + VOID_MAIN,
 		                              Messages.warningUnusedVar(3, 4, "b") + "\n" +

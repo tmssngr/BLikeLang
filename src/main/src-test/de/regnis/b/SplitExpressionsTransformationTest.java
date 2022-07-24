@@ -197,8 +197,9 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				             void main() {
 				               $1 : u8 = 2 * 3
 				               $2 : u8 = 10 + $1
-				               $3 : i16 = call(1)
-				               v0 : i16 = $2 + $3
+				               $3 : i16 = (i16) $2
+				               $4 : i16 = call(1)
+				               v0 : i16 = $3 + $4
 				             }
 				             """,
 		             SplitExpressionsTransformation.transform(
