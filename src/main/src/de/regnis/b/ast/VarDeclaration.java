@@ -20,7 +20,7 @@ public final class VarDeclaration extends SimpleStatement {
 
 	// Fields =================================================================
 
-	private final Type type;
+	public final Type type;
 	public final String typeName;
 	public final String name;
 	public final Expression expression;

@@ -52,6 +52,9 @@ public final class SplitExpressionsTransformation {
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
+		if (node.type != null) {
+			return new Assignment(node.name, expression, node.type);
+		}
 		return new Assignment(node.name, expression, node.line, node.column);
 	}
 
