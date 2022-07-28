@@ -207,8 +207,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 		return new BinaryExpression(left,
 		                            switch (ctx.operator.getType()) {
-			                            case BLikeLangLexer.Plus -> BinaryExpression.Op.plus;
-			                            case BLikeLangLexer.Minus -> BinaryExpression.Op.minus;
+			                            case BLikeLangLexer.Plus -> BinaryExpression.Op.add;
+			                            case BLikeLangLexer.Minus -> BinaryExpression.Op.sub;
 			                            default -> throw new ParseCancellationException();
 		                            },
 		                            right);
