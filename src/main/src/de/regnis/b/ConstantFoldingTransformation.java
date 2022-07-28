@@ -55,7 +55,7 @@ public final class ConstantFoldingTransformation {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					final Expression expression = handleExpression(node.expression);
-					return new Assignment(node.name, expression, node.line, node.column);
+					return new Assignment(node.operation, node.name, expression, node.line, node.column);
 				}
 
 				@Override

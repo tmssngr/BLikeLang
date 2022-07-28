@@ -27,7 +27,7 @@ public abstract class AbstractTransformationTest {
 		factory.accept(new StatementListFactory() {
 			@Override
 			public void assignment(String name, Expression expression) {
-				statementList.add(new Assignment(name, expression));
+				statementList.add(new Assignment(Assignment.Op.assign, name, expression));
 			}
 
 			@Override

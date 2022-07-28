@@ -164,7 +164,9 @@ public class CodePrinter {
 		printIndentation(indentation, output);
 
 		output.print(node.name);
-		output.print(" = ");
+		output.print(" ");
+		output.print(node.operation.text);
+		output.print(" ");
 
 		print(node.expression, output);
 

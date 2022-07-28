@@ -17,6 +17,7 @@ public class CodePrinterTest {
 		Assert.assertEquals("""
 				                    a := 0
 				                    i16 sqr(i16 x) {
+				                      x += 1
 				                      return x * x
 				                    }
 				                    """,
@@ -27,6 +28,7 @@ public class CodePrinterTest {
 						                                             new FuncDeclarationParameters()
 								                                             .add(new FuncDeclarationParameter(BasicTypes.INT16, "x")),
 						                                             new StatementList()
+								                                             .add(new Assignment(Assignment.Op.add, "x", new NumberLiteral(1)))
 								                                             .add(new ReturnStatement(
 										                                             new BinaryExpression(new VarRead("x"),
 										                                                                  BinaryExpression.Op.multiply,

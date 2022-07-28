@@ -14,7 +14,7 @@ parameterDeclaration: type=Identifier name=Identifier;
 
 statement: varDeclaration                                                   #localVarDeclaration
          | var=Identifier Deref Assign expression End                       #memoryAssignStatement
-         | var=Identifier Assign expression End                             #assignStatement
+         | var=Identifier operator=(Assign|AndAssign|OrAssign|XorAssign|PlusAssign|MinusAssign|MultiplyAssign|DivideAssign|ModuloAssign|ShiftLAssign|ShiftRAssign) expression End  #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
          | CurlyOpen statement* CurlyClose                                  #blockStatement
          | Return expression? End                                           #returnStatement
@@ -50,7 +50,6 @@ functionCallParameters: expression?
 
 Comma : ',';
 End   : ';';
-Assign: '=' ;
 
 Plus    : '+';
 Minus   : '-';
@@ -70,6 +69,18 @@ Ne : '!=';
 BitAnd : '&';
 BitOr  : '|';
 BitXor : '^';
+
+Assign: '=' ;
+AndAssign: '&=';
+OrAssign: '|=';
+XorAssign: '^=';
+PlusAssign: '+=';
+MinusAssign: '-=';
+MultiplyAssign: '*=';
+DivideAssign: '/=';
+ModuloAssign: '%=';
+ShiftLAssign: '<<=';
+ShiftRAssign: '>>=';
 
 ParenOpen : '(';
 ParenClose: ')';

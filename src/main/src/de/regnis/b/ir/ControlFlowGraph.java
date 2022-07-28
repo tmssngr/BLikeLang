@@ -183,7 +183,7 @@ public final class ControlFlowGraph {
 		@Override
 		public BasicBlock visitReturn(ReturnStatement node) {
 			if (node.expression != null) {
-				basicBlock.add(new Assignment("result", node.expression));
+				basicBlock.add(new Assignment(Assignment.Op.assign, "result", node.expression));
 			}
 			exitBlock.addPrev(basicBlock);
 			return null;

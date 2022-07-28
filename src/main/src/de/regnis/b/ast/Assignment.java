@@ -10,6 +10,7 @@ public final class Assignment extends SimpleStatement {
 
 	// Fields =================================================================
 
+	public final Op operation;
 	public final String name;
 	public final Expression expression;
 	public final int line;
@@ -18,11 +19,12 @@ public final class Assignment extends SimpleStatement {
 
 	// Setup ==================================================================
 
-	public Assignment(@NotNull String name, @NotNull Expression expression) {
-		this(name, expression, -1, -1);
+	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression) {
+		this(operation, name, expression, -1, -1);
 	}
 
-	public Assignment(@NotNull String name, @NotNull Expression expression, int line, int column) {
+	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, int line, int column) {
+		this.operation = operation;
 		this.name = name;
 		this.expression = expression;
 		this.line = line;
@@ -30,7 +32,8 @@ public final class Assignment extends SimpleStatement {
 		type = null;
 	}
 
-	public Assignment(@NotNull String name, @NotNull Expression expression, @NotNull Type type) {
+	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, @NotNull Type type) {
+		this.operation = operation;
 		this.name = name;
 		this.expression = expression;
 		this.type = type;
@@ -48,5 +51,19 @@ public final class Assignment extends SimpleStatement {
 	@Override
 	public <O> O visit(StatementVisitor<O> visitor) {
 		return visitor.visitAssignment(this);
+	}
+
+	// Inner Classes ==========================================================
+
+	public enum Op {
+		assign("="),
+		add("+="), sub("-="), multiply("*="), divide("/="), modulo("%="), shiftL("<<="), shiftR(">>="),
+		bitAnd("&="), bitOr("|="), bitXor("^=");
+
+		public final String text;
+
+		Op(String text) {
+			this.text = text;
+		}
 	}
 }
