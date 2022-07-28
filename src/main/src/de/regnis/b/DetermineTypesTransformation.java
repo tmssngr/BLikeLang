@@ -360,7 +360,7 @@ public final class DetermineTypesTransformation {
 		}
 
 		newExpression = convertToType(newExpression, variable.type);
-		return new Assignment(variable.newName, newExpression, variable.type);
+		return new Assignment(node.operation, variable.newName, newExpression, variable.type);
 	}
 
 	private MemAssignment visitMemAssignment(MemAssignment node) {

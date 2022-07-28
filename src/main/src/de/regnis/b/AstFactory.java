@@ -120,7 +120,21 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Override
 	public Node visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new Assignment(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		final Assignment.Op operation = switch (ctx.operator.getType()) {
+			case BLikeLangParser.Assign -> Assignment.Op.assign;
+			case BLikeLangParser.PlusAssign -> Assignment.Op.add;
+			case BLikeLangParser.MinusAssign -> Assignment.Op.sub;
+			case BLikeLangParser.MultiplyAssign -> Assignment.Op.multiply;
+			case BLikeLangParser.DivideAssign -> Assignment.Op.divide;
+			case BLikeLangParser.ModuloAssign -> Assignment.Op.modulo;
+			case BLikeLangParser.ShiftLAssign -> Assignment.Op.shiftL;
+			case BLikeLangParser.ShiftRAssign -> Assignment.Op.shiftR;
+			case BLikeLangParser.AndAssign -> Assignment.Op.bitAnd;
+			case BLikeLangParser.OrAssign -> Assignment.Op.bitOr;
+			case BLikeLangParser.XorAssign -> Assignment.Op.bitXor;
+			default -> throw new ParseCancellationException();
+		};
+		return new Assignment(operation, ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override

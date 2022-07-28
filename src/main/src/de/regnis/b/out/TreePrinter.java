@@ -50,7 +50,7 @@ public class TreePrinter {
 
 	public List<String> getStrings(Assignment node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.name + " =");
+		strings.add(node.name + " " + node.operation.text);
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}

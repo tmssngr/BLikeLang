@@ -47,7 +47,7 @@ public final class SplitExpressionsTransformation {
 					return node;
 				}
 
-				initializationAssignments.add(new Assignment(node.node.name, node.node.expression));
+				initializationAssignments.add(new Assignment(Assignment.Op.assign, node.node.name, node.node.expression));
 				return new GlobalVarDeclaration(new VarDeclaration(node.node.typeName, node.node.name, node.node.type == BasicTypes.BOOLEAN ? BooleanLiteral.FALSE : new NumberLiteral(0), -1, -1));
 			}
 
@@ -107,9 +107,9 @@ public final class SplitExpressionsTransformation {
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
 		if (node.type != null) {
-			return new Assignment(node.name, expression, node.type);
+			return new Assignment(node.operation, node.name, expression, node.type);
 		}
-		return new Assignment(node.name, expression, node.line, node.column);
+		return new Assignment(node.operation, node.name, expression, node.line, node.column);
 	}
 
 	private Statement handleMemAssignment(MemAssignment node, TempVarFactory tempVarFactory) {

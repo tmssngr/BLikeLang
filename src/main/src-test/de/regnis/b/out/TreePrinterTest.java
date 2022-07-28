@@ -22,9 +22,11 @@ public class TreePrinterTest {
 		                                                                                     BinaryExpression.Op.add,
 		                                                                                     new NumberLiteral(5))));
 		Assert.assertEquals(List.of("a =",
-		                            "+- literal 1"), printer.getStrings(new Assignment("a", new NumberLiteral(1))));
+		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1))));
+		Assert.assertEquals(List.of("a +=",
+		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.add, "a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a =",
-		                            "+- literal 1"), printer.getStrings(new Assignment("a", new NumberLiteral(1), BasicTypes.UINT8)));
+		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1), BasicTypes.UINT8)));
 		Assert.assertEquals(List.of("a :=",
 		                            "+- literal 1"), printer.getStrings(new VarDeclaration("a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a :=",
