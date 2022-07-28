@@ -150,8 +150,8 @@ public final class ConstantFoldingTransformation {
 			final int left = ((NumberLiteral) node.left).value;
 			final int right = ((NumberLiteral) node.right).value;
 			return switch (node.operator) {
-				case plus -> new NumberLiteral(left + right);
-				case minus -> new NumberLiteral(left - right);
+				case add -> new NumberLiteral(left + right);
+				case sub -> new NumberLiteral(left - right);
 				case multiply -> new NumberLiteral(left * right);
 				case divide -> new NumberLiteral(left / right);
 				case modulo -> new NumberLiteral(left % right);
@@ -171,7 +171,7 @@ public final class ConstantFoldingTransformation {
 
 		if (node.left instanceof NumberLiteral) {
 			final int left = ((NumberLiteral) node.left).value;
-			if (node.operator == BinaryExpression.Op.plus) {
+			if (node.operator == BinaryExpression.Op.add) {
 				if (left == 0) {
 					return node.right;
 				}
@@ -198,8 +198,8 @@ public final class ConstantFoldingTransformation {
 		if (node.right instanceof NumberLiteral) {
 			final int right = ((NumberLiteral) node.right).value;
 			//noinspection IfCanBeSwitch
-			if (node.operator == BinaryExpression.Op.plus
-					|| node.operator == BinaryExpression.Op.minus) {
+			if (node.operator == BinaryExpression.Op.add
+					|| node.operator == BinaryExpression.Op.sub) {
 				if (right == 0) {
 					return node.left;
 				}
@@ -248,7 +248,7 @@ public final class ConstantFoldingTransformation {
 			final String right = ((VarRead) node.right).name;
 
 			if (Objects.equals(left, right)) {
-				if (node.operator == BinaryExpression.Op.minus) {
+				if (node.operator == BinaryExpression.Op.sub) {
 					return new NumberLiteral(0);
 				}
 				if (node.operator == BinaryExpression.Op.bitAnd) {

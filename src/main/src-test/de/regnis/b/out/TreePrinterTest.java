@@ -19,7 +19,7 @@ public class TreePrinterTest {
 		Assert.assertEquals(List.of("operator +",
 		                            "+- read var a",
 		                            "+- literal 5"), printer.getStrings(new BinaryExpression(new VarRead("a"),
-		                                                                                     BinaryExpression.Op.plus,
+		                                                                                     BinaryExpression.Op.add,
 		                                                                                     new NumberLiteral(5))));
 		Assert.assertEquals(List.of("a =",
 		                            "+- literal 1"), printer.getStrings(new Assignment("a", new NumberLiteral(1))));

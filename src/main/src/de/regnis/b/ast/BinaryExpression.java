@@ -54,7 +54,7 @@ public final class BinaryExpression extends Expression {
 	// Inner Classes ==========================================================
 
 	public enum Op {
-		plus("+"), minus("-"), multiply("*"), divide("/"), modulo("%"), shiftL("<<"), shiftR(">>"),
+		add("+"), sub("-"), multiply("*"), divide("/"), modulo("%"), shiftL("<<"), shiftR(">>"),
 		lessThan("<"), lessEqual("<="), equal("=="), greaterEqual(">="), greaterThan(">"), notEqual("!="),
 		bitAnd("&"), bitOr("|"), bitXor("^");
 
