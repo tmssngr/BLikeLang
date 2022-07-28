@@ -14,10 +14,12 @@ public class CodePrinterTest {
 
 	@Test
 	public void testDeclaration() {
-		Assert.assertEquals("a := 0\n" +
-				                    "i16 sqr(i16 x) {\n" +
-				                    "  return x * x\n" +
-				                    "}\n",
+		Assert.assertEquals("""
+				                    a := 0
+				                    i16 sqr(i16 x) {
+				                      return x * x
+				                    }
+				                    """,
 		                    CodePrinter.print(
 				                    new DeclarationList()
 						                    .add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))
@@ -39,16 +41,18 @@ public class CodePrinterTest {
 		                    CodePrinter.print(new DeclarationList()
 				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
 				                                                                                       BooleanLiteral.FALSE)))));
-		Assert.assertEquals("i16 foo() {\n" +
-				                    "  if a > 0\n" +
-				                    "  {\n" +
-				                    "    b := 1\n" +
-				                    "  }\n" +
-				                    "  else\n" +
-				                    "  {\n" +
-				                    "    return a\n" +
-				                    "  }\n" +
-				                    "}\n",
+		Assert.assertEquals("""
+				                    i16 foo() {
+				                      if a > 0
+				                      {
+				                        b := 1
+				                      }
+				                      else
+				                      {
+				                        return a
+				                      }
+				                    }
+				                    """,
 		                    CodePrinter.print(
 				                    new DeclarationList()
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "foo",
