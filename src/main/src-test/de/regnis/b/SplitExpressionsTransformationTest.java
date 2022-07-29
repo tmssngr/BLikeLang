@@ -183,8 +183,11 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	@Test
 	public void testGlobalVarExtractions() {
 		assertEquals("""
-				             $1 := 2 * 3
-				             a := 10 + $1
+				             a := 0
+				             void __init_globals__() {
+				               $1 := 2 * 3
+				               a = 10 + $1
+				             }
 				             """, SplitExpressionsTransformation.transform(AstFactory.parseString("var a = 10 + 2 * 3;")));
 	}
 

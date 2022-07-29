@@ -1,8 +1,10 @@
 package de.regnis.b;
 
 import de.regnis.b.ast.*;
+import de.regnis.b.type.BasicTypes;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,14 +12,20 @@ import java.util.List;
  */
 public final class SplitExpressionsTransformation {
 
+	// Constants ==============================================================
+
+	private static final String FUNCTION_INIT_GLOBALS = "__init_globals__";
+
 	// Static =================================================================
 
 	public static DeclarationList transform(DeclarationList root) {
 		final SplitExpressionsTransformation transformation = new SplitExpressionsTransformation();
-		return transformation.handleDeclarationList(root);
+		root = transformation.moveGlobalVarInitializationToInit(root);
+		return transformation.splitExpressions(root);
 	}
 
 	// Fields =================================================================
+
 
 	private int tempVarIndex;
 
@@ -28,26 +36,72 @@ public final class SplitExpressionsTransformation {
 
 	// Utils ==================================================================
 
-	private DeclarationList handleDeclarationList(@NotNull DeclarationList declarationList) {
+	private DeclarationList moveGlobalVarInitializationToInit(@NotNull DeclarationList declarationList) {
+		final List<Assignment> initializationAssignments = new ArrayList<>();
+
+		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
+			@Override
+			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+				if (node.node.expression instanceof BooleanLiteral
+						|| node.node.expression instanceof NumberLiteral) {
+					return node;
+				}
+
+				initializationAssignments.add(new Assignment(node.node.name, node.node.expression));
+				return new GlobalVarDeclaration(new VarDeclaration(node.node.typeName, node.node.name, node.node.type == BasicTypes.BOOLEAN ? BooleanLiteral.FALSE : new NumberLiteral(0), -1, -1));
+			}
+
+			@Override
+			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+				return node;
+			}
+		};
+
+		final DeclarationList newDeclarationList = processDeclarations(declarationList, visitor);
+
+		if (initializationAssignments.size() > 0) {
+			addInitializationFunction(initializationAssignments, newDeclarationList);
+		}
+		return newDeclarationList;
+	}
+
+	@NotNull
+	private DeclarationList processDeclarations(@NotNull DeclarationList declarationList, DeclarationVisitor<Declaration> visitor) {
 		final DeclarationList newDeclarationList = new DeclarationList();
-
-		final TempVarFactory tempVarFactory = createTempVarFactory(newDeclarationList);
 		for (Declaration declaration : declarationList.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return new GlobalVarDeclaration(handleVarDeclaration(node.node, tempVarFactory));
-				}
-
-				@Override
-				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-					final StatementList newStatementList = handleStatementList(node.statementList);
-					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
-				}
-			});
+			final Declaration newDeclaration = declaration.visit(visitor);
 			newDeclarationList.add(newDeclaration);
 		}
 		return newDeclarationList;
+	}
+
+	private void addInitializationFunction(List<Assignment> initializationAssignments, DeclarationList newDeclarationList) {
+		if (newDeclarationList.getFunction(FUNCTION_INIT_GLOBALS) != null) {
+			throw new TransformationFailedException("Function " + FUNCTION_INIT_GLOBALS + " must not exist.");
+		}
+
+		final StatementList statementList = new StatementList();
+		for (Assignment assignment : initializationAssignments) {
+			statementList.add(assignment);
+		}
+		newDeclarationList.add(new FuncDeclaration(BasicTypes.VOID, FUNCTION_INIT_GLOBALS, new FuncDeclarationParameters(), statementList));
+	}
+
+	private DeclarationList splitExpressions(@NotNull DeclarationList declarationList) {
+		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
+			@Override
+			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
+				return node;
+			}
+
+			@Override
+			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+				final StatementList newStatementList = handleStatementList(node.statementList);
+				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+			}
+		};
+
+		return processDeclarations(declarationList, visitor);
 	}
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
@@ -273,16 +327,6 @@ public final class SplitExpressionsTransformation {
 				return tempVarFactory.createTempVarDeclaration(expression);
 			}
 		});
-	}
-
-	private TempVarFactory createTempVarFactory(DeclarationList newDeclarationList) {
-		return expression -> {
-			final String tempVar = getNextTempVarName();
-			newDeclarationList.add(new GlobalVarDeclaration(VarDeclaration.createTempVarDeclaration(tempVar, expression)));
-			final VarRead varRead = new VarRead(tempVar, -1, -1);
-			copyType(expression, varRead);
-			return varRead;
-		};
 	}
 
 	private TempVarFactory createTempVarFactory(StatementList newStatementList) {
