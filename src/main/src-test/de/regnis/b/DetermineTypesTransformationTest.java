@@ -406,9 +406,6 @@ public final class DetermineTypesTransformationTest {
 				                                  {
 				                                    break
 				                                  }
-				                                  else
-				                                  {
-				                                  }
 				                                }
 				                              }
 				                              """,

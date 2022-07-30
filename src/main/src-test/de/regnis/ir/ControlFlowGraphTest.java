@@ -258,9 +258,6 @@ public class ControlFlowGraphTest {
 				                 {
 				                   break
 				                 }
-				                 else
-				                 {
-				                 }
 				                 if v1 < v0
 				                 {
 				                   print(60)
@@ -545,15 +542,9 @@ public class ControlFlowGraphTest {
 				               {
 				                 v3 = v3 + 1
 				               }
-				               else
-				               {
-				               }
 				               if v1 == 0
 				               {
 				                 v3 = v3 - 1
-				               }
-				               else
-				               {
 				               }
 				               v4 : i8 = -30
 				               v5 : u8 = 1
@@ -562,24 +553,15 @@ public class ControlFlowGraphTest {
 				               {
 				                 v6 = 1
 				               }
-				               else
-				               {
-				               }
 				               if p1 > 2
 				               {
 				                 $9 : i8 = v4 - 1
 				                 $10 : i8 = (i8) v6
 				                 v4 = $9 - $10
 				               }
-				               else
-				               {
-				               }
 				               if p1 > 8
 				               {
 				                 v5 = 2
-				               }
-				               else
-				               {
 				               }
 				               while true
 				               {
@@ -593,9 +575,6 @@ public class ControlFlowGraphTest {
 				                 if p1 <= 0
 				                 {
 				                   break
-				                 }
-				                 else
-				                 {
 				                 }
 				               }
 				               $16 : i8 = (i8) p0

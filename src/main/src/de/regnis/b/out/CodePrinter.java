@@ -214,11 +214,13 @@ public class CodePrinter {
 
 		print(node.trueStatements, indentation, output);
 
-		printIndentation(indentation, output);
-		output.print("else");
-		output.println();
+		if (node.falseStatements.getStatements().size() > 0) {
+			printIndentation(indentation, output);
+			output.print("else");
+			output.println();
 
-		print(node.falseStatements, indentation, output);
+			print(node.falseStatements, indentation, output);
+		}
 	}
 
 	private static void print(WhileStatement node, int indentation, StringOutput output) {
