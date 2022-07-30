@@ -59,9 +59,6 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		assertStatement("""
 				                if 1 + 2
 				                  {
-				                  }
-				                  else
-				                  {
 				                  }""", "if (1 + 2) { }");
 	}
 
