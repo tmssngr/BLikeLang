@@ -12,7 +12,9 @@ import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -596,8 +598,8 @@ public class ControlFlowGraphTest {
 				             }
 				             """, CodePrinter.print(root));
 
-		final FuncDeclaration main = Utils.notNull(root.getFunction("calculate"));
-		final ControlFlowGraph graph = new ControlFlowGraph(main);
+		final FuncDeclaration function = Utils.notNull(root.getFunction("calculate"));
+		final ControlFlowGraph graph = new ControlFlowGraph(function);
 		graph.compact();
 
 		assertEquals("""
@@ -734,5 +736,50 @@ public class ControlFlowGraphTest {
 				             .createPrinter(new StringStringOutput())
 				             .print()
 				             .toString());
+
+		final RegisterAllocation registerAllocation = new RegisterAllocation(graph);
+		registerAllocation.initializeParameters(function);
+		final Map<String, Integer> varToRegister = registerAllocation.run();
+		if (false) {
+			Utils.print(varToRegister, "expected.put(\"", "\", ", ");\n");
+		}
+
+		assertEquals(12, registerAllocation.getMaxRegisterCount());
+
+		final Map<String, Integer> expected = new HashMap<>();
+		expected.put("$1", 4);
+		expected.put("$10", 6);
+		expected.put("$11", 6);
+		expected.put("$12", 7);
+		expected.put("$13", 6);
+		expected.put("$14", 7);
+		expected.put("$15", 7);
+		expected.put("$16", 0);
+		expected.put("$17", 0);
+		expected.put("$18", 0);
+		expected.put("$19", 0);
+		expected.put("$2", 4);
+		expected.put("$20", 2);
+		expected.put("$21", 0);
+		expected.put("$22", 0);
+		expected.put("$23", 0);
+		expected.put("$3", 4);
+		expected.put("$4", 4);
+		expected.put("$5", 4);
+		expected.put("$6", 4);
+		expected.put("$7", 4);
+		expected.put("$8", 2);
+		expected.put("$9", 7);
+		expected.put("p0", 0);
+		expected.put("p1", 1);
+		expected.put("p2", 2);
+		expected.put("v0", 6);
+		expected.put("v1", 8);
+		expected.put("v2", 4);
+		expected.put("v3", 10);
+		expected.put("v4", 6);
+		expected.put("v5", 3);
+		expected.put("v6", 2);
+		assertEquals(expected, varToRegister);
 	}
 }

@@ -3,7 +3,7 @@ package de.regnis.utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -76,5 +76,22 @@ public final class Utils {
 		}
 
 		return buffer;
+	}
+
+	@NotNull
+	public static <O extends Comparable<O>> List<O> toSortedList(Collection<O> strings) {
+		final List<O> sorted = new ArrayList<>(strings);
+		sorted.sort(Comparator.naturalOrder());
+		return sorted;
+	}
+
+	public static <K extends Comparable<K>, V> void print(Map<K, V> map, String prefix, String padding, String suffix) {
+		for (K key : toSortedList(map.keySet())) {
+			System.out.print(prefix);
+			System.out.print(key);
+			System.out.print(padding);
+			System.out.print(map.get(key));
+			System.out.print(suffix);
+		}
 	}
 }
