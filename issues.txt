@@ -1,6 +1,5 @@
 todo:
 - continue
-- limit number of local variables
 - string constants
 - detect constant variables and inline them
 	example:
@@ -23,6 +22,7 @@ nice-to-have:
 - import
 
 done:
+- limit number of local variables (registers)
 - more complex, realistic example
 - / %
 - fix cast
