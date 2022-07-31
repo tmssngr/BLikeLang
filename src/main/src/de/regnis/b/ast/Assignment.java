@@ -45,7 +45,7 @@ public final class Assignment extends SimpleStatement {
 
 	@Override
 	public String toString() {
-		return "set(" + name + ", " + expression + ")";
+		return name + " " + operation.text + " " + expression;
 	}
 
 	@Override

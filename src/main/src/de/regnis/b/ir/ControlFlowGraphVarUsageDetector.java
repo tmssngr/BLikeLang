@@ -152,7 +152,12 @@ public final class ControlFlowGraphVarUsageDetector {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
-					live.remove(node.name);
+					if (node.operation == Assignment.Op.assign) {
+						live.remove(node.name);
+					}
+					else {
+						live.add(node.name);
+					}
 					detectRequiredVars(node.expression, live);
 					return node;
 				}
