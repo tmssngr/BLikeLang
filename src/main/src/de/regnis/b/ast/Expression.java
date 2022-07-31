@@ -2,6 +2,7 @@ package de.regnis.b.ast;
 
 import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Thomas Singer
@@ -25,6 +26,11 @@ public abstract class Expression extends Node {
 
 	@NotNull
 	public Type getType() {
+		return type;
+	}
+
+	@Nullable
+	public Type getTypeNullable() {
 		return type;
 	}
 
