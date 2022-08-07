@@ -62,6 +62,11 @@ public final class VarDeclaration extends SimpleStatement {
 		return visitor.visitLocalVarDeclaration(this);
 	}
 
+	@Override
+	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+		return visitor.visitLocalVarDeclaration(this);
+	}
+
 	// Accessing ==============================================================
 
 	public VarDeclaration derive(@NotNull Expression expression) {

@@ -168,7 +168,7 @@ public final class ControlFlowGraphVarUsageDetector {
 		for (SimpleStatement statement : statements) {
 			setLiveVars(statement, live);
 
-			statement.visit(new StatementVisitor<>() {
+			statement.visit(new SimpleStatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
 					if (node.operation == Assignment.Op.assign) {
@@ -189,11 +189,6 @@ public final class ControlFlowGraphVarUsageDetector {
 				}
 
 				@Override
-				public Object visitStatementList(StatementList node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
 					nameToType.put(node.name, notNull(node.type));
 					live.remove(node.name);
@@ -207,29 +202,6 @@ public final class ControlFlowGraphVarUsageDetector {
 						detectRequiredVars(parameter, live);
 					}
 					return node;
-				}
-
-				@Override
-				public Object visitReturn(ReturnStatement node) {
-					if (node.expression != null) {
-						detectRequiredVars(node.expression, live);
-					}
-					return node;
-				}
-
-				@Override
-				public Object visitIf(IfStatement node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
-				public Object visitWhile(WhileStatement node) {
-					throw new IllegalStateException();
-				}
-
-				@Override
-				public Object visitBreak(BreakStatement node) {
-					throw new IllegalStateException();
 				}
 			});
 		}

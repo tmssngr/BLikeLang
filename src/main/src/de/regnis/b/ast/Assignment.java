@@ -53,6 +53,11 @@ public final class Assignment extends SimpleStatement {
 		return visitor.visitAssignment(this);
 	}
 
+	@Override
+	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+		return visitor.visitAssignment(this);
+	}
+
 	// Inner Classes ==========================================================
 
 	public enum Op {

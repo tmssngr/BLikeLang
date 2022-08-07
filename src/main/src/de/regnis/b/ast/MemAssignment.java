@@ -38,4 +38,9 @@ public final class MemAssignment extends SimpleStatement {
 	public <O> O visit(StatementVisitor<O> visitor) {
 		return visitor.visitMemAssignment(this);
 	}
+
+	@Override
+	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+		return visitor.visitMemAssignment(this);
+	}
 }
