@@ -18,7 +18,7 @@ public final class ControlFlowGraphVarUsageDetector {
 	// Static =================================================================
 
 	@NotNull
-	public static ControlFlowGraphVarUsageDetector detectVarUsage(@NotNull ControlFlowGraph graph) {
+	public static ControlFlowGraphVarUsageDetector detectVarUsages(@NotNull ControlFlowGraph graph) {
 		final ControlFlowGraphVarUsageDetector detector = new ControlFlowGraphVarUsageDetector(graph);
 		detector.propagateLiveToPrev();
 		return detector;
@@ -260,7 +260,7 @@ public final class ControlFlowGraphVarUsageDetector {
 		private final Set<String> lifeBefore = new LinkedHashSet<>();
 		private final Set<String> lifeAfter = new LinkedHashSet<>();
 
-		public Usages() {
+		private Usages() {
 		}
 
 		@Override

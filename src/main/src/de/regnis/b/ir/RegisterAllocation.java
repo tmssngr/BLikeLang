@@ -26,16 +26,16 @@ public final class RegisterAllocation {
 	// Setup ==================================================================
 
 	public RegisterAllocation(@NotNull ControlFlowGraph flowGraph) {
-		final ControlFlowGraphVarUsageDetector varUsage = ControlFlowGraphVarUsageDetector.detectVarUsage(flowGraph);
-		nameToType = varUsage.getNameToType();
+		final ControlFlowGraphVarUsageDetector usages = ControlFlowGraphVarUsageDetector.detectVarUsages(flowGraph);
+		nameToType = usages.getNameToType();
 
 		interferenceGraph = new UndirectedGraph<>();
 		flowGraph.iterate(block -> {
-			interferenceGraph.addEdgesBetween(varUsage.getVarsBefore(block));
+			interferenceGraph.addEdgesBetween(usages.getVarsBefore(block));
 			if (block instanceof BasicBlock) {
 				final BasicBlock basicBlock = (BasicBlock) block;
 				for (SimpleStatement statement : basicBlock.getStatements()) {
-					interferenceGraph.addEdgesBetween(varUsage.getVarsAfter(statement));
+					interferenceGraph.addEdgesBetween(usages.getVarsAfter(statement));
 				}
 			}
 		});
