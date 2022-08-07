@@ -94,4 +94,10 @@ public final class Utils {
 			System.out.print(suffix);
 		}
 	}
+
+	public static void assertTrue(boolean value) {
+		if (!value) {
+			throw new IllegalStateException();
+		}
+	}
 }
