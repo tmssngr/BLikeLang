@@ -3,16 +3,8 @@ package de.regnis.b.ast;
 /**
  * @author Thomas Singer
  */
-public interface StatementVisitor<O> {
-	O visitAssignment(Assignment node);
-
-	O visitMemAssignment(MemAssignment node);
-
+public interface StatementVisitor<O> extends SimpleStatementVisitor<O> {
 	O visitStatementList(StatementList node);
-
-	O visitLocalVarDeclaration(VarDeclaration node);
-
-	O visitCall(CallStatement node);
 
 	O visitReturn(ReturnStatement node);
 

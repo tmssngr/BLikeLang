@@ -38,6 +38,11 @@ public final class CallStatement extends SimpleStatement {
 		return visitor.visitCall(this);
 	}
 
+	@Override
+	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+		return visitor.visitCall(this);
+	}
+
 	// Accessing ==============================================================
 
 	public List<Expression> getParameters() {
