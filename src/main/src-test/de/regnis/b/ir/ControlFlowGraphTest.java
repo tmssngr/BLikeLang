@@ -1,4 +1,4 @@
-package de.regnis.ir;
+package de.regnis.b.ir;
 
 import de.regnis.b.AssertTypes;
 import de.regnis.b.AstFactory;
@@ -6,7 +6,6 @@ import de.regnis.b.DetermineTypesTransformation;
 import de.regnis.b.SplitExpressionsTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
-import de.regnis.b.ir.*;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
