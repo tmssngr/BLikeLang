@@ -200,7 +200,7 @@ public class ControlFlowGraphTest {
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
-				             .detectVarUsage(graph)
+				             .detectVarUsages(graph)
 				             .createPrinter(new StringStringOutput())
 				             .print()
 				             .toString());
@@ -344,7 +344,7 @@ public class ControlFlowGraphTest {
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
-				             .detectVarUsage(graph)
+				             .detectVarUsages(graph)
 				             .createPrinter(new StringStringOutput())
 				             .print()
 				             .toString());
@@ -427,7 +427,7 @@ public class ControlFlowGraphTest {
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
-				             .detectVarUsage(graph)
+				             .detectVarUsages(graph)
 				             .createPrinter(new StringStringOutput())
 				             .print()
 				             .toString());
@@ -731,7 +731,7 @@ public class ControlFlowGraphTest {
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
-				             .detectVarUsage(graph)
+				             .detectVarUsages(graph)
 				             .createPrinter(new StringStringOutput())
 				             .print()
 				             .toString());
