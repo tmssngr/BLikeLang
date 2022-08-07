@@ -43,12 +43,12 @@ public final class IfBlock extends ControlFlowBlock {
 
 	@NotNull
 	public AbstractBlock getTrueBlock() {
-		return getNext().get(0);
+		return getNextBlocks().get(0);
 	}
 
 	@NotNull
 	public AbstractBlock getFalseBlock() {
-		return getNext().get(1);
+		return getNextBlocks().get(1);
 	}
 
 	public void print(String indentation, StringOutput output) {

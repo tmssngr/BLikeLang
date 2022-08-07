@@ -109,7 +109,7 @@ public final class ControlFlowGraphVarUsageDetector {
 					repeat = true;
 				}
 
-				blocks.addAll(block.getPrev());
+				blocks.addAll(block.getPrevBlocks());
 			}
 		}
 	}
@@ -151,7 +151,7 @@ public final class ControlFlowGraphVarUsageDetector {
 	@NotNull
 	private Set<String> getLifeFromAllNext(AbstractBlock block) {
 		final Set<String> lifeFromNext = new HashSet<>();
-		for (AbstractBlock nextBlock : block.getNext()) {
+		for (AbstractBlock nextBlock : block.getNextBlocks()) {
 			final Usages nextUsages = getUsages(nextBlock);
 			lifeFromNext.addAll(nextUsages.lifeBefore);
 		}
