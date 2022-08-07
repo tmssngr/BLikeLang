@@ -63,7 +63,7 @@ public final class BasicBlock extends AbstractBlock {
 
 	@NotNull
 	public AbstractBlock getSingleNext() {
-		final List<AbstractBlock> next = getNext();
+		final List<AbstractBlock> next = getNextBlocks();
 		if (next.size() != 1) {
 			throw new IllegalStateException();
 		}

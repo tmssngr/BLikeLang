@@ -16,17 +16,17 @@ public abstract class AbstractBlock {
 
 	// Fields =================================================================
 
-	private final List<AbstractBlock> prev = new ArrayList<>();
-	private final List<AbstractBlock> next = new ArrayList<>();
+	private final List<AbstractBlock> prevBlocks = new ArrayList<>();
+	private final List<AbstractBlock> nextBlocks = new ArrayList<>();
 	public final String label;
 
 	// Setup ==================================================================
 
-	protected AbstractBlock(@NotNull String label, @Nullable AbstractBlock prev) {
+	protected AbstractBlock(@NotNull String label, @Nullable AbstractBlock prevBlock) {
 		this.label = label;
 
-		if (prev != null) {
-			addPrev(prev);
+		if (prevBlock != null) {
+			addPrev(prevBlock);
 		}
 	}
 
@@ -40,46 +40,46 @@ public abstract class AbstractBlock {
 	// Accessing ==============================================================
 
 	public final void addPrev(@NotNull AbstractBlock prev) {
-		this.prev.add(prev);
-		prev.next.add(this);
+		prevBlocks.add(prev);
+		prev.nextBlocks.add(this);
 	}
 
-	public final List<AbstractBlock> getPrev() {
-		return Collections.unmodifiableList(prev);
+	public final List<AbstractBlock> getPrevBlocks() {
+		return Collections.unmodifiableList(prevBlocks);
 	}
 
-	public final List<AbstractBlock> getNext() {
-		return Collections.unmodifiableList(next);
+	public final List<AbstractBlock> getNextBlocks() {
+		return Collections.unmodifiableList(nextBlocks);
 	}
 
 	public final void checkIntegrity() {
-		checkNoDuplicate(prev);
-		checkNoDuplicate(next);
+		checkNoDuplicate(prevBlocks);
+		checkNoDuplicate(nextBlocks);
 
-		for (AbstractBlock block : prev) {
-			if (!block.next.contains(this)) {
+		for (AbstractBlock block : prevBlocks) {
+			if (!block.nextBlocks.contains(this)) {
 				throw new IllegalStateException(label + ": missing next link from " + block.label);
 			}
 		}
-		for (AbstractBlock block : next) {
-			if (!block.prev.contains(this)) {
+		for (AbstractBlock block : nextBlocks) {
+			if (!block.prevBlocks.contains(this)) {
 				throw new IllegalStateException(label + ": missing prev link from " + block.label);
 			}
 		}
 	}
 
 	public final void remove() {
-		if (next.size() != 1) {
+		if (nextBlocks.size() != 1) {
 			return;
 		}
 
-		final AbstractBlock singleNext = next.get(0);
-		for (AbstractBlock block : prev) {
+		final AbstractBlock singleNext = nextBlocks.get(0);
+		for (AbstractBlock block : prevBlocks) {
 			block.replaceNext(this, singleNext);
 		}
 
-		singleNext.prev.remove(this);
-		singleNext.prev.addAll(prev);
+		singleNext.prevBlocks.remove(this);
+		singleNext.prevBlocks.addAll(prevBlocks);
 	}
 
 	// Utils ==================================================================
@@ -92,12 +92,12 @@ public abstract class AbstractBlock {
 	}
 
 	private void replaceNext(AbstractBlock oldBlock, AbstractBlock newBlock) {
-		final int index = next.indexOf(oldBlock);
+		final int index = nextBlocks.indexOf(oldBlock);
 		if (index < 0) {
 			throw new IllegalStateException();
 		}
 
-		next.remove(index);
-		next.add(index, newBlock);
+		nextBlocks.remove(index);
+		nextBlocks.add(index, newBlock);
 	}
 }

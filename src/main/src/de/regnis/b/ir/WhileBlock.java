@@ -42,12 +42,12 @@ public final class WhileBlock extends ControlFlowBlock {
 
 	@NotNull
 	public AbstractBlock getInnerBlock() {
-		return getNext().get(0);
+		return getNextBlocks().get(0);
 	}
 
 	@NotNull
 	public AbstractBlock getLeaveBlock() {
-		return getNext().get(1);
+		return getNextBlocks().get(1);
 	}
 
 	public void print(String indentation, StringOutput output) {

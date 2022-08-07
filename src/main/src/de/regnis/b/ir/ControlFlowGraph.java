@@ -72,7 +72,7 @@ public final class ControlFlowGraph {
 			}
 
 			consumer.accept(block);
-			blocks.addAll(block.getNext());
+			blocks.addAll(block.getNextBlocks());
 		}
 	}
 

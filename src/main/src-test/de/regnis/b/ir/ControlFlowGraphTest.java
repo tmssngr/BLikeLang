@@ -127,13 +127,13 @@ public class ControlFlowGraphTest {
 				             p0 = p0 & 15
 				             v0 : u8 = 0
 				             """, firstBlock.print(new StringStringOutput()).toString());
-		assertTrue(firstBlock.getPrev().isEmpty());
+		assertTrue(firstBlock.getPrevBlocks().isEmpty());
 
 		final IfBlock ifBlock = (IfBlock) firstBlock.getSingleNext();
 
-		assertEquals(List.of(firstBlock), ifBlock.getPrev());
+		assertEquals(List.of(firstBlock), ifBlock.getPrevBlocks());
 
-		final List<AbstractBlock> trueFalseBlocks = ifBlock.getNext();
+		final List<AbstractBlock> trueFalseBlocks = ifBlock.getNextBlocks();
 
 		assertEquals(2, trueFalseBlocks.size());
 
@@ -142,9 +142,9 @@ public class ControlFlowGraphTest {
 				             v0 = p0 + 48
 				             """,
 		             trueBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(ifBlock), trueBlock.getPrev());
+		assertEquals(List.of(ifBlock), trueBlock.getPrevBlocks());
 
-		final List<AbstractBlock> trueNext = trueBlock.getNext();
+		final List<AbstractBlock> trueNext = trueBlock.getNextBlocks();
 
 		assertEquals(1, trueNext.size());
 
@@ -155,17 +155,17 @@ public class ControlFlowGraphTest {
 				             $1 : u8 = p0 - 10
 				             v0 = $1 + 65
 				             """, falseBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(ifBlock), falseBlock.getPrev());
+		assertEquals(List.of(ifBlock), falseBlock.getPrevBlocks());
 
-		final List<AbstractBlock> falseNext = falseBlock.getNext();
+		final List<AbstractBlock> falseNext = falseBlock.getNextBlocks();
 
 		assertEquals(trueNext, falseNext);
 		assertEquals("print(v0)\n", postIfBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(trueBlock, falseBlock), postIfBlock.getPrev());
+		assertEquals(List.of(trueBlock, falseBlock), postIfBlock.getPrevBlocks());
 
 		final AbstractBlock exitBlock = postIfBlock.getSingleNext();
 
-		assertEquals(List.of(), exitBlock.getNext());
+		assertEquals(List.of(), exitBlock.getNextBlocks());
 
 		assertEquals("""
 				             start:
