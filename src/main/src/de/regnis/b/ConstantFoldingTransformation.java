@@ -59,12 +59,6 @@ public final class ConstantFoldingTransformation {
 				}
 
 				@Override
-				public Statement visitMemAssignment(MemAssignment node) {
-					final Expression expression = handleExpression(node.expression);
-					return new MemAssignment(node.name, expression, node.line, node.column);
-				}
-
-				@Override
 				public Statement visitStatementList(StatementList node) {
 					return handleStatementList(node);
 				}
@@ -129,11 +123,6 @@ public final class ConstantFoldingTransformation {
 
 			@Override
 			public Expression visitVarRead(VarRead node) {
-				return node;
-			}
-
-			@Override
-			public Expression visitMemRead(MemRead node) {
 				return node;
 			}
 

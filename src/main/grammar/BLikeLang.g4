@@ -13,7 +13,6 @@ parameterDeclarations: parameterDeclaration?
 parameterDeclaration: type=Identifier name=Identifier;
 
 statement: varDeclaration                                                   #localVarDeclaration
-         | var=Identifier Deref Assign expression End                       #memoryAssignStatement
          | var=Identifier operator=(Assign|AndAssign|OrAssign|XorAssign|PlusAssign|MinusAssign|MultiplyAssign|DivideAssign|ModuloAssign|ShiftLAssign|ShiftRAssign) expression End  #assignStatement
          | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
          | CurlyOpen statement* CurlyClose                                  #blockStatement
@@ -32,7 +31,6 @@ subexpr: Number                                                             #num
        | CharLiteral                                                        #charLiteral
        | BooleanLiteral                                                     #booleanLiteral
        | Identifier                                                         #readVariable
-       | Identifier Deref                                                   #readMemory
        | func=Identifier ParenOpen functionCallParameters ParenClose        #functionCall
        |                 ParenOpen expression ParenClose                    #expressionInParenthesis
        ;
@@ -86,8 +84,6 @@ ParenOpen : '(';
 ParenClose: ')';
 CurlyOpen : '{';
 CurlyClose: '}';
-
-Deref: '[]';
 
 Break : 'break';
 Else  : 'else';

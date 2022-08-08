@@ -55,12 +55,6 @@ public final class AssertTypes {
 				}
 
 				@Override
-				public Object visitMemAssignment(MemAssignment node) {
-					assertAllExpressionsHaveType(node.expression);
-					return node;
-				}
-
-				@Override
 				public Object visitStatementList(StatementList node) {
 					assertAllExpressionsHaveType(node);
 					return node;
@@ -153,11 +147,6 @@ public final class AssertTypes {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				return node;
-			}
-
-			@Override
-			public Object visitMemRead(MemRead node) {
 				return node;
 			}
 

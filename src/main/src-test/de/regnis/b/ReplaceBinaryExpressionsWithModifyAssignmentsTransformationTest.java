@@ -126,21 +126,6 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 						                             .add(new BinaryExpression(new NumberLiteral(1),
 						                                                       BinaryExpression.Op.sub,
 						                                                       new NumberLiteral(2))))));
-		assertEquals("""
-				             $1 := b[]
-				               $1 += 1
-				               a = $1""", f -> f.
-				assignment("a", new BinaryExpression(new MemRead("b"),
-				                                     BinaryExpression.Op.add,
-				                                     new NumberLiteral(1))));
-		assertEquals("""
-				             $1 := b[]
-				               $2 := c[]
-				               $1 += $2
-				               a = $1""", f -> f.
-				assignment("a", new BinaryExpression(new MemRead("b"),
-				                                     BinaryExpression.Op.add,
-				                                     new MemRead("c"))));
 
 		assertEquals("""
 				             $1 : u8 = 1

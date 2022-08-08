@@ -121,12 +121,6 @@ public final class PureFunctionDetection {
 				}
 
 				@Override
-				public Object visitMemAssignment(MemAssignment node) {
-					visitExpression(node.expression);
-					return node;
-				}
-
-				@Override
 				public Object visitStatementList(StatementList node) {
 					visitStatements(statementList);
 					return node;
@@ -202,14 +196,6 @@ public final class PureFunctionDetection {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				if (globalVariables.contains(node.name)) {
-					nonPureFunctions.add(currentFunction);
-				}
-				return node;
-			}
-
-			@Override
-			public Object visitMemRead(MemRead node) {
 				if (globalVariables.contains(node.name)) {
 					nonPureFunctions.add(currentFunction);
 				}

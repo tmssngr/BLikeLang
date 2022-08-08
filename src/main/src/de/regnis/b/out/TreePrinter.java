@@ -55,13 +55,6 @@ public class TreePrinter {
 		return strings;
 	}
 
-	public List<String> getStrings(MemAssignment node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add(node.name + "[] =");
-		append(getStrings(node.expression), false, strings);
-		return strings;
-	}
-
 	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
 		if (node.typeName != null) {
@@ -182,11 +175,6 @@ public class TreePrinter {
 			}
 
 			@Override
-			public List<String> visitMemAssignment(MemAssignment node) {
-				return getStrings(node);
-			}
-
-			@Override
 			public List<String> visitStatementList(StatementList node) {
 				return getStrings(node);
 			}
@@ -251,11 +239,6 @@ public class TreePrinter {
 			}
 
 			@Override
-			public List<String> visitMemRead(MemRead node) {
-				return getStrings(node);
-			}
-
-			@Override
 			public List<String> visitTypeCast(TypeCast node) {
 				return getStrings(node);
 			}
@@ -275,10 +258,6 @@ public class TreePrinter {
 
 	private List<String> getStrings(VarRead node) {
 		return Collections.singletonList("read var " + node.name);
-	}
-
-	private List<String> getStrings(MemRead node) {
-		return Collections.singletonList("read mem " + node.name);
 	}
 
 	private List<String> getStrings(TypeCast node) {

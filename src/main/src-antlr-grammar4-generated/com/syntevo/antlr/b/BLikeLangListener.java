@@ -94,18 +94,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code memoryAssignStatement}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code memoryAssignStatement}
-	 * labeled alternative in {@link BLikeLangParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code assignStatement}
 	 * labeled alternative in {@link BLikeLangParser#statement}.
 	 * @param ctx the parse tree
@@ -261,18 +249,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitReadVariable(BLikeLangParser.ReadVariableContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code readMemory}
-	 * labeled alternative in {@link BLikeLangParser#subexpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code readMemory}
-	 * labeled alternative in {@link BLikeLangParser#subexpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code functionCall}
 	 * labeled alternative in {@link BLikeLangParser#subexpr}.
