@@ -15,7 +15,6 @@ public class CodePrinterTest {
 	@Test
 	public void testDeclaration() {
 		Assert.assertEquals("""
-				                    a := 0
 				                    int sqr(int x) {
 				                      x += 1
 				                      return x * x
@@ -23,7 +22,6 @@ public class CodePrinterTest {
 				                    """,
 		                    CodePrinter.print(
 				                    new DeclarationList()
-						                    .add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "sqr",
 						                                             new FuncDeclarationParameters()
 								                                             .add(new FuncDeclarationParameter("x")),

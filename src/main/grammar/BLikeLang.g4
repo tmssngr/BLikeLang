@@ -3,8 +3,7 @@ grammar BLikeLang;
 root: declarations;
 
 declarations: declaration* ;
-declaration: varDeclaration      #globalVarDeclaration
-           | functionDeclaration #funcDeclaration
+declaration: functionDeclaration #funcDeclaration
            ;
 
 functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement;

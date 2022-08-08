@@ -28,18 +28,6 @@ public interface BLikeLangListener extends ParseTreeListener {
 	 */
 	void exitDeclarations(BLikeLangParser.DeclarationsContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code globalVarDeclaration}
-	 * labeled alternative in {@link BLikeLangParser#declaration}.
-	 * @param ctx the parse tree
-	 */
-	void enterGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code globalVarDeclaration}
-	 * labeled alternative in {@link BLikeLangParser#declaration}.
-	 * @param ctx the parse tree
-	 */
-	void exitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code funcDeclaration}
 	 * labeled alternative in {@link BLikeLangParser#declaration}.
 	 * @param ctx the parse tree

@@ -13,11 +13,6 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 	public static DeclarationList transform(@NotNull DeclarationList root) {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
-			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				return node;
-			}
-
-			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
 				final StatementList newStatementList = handleStatementList(node.statementList);
 				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);

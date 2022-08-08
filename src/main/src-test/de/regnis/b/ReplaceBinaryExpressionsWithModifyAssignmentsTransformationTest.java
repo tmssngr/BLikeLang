@@ -298,20 +298,6 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 	}
 
 	@Test
-	public void testGlobalVarExtractions() {
-		assertEquals("""
-				             a := 0
-				             void __init_globals__() {
-				               $1 := 2
-				               $1 *= 3
-				               $2 := 10
-				               $2 += $1
-				               a = $2
-				             }
-				             """, ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.transform(AstFactory.parseString("int a = 10 + 2 * 3;")));
-	}
-
-	@Test
 	public void testDefineType() {
 		assertEquals("""
 				             int call(int p0) {

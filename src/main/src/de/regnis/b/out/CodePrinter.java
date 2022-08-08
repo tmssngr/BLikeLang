@@ -29,13 +29,6 @@ public class CodePrinter {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Nullable
 				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					print(node.node, 0, output);
-					return null;
-				}
-
-				@Nullable
-				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					printFunctionDeclaration(node, output);
 					return null;
