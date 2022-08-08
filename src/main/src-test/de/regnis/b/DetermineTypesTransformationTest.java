@@ -563,38 +563,6 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
-	public void memAccess() {
-		assertSuccessfullyTransformed("""
-				                              void main() {
-				                                v0 : u16 = 32768
-				                                v1 : u8 = v0[]
-				                                v0[] = 0
-				                              }
-				                              """,
-		                              Messages.warningUnusedVar(3, 6, "byte") + "\n",
-		                              """
-				                              void main() {
-				                                var address = 32768;
-				                                var byte = address[];
-				                                address[] = 0;
-				                              }""");
-
-		assertTransformationFailedException(Messages.errorMemAccessNeedsU16(3, 13, "addr", BasicTypes.UINT8),
-		                                    NO_WARNING, """
-				                                    void main() {
-				                                      u8 addr = 0;
-				                                      var byte = addr[];
-				                                    }""");
-
-		assertTransformationFailedException(Messages.errorMemWriteNeedsU8(3, 2, BasicTypes.INT16),
-		                                    NO_WARNING, """
-				                                    void main() {
-				                                      u16 addr = 32768;
-				                                      addr[] = 256;
-				                                    }""");
-	}
-
-	@Test
 	public void testMain() {
 		assertSuccessfullyTransformed(VOID_MAIN,
 		                              NO_WARNING,

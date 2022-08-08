@@ -96,19 +96,6 @@ public class AstFactoryTest {
 				             """, TreePrinter.print(AstFactory.parseString("var a = 0 < 1000;")));
 		assertEquals("""
 				             +- a :=
-				                +- read mem address
-				             """, TreePrinter.print(AstFactory.parseString("var a = address[];")));
-		assertEquals("""
-				             +- void test()
-				                +- statementList
-				                   +- address[] =
-				                      +- literal 0
-				             """, TreePrinter.print(AstFactory.parseString("""
-						                                                           void test() {
-						                                                             address[] = 0;
-						                                                           }""")));
-		assertEquals("""
-				             +- a :=
 				             |  +- literal 0
 				             +- b :=
 				             |  +- operator +

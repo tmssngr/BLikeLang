@@ -182,13 +182,6 @@ public final class ControlFlowGraphVarUsageDetector {
 				}
 
 				@Override
-				public Object visitMemAssignment(MemAssignment node) {
-					live.add(node.name);
-					detectRequiredVars(node.expression, live);
-					return node;
-				}
-
-				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
 					nameToType.put(node.name, notNull(node.type));
 					live.remove(node.name);
@@ -236,12 +229,6 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				live.add(node.name);
-				return node;
-			}
-
-			@Override
-			public Object visitMemRead(MemRead node) {
 				live.add(node.name);
 				return node;
 			}

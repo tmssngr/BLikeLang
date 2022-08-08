@@ -112,18 +112,6 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterAssignStatement(BLikeLangParser.AssignStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -275,18 +263,6 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitReadVariable(BLikeLangParser.ReadVariableContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterReadMemory(BLikeLangParser.ReadMemoryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitReadMemory(BLikeLangParser.ReadMemoryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

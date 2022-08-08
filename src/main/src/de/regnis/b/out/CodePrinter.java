@@ -93,12 +93,6 @@ public class CodePrinter {
 			}
 
 			@Override
-			public Object visitMemAssignment(MemAssignment node) {
-				print(node, indentation, output);
-				return node;
-			}
-
-			@Override
 			public Object visitStatementList(StatementList node) {
 				print(node, indentation, output);
 				return node;
@@ -167,17 +161,6 @@ public class CodePrinter {
 		output.print(" ");
 		output.print(node.operation.text);
 		output.print(" ");
-
-		print(node.expression, output);
-
-		output.println();
-	}
-
-	private static void print(MemAssignment node, int indentation, StringOutput output) {
-		printIndentation(indentation, output);
-
-		output.print(node.name);
-		output.print("[] = ");
 
 		print(node.expression, output);
 
@@ -271,13 +254,6 @@ public class CodePrinter {
 			@Override
 			public Object visitVarRead(VarRead node) {
 				output.print(node.name);
-				return node;
-			}
-
-			@Override
-			public Object visitMemRead(MemRead node) {
-				output.print(node.name);
-				output.print("[]");
 				return node;
 			}
 

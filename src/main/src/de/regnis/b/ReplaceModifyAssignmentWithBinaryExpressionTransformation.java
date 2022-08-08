@@ -70,11 +70,6 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 				}
 
 				@Override
-				public Statement visitMemAssignment(MemAssignment node) {
-					return node;
-				}
-
-				@Override
 				public Statement visitStatementList(StatementList node) {
 					throw new UnsupportedOperationException();
 				}

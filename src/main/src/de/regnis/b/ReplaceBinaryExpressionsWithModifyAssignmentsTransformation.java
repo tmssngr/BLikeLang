@@ -175,12 +175,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 			}
 
 			@Override
-			public Expression visitMemRead(MemRead node) {
-				final String tempVar = tempVarFactory.createTempVarDeclaration(node);
-				return createVarRead(tempVar, node);
-			}
-
-			@Override
 			public Expression visitTypeCast(TypeCast node) {
 				final TypeCast expression = handleTypeCast(node, tempVarFactory);
 				if (assignToTempVar) {
@@ -232,11 +226,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		return new Assignment(operation, name, expression);
 	}
 
-	private Statement handleMemAssignment(MemAssignment node, TempVarFactory tempVarFactory) {
-		final Expression expression = splitExpression(node.expression, true, tempVarFactory);
-		return new MemAssignment(node.name, expression, node.line, node.column);
-	}
-
 	private VarDeclaration handleVarDeclaration(VarDeclaration node, TempVarFactory tempVarFactory) {
 		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
 		return node.derive(expression);
@@ -279,11 +268,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					return handleAssignment(node, tempVarFactory);
-				}
-
-				@Override
-				public Statement visitMemAssignment(MemAssignment node) {
-					return handleMemAssignment(node, tempVarFactory);
 				}
 
 				@Override

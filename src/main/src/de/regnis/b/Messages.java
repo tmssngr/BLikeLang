@@ -39,16 +39,6 @@ public final class Messages {
 	}
 
 	@NotNull
-	public static String errorMemAccessNeedsU16(int line, int column, String varName, Type type) {
-		return line + ":" + column + ": accessing memory needs type " + BasicTypes.UINT16 + ", but variable " + varName + " is of type " + type;
-	}
-
-	@NotNull
-	public static String errorMemWriteNeedsU8(int line, int column, Type type) {
-		return line + ":" + column + ": writing to memory needs type " + BasicTypes.UINT8 + ", but expression is of type " + type;
-	}
-
-	@NotNull
 	public static String errorMissingMain() {
 		return "Missing function 'void main()'";
 	}

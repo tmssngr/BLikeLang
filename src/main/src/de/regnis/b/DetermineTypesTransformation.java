@@ -179,11 +179,6 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
-			public Statement visitMemAssignment(MemAssignment node) {
-				return DetermineTypesTransformation.this.visitMemAssignment(node);
-			}
-
-			@Override
 			public Statement visitStatementList(StatementList node) {
 				return DetermineTypesTransformation.this.visitStatementList(node);
 			}
@@ -266,12 +261,6 @@ public final class DetermineTypesTransformation {
 		statement.visit(new StatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
-				list.add(statement);
-				return node;
-			}
-
-			@Override
-			public Object visitMemAssignment(MemAssignment node) {
 				list.add(statement);
 				return node;
 			}
@@ -363,22 +352,6 @@ public final class DetermineTypesTransformation {
 		return new Assignment(node.operation, variable.newName, newExpression, variable.type);
 	}
 
-	private MemAssignment visitMemAssignment(MemAssignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
-		if (variable.type != BasicTypes.UINT16) {
-			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
-		}
-
-		final Expression newExpression = visitExpression(node.expression);
-
-		final Type expressionType = newExpression.getType();
-		if (expressionType != BasicTypes.UINT8) {
-			throw new TransformationFailedException(Messages.errorMemWriteNeedsU8(node.line, node.column, expressionType));
-		}
-
-		return new MemAssignment(variable.newName, newExpression);
-	}
-
 	private Expression visitExpression(Expression expression) {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
@@ -404,11 +377,6 @@ public final class DetermineTypesTransformation {
 			@Override
 			public Expression visitVarRead(VarRead node) {
 				return DetermineTypesTransformation.this.visitVarRead(node);
-			}
-
-			@Override
-			public Expression visitMemRead(MemRead node) {
-				return DetermineTypesTransformation.this.visitMemRead(node);
 			}
 
 			@Override
@@ -571,15 +539,6 @@ public final class DetermineTypesTransformation {
 		return new VarRead(typeName.type, typeName.newName);
 	}
 
-	private MemRead visitMemRead(MemRead node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
-		if (variable.type != BasicTypes.UINT16) {
-			throw new TransformationFailedException(Messages.errorMemAccessNeedsU16(node.line, node.column, node.name, variable.type));
-		}
-
-		return new MemRead(BasicTypes.UINT8, variable.newName);
-	}
-
 	private Expression visitTypeCast(TypeCast node) {
 		final Expression newExpression = visitExpression(node.expression);
 		final Type expressionType = newExpression.getType();
@@ -631,11 +590,6 @@ public final class DetermineTypesTransformation {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
-					return node;
-				}
-
-				@Override
-				public Object visitMemAssignment(MemAssignment node) {
 					return node;
 				}
 

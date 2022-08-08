@@ -138,12 +138,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitMemoryAssignStatement(BLikeLangParser.MemoryAssignStatementContext ctx) {
-		final Expression expression = (Expression) visit(ctx.expression());
-		return new MemAssignment(ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
-	}
-
-	@Override
 	public VarDeclaration visitLocalVarDeclaration(BLikeLangParser.LocalVarDeclarationContext ctx) {
 		return (VarDeclaration) visit(ctx.varDeclaration());
 	}
@@ -362,12 +356,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	public VarRead visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
 		final Token varName = ctx.Identifier().getSymbol();
 		return new VarRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
-	}
-
-	@Override
-	public MemRead visitReadMemory(BLikeLangParser.ReadMemoryContext ctx) {
-		final Token varName = ctx.Identifier().getSymbol();
-		return new MemRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
 	}
 
 	@Override
