@@ -1,6 +1,5 @@
 package de.regnis.b;
 
-import de.regnis.b.type.Type;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +33,7 @@ public final class SymbolScope {
 
 	// Accessing ==============================================================
 
-	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Type type, int line, int column) {
+	public void declareVariable(@NotNull String name, @NotNull String newName, int line, int column) {
 		if (variables.containsKey(name)) {
 			throw new TransformationFailedException(scopeKind == ScopeKind.Parameter
 					                                  ? Messages.errorParameterAlreadyDeclared(line, column, name)
@@ -50,7 +49,7 @@ public final class SymbolScope {
 			}
 		}
 
-		variables.put(name, new Variable(newName, type, line, column));
+		variables.put(name, new Variable(newName, line, column));
 	}
 
 	public SymbolScope createChildMap(ScopeKind scopeKind) {
@@ -95,15 +94,13 @@ public final class SymbolScope {
 
 	public static final class Variable {
 		public final String newName;
-		public final Type type;
 		private final int line;
 		private final int column;
 
 		private boolean used;
 
-		private Variable(String newName, @NotNull Type type, int line, int column) {
+		private Variable(String newName, int line, int column) {
 			this.newName = newName;
-			this.type = type;
 			this.line = line;
 			this.column = column;
 		}

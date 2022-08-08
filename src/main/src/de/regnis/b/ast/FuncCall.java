@@ -1,6 +1,5 @@
 package de.regnis.b.ast;
 
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,11 +29,6 @@ public final class FuncCall extends Expression {
 		this.line = line;
 		this.column = column;
 		this.parameters = Collections.unmodifiableList(new ArrayList<>(parameters.getExpressions()));
-	}
-
-	public FuncCall(@NotNull Type type, @NotNull String name, @NotNull FuncCallParameters parameters) {
-		this(name, parameters);
-		setType(type);
 	}
 
 	// Implemented ============================================================

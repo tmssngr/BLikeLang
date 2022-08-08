@@ -1,7 +1,6 @@
 package de.regnis.b;
 
 import de.regnis.b.ast.*;
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -45,26 +44,16 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 				@Override
 				public Statement visitAssignment(Assignment node) {
 					return switch (node.operation) {
-						case add ->
-								replaceWithAssignment(BinaryExpression.Op.add, node.name, node.type, node.expression);
-						case bitAnd ->
-								replaceWithAssignment(BinaryExpression.Op.bitAnd, node.name, node.type, node.expression);
-						case bitOr ->
-								replaceWithAssignment(BinaryExpression.Op.bitOr, node.name, node.type, node.expression);
-						case bitXor ->
-								replaceWithAssignment(BinaryExpression.Op.bitXor, node.name, node.type, node.expression);
-						case divide ->
-								replaceWithAssignment(BinaryExpression.Op.divide, node.name, node.type, node.expression);
-						case modulo ->
-								replaceWithAssignment(BinaryExpression.Op.modulo, node.name, node.type, node.expression);
-						case multiply ->
-								replaceWithAssignment(BinaryExpression.Op.multiply, node.name, node.type, node.expression);
-						case shiftL ->
-								replaceWithAssignment(BinaryExpression.Op.shiftL, node.name, node.type, node.expression);
-						case shiftR ->
-								replaceWithAssignment(BinaryExpression.Op.shiftR, node.name, node.type, node.expression);
-						case sub ->
-								replaceWithAssignment(BinaryExpression.Op.sub, node.name, node.type, node.expression);
+						case add -> replaceWithAssignment(BinaryExpression.Op.add, node.name, node.expression);
+						case bitAnd -> replaceWithAssignment(BinaryExpression.Op.bitAnd, node.name, node.expression);
+						case bitOr -> replaceWithAssignment(BinaryExpression.Op.bitOr, node.name, node.expression);
+						case bitXor -> replaceWithAssignment(BinaryExpression.Op.bitXor, node.name, node.expression);
+						case divide -> replaceWithAssignment(BinaryExpression.Op.divide, node.name, node.expression);
+						case modulo -> replaceWithAssignment(BinaryExpression.Op.modulo, node.name, node.expression);
+						case multiply -> replaceWithAssignment(BinaryExpression.Op.multiply, node.name, node.expression);
+						case shiftL -> replaceWithAssignment(BinaryExpression.Op.shiftL, node.name, node.expression);
+						case shiftR -> replaceWithAssignment(BinaryExpression.Op.shiftR, node.name, node.expression);
+						case sub -> replaceWithAssignment(BinaryExpression.Op.sub, node.name, node.expression);
 						default -> node;
 					};
 				}
@@ -110,15 +99,7 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 		return newStatementList;
 	}
 
-	private static Assignment replaceWithAssignment(BinaryExpression.Op operator, String name, Type type, Expression expression) {
-		if (type != null) {
-			return new Assignment(Assignment.Op.assign, name,
-			                      new BinaryExpression(new VarRead(type, name),
-			                                           operator,
-			                                           expression,
-			                                           type),
-			                      type);
-		}
+	private static Assignment replaceWithAssignment(BinaryExpression.Op operator, String name, Expression expression) {
 		return new Assignment(Assignment.Op.assign,
 		                      name,
 		                      new BinaryExpression(new VarRead(name),

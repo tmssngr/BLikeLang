@@ -1,12 +1,12 @@
-var a = 10_u8;
+var a = 10;
 var b = 5 + 2 * 3;
 
 int sqr(int a) {
     return a * a;
 }
 
-i8 rnd() {
-    return (i8)1;
+int rnd() {
+    return 1;
 }
 
 int max(int a, int b) {

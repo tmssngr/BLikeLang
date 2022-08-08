@@ -2,13 +2,10 @@ package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
 import de.regnis.b.out.StringOutput;
-import de.regnis.b.type.Type;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-
-import static de.regnis.utils.Utils.notNull;
 
 /**
  * @author Thomas Singer
@@ -28,7 +25,6 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	private final Map<AbstractBlock, Usages> usageMap = new HashMap<>();
 	private final Map<SimpleStatement, Set<String>> liveVars = new HashMap<>();
-	private final Map<String, Type> nameToType = new HashMap<>();
 	private final ControlFlowGraph graph;
 
 	// Setup ==================================================================
@@ -75,11 +71,6 @@ public final class ControlFlowGraphVarUsageDetector {
 	@NotNull
 	public Set<String> getVarsAfter(SimpleStatement statement) {
 		return Collections.unmodifiableSet(liveVars.get(statement));
-	}
-
-	@NotNull
-	public Map<String, Type> getNameToType() {
-		return Collections.unmodifiableMap(nameToType);
 	}
 
 	// Utils ==================================================================
@@ -183,7 +174,6 @@ public final class ControlFlowGraphVarUsageDetector {
 
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					nameToType.put(node.name, notNull(node.type));
 					live.remove(node.name);
 					detectRequiredVars(node.expression, live);
 					return node;
@@ -223,19 +213,8 @@ public final class ControlFlowGraphVarUsageDetector {
 			}
 
 			@Override
-			public Object visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Object visitVarRead(VarRead node) {
 				live.add(node.name);
-				return node;
-			}
-
-			@Override
-			public Object visitTypeCast(TypeCast node) {
-				detectRequiredVars(node.expression, live);
 				return node;
 			}
 		});

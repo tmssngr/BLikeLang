@@ -4,7 +4,6 @@ import de.regnis.b.ast.*;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.b.out.TreePrinter;
-import de.regnis.b.type.BasicTypes;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,10 +35,6 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new VarRead("b")))));
-		assertEquals("a = (u8) 1", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new NumberLiteral(1))));
-		assertEquals("a = (u8) b", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new VarRead("b"))));
 	}
 
 	@Test
@@ -50,7 +45,7 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                                BinaryExpression.Op.add,
 				                                new NumberLiteral(2))));
 		assertEquals("""
-				             $1 : u8 = 1
+				             $1 := 1
 				               $1 += 2
 				               a = $1""", f -> f.
 				assignment("a",
@@ -58,9 +53,9 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                                BinaryExpression.Op.add,
 				                                new NumberLiteral(2))));
 		assertEquals("""
-				             $1 : u8 = 2
+				             $1 := 2
 				               $1 += 3
-				               $2 : u8 = 1
+				               $2 := 1
 				               $2 += $1
 				               a = $2""", f -> f.
 				assignment("a",
@@ -70,7 +65,7 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                                                     BinaryExpression.Op.add,
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
-				             $1 : u8 = 2
+				             $1 := 2
 				               $1 *= 3
 				               a += $1""", f -> f.
 				assignment("a",
@@ -81,16 +76,16 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
 				             $1 := 2 <= 3
-				               $2 := false == $1
+				               $2 := 0 == $1
 				               a = $2""", f -> f.
 				assignment("a",
-				           new BinaryExpression(BooleanLiteral.FALSE,
+				           new BinaryExpression(NumberLiteral.FALSE,
 				                                BinaryExpression.Op.equal,
 				                                new BinaryExpression(new NumberLiteral(2),
 				                                                     BinaryExpression.Op.lessEqual,
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
-				             $1 : u8 = 1
+				             $1 := 1
 				               $1 += 2
 				               $1 += 3
 				               a = $1""", f -> f.
@@ -118,7 +113,7 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 						                                               new FuncCallParameters()
 								                                               .add(new NumberLiteral(1)))))));
 		assertEquals("""
-				             $1 : u8 = 1
+				             $1 := 1
 				               $1 -= 2
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
@@ -128,9 +123,9 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 						                                                       new NumberLiteral(2))))));
 
 		assertEquals("""
-				             $1 : u8 = 1
+				             $1 := 1
 				               $1 *= 2
-				               $2 : u8 = 3
+				               $2 := 3
 				               $2 *= 4
 				               $1 += $2
 				               a := $1""", f -> f.
@@ -144,9 +139,9 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                                                         new NumberLiteral(4)))));
 
 		assertEquals("""
-				             $1 : u8 = 1
+				             $1 := 1
 				               $1 += b
-				               $2 : u8 = 3
+				               $2 := 3
 				               $2 *= 4
 				               a := foo($1, $2)""", f -> f.
 				varDeclaration("a",
@@ -160,9 +155,9 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 						                                                      new NumberLiteral(4))))));
 		assertEquals("""
 				             void main() {
-				               $1 : u8 = 2
+				               $1 := 2
 				               $1 *= 3
-				               $2 : u8 = 10
+				               $2 := 10
 				               $2 += $1
 				               call($2)
 				             }
@@ -174,47 +169,13 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 	}
 
 	@Test
-	public void testCast() {
-		assertEquals("""
-				             $1 : u8 = 1
-				               $1 -= 2
-				               a = (u8) $1""", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                                    BinaryExpression.Op.sub,
-				                                                                    new NumberLiteral(2)))));
-		assertEquals("""
-				             $1 : u8 = 1
-				               $1 -= 2
-				               return (u8) $1""", f -> f.
-				returnStm(new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                              BinaryExpression.Op.sub,
-				                                                              new NumberLiteral(2)))));
-		assertEquals("""
-				             $1 : u8 = (u8) b
-				               a = foo($1)""", f -> f.
-				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new TypeCast(BasicTypes.UINT8, new VarRead("b"))))));
-		assertEquals("""
-				             $1 : u8 = 1
-				               $1 -= 2
-				               $2 : i8 = (i8) $1
-				               a = foo($2)""", f -> f.
-				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new TypeCast(BasicTypes.INT8, new BinaryExpression(new NumberLiteral(1),
-						                                                                                     BinaryExpression.Op.sub,
-						                                                                                     new NumberLiteral(2)))))));
-	}
-
-	@Test
 	public void testLargerExpression1() {
 		final DeclarationList root = AstFactory.parseString("""
-				                                                    u16 calc(u16 x, u16 y) {
+				                                                    int calc(int x, int y) {
 				                                                      return x * x + y * y;
 				                                                    }""");
 		Assert.assertEquals("""
-				                    +- u16 calc(u16 x, u16 y)
+				                    +- int calc(int x, int y)
 				                       +- statementList
 				                          +- return
 				                             +- operator +
@@ -227,7 +188,7 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                    """,
 		                    TreePrinter.print(root));
 		Assert.assertEquals("""
-				                    u16 calc(u16 x, u16 y) {
+				                    int calc(int x, int y) {
 				                      $1 := x
 				                      $1 *= x
 				                      $2 := y
@@ -245,11 +206,11 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 	@Test
 	public void testLargerExpression2() {
 		final DeclarationList root = AstFactory.parseString("""
-				                                                    u8 calc(u16 year) {
+				                                                    int calc(int year) {
 				                                                      return (year + year/4 - h + v + 1) % 7;
 				                                                    }""");
 		Assert.assertEquals("""
-				                    +- u8 calc(u16 year)
+				                    +- int calc(int year)
 				                       +- statementList
 				                          +- return
 				                             +- operator %
@@ -268,7 +229,7 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				                    """,
 		                    TreePrinter.print(root));
 		Assert.assertEquals("""
-				                    +- u8 calc(u16 year)
+				                    +- int calc(int year)
 				                       +- statementList
 				                          +- $1 :=
 				                          |  +- read var year
@@ -341,30 +302,29 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 		assertEquals("""
 				             a := 0
 				             void __init_globals__() {
-				               $1 : u8 = 2
+				               $1 := 2
 				               $1 *= 3
-				               $2 : u8 = 10
+				               $2 := 10
 				               $2 += $1
 				               a = $2
 				             }
-				             """, ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.transform(AstFactory.parseString("var a = 10 + 2 * 3;")));
+				             """, ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.transform(AstFactory.parseString("int a = 10 + 2 * 3;")));
 	}
 
 	@Test
 	public void testDefineType() {
 		assertEquals("""
-				             i16 call(i16 p0) {
+				             int call(int p0) {
 				               return p0
 				             }
 				             void main() {
-				               $1 : u8 = 2
+				               $1 := 2
 				               $1 *= 3
-				               $2 : u8 = 10
+				               $2 := 10
 				               $2 += $1
-				               $3 : i16 = (i16) $2
-				               $4 : i16 = call(1)
-				               $3 += $4
-				               v0 : i16 = $3
+				               $3 := call(1)
+				               $2 += $3
+				               v0 := $2
 				             }
 				             """,
 		             ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.transform(

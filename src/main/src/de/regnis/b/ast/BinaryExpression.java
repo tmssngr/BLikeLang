@@ -1,6 +1,5 @@
 package de.regnis.b.ast;
 
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,11 +31,6 @@ public final class BinaryExpression extends Expression {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;
-	}
-
-	public BinaryExpression(@NotNull Expression left, @NotNull Op operator, @NotNull Expression right, @NotNull Type type) {
-		this(left, operator, right);
-		setType(type);
 	}
 
 	// Implemented ============================================================

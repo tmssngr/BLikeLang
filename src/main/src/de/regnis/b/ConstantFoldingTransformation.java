@@ -117,17 +117,7 @@ public final class ConstantFoldingTransformation {
 			}
 
 			@Override
-			public Expression visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Expression visitVarRead(VarRead node) {
-				return node;
-			}
-
-			@Override
-			public Expression visitTypeCast(TypeCast node) {
 				return node;
 			}
 		});
@@ -149,12 +139,12 @@ public final class ConstantFoldingTransformation {
 				case bitAnd -> new NumberLiteral(left & right);
 				case bitOr -> new NumberLiteral(left | right);
 				case bitXor -> new NumberLiteral(left ^ right);
-				case lessThan -> BooleanLiteral.get(left < right);
-				case lessEqual -> BooleanLiteral.get(left <= right);
-				case equal -> BooleanLiteral.get(left == right);
-				case greaterEqual -> BooleanLiteral.get(left >= right);
-				case greaterThan -> BooleanLiteral.get(left > right);
-				case notEqual -> BooleanLiteral.get(left != right);
+				case lessThan -> NumberLiteral.get(left < right);
+				case lessEqual -> NumberLiteral.get(left <= right);
+				case equal -> NumberLiteral.get(left == right);
+				case greaterEqual -> NumberLiteral.get(left >= right);
+				case greaterThan -> NumberLiteral.get(left > right);
+				case notEqual -> NumberLiteral.get(left != right);
 			};
 		}
 
@@ -219,18 +209,6 @@ public final class ConstantFoldingTransformation {
 			}
 		}
 
-		if (node.left instanceof BooleanLiteral
-				&& node.right instanceof BooleanLiteral) {
-			final boolean left = ((BooleanLiteral) node.left).value;
-			final boolean right = ((BooleanLiteral) node.right).value;
-			if (node.operator == BinaryExpression.Op.equal) {
-				return BooleanLiteral.get(left == right);
-			}
-			if (node.operator == BinaryExpression.Op.notEqual) {
-				return BooleanLiteral.get(left != right);
-			}
-		}
-
 		if (node.left instanceof VarRead
 				&& node.right instanceof VarRead) {
 			final String left = ((VarRead) node.left).name;
@@ -250,22 +228,22 @@ public final class ConstantFoldingTransformation {
 					return new NumberLiteral(0);
 				}
 				if (node.operator == BinaryExpression.Op.lessThan) {
-					return BooleanLiteral.FALSE;
+					return NumberLiteral.FALSE;
 				}
 				if (node.operator == BinaryExpression.Op.lessEqual) {
-					return BooleanLiteral.TRUE;
+					return NumberLiteral.TRUE;
 				}
 				if (node.operator == BinaryExpression.Op.equal) {
-					return BooleanLiteral.TRUE;
+					return NumberLiteral.TRUE;
 				}
 				if (node.operator == BinaryExpression.Op.greaterEqual) {
-					return BooleanLiteral.TRUE;
+					return NumberLiteral.TRUE;
 				}
 				if (node.operator == BinaryExpression.Op.greaterThan) {
-					return BooleanLiteral.FALSE;
+					return NumberLiteral.FALSE;
 				}
 				if (node.operator == BinaryExpression.Op.notEqual) {
-					return BooleanLiteral.FALSE;
+					return NumberLiteral.FALSE;
 				}
 			}
 		}

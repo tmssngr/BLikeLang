@@ -2,7 +2,6 @@ package de.regnis.b;
 
 import de.regnis.b.ast.*;
 import de.regnis.b.type.BasicTypes;
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,13 +43,12 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				if (node.node.expression instanceof BooleanLiteral
-						|| node.node.expression instanceof NumberLiteral) {
+				if (node.node.expression instanceof NumberLiteral) {
 					return node;
 				}
 
 				initializationAssignments.add(new Assignment(Assignment.Op.assign, node.node.name, node.node.expression));
-				return new GlobalVarDeclaration(new VarDeclaration(node.node.typeName, node.node.name, node.node.type == BasicTypes.BOOLEAN ? BooleanLiteral.FALSE : new NumberLiteral(0), -1, -1));
+				return new GlobalVarDeclaration(new VarDeclaration(node.node.name, new NumberLiteral(0), -1, -1));
 			}
 
 			@Override
@@ -132,10 +130,9 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 				final Assignment.Op op = toAssignmentOperator(node);
 				if (op == null) {
 					final BinaryExpression expression = new BinaryExpression(left, node.operator, right);
-					copyType(node, expression);
 					if (assignToTempVar) {
 						final String tempVar = tempVarFactory.createTempVarDeclaration(expression);
-						return createVarRead(tempVar, expression);
+						return new VarRead(tempVar);
 					}
 
 					return expression;
@@ -144,17 +141,16 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 				final String tempVar = left != node.left && left instanceof VarRead leftTempVar
 						? leftTempVar.name
 						: tempVarFactory.createTempVarDeclaration(left);
-				tempVarFactory.createAssignment(op, tempVar, right, left.getTypeNullable());
-				return createVarRead(tempVar, left);
+				tempVarFactory.createAssignment(op, tempVar, right);
+				return new VarRead(tempVar);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
 				final FuncCall fcn = handleFunctionCall(node, tempVarFactory);
-				copyType(node, fcn);
 				if (assignToTempVar) {
 					final String tempVar = tempVarFactory.createTempVarDeclaration(fcn);
-					return createVarRead(tempVar, fcn);
+					return new VarRead(tempVar);
 				}
 				return fcn;
 			}
@@ -165,23 +161,8 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 			}
 
 			@Override
-			public Expression visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Expression visitVarRead(VarRead node) {
 				return node;
-			}
-
-			@Override
-			public Expression visitTypeCast(TypeCast node) {
-				final TypeCast expression = handleTypeCast(node, tempVarFactory);
-				if (assignToTempVar) {
-					final String tempVar = tempVarFactory.createTempVarDeclaration(expression);
-					return createVarRead(tempVar, expression);
-				}
-				return expression;
 			}
 		});
 	}
@@ -195,7 +176,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 				String tempVar = null;
 				if (left instanceof VarRead leftVar) {
 					if (leftVar.name.equals(node.name)) {
-						return createAssignment(op, node.name, node.type, right);
+						return createAssignment(op, node.name, right);
 					}
 
 					if (left != binEx.left) {
@@ -205,24 +186,21 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 				if (tempVar == null) {
 					tempVar = tempVarFactory.createTempVarDeclaration(left);
 				}
-				tempVarFactory.createAssignment(op, tempVar, right, left.getTypeNullable());
-				return createAssignment(Assignment.Op.assign, node.name, node.type, createVarRead(tempVar, left));
+				tempVarFactory.createAssignment(op, tempVar, right);
+				return createAssignment(Assignment.Op.assign, node.name, new VarRead(tempVar));
 			}
 
 			// boolean
 			final Expression expression = splitExpression(node.expression, true, tempVarFactory);
-			return createAssignment(node.operation, node.name, node.type, expression);
+			return createAssignment(node.operation, node.name, expression);
 		}
 
 		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
-		return createAssignment(node.operation, node.name, node.type, expression);
+		return createAssignment(node.operation, node.name, expression);
 	}
 
 	@NotNull
-	private Assignment createAssignment(Assignment.Op operation, String name, @Nullable Type type, Expression expression) {
-		if (type != null) {
-			return new Assignment(operation, name, expression, type);
-		}
+	private Assignment createAssignment(Assignment.Op operation, String name, Expression expression) {
 		return new Assignment(operation, name, expression);
 	}
 
@@ -312,15 +290,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
-		final FuncCall funcCall = new FuncCall(node.name, parameters, node.line, node.column);
-		copyType(node, funcCall);
-		return funcCall;
-	}
-
-	private void copyType(Expression from, Expression to) {
-		if (from.hasType()) {
-			to.setType(from.getType());
-		}
+		return new FuncCall(node.name, parameters, node.line, node.column);
 	}
 
 	@NotNull
@@ -333,14 +303,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		return newParameters;
 	}
 
-	@NotNull
-	private TypeCast handleTypeCast(TypeCast node, TempVarFactory tempVarFactory) {
-		final Expression simplifiedExpression = splitExpression(node.expression, true, tempVarFactory);
-		final TypeCast typeCast = new TypeCast(node.typeName, simplifiedExpression);
-		copyType(node, typeCast);
-		return typeCast;
-	}
-
 	private TempVarFactory createTempVarFactory(StatementList statementList) {
 		return new TempVarFactory() {
 			@Override
@@ -351,18 +313,11 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 			}
 
 			@Override
-			public void createAssignment(Assignment.Op op, String var, Expression expression, @Nullable Type type) {
-				final Assignment assignment = ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.this.createAssignment(op, var, type, expression);
+			public void createAssignment(Assignment.Op op, String var, Expression expression) {
+				final Assignment assignment = ReplaceBinaryExpressionsWithModifyAssignmentsTransformation.this.createAssignment(op, var, expression);
 				statementList.add(assignment);
 			}
 		};
-	}
-
-	@NotNull
-	private VarRead createVarRead(String tempVar, Expression expression) {
-		final VarRead varRead = new VarRead(tempVar, -1, -1);
-		copyType(expression, varRead);
-		return varRead;
 	}
 
 	@NotNull
@@ -376,6 +331,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	private interface TempVarFactory {
 		String createTempVarDeclaration(Expression expression);
 
-		void createAssignment(Assignment.Op op, String var, Expression expression, @Nullable Type type);
+		void createAssignment(Assignment.Op op, String var, Expression expression);
 	}
 }
