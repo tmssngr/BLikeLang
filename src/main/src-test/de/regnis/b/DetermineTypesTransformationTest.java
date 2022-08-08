@@ -1,10 +1,10 @@
 package de.regnis.b;
 
-import de.regnis.b.type.BasicTypes;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
+import de.regnis.b.type.BasicTypes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -66,10 +66,10 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testGlobalVars() {
 		assertSuccessfullyTransformed("""
-				                              g0 : u8 = 1
-				                              g1 : i8 = -1
-				                              g2 : i8 = (i8) g0 + g1
-				                              g3 : boolean = false
+				                              g0 := 1
+				                              g1 := -1
+				                              g2 := g0 + g1
+				                              g3 := 0
 				                              """ + VOID_MAIN,
 		                              Messages.warningUnusedVar(3, 4, "b") + "\n" +
 				                              Messages.warningUnusedVar(4, 4, "booF") + "\n",
@@ -84,17 +84,17 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testLocalVars() {
 		assertSuccessfullyTransformed("""
-				                              i16 add(i16 p0, i16 p1) {
-				                                v0 : i16 = p0 + p1
+				                              int add(int p0, int p1) {
+				                                v0 := p0 + p1
 				                                return v0
 				                              }
-				                              boolean getFalse() {
-				                                v0 : boolean = false
+				                              int getFalse() {
+				                                v0 := 0
 				                                return v0
 				                              }
 				                              void main() {
-				                                v0 : i16 = add(1, 2)
-				                                v1 : boolean = getFalse()
+				                                v0 := add(1, 2)
+				                                v1 := getFalse()
 				                              }
 				                              """,
 		                              Messages.warningUnusedVar(10, 6, "a") + "\n" +
@@ -104,8 +104,8 @@ public final class DetermineTypesTransformationTest {
 				                                var sum = a + b;
 				                                return sum;
 				                              }
-				                              boolean getFalse() {
-				                                boolean v = false;
+				                              int getFalse() {
+				                                int v = false;
 				                                return v;
 				                              }
 				                              void main() {
@@ -118,16 +118,16 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testReturn() {
 		assertSuccessfullyTransformed("""
-				                              boolean isEqual(i16 p0, i16 p1) {
+				                              int isEqual(int p0, int p1) {
 				                                return p0 == p1
 				                              }
 				                              void main() {
 				                                isEqual(1, 2)
 				                              }
 				                              """,
-		                              Messages.warningIgnoredReturnValue(5, 2, "isEqual", BasicTypes.BOOLEAN) + "\n",
+		                              Messages.warningIgnoredReturnValue(5, 2, "isEqual", BasicTypes.INT16) + "\n",
 		                              """
-				                              boolean isEqual(int a, int b) {
+				                              int isEqual(int a, int b) {
 				                                return a == b;
 				                              }
 				                              void main() {
@@ -136,16 +136,16 @@ public final class DetermineTypesTransformationTest {
 				                              """);
 
 		assertSuccessfullyTransformed("""
-				                              boolean isSingleDigit(u16 p0) {
+				                              int isSingleDigit(int p0) {
 				                                return p0 <= 10
 				                              }
 				                              void main() {
 				                                isSingleDigit(9)
 				                              }
 				                              """,
-		                              Messages.warningIgnoredReturnValue(5, 2, "isSingleDigit", BasicTypes.BOOLEAN) + "\n",
+		                              Messages.warningIgnoredReturnValue(5, 2, "isSingleDigit", BasicTypes.INT16) + "\n",
 		                              """
-				                              boolean isSingleDigit(u16 a) {
+				                              int isSingleDigit(int a) {
 				                                return a <= 10;
 				                              }
 				                              void main() {
@@ -154,11 +154,11 @@ public final class DetermineTypesTransformationTest {
 				                              """);
 
 		assertSuccessfullyTransformed("""
-				                              i16 print(i16 p0) {
+				                              int print(int p0) {
 				                                return 0
 				                              }
-				                              void anotherPrint(i16 p0) {
-				                                v0 : i16 = print(p0)
+				                              void anotherPrint(int p0) {
+				                                v0 := print(p0)
 				                                return
 				                              }
 				                              void main() {
@@ -181,7 +181,7 @@ public final class DetermineTypesTransformationTest {
 				                              """);
 
 		assertSuccessfullyTransformed("""
-				                              i16 max(i16 p0, i16 p1) {
+				                              int max(int p0, int p1) {
 				                                if p0 > p1
 				                                {
 				                                  return p0
@@ -212,12 +212,12 @@ public final class DetermineTypesTransformationTest {
 		assertSuccessfullyTransformed("""
 				                              void print() {
 				                              }
-				                              i16 max() {
+				                              int max() {
 				                                print()
 				                                return 0
 				                              }
 				                              void main() {
-				                                v0 : i16 = max()
+				                                v0 := max()
 				                              }
 				                              """,
 		                              Messages.warningStatementAfterReturn() + "\n" +
@@ -241,11 +241,11 @@ public final class DetermineTypesTransformationTest {
 				                              """);
 
 		assertSuccessfullyTransformed("""
-				                              i16 max() {
+				                              int max() {
 				                                return 0
 				                              }
 				                              void main() {
-				                                v0 : i16 = max()
+				                                v0 := max()
 				                              }
 				                              """,
 		                              Messages.warningStatementAfterReturn() + "\n" +
@@ -270,7 +270,7 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testCall() {
 		assertSuccessfullyTransformed("""
-				                              i16 one() {
+				                              int one() {
 				                                return 1
 				                              }
 				                              """ + VOID_MAIN,
@@ -288,7 +288,7 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testValidDuplicateDeclarations() {
 		assertSuccessfullyTransformed("""
-				                              g0 : u8 = 1
+				                              g0 := 1
 				                              """ + VOID_MAIN,
 		                              Messages.warningUnusedParameter(2, 21, "b") + "\n" +
 				                              Messages.warningUnusedVar(1, 4, "a") + "\n" +
@@ -304,8 +304,8 @@ public final class DetermineTypesTransformationTest {
 				                              """ + VOID_MAIN);
 
 		assertSuccessfullyTransformed("""
-				                              g0 : u8 = 1
-				                              i16 twice(i16 p0, i16 p1) {
+				                              g0 := 1
+				                              int twice(int p0, int p1) {
 				                                return p0 * 2
 				                              }
 				                              """ + VOID_MAIN,
@@ -329,77 +329,11 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
-	public void testInvalidTypes() {
-		assertTransformationFailedException("foobar", NO_WARNING, "foobar a = 0;\n" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorCantAssignType(1, 3, "a", BasicTypes.INT8, BasicTypes.UINT8), NO_WARNING, "u8 a = -1;\n" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorCantAssignType(2, 5, "a", BasicTypes.INT16, BasicTypes.UINT8), NO_WARNING, """
-				int test() {
-				  u8 a = 256;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorCantAssignType(4, 2, "a", BasicTypes.INT16, BasicTypes.UINT8), NO_WARNING, """
-				int test() {
-				  u8 a = 0;
-				  int b = 0;
-				  a = a + b;
-				  return 0;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorCantAssignReturnType(2, 9, BasicTypes.UINT8, BasicTypes.INT8), NO_WARNING, """
-				i8 test() {
-				  return 128;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(2, 9), NO_WARNING, """
-				void test() {
-				  return 128;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorReturnExpressionExpected(2, 2, BasicTypes.INT16), NO_WARNING, """
-				int test() {
-				  return;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(5, 9, "nothing"), Messages.warningUnusedParameter(1, 17, "a") + "\n", """
-				void nothing(int a) {
-				  return;
-				}
-				int test() {
-				  return nothing(1) + 2;
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorBooleanExpected(2, 5, BasicTypes.UINT8), NO_WARNING, """
-				int max(int a, int b) {
-				  if (1) {
-				    return a;
-				  } else {
-				    return b;
-				  }
-				}
-				""" + VOID_MAIN);
-
-		assertTransformationFailedException(Messages.errorBooleanExpected(2, 8, BasicTypes.UINT8), NO_WARNING, """
-				int max(int a, int b) {
-				  while (1) {
-				  }
-				}
-				""" + VOID_MAIN);
-	}
-
-	@Test
 	public void testBreak() {
 		assertSuccessfullyTransformed("""
 				                              void main() {
-				                                v0 : i16 = 0
-				                                while true
+				                                v0 := 0
+				                                while 1
 				                                {
 				                                  v0 = v0 + 1
 				                                  if v0 == 10
@@ -445,71 +379,6 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
-	public void testTypeCast() {
-		assertSuccessfullyTransformed("g0 : u8 = (u8) -1\n" + VOID_MAIN,
-		                              Messages.warningUnusedVar(1, 4, "a") + "\n",
-		                              "var a = (u8)-1;\n" + VOID_MAIN);
-
-		assertSuccessfullyTransformed("g0 : u8 = 0\n" + VOID_MAIN,
-		                              Messages.warningUnnecessaryCastTo(1, 8, BasicTypes.UINT8) + "\n" +
-				                              Messages.warningUnusedVar(1, 3, "a") + "\n",
-		                              "u8 a = (u8)0;\n" + VOID_MAIN);
-
-		assertSuccessfullyTransformed("""
-				                              void main() {
-				                                v0 : u8 = 10
-				                                v1 : u8 = v0
-				                              }
-				                              """,
-		                              Messages.warningUnnecessaryCastTo(3, 11, BasicTypes.UINT8) + "\n" +
-				                              Messages.warningUnusedVar(3, 6, "b") + "\n",
-		                              """
-				                              void main() {
-				                                u8  a = 10;
-				                                var b = (u8) a;
-				                              }
-				                              """);
-
-		assertSuccessfullyTransformed("""
-				                              void print(i16 p0) {
-				                              }
-				                              void main() {
-				                                v0 : u8 = 10
-				                                print((i16) v0)
-				                              }
-				                              """,
-		                              Messages.warningUnusedParameter(1, 27, "value") + "\n",
-		                              """
-                                              void print(i16 value) {
-                                              }
-				                              void main() {
-				                                u8  a = 10;
-				                                print(a);
-				                              }
-				                              """);
-
-		assertSuccessfullyTransformed("""
-				                              void print(i16 p0) {
-				                              }
-				                              void main() {
-				                                v0 : u8 = 10
-				                                print((i16) v0)
-				                              }
-				                              """,
-		                              Messages.warningUnusedParameter(1, 27, "value") + "\n",
-		                              """
-                                              void print(i16 value) {
-                                              }
-				                              void main() {
-				                                u8  a = 10;
-				                                print((i8) a);
-				                              }
-				                              """);
-
-		assertTransformationFailedException("Foo", NO_WARNING, "var a = (Foo)0;\n" + VOID_MAIN);
-	}
-
-	@Test
 	public void testDuplicateDeclaration() {
 		assertTransformationFailedException(Messages.errorVarAlreadyDeclared(2, 4, "a"),
 		                                    NO_WARNING,
@@ -521,7 +390,7 @@ public final class DetermineTypesTransformationTest {
 		assertTransformationFailedException(Messages.errorVarAlreadyDeclared(3, 6, "a"),
 		                                    NO_WARNING,
 		                                    """
-				                                                void main() {
+				                                    void main() {
 				                                      var a = 1;
 				                                      var a = 2;
 				                                    }""");
@@ -583,9 +452,9 @@ public final class DetermineTypesTransformationTest {
 	@Test
 	public void testGlobalVarsBeforeFunctions() {
 		assertSuccessfullyTransformed("""
-				                              g0 : u8 = 24
-				                              g1 : u8 = 40
-				                              g2 : u8 = g0 * g1
+				                              g0 := 24
+				                              g1 := 40
+				                              g2 := g0 * g1
 				                              void main() {
 				                                test()
 				                                test2()
@@ -608,7 +477,6 @@ public final class DetermineTypesTransformationTest {
 				                              void test2() {
 				                              }
 				                              var charsPerScreen = lines * columns;
-				                              				                              
 				                              """);
 	}
 

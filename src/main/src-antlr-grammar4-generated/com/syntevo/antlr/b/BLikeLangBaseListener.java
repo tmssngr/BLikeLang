@@ -304,18 +304,6 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypeCast(BLikeLangParser.TypeCastContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypeCast(BLikeLangParser.TypeCastContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { }
 	/**
 	 * {@inheritDoc}

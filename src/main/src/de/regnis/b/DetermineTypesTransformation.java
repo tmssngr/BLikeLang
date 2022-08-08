@@ -7,7 +7,10 @@ import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Thomas Singer
@@ -24,9 +27,7 @@ public final class DetermineTypesTransformation {
 		transformation.reportIllegalBreakStatement(root);
 
 		DeclarationList newRoot = transformation.visitDeclarationList(root);
-		AssertTypes.assertAllExpressionsHaveType(newRoot);
 		newRoot = transformation.reportAndRemoveUnusedFunctions(newRoot);
-		AssertTypes.assertAllExpressionsHaveType(newRoot);
 		return newRoot;
 	}
 
@@ -59,12 +60,12 @@ public final class DetermineTypesTransformation {
 
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					final List<Type> parameterTypes = getParameterTypes(node);
+					final int parameterCount = node.parameters.getParameters().size();
 					if (functions.containsKey(node.name)) {
 						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.line, node.column, node.name));
 					}
 
-					functions.put(node.name, new Function(node.type, parameterTypes, node.line, node.column));
+					functions.put(node.name, new Function(node.type, parameterCount, node.line, node.column));
 
 					return node;
 				}
@@ -147,26 +148,16 @@ public final class DetermineTypesTransformation {
 		return false;
 	}
 
-	@NotNull
-	private List<Type> getParameterTypes(FuncDeclaration node) {
-		final List<Type> parameterTypes = new ArrayList<>();
-		for (FuncDeclarationParameter parameter : node.parameters.getParameters()) {
-			parameterTypes.add(parameter.type);
-		}
-		return parameterTypes;
-	}
-
 	private FuncDeclarationParameters declareParameters(FuncDeclarationParameters parameters) {
 		final FuncDeclarationParameters renamedParameters = new FuncDeclarationParameters();
 		int i = 0;
 		for (FuncDeclarationParameter parameter : parameters.getParameters()) {
-
 			final String newName = "p" + i;
 			i++;
 
-			symbolMap.declareVariable(parameter.name, newName, parameter.type, parameter.line, parameter.column);
+			symbolMap.declareVariable(parameter.name, newName, parameter.line, parameter.column);
 
-			renamedParameters.add(new FuncDeclarationParameter(parameter.type, newName));
+			renamedParameters.add(new FuncDeclarationParameter(newName));
 		}
 		return renamedParameters;
 	}
@@ -318,38 +309,17 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	private VarDeclaration visitVarDeclaration(VarDeclaration varDeclaration, String newName) {
-		Type type = null;
-		if (varDeclaration.typeName != null) {
-			type = BasicTypes.getType(varDeclaration.typeName, false);
-		}
-
 		final Expression newExpression = visitExpression(varDeclaration.expression);
 
-		final Type expressionType = newExpression.getType();
-		if (type != null) {
-			if (!BasicTypes.canBeAssignedFrom(type, expressionType)) {
-				throw new TransformationFailedException(Messages.errorCantAssignType(varDeclaration.line, varDeclaration.column, varDeclaration.name, expressionType, type));
-			}
-		}
-		else {
-			type = expressionType;
-		}
-
-		symbolMap.declareVariable(varDeclaration.name, newName, type, varDeclaration.line, varDeclaration.column);
-		return new VarDeclaration(newName, type, newExpression);
+		symbolMap.declareVariable(varDeclaration.name, newName, varDeclaration.line, varDeclaration.column);
+		return new VarDeclaration(newName, newExpression);
 	}
 
 	private Assignment visitAssignment(Assignment node) {
 		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
-		Expression newExpression = visitExpression(node.expression);
+		final Expression newExpression = visitExpression(node.expression);
 
-		final Type expressionType = newExpression.getType();
-		if (!BasicTypes.canBeAssignedFrom(variable.type, expressionType)) {
-			throw new TransformationFailedException(Messages.errorCantAssignType(node.line, node.column, node.name, expressionType, variable.type));
-		}
-
-		newExpression = convertToType(newExpression, variable.type);
-		return new Assignment(node.operation, variable.newName, newExpression, variable.type);
+		return new Assignment(node.operation, variable.newName, newExpression);
 	}
 
 	private Expression visitExpression(Expression expression) {
@@ -370,60 +340,17 @@ public final class DetermineTypesTransformation {
 			}
 
 			@Override
-			public Expression visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Expression visitVarRead(VarRead node) {
 				return DetermineTypesTransformation.this.visitVarRead(node);
-			}
-
-			@Override
-			public Expression visitTypeCast(TypeCast node) {
-				return DetermineTypesTransformation.this.visitTypeCast(node);
 			}
 		});
 	}
 
 	private BinaryExpression visitBinary(BinaryExpression node) {
-		Expression newLeft = visitExpression(node.left);
-		Expression newRight = visitExpression(node.right);
+		final Expression newLeft = visitExpression(node.left);
+		final Expression newRight = visitExpression(node.right);
 
-		final Type leftType = newLeft.getType();
-		final Type rightType = newRight.getType();
-		final Type type = getBinaryExpressionType(leftType, node.operator, rightType);
-		if (type == null) {
-			throw new TransformationFailedException("Operator " + node.operator + " can't work on " + leftType + " and " + rightType);
-		}
-		if (type instanceof BasicTypes.NumericType) {
-			newLeft = convertToType(newLeft, type);
-			newRight = convertToType(newRight, type);
-		}
-		return new BinaryExpression(newLeft, node.operator, newRight, type);
-	}
-
-	@Nullable
-	private Type getBinaryExpressionType(Type left, BinaryExpression.Op operator, Type right) {
-		if (left instanceof final BasicTypes.NumericType lnt
-				&& right instanceof final BasicTypes.NumericType rnt) {
-			if (BinaryExpression.isComparison(operator)) {
-				return BasicTypes.BOOLEAN;
-			}
-
-			if (lnt.isSigned() || rnt.isSigned()) {
-				return lnt.min > rnt.min ? rnt : lnt;
-			}
-			return lnt.max > rnt.max ? lnt : rnt;
-		}
-
-		if (left == BasicTypes.BOOLEAN && right == BasicTypes.BOOLEAN) {
-			if (operator == BinaryExpression.Op.equal || operator == BinaryExpression.Op.notEqual) {
-				return BasicTypes.BOOLEAN;
-			}
-		}
-
-		return null;
+		return new BinaryExpression(newLeft, node.operator, newRight);
 	}
 
 	private FuncCall visitFunctionCall(FuncCall node) {
@@ -435,7 +362,7 @@ public final class DetermineTypesTransformation {
 			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
 		}
 
-		return new FuncCall(function.type, node.name, newParameters);
+		return new FuncCall(node.name, newParameters);
 	}
 
 	private CallStatement visitCall(CallStatement node) {
@@ -459,36 +386,14 @@ public final class DetermineTypesTransformation {
 
 		function.setUsed();
 
-		final List<Type> parameterTypes = function.parameterTypes;
-		if (parameters.size() != parameterTypes.size()) {
-			throw new TransformationFailedException("Function " + name + " expects " + parameterTypes.size() + " expressions, but got " + parameters.size());
+		if (parameters.size() != function.parameterCount) {
+			throw new TransformationFailedException("Function " + name + " expects " + function.parameterCount + " expressions, but got " + parameters.size());
 		}
 
-		for (int i = 0; i < parameterTypes.size(); i++) {
-			final Expression parameter = parameters.get(i);
-			Expression typedExpression = visitExpression(parameter);
-			final Type expressionType = typedExpression.getType();
-			final Type parameterType = parameterTypes.get(i);
-			if (!BasicTypes.canBeAssignedFrom(parameterType, expressionType)) {
-				throw new TransformationFailedException("Function " + name + ": the " + (i + 1) + ". parameter expects " + parameterType + " which can't be assigned from " + expressionType);
-			}
-
-			typedExpression = convertToType(typedExpression, parameterType);
-			newParameters.add(typedExpression);
+		for (Expression parameter : parameters) {
+			newParameters.add(visitExpression(parameter));
 		}
 		return function;
-	}
-
-	private static Expression convertToType(Expression expression, Type expectedType) {
-		if (expression.getType() != expectedType) {
-			if (expression instanceof TypeCast cast) {
-				expression = cast.expression;
-			}
-			if (!(expression instanceof NumberLiteral)) {
-				expression = new TypeCast(expectedType, expression);
-			}
-		}
-		return expression;
 	}
 
 	private ReturnStatement visitReturn(ReturnStatement node) {
@@ -508,51 +413,22 @@ public final class DetermineTypesTransformation {
 		}
 
 		final Expression newExpression = visitExpression(node.expression);
-
-		if (!BasicTypes.canBeAssignedFrom(functionReturnType, newExpression.getType())) {
-			throw new TransformationFailedException(Messages.errorCantAssignReturnType(node.line, node.column, node.expression.getType(), functionReturnType));
-		}
-
 		return new ReturnStatement(newExpression);
 	}
 
 	private IfStatement visitIf(IfStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
-		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new TransformationFailedException(Messages.errorBooleanExpected(node.line, node.column, newExpression.getType()));
-		}
-
 		return new IfStatement(newExpression, visitStatementList(node.trueStatements), visitStatementList(node.falseStatements));
 	}
 
 	private WhileStatement visitWhile(WhileStatement node) {
 		final Expression newExpression = visitExpression(node.expression);
-		if (newExpression.getType() != BasicTypes.BOOLEAN) {
-			throw new TransformationFailedException(Messages.errorBooleanExpected(node.line, node.column, newExpression.getType()));
-		}
-
 		return new WhileStatement(newExpression, visitStatementList(node.statements));
 	}
 
 	private VarRead visitVarRead(VarRead node) {
 		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name, node.line, node.column);
-		return new VarRead(typeName.type, typeName.newName);
-	}
-
-	private Expression visitTypeCast(TypeCast node) {
-		final Expression newExpression = visitExpression(node.expression);
-		final Type expressionType = newExpression.getType();
-		final Type type = BasicTypes.getType(node.typeName, false);
-		if (expressionType == type) {
-			warning(Messages.warningUnnecessaryCastTo(node.line, node.column, type));
-			return newExpression;
-		}
-
-		if (BasicTypes.canBeAssignedFrom(type, expressionType)) {
-			warning(Messages.warningUnnecessaryCastTo(node.line, node.column, type));
-		}
-
-		return new TypeCast(type, newExpression);
+		return new VarRead(typeName.newName);
 	}
 
 	private void reportMissingMainFunction() {
@@ -673,7 +549,7 @@ public final class DetermineTypesTransformation {
 	private boolean isMainFunction(String name, Function function) {
 		return "main".equals(name)
 				&& function.type == BasicTypes.VOID
-				&& function.parameterTypes.isEmpty();
+				&& function.parameterCount == 0;
 	}
 
 	private void warning(String message) {
@@ -685,15 +561,15 @@ public final class DetermineTypesTransformation {
 
 	private static final class Function {
 		public final Type type;
-		public final List<Type> parameterTypes;
+		private final int parameterCount;
 		private final int line;
 		private final int column;
 
 		private boolean used;
 
-		private Function(Type type, List<Type> parameterTypes, int line, int column) {
+		private Function(Type type, int parameterCount, int line, int column) {
 			this.type = type;
-			this.parameterTypes = Collections.unmodifiableList(parameterTypes);
+			this.parameterCount = parameterCount;
 			this.line = line;
 			this.column = column;
 		}

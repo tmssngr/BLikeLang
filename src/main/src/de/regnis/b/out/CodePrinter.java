@@ -60,7 +60,7 @@ public class CodePrinter {
 				output.print(", ");
 			}
 
-			output.print(parameter.type.toString());
+			output.print("int");
 			output.print(" ");
 			output.print(parameter.name);
 		}
@@ -140,14 +140,7 @@ public class CodePrinter {
 		printIndentation(indentation, output);
 
 		output.print(node.name);
-		if (node.typeName != null) {
-			output.print(" : ");
-			output.print(node.typeName);
-			output.print(" = ");
-		}
-		else {
-			output.print(" := ");
-		}
+		output.print(" := ");
 
 		print(node.expression, output);
 
@@ -246,23 +239,8 @@ public class CodePrinter {
 			}
 
 			@Override
-			public Object visitBoolean(BooleanLiteral node) {
-				output.print(String.valueOf(node.value));
-				return node;
-			}
-
-			@Override
 			public Object visitVarRead(VarRead node) {
 				output.print(node.name);
-				return node;
-			}
-
-			@Override
-			public Object visitTypeCast(TypeCast node) {
-				output.print("(");
-				output.print(node.typeName);
-				output.print(") ");
-				print(node.expression, output);
 				return node;
 			}
 		});

@@ -52,8 +52,6 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		                "a = foo(1 + 2);");
 		assertStatement("foo(1 + 2)",
 		                "foo(1 + 2);");
-		assertStatement("a = (u8) 1 + 2",
-		                "a = (u8) 1 + 2;");
 		assertStatement("return 1 + 2",
 		                "return 1 + 2;");
 		assertStatement("""
@@ -99,32 +97,32 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 
 	@Test
 	public void testComparisonReplacements() {
-		assertChanged("true", "1 < 2");
-		assertChanged("true", "1 <= 2");
-		assertChanged("false", "1 == 2");
-		assertChanged("false", "1 >= 2");
-		assertChanged("false", "1 > 2");
-		assertChanged("true", "1 != 2");
+		assertChanged("1", "1 < 2");
+		assertChanged("1", "1 <= 2");
+		assertChanged("0", "1 == 2");
+		assertChanged("0", "1 >= 2");
+		assertChanged("0", "1 > 2");
+		assertChanged("1", "1 != 2");
 
-		assertChanged("false", "b < b");
-		assertChanged("true", "b <= b");
-		assertChanged("true", "b == b");
-		assertChanged("true", "b >= b");
-		assertChanged("false", "b > b");
-		assertChanged("false", "b != b");
+		assertChanged("0", "b < b");
+		assertChanged("1", "b <= b");
+		assertChanged("1", "b == b");
+		assertChanged("1", "b >= b");
+		assertChanged("0", "b > b");
+		assertChanged("0", "b != b");
 	}
 
 	@Test
 	public void testBooleanReplacements() {
-		assertChanged("true", "false == false");
-		assertChanged("false", "false == true");
-		assertChanged("false", "true == false");
-		assertChanged("true", "true == true");
+		assertChanged("1", "false == false");
+		assertChanged("0", "false == true");
+		assertChanged("0", "true == false");
+		assertChanged("1", "true == true");
 
-		assertChanged("false", "false != false");
-		assertChanged("true", "false != true");
-		assertChanged("true", "true != false");
-		assertChanged("false", "true != true");
+		assertChanged("0", "false != false");
+		assertChanged("1", "false != true");
+		assertChanged("1", "true != false");
+		assertChanged("0", "true != true");
 	}
 
 	// Utils ==================================================================

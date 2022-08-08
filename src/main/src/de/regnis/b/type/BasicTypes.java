@@ -13,7 +13,7 @@ public final class BasicTypes {
 	public static final NumericType UINT8 = new NumericType(0, 255, "u8");
 	public static final NumericType UINT16 = new NumericType(0, 65535, "u16");
 	public static final NumericType INT8 = new NumericType(-128, 127, "i8");
-	public static final NumericType INT16 = new NumericType(-32768, 32767, "i16");
+	public static final NumericType INT16 = new NumericType(-32768, 32767, "int");
 
 	public static final Type VOID = new Type() {
 		@Override

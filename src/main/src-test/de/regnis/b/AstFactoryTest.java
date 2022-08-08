@@ -28,7 +28,7 @@ public class AstFactoryTest {
 				             """, TreePrinter.print(AstFactory.parseString("var a = 'A';")));
 		assertEquals("""
 				             +- a :=
-				                +- literal false
+				                +- literal 0
 				             """, TreePrinter.print(AstFactory.parseString("var a = false;")));
 		assertEquals("""
 				             +- a :=
@@ -73,22 +73,6 @@ public class AstFactoryTest {
 				                   +- literal 4
 				             """, TreePrinter.print(AstFactory.parseString("var a = 192 >> 4;")));
 		assertEquals("""
-				             +- a : Foobar =
-				                +- literal 0
-				             """, TreePrinter.print(AstFactory.parseString("Foobar a = 0;")));
-		assertEquals("""
-				             +- a :=
-				                +- cast to u16
-				                   +- literal 0
-				             """, TreePrinter.print(AstFactory.parseString("var a = (u16)0;")));
-		assertEquals("""
-				             +- a :=
-				                +- operator +
-				                   +- cast to i8
-				                   |  +- literal 0
-				                   +- literal 1000
-				             """, TreePrinter.print(AstFactory.parseString("var a = (i8)0 + 1000;")));
-		assertEquals("""
 				             +- a :=
 				                +- operator <
 				                   +- literal 0
@@ -121,13 +105,13 @@ public class AstFactoryTest {
 						                                                           var e = d ^ 1;
 						                                                           """)));
 		assertEquals("""
-				             +- void wom(i16 x)
+				             +- void wom(int x)
 				             |  +- statementList
 				             |     +- b :=
 				             |        +- operator +
 				             |           +- read var a
 				             |           +- literal 1
-				             +- i16 getLength(i16 address)
+				             +- int getLength(int address)
 				                +- statementList
 				                   +- return
 				                      +- literal 0
@@ -153,13 +137,13 @@ public class AstFactoryTest {
 		assertEquals("""
 				             +- a :=
 				             |  +- literal 1
-				             +- i16 twice(i16 a)
+				             +- int twice(int a)
 				             |  +- statementList
 				             |     +- return
 				             |        +- operator *
 				             |           +- read var a
 				             |           +- literal 2
-				             +- i16 zero()
+				             +- int zero()
 				                +- statementList
 				                   +- a :=
 				                   |  +- literal 0
@@ -173,7 +157,7 @@ public class AstFactoryTest {
 						                                                             return a;
 						                                                           }""")));
 		assertEquals("""
-				             +- void test(i16 a)
+				             +- void test(int a)
 				                +- statementList
 				                   +- if
 				                   |  +- operator >
@@ -194,7 +178,7 @@ public class AstFactoryTest {
 						                                                             var i = print(a);
 						                                                           }""")));
 		assertEquals("""
-				             +- void printHex4(u8 i)
+				             +- void printHex4(int i)
 				                +- statementList
 				                   +- i =
 				                   |  +- operator &
@@ -217,7 +201,7 @@ public class AstFactoryTest {
 				                               |  +- literal 10
 				                               +- literal 65
 				             """, TreePrinter.print(AstFactory.parseString("""
-						                                                           void printHex4(u8 i) {
+						                                                           void printHex4(int i) {
 						                                                             i = i & 15;
 						                                                             if (i < 10) {
 						                                                               print(i + 48);
@@ -227,7 +211,7 @@ public class AstFactoryTest {
 						                                                             }
 						                                                           }""")));
 		assertEquals("""
-				             +- void printDigit(i16 v)
+				             +- void printDigit(int v)
 				                +- statementList
 				                   +- if
 				                   |  +- operator >
@@ -292,7 +276,7 @@ public class AstFactoryTest {
 				                   +- i :=
 				                   |  +- literal 0
 				                   +- While
-				                   |  +- literal true
+				                   |  +- literal 1
 				                   |  +- do
 				                   |     +- call print
 				                   |     |  +- operator +

@@ -57,12 +57,7 @@ public class TreePrinter {
 
 	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
-		if (node.typeName != null) {
-			strings.add(node.name + " : " + node.typeName + " =");
-		}
-		else {
-			strings.add(node.name + " :=");
-		}
+		strings.add(node.name + " :=");
 		append(getStrings(node.expression), false, strings);
 		return strings;
 	}
@@ -154,7 +149,7 @@ public class TreePrinter {
 						buffer.append(", ");
 					}
 
-					buffer.append(parameter.type);
+					buffer.append("int");
 					buffer.append(" ");
 					buffer.append(parameter.name);
 				}
@@ -229,17 +224,7 @@ public class TreePrinter {
 			}
 
 			@Override
-			public List<String> visitBoolean(BooleanLiteral node) {
-				return getStrings(node);
-			}
-
-			@Override
 			public List<String> visitVarRead(VarRead node) {
-				return getStrings(node);
-			}
-
-			@Override
-			public List<String> visitTypeCast(TypeCast node) {
 				return getStrings(node);
 			}
 		});
@@ -260,18 +245,7 @@ public class TreePrinter {
 		return Collections.singletonList("read var " + node.name);
 	}
 
-	private List<String> getStrings(TypeCast node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add("cast to " + node.typeName);
-		append(getStrings(node.expression), false, strings);
-		return strings;
-	}
-
 	private List<String> getStrings(NumberLiteral node) {
-		return Collections.singletonList("literal " + node.value);
-	}
-
-	private List<String> getStrings(BooleanLiteral node) {
 		return Collections.singletonList("literal " + node.value);
 	}
 
