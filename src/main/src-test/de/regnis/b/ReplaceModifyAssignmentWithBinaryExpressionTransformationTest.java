@@ -17,9 +17,9 @@ public class ReplaceModifyAssignmentWithBinaryExpressionTransformationTest {
 	public void testKeepAsIs() {
 		assertEquals("""
 				             void main() {
-				               a : int = 10
-				               b : int = 20
-				               c : int = a + b
+				               a := 10
+				               b := 20
+				               c := a + b
 				             }
 				             """,
 		             """
@@ -34,12 +34,12 @@ public class ReplaceModifyAssignmentWithBinaryExpressionTransformationTest {
 	public void testTransform() {
 		assertEquals("""
 				             void main() {
-				               a : int = 10
+				               a := 10
 				               a = a + 1
 				               a = a - 1
 				               a = a * 2
 				               a = a / 2
-				               if true
+				               if 1
 				               {
 				                 a = a << 1
 				                 a = a >> 1
@@ -51,12 +51,12 @@ public class ReplaceModifyAssignmentWithBinaryExpressionTransformationTest {
 				             """,
 		             """
 				             void main() {
-				               v0 : i16 = 10
+				               v0 := 10
 				               v0 = v0 + 1
 				               v0 = v0 - 1
 				               v0 = v0 * 2
 				               v0 = v0 / 2
-				               if true
+				               if 1
 				               {
 				                 v0 = v0 << 1
 				                 v0 = v0 >> 1
@@ -88,7 +88,6 @@ public class ReplaceModifyAssignmentWithBinaryExpressionTransformationTest {
 	private void assertEquals(String expected, String expectedTyped, String source) {
 		assertEquals(expected, source, false);
 		final DeclarationList root = assertEquals(expectedTyped, source, true);
-		AssertTypes.assertAllExpressionsHaveType(root);
 	}
 
 	private DeclarationList assertEquals(String expected, String source, boolean withType) {

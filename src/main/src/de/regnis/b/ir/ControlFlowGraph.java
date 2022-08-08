@@ -1,6 +1,5 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.AssertTypes;
 import de.regnis.b.ast.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,8 +22,6 @@ public final class ControlFlowGraph {
 	// Setup ==================================================================
 
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
-		AssertTypes.assertAllExpressionsHaveType(declaration);
-
 		exitBlock = new ExitBlock();
 
 		final BasicBlock firstBlock = new BasicBlock();

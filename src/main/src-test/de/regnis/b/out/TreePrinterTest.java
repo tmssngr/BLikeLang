@@ -1,7 +1,6 @@
 package de.regnis.b.out;
 
 import de.regnis.b.ast.*;
-import de.regnis.b.type.BasicTypes;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,11 +25,9 @@ public class TreePrinterTest {
 		Assert.assertEquals(List.of("a +=",
 		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.add, "a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a =",
-		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1), BasicTypes.UINT8)));
+		                            "+- literal 1"), printer.getStrings(new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1))));
 		Assert.assertEquals(List.of("a :=",
 		                            "+- literal 1"), printer.getStrings(new VarDeclaration("a", new NumberLiteral(1))));
-		Assert.assertEquals(List.of("a :=",
-		                            "+- literal true"), printer.getStrings(new VarDeclaration("a", BooleanLiteral.TRUE)));
 		Assert.assertEquals(List.of("if",
 		                            "+- operator >",
 		                            "|  +- read var a",

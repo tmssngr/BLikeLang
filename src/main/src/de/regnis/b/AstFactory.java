@@ -74,7 +74,17 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Nullable
 	@Override
 	public FuncDeclaration visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
-		final Type type = BasicTypes.getType(ctx.type.getText(), true);
+		final String typeString = ctx.type.getText();
+		final Type type;
+		if ("void".equals(typeString)) {
+			type = BasicTypes.VOID;
+		}
+		else if ("int".equals(typeString)) {
+			type = BasicTypes.INT16;
+		}
+		else {
+			throw new ParseCancellationException("Unsupported type " + typeString);
+		}
 		final String name = ctx.name.getText();
 		final FuncDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
 		final Statement statement = (Statement) visit(ctx.statement());
@@ -95,9 +105,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 
 	@Override
 	public FuncDeclarationParameter visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx) {
-		final Type type = BasicTypes.getType(ctx.type.getText(), false);
 		final String name = ctx.name.getText();
-		return new FuncDeclarationParameter(type, name, ctx.name.getLine(), ctx.name.getCharPositionInLine());
+		return new FuncDeclarationParameter(name, ctx.name.getLine(), ctx.name.getCharPositionInLine());
 	}
 
 	@Override
@@ -146,15 +155,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	public VarDeclaration visitInferVarDeclaration(BLikeLangParser.InferVarDeclarationContext ctx) {
 		final String name = ctx.var.getText();
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new VarDeclaration(null, name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclaration(name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
 	public VarDeclaration visitTypeVarDeclaration(BLikeLangParser.TypeVarDeclarationContext ctx) {
-		final String typeName = ctx.type.getText();
 		final String name = ctx.var.getText();
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new VarDeclaration(typeName, name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclaration(name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
 	}
 
 	@Override
@@ -304,26 +312,8 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		final Token number = ctx.Number().getSymbol();
 		final String text = number.getText();
 		try {
-			final int suffixPos = text.indexOf('_');
-			final int value;
-			final BasicTypes.NumericType type;
-			if (suffixPos < 0) {
-				value = parseInt(text);
-				type = BasicTypes.determineType(value);
-			}
-			else {
-				value = parseInt(text.substring(0, suffixPos));
-				final String suffix = text.substring(suffixPos + 1);
-				type = BasicTypes.getNumbericType(suffix);
-			}
-
-			if (value < type.min || value > type.max) {
-				throw new ParseFailedException("Number out of bounds: " + text, number.getLine(), number.getCharPositionInLine());
-			}
-
-			final NumberLiteral numberLiteral = new NumberLiteral(value);
-			numberLiteral.setType(type);
-			return numberLiteral;
+			final int value = parseInt(text);
+			return new NumberLiteral(value);
 		}
 		catch (NumberFormatException | BasicTypes.UnsupportedTypeException e) {
 			throw new ParseFailedException("Invalid number: " + text, number.getLine(), number.getCharPositionInLine());
@@ -343,26 +333,19 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 			throw new ParseFailedException("char out of bounds " + text, ctx.start.getLine(), ctx.start.getCharPositionInLine());
 		}
 
-		return new NumberLiteral(chr, BasicTypes.UINT8);
+		return new NumberLiteral(chr);
 	}
 
 	@Override
 	public Node visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) {
 		final String text = ctx.BooleanLiteral().getText();
-		return BooleanLiteral.get("true".equals(text));
+		return NumberLiteral.get("true".equals(text));
 	}
 
 	@Override
 	public VarRead visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
 		final Token varName = ctx.Identifier().getSymbol();
 		return new VarRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
-	}
-
-	@Override
-	public TypeCast visitTypeCast(BLikeLangParser.TypeCastContext ctx) {
-		final String typeName = ctx.type.getText();
-		final Expression expression = (Expression) visit(ctx.subexpr());
-		return new TypeCast(typeName, expression, ctx.type.getLine(), ctx.type.getCharPositionInLine());
 	}
 
 	// Utils ==================================================================

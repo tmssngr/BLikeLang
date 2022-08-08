@@ -39,7 +39,6 @@ expression: subexpr                                                            #
           | left=expression operator=(Multiply|Divide|Modulo|ShiftL|ShiftR) right=expression #binaryExpressionPoint
           | left=expression operator=(Plus|Minus) right=expression             #binaryExpressionDash
           | left=expression operator=(Lt|Le|Eq|Ge|Gt|Ne) right=expression      #binaryExpressionBool
-          | ParenOpen type=Identifier ParenClose subexpr                       #typeCast
           ;
 
 functionCallParameters: expression?
@@ -104,7 +103,7 @@ BooleanLiteral: 'true' | 'false';
 
 Number: ( [-]? [0-9]+
         | '0x' [0-9A-Fa-f]+
-        ) ('_' [ui] ('8' | '16'))?;
+        );
 
 Identifier
     : [a-zA-Z] [0-9a-zA-Z_]*

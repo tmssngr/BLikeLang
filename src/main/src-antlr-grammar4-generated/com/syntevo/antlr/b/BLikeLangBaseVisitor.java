@@ -185,13 +185,6 @@ public class BLikeLangBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitTypeCast(BLikeLangParser.TypeCastContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
 	@Override public T visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

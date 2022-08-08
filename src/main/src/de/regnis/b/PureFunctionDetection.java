@@ -190,21 +190,10 @@ public final class PureFunctionDetection {
 			}
 
 			@Override
-			public Object visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Object visitVarRead(VarRead node) {
 				if (globalVariables.contains(node.name)) {
 					nonPureFunctions.add(currentFunction);
 				}
-				return node;
-			}
-
-			@Override
-			public Object visitTypeCast(TypeCast node) {
-				visitExpression(node.expression);
 				return node;
 			}
 		});

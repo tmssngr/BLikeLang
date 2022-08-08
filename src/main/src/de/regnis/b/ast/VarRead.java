@@ -1,6 +1,5 @@
 package de.regnis.b.ast;
 
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -24,13 +23,6 @@ public final class VarRead extends Expression {
 		this.name = name;
 		this.line = line;
 		this.column = column;
-	}
-
-	public VarRead(@NotNull Type type, @NotNull String name) {
-		this.name = name;
-		setType(type);
-		line = -1;
-		column = -1;
 	}
 
 	// Implemented ============================================================

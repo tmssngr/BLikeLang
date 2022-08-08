@@ -2,7 +2,6 @@ package de.regnis.b;
 
 import de.regnis.b.ast.*;
 import de.regnis.b.out.StringStringOutput;
-import de.regnis.b.type.BasicTypes;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -38,10 +37,6 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				assignment("a", new FuncCall("foo",
 				                             new FuncCallParameters()
 						                             .add(new VarRead("b")))));
-		assertEquals("a = (u8) 1", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new NumberLiteral(1))));
-		assertEquals("a = (u8) b", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new VarRead("b"))));
 	}
 
 	@Test
@@ -57,9 +52,9 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 				                                                     new NumberLiteral(3)))));
 		assertEquals("""
 				             $1 := 2 <= 3
-				               a = false == $1""", f -> f.
+				               a = 0 == $1""", f -> f.
 				assignment("a",
-				           new BinaryExpression(BooleanLiteral.FALSE,
+				           new BinaryExpression(NumberLiteral.FALSE,
 				                                BinaryExpression.Op.equal,
 				                                new BinaryExpression(new NumberLiteral(2),
 				                                                     BinaryExpression.Op.lessEqual,
@@ -97,24 +92,6 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						                             .add(new BinaryExpression(new NumberLiteral(1),
 						                                                       BinaryExpression.Op.sub,
 						                                                       new NumberLiteral(2))))));
-		assertEquals("""
-				             $1 := 1 - 2
-				               a = (u8) $1""", f -> f.
-				assignment("a", new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                                    BinaryExpression.Op.sub,
-				                                                                    new NumberLiteral(2)))));
-		assertEquals("""
-				             $1 := 1 - 2
-				               return (u8) $1""", f -> f.
-				returnStm(new TypeCast(BasicTypes.UINT8, new BinaryExpression(new NumberLiteral(1),
-				                                                              BinaryExpression.Op.sub,
-				                                                              new NumberLiteral(2)))));
-		assertEquals("""
-				             $1 : u8 = (u8) b
-				               a = foo($1)""", f -> f.
-				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new TypeCast(BasicTypes.UINT8, new VarRead("b"))))));
 	}
 
 	@Test
@@ -156,15 +133,6 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 						                       void main() {
 						                         call(10 + 2 * 3);
 						                       }""")));
-		assertEquals("""
-				             $1 := 1 - 2
-				               $2 : i8 = (i8) $1
-				               a = foo($2)""", f -> f.
-				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new TypeCast(BasicTypes.INT8, new BinaryExpression(new NumberLiteral(1),
-						                                                                                     BinaryExpression.Op.sub,
-						                                                                                     new NumberLiteral(2)))))));
 	}
 
 	@Test
@@ -181,15 +149,14 @@ public class SplitExpressionsTransformationTest extends AbstractTransformationTe
 	@Test
 	public void testDefineType() {
 		assertEquals("""
-				             i16 call(i16 p0) {
+				             int call(int p0) {
 				               return p0
 				             }
 				             void main() {
-				               $1 : u8 = 2 * 3
-				               $2 : u8 = 10 + $1
-				               $3 : i16 = (i16) $2
-				               $4 : i16 = call(1)
-				               v0 : i16 = $3 + $4
+				               $1 := 2 * 3
+				               $2 := 10 + $1
+				               $3 := call(1)
+				               v0 := $2 + $3
 				             }
 				             """,
 		             SplitExpressionsTransformation.transform(

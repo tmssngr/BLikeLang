@@ -3,8 +3,6 @@ package de.regnis.b.ir;
 import de.regnis.b.ast.FuncDeclaration;
 import de.regnis.b.ast.FuncDeclarationParameter;
 import de.regnis.b.ast.SimpleStatement;
-import de.regnis.b.type.BasicTypes;
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -18,7 +16,6 @@ public final class RegisterAllocation {
 
 	private final Map<String, Set<Integer>> varToUsedRegisters = new HashMap<>();
 	private final Map<String, Integer> varToRegister = new HashMap<>();
-	private final Map<String, Type> nameToType;
 	private final UndirectedGraph<String> interferenceGraph;
 
 	private int maxUsedRegister = -1;
@@ -27,7 +24,6 @@ public final class RegisterAllocation {
 
 	public RegisterAllocation(@NotNull ControlFlowGraph flowGraph) {
 		final ControlFlowGraphVarUsageDetector usages = ControlFlowGraphVarUsageDetector.detectVarUsages(flowGraph);
-		nameToType = usages.getNameToType();
 
 		interferenceGraph = new UndirectedGraph<>();
 		flowGraph.iterate(block -> {
@@ -51,11 +47,9 @@ public final class RegisterAllocation {
 		int i = 0;
 		int register = 0;
 		for (FuncDeclarationParameter parameter : function.parameters.getParameters()) {
-			final int size = getSize(parameter.type);
-			register += register % size;
-			setRegister("p" + i, register, size);
+			setRegister("p" + i, register);
 			i++;
-			register += size;
+			register++;
 		}
 	}
 
@@ -67,10 +61,8 @@ public final class RegisterAllocation {
 			final String var = getVarWithHighestEdgeCount(pendingVars, interferenceGraph);
 			pendingVars.remove(var);
 
-			final Type type = nameToType.get(var);
-			final int size = getSize(type);
-			final int register = getNextFreeRegister(var, size);
-			setRegister(var, register, size);
+			final int register = getNextFreeRegister(var);
+			setRegister(var, register);
 		}
 
 		return Collections.unmodifiableMap(varToRegister);
@@ -82,11 +74,7 @@ public final class RegisterAllocation {
 
 	// Utils ==================================================================
 
-	private void setRegister(@NotNull String var, int register, int size) {
-		if (size < 1 || size > 2) {
-			throw new IllegalArgumentException();
-		}
-
+	private void setRegister(@NotNull String var, int register) {
 		if (varToRegister.containsKey(var)) {
 			throw new IllegalArgumentException();
 		}
@@ -96,9 +84,6 @@ public final class RegisterAllocation {
 		for (String interferedVar : interferedVars) {
 			final Set<Integer> usedRegisters = varToUsedRegisters.get(interferedVar);
 			setUsedRegister(register, usedRegisters);
-			if (size == 2) {
-				setUsedRegister(register + 1, usedRegisters);
-			}
 		}
 	}
 
@@ -107,31 +92,18 @@ public final class RegisterAllocation {
 		maxUsedRegister = Math.max(register, maxUsedRegister);
 	}
 
-	private int getSize(@NotNull Type type) {
-		return type == BasicTypes.INT16 || type == BasicTypes.UINT16
-				? 2 : 1;
-	}
-
-	private int getNextFreeRegister(@NotNull String var, int size) {
+	private int getNextFreeRegister(@NotNull String var) {
 		final Set<Integer> allUsedRegisters = varToUsedRegisters.get(var);
 
 		int register = 0;
-		while (!isFree(register, size, allUsedRegisters)) {
-			register += size;
+		while (!isFree(register, allUsedRegisters)) {
+			register += 1;
 		}
 		return register;
 	}
 
-	private boolean isFree(int register, int size, Set<Integer> allUsedRegisters) {
-		while (size > 0) {
-			if (allUsedRegisters.contains(register)) {
-				return false;
-			}
-
-			register++;
-			size--;
-		}
-		return true;
+	private boolean isFree(int register, Set<Integer> allUsedRegisters) {
+		return !allUsedRegisters.contains(register);
 	}
 
 	private String getVarWithHighestEdgeCount(Set<String> varsToHandle, UndirectedGraph<String> graph) {

@@ -16,7 +16,7 @@ public class CodePrinterTest {
 	public void testDeclaration() {
 		Assert.assertEquals("""
 				                    a := 0
-				                    i16 sqr(i16 x) {
+				                    int sqr(int x) {
 				                      x += 1
 				                      return x * x
 				                    }
@@ -26,7 +26,7 @@ public class CodePrinterTest {
 						                    .add(new GlobalVarDeclaration(new VarDeclaration("a", new NumberLiteral(0))))
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "sqr",
 						                                             new FuncDeclarationParameters()
-								                                             .add(new FuncDeclarationParameter(BasicTypes.INT16, "x")),
+								                                             .add(new FuncDeclarationParameter("x")),
 						                                             new StatementList()
 								                                             .add(new Assignment(Assignment.Op.add, "x", new NumberLiteral(1)))
 								                                             .add(new ReturnStatement(
@@ -34,17 +34,8 @@ public class CodePrinterTest {
 										                                                                  BinaryExpression.Op.multiply,
 										                                                                  new VarRead("x"))))))
 		                    ));
-		Assert.assertEquals("a := (u8) -1\n",
-		                    CodePrinter.print(new DeclarationList()
-				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
-				                                                                                       new TypeCast("u8",
-				                                                                                                    new NumberLiteral(-1)))))));
-		Assert.assertEquals("a := false\n",
-		                    CodePrinter.print(new DeclarationList()
-				                                      .add(new GlobalVarDeclaration(new VarDeclaration("a",
-				                                                                                       BooleanLiteral.FALSE)))));
 		Assert.assertEquals("""
-				                    i16 foo() {
+				                    int foo() {
 				                      if a > 0
 				                      {
 				                        b := 1

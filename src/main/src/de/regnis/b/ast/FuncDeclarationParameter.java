@@ -1,6 +1,5 @@
 package de.regnis.b.ast;
 
-import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,19 +9,17 @@ public final class FuncDeclarationParameter extends Node {
 
 	// Fields =================================================================
 
-	public final Type type;
 	public final String name;
 	public final int line;
 	public final int column;
 
 	// Setup ==================================================================
 
-	public FuncDeclarationParameter(@NotNull Type type, @NotNull String name) {
-		this(type, name, -1, -1);
+	public FuncDeclarationParameter(@NotNull String name) {
+		this(name, -1, -1);
 	}
 
-	public FuncDeclarationParameter(@NotNull Type type, @NotNull String name, int line, int column) {
-		this.type = type;
+	public FuncDeclarationParameter(@NotNull String name, int line, int column) {
 		this.name = name;
 		this.line = line;
 		this.column = column;

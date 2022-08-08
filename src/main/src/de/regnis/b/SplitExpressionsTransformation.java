@@ -42,13 +42,12 @@ public final class SplitExpressionsTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				if (node.node.expression instanceof BooleanLiteral
-						|| node.node.expression instanceof NumberLiteral) {
+				if (node.node.expression instanceof NumberLiteral) {
 					return node;
 				}
 
 				initializationAssignments.add(new Assignment(Assignment.Op.assign, node.node.name, node.node.expression));
-				return new GlobalVarDeclaration(new VarDeclaration(node.node.typeName, node.node.name, node.node.type == BasicTypes.BOOLEAN ? BooleanLiteral.FALSE : new NumberLiteral(0), -1, -1));
+				return new GlobalVarDeclaration(new VarDeclaration(node.node.name, new NumberLiteral(0)));
 			}
 
 			@Override
@@ -106,9 +105,6 @@ public final class SplitExpressionsTransformation {
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		if (node.type != null) {
-			return new Assignment(node.operation, node.name, expression, node.type);
-		}
 		return new Assignment(node.operation, node.name, expression, node.line, node.column);
 	}
 
@@ -214,18 +210,8 @@ public final class SplitExpressionsTransformation {
 			}
 
 			@Override
-			public Expression visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Expression visitVarRead(VarRead node) {
 				return node;
-			}
-
-			@Override
-			public Expression visitTypeCast(TypeCast node) {
-				return handleTypeCast(node, tempVarFactory);
 			}
 		});
 	}
@@ -233,22 +219,12 @@ public final class SplitExpressionsTransformation {
 	private BinaryExpression handleBinary(BinaryExpression node, TempVarFactory tempVarFactory) {
 		final Expression left = splitInnerExpression(node.left, tempVarFactory);
 		final Expression right = splitInnerExpression(node.right, tempVarFactory);
-		final BinaryExpression expression = new BinaryExpression(left, node.operator, right);
-		copyType(node, expression);
-		return expression;
+		return new BinaryExpression(left, node.operator, right);
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
-		final FuncCall funcCall = new FuncCall(node.name, parameters, node.line, node.column);
-		copyType(node, funcCall);
-		return funcCall;
-	}
-
-	private void copyType(Expression from, Expression to) {
-		if (from.hasType()) {
-			to.setType(from.getType());
-		}
+		return new FuncCall(node.name, parameters, node.line, node.column);
 	}
 
 	@NotNull
@@ -262,27 +238,17 @@ public final class SplitExpressionsTransformation {
 	}
 
 	@NotNull
-	private TypeCast handleTypeCast(TypeCast node, TempVarFactory tempVarFactory) {
-		final Expression simplifiedExpression = splitInnerExpression(node.expression, tempVarFactory);
-		final TypeCast typeCast = new TypeCast(node.typeName, simplifiedExpression);
-		copyType(node, typeCast);
-		return typeCast;
-	}
-
-	@NotNull
 	private Expression splitInnerExpression(Expression expressionNode, TempVarFactory tempVarFactory) {
 		return expressionNode.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
 				final BinaryExpression tempExpression = handleBinary(node, tempVarFactory);
-				copyType(node, tempExpression);
 				return tempVarFactory.createTempVarDeclaration(tempExpression);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
 				final FuncCall fcn = handleFunctionCall(node, tempVarFactory);
-				copyType(node, fcn);
 				return tempVarFactory.createTempVarDeclaration(fcn);
 			}
 
@@ -292,19 +258,8 @@ public final class SplitExpressionsTransformation {
 			}
 
 			@Override
-			public Expression visitBoolean(BooleanLiteral node) {
-				return node;
-			}
-
-			@Override
 			public Expression visitVarRead(VarRead node) {
 				return node;
-			}
-
-			@Override
-			public Expression visitTypeCast(TypeCast node) {
-				final TypeCast expression = handleTypeCast(node, tempVarFactory);
-				return tempVarFactory.createTempVarDeclaration(expression);
 			}
 		});
 	}
@@ -313,9 +268,7 @@ public final class SplitExpressionsTransformation {
 		return expression -> {
 			final String tempVar = getNextTempVarName();
 			newStatementList.add(VarDeclaration.createTempVarDeclaration(tempVar, expression));
-			final VarRead varRead = new VarRead(tempVar, -1, -1);
-			copyType(expression, varRead);
-			return varRead;
+			return new VarRead(tempVar);
 		};
 	}
 
