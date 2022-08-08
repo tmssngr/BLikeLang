@@ -40,18 +40,6 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}

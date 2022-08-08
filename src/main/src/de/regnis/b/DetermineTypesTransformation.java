@@ -36,7 +36,6 @@ public final class DetermineTypesTransformation {
 	private final Map<String, Function> functions = new LinkedHashMap<>();
 	private final StringOutput warningOutput;
 
-	private int globalVarCount;
 	private SymbolScope symbolMap = SymbolScope.createRootInstance();
 	@Nullable
 	private Type functionReturnType;
@@ -53,11 +52,6 @@ public final class DetermineTypesTransformation {
 	private void determineFunctions(DeclarationList root) {
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return node;
-				}
-
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final int parameterCount = node.parameters.getParameters().size();
@@ -78,11 +72,6 @@ public final class DetermineTypesTransformation {
 		for (Declaration declaration : root.getDeclarations()) {
 			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
 				@Override
-				public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return DetermineTypesTransformation.this.visitGlobalVarDeclaration(node);
-				}
-
-				@Override
 				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
 					return DetermineTypesTransformation.this.visitFunctionDeclaration(node);
 				}
@@ -93,14 +82,6 @@ public final class DetermineTypesTransformation {
 		symbolMap.reportUnusedVariables(warningOutput);
 
 		return newRoot;
-	}
-
-	private Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-		final String newName = "g" + globalVarCount;
-		globalVarCount++;
-
-		final VarDeclaration newVarDeclaration = visitVarDeclaration(node.node, newName);
-		return new GlobalVarDeclaration(newVarDeclaration);
 	}
 
 	private Declaration visitFunctionDeclaration(FuncDeclaration node) {
@@ -448,11 +429,6 @@ public final class DetermineTypesTransformation {
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return node;
-				}
-
-				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					reportIllegalBreakStatement(node.statementList);
 					return node;
@@ -511,22 +487,15 @@ public final class DetermineTypesTransformation {
 	}
 
 	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
-		final List<GlobalVarDeclaration> varDeclarations = new ArrayList<>();
-		final List<FuncDeclaration> functionDeclarations = new ArrayList<>();
+		final DeclarationList newRoot = new DeclarationList();
 
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					varDeclarations.add(node);
-					return node;
-				}
-
-				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final Function function = functions.get(node.name);
 					if (function.used) {
-						functionDeclarations.add(node);
+						newRoot.add(node);
 					}
 					else {
 						warning(Messages.warningUnusedFunction(function.line, function.column, node.name));
@@ -536,13 +505,6 @@ public final class DetermineTypesTransformation {
 			});
 		}
 
-		final DeclarationList newRoot = new DeclarationList();
-		for (GlobalVarDeclaration declaration : varDeclarations) {
-			newRoot.add(declaration);
-		}
-		for (FuncDeclaration declaration : functionDeclarations) {
-			newRoot.add(declaration);
-		}
 		return newRoot;
 	}
 

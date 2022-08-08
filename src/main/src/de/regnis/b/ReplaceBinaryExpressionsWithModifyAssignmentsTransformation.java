@@ -5,7 +5,6 @@ import de.regnis.b.type.BasicTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,15 +12,10 @@ import java.util.List;
  */
 public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
-	// Constants ==============================================================
-
-	private static final String FUNCTION_INIT_GLOBALS = "__init_globals__";
-
 	// Static =================================================================
 
 	public static DeclarationList transform(DeclarationList root) {
 		final ReplaceBinaryExpressionsWithModifyAssignmentsTransformation transformation = new ReplaceBinaryExpressionsWithModifyAssignmentsTransformation();
-		root = transformation.moveGlobalVarInitializationToInit(root);
 		return transformation.splitExpressions(root);
 	}
 
@@ -37,34 +31,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	// Utils ==================================================================
 
-	private DeclarationList moveGlobalVarInitializationToInit(@NotNull DeclarationList declarationList) {
-		final List<Assignment> initializationAssignments = new ArrayList<>();
-
-		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
-			@Override
-			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				if (node.node.expression instanceof NumberLiteral) {
-					return node;
-				}
-
-				initializationAssignments.add(new Assignment(Assignment.Op.assign, node.node.name, node.node.expression));
-				return new GlobalVarDeclaration(new VarDeclaration(node.node.name, new NumberLiteral(0), -1, -1));
-			}
-
-			@Override
-			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				return node;
-			}
-		};
-
-		final DeclarationList newDeclarationList = processDeclarations(declarationList, visitor);
-
-		if (initializationAssignments.size() > 0) {
-			addInitializationFunction(initializationAssignments, newDeclarationList);
-		}
-		return newDeclarationList;
-	}
-
 	@NotNull
 	private DeclarationList processDeclarations(@NotNull DeclarationList declarationList, DeclarationVisitor<Declaration> visitor) {
 		final DeclarationList newDeclarationList = new DeclarationList();
@@ -75,25 +41,8 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		return newDeclarationList;
 	}
 
-	private void addInitializationFunction(List<Assignment> initializationAssignments, DeclarationList newDeclarationList) {
-		if (newDeclarationList.getFunction(FUNCTION_INIT_GLOBALS) != null) {
-			throw new TransformationFailedException("Function " + FUNCTION_INIT_GLOBALS + " must not exist.");
-		}
-
-		final StatementList statementList = new StatementList();
-		for (Assignment assignment : initializationAssignments) {
-			statementList.add(assignment);
-		}
-		newDeclarationList.add(new FuncDeclaration(BasicTypes.VOID, FUNCTION_INIT_GLOBALS, new FuncDeclarationParameters(), statementList));
-	}
-
 	private DeclarationList splitExpressions(@NotNull DeclarationList declarationList) {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
-			@Override
-			public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				return node;
-			}
-
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
 				final StatementList newStatementList = handleStatementList(node.statementList);

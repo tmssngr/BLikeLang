@@ -5,7 +5,5 @@ package de.regnis.b.ast;
  */
 public interface DeclarationVisitor<O> {
 
-	O visitGlobalVarDeclaration(GlobalVarDeclaration node);
-
 	O visitFunctionDeclaration(FuncDeclaration node);
 }

@@ -1,5 +1,9 @@
 package de.regnis.b;
 
+import de.regnis.b.ast.DeclarationList;
+import de.regnis.b.ast.StatementList;
+import de.regnis.b.out.StringOutput;
+import de.regnis.b.out.StringStringOutput;
 import de.regnis.b.out.TreePrinter;
 import org.junit.Test;
 
@@ -17,67 +21,67 @@ public class AstFactoryTest {
 		assertEquals("""
 				             +- a :=
 				                +- literal 0
-				             """, TreePrinter.print(AstFactory.parseString("var a = 0;")));
+				             """, parseAndPrintStatement("var a = 0;"));
 		assertEquals("""
 				             +- a :=
 				                +- literal 10
-				             """, TreePrinter.print(AstFactory.parseString("var a = 0xA;")));
+				             """, parseAndPrintStatement("var a = 0xA;"));
 		assertEquals("""
 				             +- a :=
 				                +- literal 65
-				             """, TreePrinter.print(AstFactory.parseString("var a = 'A';")));
+				             """, parseAndPrintStatement("var a = 'A';"));
 		assertEquals("""
 				             +- a :=
 				                +- literal 0
-				             """, TreePrinter.print(AstFactory.parseString("var a = false;")));
+				             """, parseAndPrintStatement("var a = false;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator +
 				                   +- literal 1
 				                   +- literal 2
-				             """, TreePrinter.print(AstFactory.parseString("var a = 1 + 2;")));
+				             """, parseAndPrintStatement("var a = 1 + 2;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator -
 				                   +- literal 1
 				                   +- literal 2
-				             """, TreePrinter.print(AstFactory.parseString("var a = 1 - 2;")));
+				             """, parseAndPrintStatement("var a = 1 - 2;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator *
 				                   +- literal 2
 				                   +- literal 4
-				             """, TreePrinter.print(AstFactory.parseString("var a = 2 * 4;")));
+				             """, parseAndPrintStatement("var a = 2 * 4;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator /
 				                   +- literal 10
 				                   +- literal 2
-				             """, TreePrinter.print(AstFactory.parseString("var a = 10 / 2;")));
+				             """, parseAndPrintStatement("var a = 10 / 2;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator %
 				                   +- literal 16
 				                   +- literal 6
-				             """, TreePrinter.print(AstFactory.parseString("var a = 16 % 6;")));
+				             """, parseAndPrintStatement("var a = 16 % 6;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator <<
 				                   +- literal 1
 				                   +- literal 4
-				             """, TreePrinter.print(AstFactory.parseString("var a = 1 << 4;")));
+				             """, parseAndPrintStatement("var a = 1 << 4;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator >>
 				                   +- literal 192
 				                   +- literal 4
-				             """, TreePrinter.print(AstFactory.parseString("var a = 192 >> 4;")));
+				             """, parseAndPrintStatement("var a = 192 >> 4;"));
 		assertEquals("""
 				             +- a :=
 				                +- operator <
 				                   +- literal 0
 				                   +- literal 1000
-				             """, TreePrinter.print(AstFactory.parseString("var a = 0 < 1000;")));
+				             """, parseAndPrintStatement("var a = 0 < 1000;"));
 		assertEquals("""
 				             +- a :=
 				             |  +- literal 0
@@ -97,13 +101,13 @@ public class AstFactoryTest {
 				                +- operator ^
 				                   +- read var d
 				                   +- literal 1
-				             """, TreePrinter.print(AstFactory.parseString("""
-						                                                           var a = 0;
-						                                                           var b = a + 1;
-						                                                           var c = b & 15;
-						                                                           var d = c | 16;
-						                                                           var e = d ^ 1;
-						                                                           """)));
+				             """, parseAndPrintStatement("""
+						                                         var a = 0;
+						                                         var b = a + 1;
+						                                         var c = b & 15;
+						                                         var d = c | 16;
+						                                         var e = d ^ 1;
+						                                         """));
 		assertEquals("""
 				             +- void wom(int x)
 				             |  +- statementList
@@ -135,8 +139,6 @@ public class AstFactoryTest {
 						                                                             return;
 						                                                           }""")));
 		assertEquals("""
-				             +- a :=
-				             |  +- literal 1
 				             +- int twice(int a)
 				             |  +- statementList
 				             |     +- return
@@ -150,7 +152,6 @@ public class AstFactoryTest {
 				                   +- return
 				                      +- read var a
 				             """, TreePrinter.print(AstFactory.parseString("""
-						                                                           var a = 1;
 						                                                           int twice(int a) return a * 2;
 						                                                           int zero() {
 						                                                             var a = 0;
@@ -307,5 +308,18 @@ public class AstFactoryTest {
 						                                                             }
 						                                                             print(13);
 						                                                           }""")));
+	}
+
+	// Utils ==================================================================
+
+	private String parseAndPrintStatement(String statements) {
+		final DeclarationList root = AstFactory.parseString("int method() {\n" + statements + "\n}");
+		final StatementList statementsList = root.getFunction("method").statementList;
+		final StringOutput output = new StringStringOutput();
+		for (String string : new TreePrinter().getStrings(null, statementsList)) {
+			output.print(string);
+			output.println();
+		}
+		return output.toString();
 	}
 }
