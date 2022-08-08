@@ -133,9 +133,6 @@ public final class ConstantFoldingTransformationTest extends AbstractTransformat
 		// local variable
 		assertStatement("a := " + expression,
 		                "var a = " + expression + ";");
-		// global variable
-		assertCode("a := " + expression + "\n",
-		           "var a = " + expression + ";");
 	}
 
 	private void assertChanged(String expectedExpression, String initialExpression) {

@@ -64,24 +64,6 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
-	public void testGlobalVars() {
-		assertSuccessfullyTransformed("""
-				                              g0 := 1
-				                              g1 := -1
-				                              g2 := g0 + g1
-				                              g3 := 0
-				                              """ + VOID_MAIN,
-		                              Messages.warningUnusedVar(3, 4, "b") + "\n" +
-				                              Messages.warningUnusedVar(4, 4, "booF") + "\n",
-		                              """
-				                              var a = 1;
-				                              var A = -1;
-				                              var b=a+A;
-				                              var booF = false;
-				                              """ + VOID_MAIN);
-	}
-
-	@Test
 	public void testLocalVars() {
 		assertSuccessfullyTransformed("""
 				                              int add(int p0, int p1) {
@@ -287,15 +269,11 @@ public final class DetermineTypesTransformationTest {
 
 	@Test
 	public void testValidDuplicateDeclarations() {
-		assertSuccessfullyTransformed("""
-				                              g0 := 1
-				                              """ + VOID_MAIN,
-		                              Messages.warningUnusedParameter(2, 21, "b") + "\n" +
-				                              Messages.warningUnusedVar(1, 4, "a") + "\n" +
-				                              Messages.warningUnusedFunction(2, 4, "twice") + "\n" +
-				                              Messages.warningUnusedFunction(3, 4, "zero") + "\n",
+		assertSuccessfullyTransformed(VOID_MAIN,
+		                              Messages.warningUnusedParameter(1, 21, "b") + "\n" +
+				                              Messages.warningUnusedFunction(1, 4, "twice") + "\n" +
+				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
 		                              """
-				                              var a = 1;
 				                              int twice(int a, int b) return a * 2;
 				                              int zero() {
 				                              var a = 0;
@@ -304,16 +282,13 @@ public final class DetermineTypesTransformationTest {
 				                              """ + VOID_MAIN);
 
 		assertSuccessfullyTransformed("""
-				                              g0 := 1
 				                              int twice(int p0, int p1) {
 				                                return p0 * 2
 				                              }
 				                              """ + VOID_MAIN,
-		                              Messages.warningUnusedParameter(2, 21, "b") + "\n" +
-				                              Messages.warningUnusedVar(1, 4, "a") + "\n" +
-				                              Messages.warningUnusedFunction(3, 4, "zero") + "\n",
+		                              Messages.warningUnusedParameter(1, 21, "b") + "\n" +
+				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
 		                              """
-				                              var a = 1;
 				                              int twice(int a, int b) return a * 2;
 				                              int zero() {
 				                                var b = 1000;
@@ -380,13 +355,6 @@ public final class DetermineTypesTransformationTest {
 
 	@Test
 	public void testDuplicateDeclaration() {
-		assertTransformationFailedException(Messages.errorVarAlreadyDeclared(2, 4, "a"),
-		                                    NO_WARNING,
-		                                    """
-				                                    var a = 1;
-				                                    var a = 2;
-				                                    """ + VOID_MAIN);
-
 		assertTransformationFailedException(Messages.errorVarAlreadyDeclared(3, 6, "a"),
 		                                    NO_WARNING,
 		                                    """
@@ -437,7 +405,6 @@ public final class DetermineTypesTransformationTest {
 		                              NO_WARNING,
 		                              VOID_MAIN);
 		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, "");
-		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, "var global = 1;");
 		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, """
 				void foo() {
 				}""");
@@ -447,37 +414,6 @@ public final class DetermineTypesTransformationTest {
 		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, """
 				void main(int a) {
 				}""");
-	}
-
-	@Test
-	public void testGlobalVarsBeforeFunctions() {
-		assertSuccessfullyTransformed("""
-				                              g0 := 24
-				                              g1 := 40
-				                              g2 := g0 * g1
-				                              void main() {
-				                                test()
-				                                test2()
-				                              }
-				                              void test() {
-				                              }
-				                              void test2() {
-				                              }
-				                              """,
-		                              Messages.warningUnusedVar(11, 4, "charsPerScreen") + "\n",
-		                              """
-				                              void main() {
-				                                test();
-				                                test2();
-				                              }
-				                              var lines = 24;
-				                              void test() {
-				                              }
-				                              var columns = 40;
-				                              void test2() {
-				                              }
-				                              var charsPerScreen = lines * columns;
-				                              """);
 	}
 
 	// Utils ==================================================================

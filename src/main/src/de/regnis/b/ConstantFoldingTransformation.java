@@ -30,12 +30,6 @@ public final class ConstantFoldingTransformation {
 		for (Declaration declaration : declarationList.getDeclarations()) {
 			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
 				@Override
-				public Declaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					final Expression expression = handleExpression(node.node.expression);
-					return new GlobalVarDeclaration(node.node.derive(expression));
-				}
-
-				@Override
 				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
 					final StatementList newStatementList = handleStatementList(node.statementList);
 					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);

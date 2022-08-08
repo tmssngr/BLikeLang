@@ -1,6 +1,7 @@
 package de.regnis.b.out;
 
 import de.regnis.b.ast.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,6 +92,21 @@ public class TreePrinter {
 		return strings;
 	}
 
+	public List<String> getStrings(@Nullable String name, StatementList node) {
+		final List<String> strings = new ArrayList<>();
+		if (name != null) {
+			strings.add(name);
+		}
+		final List<? extends Statement> statements = node.getStatements();
+		for (int i = 0, size = statements.size(); i < size; i++) {
+			final Statement statement = statements.get(i);
+			append(getStrings(statement), i < size - 1, strings);
+		}
+		return strings;
+	}
+
+	// Utils ==================================================================
+
 	private List<String> getStrings(WhileStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("While");
@@ -102,20 +118,6 @@ public class TreePrinter {
 	private List<String> getStrings(StatementList node) {
 		return getStrings("statementList", node);
 	}
-
-	private List<String> getStrings(String name, StatementList node) {
-		final List<String> strings = new ArrayList<>();
-		strings.add(name);
-		final List<? extends Statement> statements = node.getStatements();
-		for (int i = 0, size = statements.size(); i < size; i++) {
-			final Statement statement = statements.get(i);
-			append(getStrings(statement), i < size - 1, strings);
-		}
-		return strings;
-	}
-
-	// Utils ==================================================================
-
 	private List<String> getStrings(DeclarationList node) {
 		final List<String> strings = new ArrayList<>();
 		final List<Declaration> declarations = node.getDeclarations();
@@ -128,11 +130,6 @@ public class TreePrinter {
 
 	private List<String> getStrings(Declaration declaration) {
 		return declaration.visit(new DeclarationVisitor<>() {
-			@Override
-			public List<String> visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-				return getStrings(node.node);
-			}
-
 			@Override
 			public List<String> visitFunctionDeclaration(FuncDeclaration node) {
 				final StringBuilder buffer = new StringBuilder();

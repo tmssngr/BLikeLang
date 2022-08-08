@@ -58,14 +58,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 		return declarationList;
 	}
 
-	@Nullable
-	@Override
-	public Node visitGlobalVarDeclaration(BLikeLangParser.GlobalVarDeclarationContext ctx) {
-		final VarDeclaration node = (VarDeclaration) visit(ctx.varDeclaration());
-		declarationList.add(new GlobalVarDeclaration(node));
-		return null;
-	}
-
 	@Override
 	public FuncDeclaration visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) {
 		return visitFunctionDeclaration(ctx.functionDeclaration());

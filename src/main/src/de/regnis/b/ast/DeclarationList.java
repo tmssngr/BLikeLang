@@ -35,13 +35,7 @@ public final class DeclarationList extends Node {
 	@Nullable
 	public FuncDeclaration getFunction(String name) {
 		for (Declaration declaration : declarations) {
-			final FuncDeclaration found = declaration.visit(new DeclarationVisitor<FuncDeclaration>() {
-				@Nullable
-				@Override
-				public FuncDeclaration visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return null;
-				}
-
+			final FuncDeclaration found = declaration.visit(new DeclarationVisitor<>() {
 				@Nullable
 				@Override
 				public FuncDeclaration visitFunctionDeclaration(FuncDeclaration node) {

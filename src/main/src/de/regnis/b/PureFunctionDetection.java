@@ -44,14 +44,6 @@ public final class PureFunctionDetection {
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					if (!globalVariables.add(node.node.name)) {
-						throw new IllegalStateException("Duplicate global variable " + node.node.name);
-					}
-					return node;
-				}
-
-				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					if (functionCalledByFunctions.put(node.name, new HashSet<>()) != null) {
 						throw new IllegalStateException("Duplicate function " + node.name);
@@ -65,11 +57,6 @@ public final class PureFunctionDetection {
 	private void detectNonPureFunctions(@NotNull DeclarationList root) {
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Object visitGlobalVarDeclaration(GlobalVarDeclaration node) {
-					return node;
-				}
-
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					currentFunction = node.name;
