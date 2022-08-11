@@ -111,6 +111,10 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	public Node visitBlockStatement(BLikeLangParser.BlockStatementContext ctx) {
 		final StatementList statementList = new StatementList();
 		for (BLikeLangParser.StatementContext statementCtx : ctx.statement()) {
+			if (statementCtx instanceof BLikeLangParser.EmptyStatementContext) {
+				continue;
+			}
+
 			final Statement statement = (Statement) visit(statementCtx);
 			Objects.requireNonNull(statement);
 			statementList.add(statement);
@@ -206,6 +210,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	@Override
 	public Node visitBreakStatement(BLikeLangParser.BreakStatementContext ctx) {
 		return new BreakStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+	}
+
+	@Override
+	public Node visitEmptyStatement(BLikeLangParser.EmptyStatementContext ctx) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

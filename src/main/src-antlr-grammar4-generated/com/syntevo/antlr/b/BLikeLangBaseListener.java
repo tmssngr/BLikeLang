@@ -184,6 +184,18 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterEmptyStatement(BLikeLangParser.EmptyStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEmptyStatement(BLikeLangParser.EmptyStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInferVarDeclaration(BLikeLangParser.InferVarDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}

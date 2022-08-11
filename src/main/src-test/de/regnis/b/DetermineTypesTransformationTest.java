@@ -259,7 +259,7 @@ public final class DetermineTypesTransformationTest {
 		                              Messages.warningIgnoredReturnValue(3, 2, "one", BasicTypes.INT16) + "\n" +
 				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
 		                              """
-				                              int one() return 1;
+				                              int one() return 1
 				                              int zero() {
 				                                one();
 				                                return 0;
@@ -274,7 +274,7 @@ public final class DetermineTypesTransformationTest {
 				                              Messages.warningUnusedFunction(1, 4, "twice") + "\n" +
 				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
 		                              """
-				                              int twice(int a, int b) return a * 2;
+				                              int twice(int a, int b) return a * 2
 				                              int zero() {
 				                              var a = 0;
 				                              return a;
@@ -289,7 +289,7 @@ public final class DetermineTypesTransformationTest {
 		                              Messages.warningUnusedParameter(1, 21, "b") + "\n" +
 				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
 		                              """
-				                              int twice(int a, int b) return a * 2;
+				                              int twice(int a, int b) return a * 2
 				                              int zero() {
 				                                var b = 1000;
 				                                {
