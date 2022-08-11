@@ -17,14 +17,14 @@ public class BLikeLangLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		Comma=1, End=2, Plus=3, Minus=4, Multiply=5, Divide=6, Modulo=7, ShiftL=8, 
-		ShiftR=9, Lt=10, Le=11, Eq=12, Ge=13, Gt=14, Ne=15, BitAnd=16, BitOr=17, 
-		BitXor=18, Assign=19, AndAssign=20, OrAssign=21, XorAssign=22, PlusAssign=23, 
-		MinusAssign=24, MultiplyAssign=25, DivideAssign=26, ModuloAssign=27, ShiftLAssign=28, 
-		ShiftRAssign=29, ParenOpen=30, ParenClose=31, CurlyOpen=32, CurlyClose=33, 
-		Break=34, Else=35, If=36, Return=37, Var=38, While=39, CharLiteral=40, 
-		BooleanLiteral=41, Number=42, Identifier=43, Whitespace=44, NL=45, LineComment=46, 
-		BlockComment=47;
+		Comma=1, Semicolon=2, Plus=3, Minus=4, Multiply=5, Divide=6, Modulo=7, 
+		ShiftL=8, ShiftR=9, Lt=10, Le=11, Eq=12, Ge=13, Gt=14, Ne=15, BitAnd=16, 
+		BitOr=17, BitXor=18, Assign=19, AndAssign=20, OrAssign=21, XorAssign=22, 
+		PlusAssign=23, MinusAssign=24, MultiplyAssign=25, DivideAssign=26, ModuloAssign=27, 
+		ShiftLAssign=28, ShiftRAssign=29, ParenOpen=30, ParenClose=31, CurlyOpen=32, 
+		CurlyClose=33, Break=34, Else=35, If=36, Return=37, Var=38, While=39, 
+		CharLiteral=40, BooleanLiteral=41, Number=42, Identifier=43, Whitespace=44, 
+		NL=45, LineComment=46, BlockComment=47;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -35,14 +35,14 @@ public class BLikeLangLexer extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"Comma", "End", "Plus", "Minus", "Multiply", "Divide", "Modulo", "ShiftL", 
-			"ShiftR", "Lt", "Le", "Eq", "Ge", "Gt", "Ne", "BitAnd", "BitOr", "BitXor", 
-			"Assign", "AndAssign", "OrAssign", "XorAssign", "PlusAssign", "MinusAssign", 
-			"MultiplyAssign", "DivideAssign", "ModuloAssign", "ShiftLAssign", "ShiftRAssign", 
-			"ParenOpen", "ParenClose", "CurlyOpen", "CurlyClose", "Break", "Else", 
-			"If", "Return", "Var", "While", "SingleQuote", "Char", "CharLiteral", 
-			"BooleanLiteral", "Number", "Identifier", "Whitespace", "NL", "LineComment", 
-			"BlockComment"
+			"Comma", "Semicolon", "Plus", "Minus", "Multiply", "Divide", "Modulo", 
+			"ShiftL", "ShiftR", "Lt", "Le", "Eq", "Ge", "Gt", "Ne", "BitAnd", "BitOr", 
+			"BitXor", "Assign", "AndAssign", "OrAssign", "XorAssign", "PlusAssign", 
+			"MinusAssign", "MultiplyAssign", "DivideAssign", "ModuloAssign", "ShiftLAssign", 
+			"ShiftRAssign", "ParenOpen", "ParenClose", "CurlyOpen", "CurlyClose", 
+			"Break", "Else", "If", "Return", "Var", "While", "SingleQuote", "Char", 
+			"CharLiteral", "BooleanLiteral", "Number", "Identifier", "Whitespace", 
+			"NL", "LineComment", "BlockComment"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -59,7 +59,7 @@ public class BLikeLangLexer extends Lexer {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "Comma", "End", "Plus", "Minus", "Multiply", "Divide", "Modulo", 
+			null, "Comma", "Semicolon", "Plus", "Minus", "Multiply", "Divide", "Modulo", 
 			"ShiftL", "ShiftR", "Lt", "Le", "Eq", "Ge", "Gt", "Ne", "BitAnd", "BitOr", 
 			"BitXor", "Assign", "AndAssign", "OrAssign", "XorAssign", "PlusAssign", 
 			"MinusAssign", "MultiplyAssign", "DivideAssign", "ModuloAssign", "ShiftLAssign", 

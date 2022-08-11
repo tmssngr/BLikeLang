@@ -152,10 +152,10 @@ public class AstFactoryTest {
 				                   +- return
 				                      +- read var a
 				             """, TreePrinter.print(AstFactory.parseString("""
-						                                                           int twice(int a) return a * 2;
+						                                                           int twice(int a) return a * 2
 						                                                           int zero() {
-						                                                             var a = 0;
-						                                                             return a;
+						                                                             var a = 0
+						                                                             return a
 						                                                           }""")));
 		assertEquals("""
 				             +- void test(int a)
