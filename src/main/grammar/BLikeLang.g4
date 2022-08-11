@@ -6,25 +6,26 @@ declarations: declaration* ;
 declaration: functionDeclaration #funcDeclaration
            ;
 
-functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement;
+functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement Semicolon?;
 parameterDeclarations: parameterDeclaration?
                      | parameterDeclaration (Comma parameterDeclaration)+;
 parameterDeclaration: type=Identifier name=Identifier;
 
 statement: varDeclaration                                                   #localVarDeclaration
-         | var=Identifier operator=(Assign|AndAssign|OrAssign|XorAssign|PlusAssign|MinusAssign|MultiplyAssign|DivideAssign|ModuloAssign|ShiftLAssign|ShiftRAssign) expression End  #assignStatement
-         | func=Identifier ParenOpen functionCallParameters ParenClose End  #callStatement
+         | var=Identifier operator=(Assign|AndAssign|OrAssign|XorAssign|PlusAssign|MinusAssign|MultiplyAssign|DivideAssign|ModuloAssign|ShiftLAssign|ShiftRAssign) expression  #assignStatement
+         | func=Identifier ParenOpen functionCallParameters ParenClose      #callStatement
          | CurlyOpen statement* CurlyClose                                  #blockStatement
-         | Return expression? End                                           #returnStatement
+         | Return expression?                                               #returnStatement
          | If expression
              trueStatement=statement
            (Else
              falseStatement=statement)?                                     #ifStatement
          | While expression statement                                       #whileStatement
-         | Break End                                                        #breakStatement
+         | Break                                                            #breakStatement
+         | Semicolon                                                        #emptyStatement
          ;
-varDeclaration: Var             var=Identifier Assign expression End #inferVarDeclaration
-              | type=Identifier var=Identifier Assign expression End #typeVarDeclaration
+varDeclaration: Var             var=Identifier Assign expression  #inferVarDeclaration
+              | type=Identifier var=Identifier Assign expression  #typeVarDeclaration
               ;
 subexpr: Number                                                             #numberLiteral
        | CharLiteral                                                        #charLiteral
@@ -44,8 +45,8 @@ functionCallParameters: expression?
                       | expression (Comma expression)+
                       ;
 
-Comma : ',';
-End   : ';';
+Comma    : ',';
+Semicolon: ';';
 
 Plus    : '+';
 Minus   : '-';
