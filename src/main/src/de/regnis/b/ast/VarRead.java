@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class VarRead extends Expression {
+public final class VarRead extends SimpleExpression {
 
 	// Fields =================================================================
 
