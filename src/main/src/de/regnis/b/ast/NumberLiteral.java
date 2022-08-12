@@ -3,7 +3,7 @@ package de.regnis.b.ast;
 /**
  * @author Thomas Singer
  */
-public final class NumberLiteral extends Expression {
+public final class NumberLiteral extends SimpleExpression {
 
 	// Constants ==============================================================
 
