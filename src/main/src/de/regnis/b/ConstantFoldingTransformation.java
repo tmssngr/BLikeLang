@@ -17,107 +17,7 @@ public final class ConstantFoldingTransformation {
 		return transformation.handleDeclarationList(root);
 	}
 
-	// Setup ==================================================================
-
-	private ConstantFoldingTransformation() {
-	}
-
-	// Utils ==================================================================
-
-	private DeclarationList handleDeclarationList(@NotNull DeclarationList declarationList) {
-		final DeclarationList newDeclarationList = new DeclarationList();
-
-		for (Declaration declaration : declarationList.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-					final StatementList newStatementList = handleStatementList(node.statementList);
-					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
-				}
-			});
-			newDeclarationList.add(newDeclaration);
-		}
-		return newDeclarationList;
-	}
-
-	@NotNull
-	private StatementList handleStatementList(@NotNull StatementList statementList) {
-		final StatementList newStatementList = new StatementList();
-
-		for (Statement statement : statementList.getStatements()) {
-			final Statement newStatement = statement.visit(new StatementVisitor<>() {
-				@Override
-				public Statement visitAssignment(Assignment node) {
-					final Expression expression = handleExpression(node.expression);
-					return new Assignment(node.operation, node.name, expression, node.line, node.column);
-				}
-
-				@Override
-				public Statement visitStatementList(StatementList node) {
-					return handleStatementList(node);
-				}
-
-				@Override
-				public Statement visitLocalVarDeclaration(VarDeclaration node) {
-					final Expression expression = handleExpression(node.expression);
-					return node.derive(expression);
-				}
-
-				@Override
-				public Statement visitCall(CallStatement node) {
-					return node;
-				}
-
-				@Override
-				public Statement visitReturn(ReturnStatement node) {
-					return node;
-				}
-
-				@Override
-				public Statement visitIf(IfStatement node) {
-					return node;
-				}
-
-				@Override
-				public Statement visitWhile(WhileStatement node) {
-					return node;
-				}
-
-				@Override
-				public Statement visitBreak(BreakStatement node) {
-					return node;
-				}
-			});
-			newStatementList.add(newStatement);
-		}
-		return newStatementList;
-	}
-
-	private Expression handleExpression(Expression expression) {
-		return expression.visit(new ExpressionVisitor<>() {
-			@Override
-			public Expression visitBinary(BinaryExpression node) {
-				return handleBinary(node);
-			}
-
-			@Override
-			public Expression visitFunctionCall(FuncCall node) {
-				return node;
-			}
-
-			@Override
-			public Expression visitNumber(NumberLiteral node) {
-				return node;
-			}
-
-			@Override
-			public Expression visitVarRead(VarRead node) {
-				return node;
-			}
-		});
-	}
-
-	private Expression handleBinary(BinaryExpression node) {
+	public static Expression simplifyBinaryExpression(BinaryExpression node) {
 		if (node.left instanceof NumberLiteral
 				&& node.right instanceof NumberLiteral) {
 			final int left = ((NumberLiteral) node.left).value;
@@ -242,5 +142,105 @@ public final class ConstantFoldingTransformation {
 			}
 		}
 		return node;
+	}
+
+	// Setup ==================================================================
+
+	private ConstantFoldingTransformation() {
+	}
+
+	// Utils ==================================================================
+
+	private DeclarationList handleDeclarationList(@NotNull DeclarationList declarationList) {
+		final DeclarationList newDeclarationList = new DeclarationList();
+
+		for (Declaration declaration : declarationList.getDeclarations()) {
+			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+					final StatementList newStatementList = handleStatementList(node.statementList);
+					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+				}
+			});
+			newDeclarationList.add(newDeclaration);
+		}
+		return newDeclarationList;
+	}
+
+	@NotNull
+	private StatementList handleStatementList(@NotNull StatementList statementList) {
+		final StatementList newStatementList = new StatementList();
+
+		for (Statement statement : statementList.getStatements()) {
+			final Statement newStatement = statement.visit(new StatementVisitor<>() {
+				@Override
+				public Statement visitAssignment(Assignment node) {
+					final Expression expression = handleExpression(node.expression);
+					return new Assignment(node.operation, node.name, expression, node.line, node.column);
+				}
+
+				@Override
+				public Statement visitStatementList(StatementList node) {
+					return handleStatementList(node);
+				}
+
+				@Override
+				public Statement visitLocalVarDeclaration(VarDeclaration node) {
+					final Expression expression = handleExpression(node.expression);
+					return node.derive(expression);
+				}
+
+				@Override
+				public Statement visitCall(CallStatement node) {
+					return node;
+				}
+
+				@Override
+				public Statement visitReturn(ReturnStatement node) {
+					return node;
+				}
+
+				@Override
+				public Statement visitIf(IfStatement node) {
+					return node;
+				}
+
+				@Override
+				public Statement visitWhile(WhileStatement node) {
+					return node;
+				}
+
+				@Override
+				public Statement visitBreak(BreakStatement node) {
+					return node;
+				}
+			});
+			newStatementList.add(newStatement);
+		}
+		return newStatementList;
+	}
+
+	private Expression handleExpression(Expression expression) {
+		return expression.visit(new ExpressionVisitor<>() {
+			@Override
+			public Expression visitBinary(BinaryExpression node) {
+				return simplifyBinaryExpression(node);
+			}
+
+			@Override
+			public Expression visitFunctionCall(FuncCall node) {
+				return node;
+			}
+
+			@Override
+			public Expression visitNumber(NumberLiteral node) {
+				return node;
+			}
+
+			@Override
+			public Expression visitVarRead(VarRead node) {
+				return node;
+			}
+		});
 	}
 }

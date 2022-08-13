@@ -5,10 +5,12 @@ import de.regnis.b.DetermineTypesTransformation;
 import de.regnis.b.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
+import de.regnis.b.ast.SimpleExpression;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.Set;
 
 import static de.regnis.utils.Utils.notNull;
@@ -23,149 +25,62 @@ public class StaticSingleAssignmentFactoryTest {
 
 	@Test
 	public void testSimple() {
-		test("""
-				     void main() {
-				       int a = 1;
-				       int b = 2;
-				       a = a + b;
-				       b = 1;
-				       int c = a;
-				       a = b + c;
-				     }""",
-		     "main",
-		     """
-				     main_start:
-				         v0 := 1
-				         v1 := 2
-				         v0 = v0 + v1
-				         v1 = 1
-				         v2 := v0
-				         v0 = v1 + v2
-				     main_exit:
-				         return
-				     """,
-		     """
-				     main_start:
-				         v0_0 := 1
-				         v1_0 := 2
-				         v0_1 := v0_0 + v1_0
-				         v1_1 := 1
-				         v2_0 := v0_1
-				         v0_2 := v1_1 + v2_0
-				     main_exit:
-				         return
-				     """);
+		final ControlFlowGraph graph = test("""
+				                                    void print(int a) {
+				                                    }
+				                                    void main() {
+				                                      int a = 1;
+				                                      int b = 2;
+				                                      a = a + b;
+				                                      b = 1;
+				                                      int c = a;
+				                                      a = b + c;
+				                                      print(a)
+				                                    }""",
+		                                    "main",
+		                                    """
+				                                    main_start:
+				                                        v0 := 1
+				                                        v1 := 2
+				                                        v0 = v0 + v1
+				                                        v1 = 1
+				                                        v2 := v0
+				                                        v0 = v1 + v2
+				                                        print(v0)
+				                                    main_exit:
+				                                        return
+				                                    """,
+		                                    """
+				                                    main_start:
+				                                        v0_0 := 1
+				                                        v1_0 := 2
+				                                        v0_1 := v0_0 + v1_0
+				                                        v1_1 := 1
+				                                        v2_0 := v0_1
+				                                        v0_2 := v1_1 + v2_0
+				                                        print(v0_2)
+				                                    main_exit:
+				                                        return
+				                                    """);
+		while (true) {
+			final Map<String, SimpleExpression> constants = SsaConstantDetection.detectConstants(graph);
+			if (constants.isEmpty()) {
+				break;
+			}
+
+			SsaSearchAndReplace.replace(graph, constants);
+		}
+
+		assertEquals("""
+				             main_start:
+				                 print(4)
+				             main_exit:
+				                 return
+				             """, toString(graph));
 	}
 
 	@Test
-	public void testIf() {
-		test("""
-				     void main() {
-				       int a = 1;
-				       int b = 2;
-				       if (a < b) {
-				         a = b;
-				       }
-				       a += 1;
-				     }""",
-		     "main",
-		     """
-				     main_start:
-				         v0 := 1
-				         v1 := 2
-				     main_if_1:
-				         if v0 < v1
-				         if ! goto main_else_1
-				     main_then_1:
-				         v0 = v1
-				     main_after_if_1:
-				         v0 = v0 + 1
-				         goto main_exit
-
-				     main_else_1:
-				         goto main_after_if_1
-
-				     main_exit:
-				         return
-				     """,
-		     """
-				     main_start:
-				         v0_0 := 1
-				         v1_0 := 2
-				     main_if_1:
-				         if v0_0 < v1_0
-				         if ! goto main_else_1
-				     main_then_1:
-				         v0_1 := v1_0
-				     main_after_if_1:
-				         v0_2 := phi (v0_0, v0_1)
-				         v0_3 := v0_2 + 1
-				         goto main_exit
-
-				     main_else_1:
-				         goto main_after_if_1
-
-				     main_exit:
-				         return
-				     """);
-
-		test("""
-				     int test(int a) {
-				       int b = a;
-				       if (a > 10) {
-				         b = 0;
-				         a -= 1;
-				       }
-				       a += 2;
-				       return b;
-				     }
-				     void main() {
-				       int result = test(10);
-				     }""",
-		     "test",
-		     """
-				     test_start:
-				         v0 := p0
-				     test_if_1:
-				         if p0 > 10
-				         if ! goto test_else_1
-				     test_then_1:
-				         v0 = 0
-				         p0 = p0 - 1
-				     test_after_if_1:
-				         p0 = p0 + 2
-				         result = v0
-				         goto test_exit
-
-				     test_else_1:
-				         goto test_after_if_1
-
-				     test_exit:
-				         return
-				     """,
-		     """
-				     test_start:
-				         v0_0 := p0_0
-				     test_if_1:
-				         if p0_0 > 10
-				         if ! goto test_else_1
-				     test_then_1:
-				         v0_1 := 0
-				         p0_1 := p0_0 - 1
-				     test_after_if_1:
-				         p0_2 := phi (p0_0, p0_1)
-				         v0_2 := phi (v0_0, v0_1)
-				         p0_3 := p0_2 + 2
-				         result := v0_2
-				         goto test_exit
-
-				     test_else_1:
-				         goto test_after_if_1
-
-				     test_exit:
-				         return
-				     """);
-
+	public void testIf1() {
 		final ControlFlowGraph graph = test("""
 				                                    int test(int a) {
 				                                      int b = a;
@@ -272,6 +187,119 @@ public class StaticSingleAssignmentFactoryTest {
 				             test_exit:
 				                 return
 				             """, toString(graph));
+	}
+
+	@Test
+	public void testIf2() {
+		test("""
+				     int test(int a) {
+				       int b = a;
+				       if (a > 10) {
+				         b = 0;
+				         a -= 1;
+				       }
+				       a += 2;
+				       return b;
+				     }
+				     void main() {
+				       int result = test(10);
+				     }""",
+		     "test",
+		     """
+				     test_start:
+				         v0 := p0
+				     test_if_1:
+				         if p0 > 10
+				         if ! goto test_else_1
+				     test_then_1:
+				         v0 = 0
+				         p0 = p0 - 1
+				     test_after_if_1:
+				         p0 = p0 + 2
+				         result = v0
+				         goto test_exit
+
+				     test_else_1:
+				         goto test_after_if_1
+
+				     test_exit:
+				         return
+				     """,
+		     """
+				     test_start:
+				         v0_0 := p0_0
+				     test_if_1:
+				         if p0_0 > 10
+				         if ! goto test_else_1
+				     test_then_1:
+				         v0_1 := 0
+				         p0_1 := p0_0 - 1
+				     test_after_if_1:
+				         p0_2 := phi (p0_0, p0_1)
+				         v0_2 := phi (v0_0, v0_1)
+				         p0_3 := p0_2 + 2
+				         result := v0_2
+				         goto test_exit
+
+				     test_else_1:
+				         goto test_after_if_1
+
+				     test_exit:
+				         return
+				     """);
+	}
+
+	@Test
+	public void testIf3() {
+		test("""
+				     void main() {
+				       int a = 1;
+				       int b = 2;
+				       if (a < b) {
+				         a = b;
+				       }
+				       a += 1;
+				     }""",
+		     "main",
+		     """
+				     main_start:
+				         v0 := 1
+				         v1 := 2
+				     main_if_1:
+				         if v0 < v1
+				         if ! goto main_else_1
+				     main_then_1:
+				         v0 = v1
+				     main_after_if_1:
+				         v0 = v0 + 1
+				         goto main_exit
+
+				     main_else_1:
+				         goto main_after_if_1
+
+				     main_exit:
+				         return
+				     """,
+		     """
+				     main_start:
+				         v0_0 := 1
+				         v1_0 := 2
+				     main_if_1:
+				         if v0_0 < v1_0
+				         if ! goto main_else_1
+				     main_then_1:
+				         v0_1 := v1_0
+				     main_after_if_1:
+				         v0_2 := phi (v0_0, v0_1)
+				         v0_3 := v0_2 + 1
+				         goto main_exit
+
+				     main_else_1:
+				         goto main_after_if_1
+
+				     main_exit:
+				         return
+				     """);
 	}
 
 	@Test
