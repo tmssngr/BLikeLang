@@ -15,7 +15,7 @@ public class ControlFlowGraphPrinter {
 
 	// Constants ==============================================================
 
-	private static final String INDENTATION = "    ";
+	public static final String INDENTATION = "    ";
 
 	// Static =================================================================
 
