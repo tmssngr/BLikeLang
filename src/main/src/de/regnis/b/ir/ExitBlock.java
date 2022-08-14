@@ -9,8 +9,8 @@ public final class ExitBlock extends AbstractBlock {
 
 	// Setup ==================================================================
 
-	public ExitBlock() {
-		super("exit", null);
+	public ExitBlock(String prefix) {
+		super(prefix + "exit", null);
 	}
 
 	// Implemented ============================================================

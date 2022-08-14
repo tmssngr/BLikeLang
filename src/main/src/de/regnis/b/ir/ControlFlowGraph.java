@@ -29,9 +29,11 @@ public final class ControlFlowGraph {
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
 		parameters = declaration.parameters;
 
-		exitBlock = new ExitBlock();
+		final String prefix = declaration.name + "_";
 
-		final BasicBlock firstBlock = new BasicBlock();
+		exitBlock = new ExitBlock(prefix);
+
+		final BasicBlock firstBlock = new BasicBlock(prefix);
 
 		final Supplier<Integer> labelIndexSupplier = new Supplier<>() {
 			private int index;
@@ -42,7 +44,7 @@ public final class ControlFlowGraph {
 				return index;
 			}
 		};
-		final BasicBlock lastBlock = new Builder(firstBlock, exitBlock, null, labelIndexSupplier)
+		final BasicBlock lastBlock = new Builder(firstBlock, exitBlock, null, prefix, labelIndexSupplier)
 				.processStatements(declaration.statementList);
 		if (lastBlock != null) {
 			exitBlock.addPrev(lastBlock);
@@ -109,14 +111,16 @@ public final class ControlFlowGraph {
 	private static final class Builder implements StatementVisitor<BasicBlock> {
 		private final ExitBlock exitBlock;
 		private final BasicBlock breakBlock;
+		private final String prefix;
 		private final Supplier<Integer> labelIndexSupplier;
 
 		private BasicBlock basicBlock;
 
-		private Builder(@NotNull BasicBlock basicBlock, @NotNull ExitBlock exitBlock, @Nullable BasicBlock breakBlock, @NotNull Supplier<Integer> labelIndexSupplier) {
+		private Builder(@NotNull BasicBlock basicBlock, @NotNull ExitBlock exitBlock, @Nullable BasicBlock breakBlock, @NotNull String prefix, @NotNull Supplier<Integer> labelIndexSupplier) {
 			this.basicBlock = basicBlock;
 			this.exitBlock = exitBlock;
 			this.breakBlock = breakBlock;
+			this.prefix = prefix;
 			this.labelIndexSupplier = labelIndexSupplier;
 		}
 
@@ -142,15 +146,15 @@ public final class ControlFlowGraph {
 		@Override
 		public BasicBlock visitIf(IfStatement node) {
 			final Integer labelIndex = labelIndexSupplier.get();
-			final IfBlock ifBlock = new IfBlock(basicBlock, node, labelIndex);
+			final IfBlock ifBlock = new IfBlock(basicBlock, node, prefix, labelIndex);
 
-			final BasicBlock trueBlock = new Builder((BasicBlock) ifBlock.getTrueBlock(), exitBlock, breakBlock, labelIndexSupplier)
+			final BasicBlock trueBlock = new Builder((BasicBlock) ifBlock.getTrueBlock(), exitBlock, breakBlock, prefix, labelIndexSupplier)
 					.processStatements(node.trueStatements);
 
-			final BasicBlock falseBlock = new Builder((BasicBlock) ifBlock.getFalseBlock(), exitBlock, breakBlock, labelIndexSupplier)
+			final BasicBlock falseBlock = new Builder((BasicBlock) ifBlock.getFalseBlock(), exitBlock, breakBlock, prefix, labelIndexSupplier)
 					.processStatements(node.falseStatements);
 
-			final String nextLabel = "after_if_" + labelIndex;
+			final String nextLabel = prefix + "after_if_" + labelIndex;
 			if (trueBlock == null) {
 				if (falseBlock == null) {
 					return null;
@@ -168,10 +172,10 @@ public final class ControlFlowGraph {
 
 		@Override
 		public BasicBlock visitWhile(WhileStatement node) {
-			final WhileBlock whileBlock = new WhileBlock(basicBlock, node, labelIndexSupplier.get());
+			final WhileBlock whileBlock = new WhileBlock(basicBlock, node, prefix, labelIndexSupplier.get());
 			final BasicBlock leaveBlock = (BasicBlock) whileBlock.getLeaveBlock();
 
-			final BasicBlock lastInnerBlock = new Builder((BasicBlock) whileBlock.getInnerBlock(), exitBlock, leaveBlock, labelIndexSupplier)
+			final BasicBlock lastInnerBlock = new Builder((BasicBlock) whileBlock.getInnerBlock(), exitBlock, leaveBlock, prefix, labelIndexSupplier)
 					.processStatements(node.statements);
 
 			if (lastInnerBlock != null) {
