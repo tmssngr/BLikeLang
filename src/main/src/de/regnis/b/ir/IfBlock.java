@@ -1,6 +1,5 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.ast.Expression;
 import de.regnis.b.ast.IfStatement;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
@@ -11,16 +10,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class IfBlock extends ControlFlowBlock {
 
-	// Fields =================================================================
-
-	private final IfStatement node;
-
 	// Setup ==================================================================
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public IfBlock(@NotNull BasicBlock prevBlock, @NotNull IfStatement node, @NotNull Integer labelIndex) {
-		super("if_" + labelIndex, prevBlock);
-		this.node = node;
+		super(node.expression, "if_" + labelIndex, prevBlock);
 
 		// they might get replaced by direct links during compacting
 		new BasicBlock("then_" + labelIndex, this);
@@ -34,12 +28,18 @@ public final class IfBlock extends ControlFlowBlock {
 		visitor.visitIf(this);
 	}
 
-	// Accessing ==============================================================
+	@Override
+	public StringOutput print(String indentation, StringOutput output) {
+		super.print(indentation, output);
 
-	@NotNull
-	public Expression getCondition() {
-		return node.expression;
+		output.print(indentation);
+		output.print("if ");
+		CodePrinter.print(getExpression(), output);
+		output.println();
+		return output;
 	}
+
+	// Accessing ==============================================================
 
 	@NotNull
 	public AbstractBlock getTrueBlock() {
@@ -49,12 +49,5 @@ public final class IfBlock extends ControlFlowBlock {
 	@NotNull
 	public AbstractBlock getFalseBlock() {
 		return getNextBlocks().get(1);
-	}
-
-	public void print(String indentation, StringOutput output) {
-		output.print(indentation);
-		output.print("if ");
-		CodePrinter.print(node.expression, output);
-		output.println();
 	}
 }

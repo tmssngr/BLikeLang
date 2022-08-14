@@ -119,12 +119,12 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public void visitIf(IfBlock block) {
-				detectRequiredVars(block.getCondition(), live);
+				detectRequiredVars(block.getExpression(), live);
 			}
 
 			@Override
 			public void visitWhile(WhileBlock block) {
-				detectRequiredVars(block.getCondition(), live);
+				detectRequiredVars(block.getExpression(), live);
 			}
 
 			@Override
