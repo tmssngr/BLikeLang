@@ -94,24 +94,24 @@ public class ControlFlowGraphTest {
 		final ControlFlowGraph graph = new ControlFlowGraph(printHex4);
 
 		final String expectedOutput = """
-				start:
+				printHex4_start:
 				    p0 = p0 & 15
 				    v0 := 0
-				if_1:
+				printHex4_if_1:
 				    if p0 < 10
-				    if ! goto else_1
-				then_1:
+				    if ! goto printHex4_else_1
+				printHex4_then_1:
 				    v0 = p0 + 48
-				after_if_1:
+				printHex4_after_if_1:
 				    print(v0)
-				    goto exit
+				    goto printHex4_exit
 
-				else_1:
+				printHex4_else_1:
 				    $1 := p0 - 10
 				    v0 = $1 + 65
-				    goto after_if_1
+				    goto printHex4_after_if_1
 
-				exit:
+				printHex4_exit:
 				    return
 				""";
 		assertEquals(expectedOutput, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
@@ -165,35 +165,35 @@ public class ControlFlowGraphTest {
 		assertEquals(List.of(), exitBlock.getNextBlocks());
 
 		assertEquals("""
-				             start:
+				             printHex4_start:
 				                 // [p0]
 				                 p0 = p0 & 15
 				                 // [p0]
 				                 v0 := 0
 				                 // [p0]
-				             if_1:
+				             printHex4_if_1:
 				                 // [p0]
 				                 if p0 < 10
-				                 if ! goto else_1
-				             then_1:
+				                 if ! goto printHex4_else_1
+				             printHex4_then_1:
 				                 // [p0]
 				                 v0 = p0 + 48
 				                 // [v0]
-				             after_if_1:
+				             printHex4_after_if_1:
 				                 // [v0]
 				                 print(v0)
 				                 // []
-				                 goto exit
+				                 goto printHex4_exit
 
-				             else_1:
+				             printHex4_else_1:
 				                 // [p0]
 				                 $1 := p0 - 10
 				                 // [$1]
 				                 v0 = $1 + 65
 				                 // [v0]
-				                 goto after_if_1
+				                 goto printHex4_after_if_1
 
-				             exit:
+				             printHex4_exit:
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
@@ -269,73 +269,73 @@ public class ControlFlowGraphTest {
 		final FuncDeclaration main = Utils.notNull(root.getFunction("main"));
 		final ControlFlowGraph graph = new ControlFlowGraph(main);
 		assertEquals("""
-				             start:
+				             main_start:
 				                 v0 := rnd()
-				             while_1:
+				             main_while_1:
 				                 while 1
-				             do_1:
+				             main_do_1:
 				                 v1 := getNumber()
-				             if_2:
+				             main_if_2:
 				                 if v1 == v0
-				                 if ! goto else_2
-				             then_2:
-				             after_while_1:
-				                 goto exit
+				                 if ! goto main_else_2
+				             main_then_2:
+				             main_after_while_1:
+				                 goto main_exit
 
-				             else_2:
-				             after_if_2:
-				             if_3:
+				             main_else_2:
+				             main_after_if_2:
+				             main_if_3:
 				                 if v1 < v0
-				                 if ! goto else_3
-				             then_3:
+				                 if ! goto main_else_3
+				             main_then_3:
 				                 print(60)
-				             after_if_3:
-				                 goto while_1
+				             main_after_if_3:
+				                 goto main_while_1
 
-				             else_3:
+				             main_else_3:
 				                 print(62)
-				                 goto after_if_3
+				                 goto main_after_if_3
 
-				             exit:
+				             main_exit:
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 		graph.compact();
 
 		assertEquals("""
-				             start:
+				             main_start:
 				                 // []
 				                 v0 := rnd()
 				                 // [v0]
-				             while_1:
+				             main_while_1:
 				                 // [v0]
 				                 while 1
-				             do_1:
+				             main_do_1:
 				                 // [v0]
 				                 v1 := getNumber()
 				                 // [v0, v1]
-				             if_2:
+				             main_if_2:
 				                 // [v0, v1]
 				                 if v1 == v0
-				                 if ! goto if_3
-				                 goto exit
+				                 if ! goto main_if_3
+				                 goto main_exit
 
-				             if_3:
+				             main_if_3:
 				                 // [v0, v1]
 				                 if v1 < v0
-				                 if ! goto else_3
-				             then_3:
+				                 if ! goto main_else_3
+				             main_then_3:
 				                 // [v0]
 				                 print(60)
 				                 // [v0]
-				                 goto while_1
+				                 goto main_while_1
 
-				             else_3:
+				             main_else_3:
 				                 // [v0]
 				                 print(62)
 				                 // [v0]
-				                 goto while_1
+				                 goto main_while_1
 
-				             exit:
+				             main_exit:
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
@@ -379,44 +379,44 @@ public class ControlFlowGraphTest {
 		graph.compact();
 
 		assertEquals("""
-				             start:
+				             main_start:
 				                 // []
 				                 v0 := 0
 				                 // [v0]
 				                 v1 := 0
 				                 // [v0, v1]
-				             while_1:
+				             main_while_1:
 				                 // [v0, v1]
 				                 while 1
-				             do_1:
+				             main_do_1:
 				                 // [v0, v1]
 				                 v2 := getInput()
 				                 // [v0, v1, v2]
-				             if_2:
+				             main_if_2:
 				                 // [v0, v1, v2]
 				                 if v2 == 0
-				                 if ! goto after_if_2
-				             if_3:
+				                 if ! goto main_after_if_2
+				             main_if_3:
 				                 // [v0, v1]
 				                 if v0 > 0
-				                 if ! goto exit
-				             then_3:
+				                 if ! goto main_exit
+				             main_then_3:
 				                 // [v0, v1]
 				                 $1 := v1 / v0
 				                 // [$1]
 				                 print($1)
 				                 // []
-				                 goto exit
+				                 goto main_exit
 				                              
-				             after_if_2:
+				             main_after_if_2:
 				                 // [v0, v1, v2]
 				                 v0 = v0 + 1
 				                 // [v0, v1, v2]
 				                 v1 = v1 + v2
 				                 // [v0, v1]
-				                 goto while_1
+				                 goto main_while_1
 				                              
-				             exit:
+				             main_exit:
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
@@ -584,7 +584,7 @@ public class ControlFlowGraphTest {
 		graph.compact();
 
 		assertEquals("""
-				             start:
+				             calculate_start:
 				                 // [p0, p1, p2]
 				                 v0 := p2 / 100
 				                 // [p0, p1, p2, v0]
@@ -608,23 +608,23 @@ public class ControlFlowGraphTest {
 				                 // [p0, p1, p2, v0, v2, v3]
 				                 v1 = p2 % 400
 				                 // [p0, p1, v0, v1, v2, v3]
-				             if_1:
+				             calculate_if_1:
 				                 // [p0, p1, v0, v1, v2, v3]
 				                 if v0 == 0
-				                 if ! goto if_2
-				             then_1:
+				                 if ! goto calculate_if_2
+				             calculate_then_1:
 				                 // [p0, p1, v1, v2, v3]
 				                 v3 = v3 + 1
 				                 // [p0, p1, v1, v2, v3]
-				             if_2:
+				             calculate_if_2:
 				                 // [p0, p1, v1, v2, v3]
 				                 if v1 == 0
-				                 if ! goto after_if_2
-				             then_2:
+				                 if ! goto calculate_after_if_2
+				             calculate_then_2:
 				                 // [p0, p1, v2, v3]
 				                 v3 = v3 - 1
 				                 // [p0, p1, v2, v3]
-				             after_if_2:
+				             calculate_after_if_2:
 				                 // [p0, p1, v2, v3]
 				                 v4 := -30
 				                 // [p0, p1, v2, v3, v4]
@@ -632,36 +632,36 @@ public class ControlFlowGraphTest {
 				                 // [p0, p1, v2, v3, v4, v5]
 				                 v6 := 0
 				                 // [p0, p1, v2, v3, v4, v5, v6]
-				             if_3:
+				             calculate_if_3:
 				                 // [p0, p1, v2, v3, v4, v5, v6]
 				                 if v3 > 0
-				                 if ! goto if_4
-				             then_3:
+				                 if ! goto calculate_if_4
+				             calculate_then_3:
 				                 // [p0, p1, v2, v4, v5]
 				                 v6 = 1
 				                 // [p0, p1, v2, v4, v5, v6]
-				             if_4:
+				             calculate_if_4:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 > 2
-				                 if ! goto if_5
-				             then_4:
+				                 if ! goto calculate_if_5
+				             calculate_then_4:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 $6 := v4 - 1
 				                 // [$6, p0, p1, v2, v5, v6]
 				                 v4 = $6 - v6
 				                 // [p0, p1, v2, v4, v5, v6]
-				             if_5:
+				             calculate_if_5:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 > 8
-				                 if ! goto while_6
-				             then_5:
+				                 if ! goto calculate_while_6
+				             calculate_then_5:
 				                 // [p0, p1, v2, v4, v6]
 				                 v5 = 2
 				                 // [p0, p1, v2, v4, v5, v6]
-				             while_6:
+				             calculate_while_6:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 while 1
-				             do_6:
+				             calculate_do_6:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 $7 := v4 + 30
 				                 // [$7, p0, p1, v2, v5, v6]
@@ -673,11 +673,11 @@ public class ControlFlowGraphTest {
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 p1 = p1 - 1
 				                 // [p0, p1, v2, v4, v5, v6]
-				             if_7:
+				             calculate_if_7:
 				                 // [p0, p1, v2, v4, v5, v6]
 				                 if p1 <= 0
-				                 if ! goto while_6
-				             after_while_6:
+				                 if ! goto calculate_while_6
+				             calculate_after_while_6:
 				                 // [p0, v2, v4, v6]
 				                 $10 := v4 + p0
 				                 // [$10, v2, v6]
@@ -689,7 +689,7 @@ public class ControlFlowGraphTest {
 				                 // [$13]
 				                 result = $13 % 7
 				                 // []
-				             exit:
+				             calculate_exit:
 				                 return
 				             """,
 		             ControlFlowGraphVarUsageDetector
