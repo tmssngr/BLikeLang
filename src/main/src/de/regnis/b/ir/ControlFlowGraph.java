@@ -13,8 +13,13 @@ import java.util.function.Supplier;
  */
 public final class ControlFlowGraph {
 
+	// Constants ==============================================================
+
+	public static final String RESULT = "result";
+
 	// Fields =================================================================
 
+	private final FuncDeclarationParameters parameters;
 	private final ExitBlock exitBlock;
 
 	private AbstractBlock firstBlock;
@@ -22,6 +27,8 @@ public final class ControlFlowGraph {
 	// Setup ==================================================================
 
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
+		parameters = declaration.parameters;
+
 		exitBlock = new ExitBlock();
 
 		final BasicBlock firstBlock = new BasicBlock();
@@ -47,6 +54,10 @@ public final class ControlFlowGraph {
 	}
 
 	// Accessing ==============================================================
+
+	public List<FuncDeclarationParameter> getParameters() {
+		return parameters.getParameters();
+	}
 
 	public AbstractBlock getFirstBlock() {
 		return firstBlock;
@@ -174,7 +185,7 @@ public final class ControlFlowGraph {
 		@Override
 		public BasicBlock visitReturn(ReturnStatement node) {
 			if (node.expression != null) {
-				basicBlock.add(new Assignment(Assignment.Op.assign, "result", node.expression));
+				basicBlock.add(new Assignment(Assignment.Op.assign, RESULT, node.expression));
 			}
 			exitBlock.addPrev(basicBlock);
 			return null;
