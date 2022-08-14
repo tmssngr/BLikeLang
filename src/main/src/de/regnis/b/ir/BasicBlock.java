@@ -11,8 +11,8 @@ public final class BasicBlock extends StatementsBlock {
 
 	// Setup ==================================================================
 
-	public BasicBlock() {
-		super("start", null);
+	public BasicBlock(String prefix) {
+		super(prefix + "start", null);
 	}
 
 	public BasicBlock(@NotNull String label, @NotNull ControlFlowBlock prev) {
