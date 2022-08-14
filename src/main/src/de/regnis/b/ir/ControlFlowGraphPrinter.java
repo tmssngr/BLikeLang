@@ -55,8 +55,7 @@ public class ControlFlowGraphPrinter {
 				printLabel(block);
 
 				print(block);
-				output.print(INDENTATION + "if ! goto " + block.getFalseBlock().label);
-				output.println();
+				printlnIndented("if ! goto " + block.getFalseBlock().label);
 				printGoto(block, block.getTrueBlock());
 			}
 
@@ -71,14 +70,12 @@ public class ControlFlowGraphPrinter {
 			public void visitExit(ExitBlock block) {
 				printLabel(block);
 
-				output.print(INDENTATION + "return");
-				output.println();
+				printlnIndented("return");
 			}
 
 			private void printGoto(AbstractBlock block, AbstractBlock next) {
 				if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
-					output.print(INDENTATION + "goto " + next.label);
-					output.println();
+					printlnIndented("goto " + next.label);
 					output.println();
 				}
 			}
@@ -94,6 +91,11 @@ public class ControlFlowGraphPrinter {
 		}
 
 		return output;
+	}
+
+	protected final void printlnIndented(String s) {
+		output.print(INDENTATION + s);
+		output.println();
 	}
 
 	protected void printBefore(String indentation, AbstractBlock block) {
