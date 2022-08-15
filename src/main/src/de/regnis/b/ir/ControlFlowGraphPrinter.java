@@ -40,7 +40,7 @@ public class ControlFlowGraphPrinter {
 
 	@NotNull
 	public final StringOutput print() {
-		final List<AbstractBlock> blocks = linearizeBlocks();
+		final List<AbstractBlock> blocks = CfgBlockLinearizer.linearize(graph);
 
 		final BlockVisitor visitor = new BlockVisitor() {
 			@Override
@@ -126,45 +126,5 @@ public class ControlFlowGraphPrinter {
 		printBefore(INDENTATION, block);
 
 		block.print(INDENTATION, output);
-	}
-
-	private List<AbstractBlock> linearizeBlocks() {
-		final List<AbstractBlock> blocks = new ArrayList<>();
-		linearizeBlocks(graph.getFirstBlock(), blocks);
-		blocks.add(graph.getExitBlock());
-		return blocks;
-	}
-
-	private static void linearizeBlocks(AbstractBlock block, List<AbstractBlock> blocks) {
-		if (blocks.contains(block)) {
-			return;
-		}
-
-		block.visit(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				blocks.add(block);
-
-				linearizeBlocks(block.getSingleNext(), blocks);
-			}
-
-			@Override
-			public void visitIf(IfBlock block) {
-				blocks.add(block);
-				linearizeBlocks(block.getTrueBlock(), blocks);
-				linearizeBlocks(block.getFalseBlock(), blocks);
-			}
-
-			@Override
-			public void visitWhile(WhileBlock block) {
-				blocks.add(block);
-				linearizeBlocks(block.getInnerBlock(), blocks);
-				linearizeBlocks(block.getLeaveBlock(), blocks);
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
-			}
-		});
 	}
 }
