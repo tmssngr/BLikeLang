@@ -1,6 +1,7 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
+import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,7 @@ public final class ControlFlowGraph {
 
 	private final FuncDeclarationParameters parameters;
 	private final ExitBlock exitBlock;
+	private final Type type;
 
 	private AbstractBlock firstBlock;
 
@@ -28,6 +30,7 @@ public final class ControlFlowGraph {
 
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
 		parameters = declaration.parameters;
+		type       = declaration.type;
 
 		final String prefix = declaration.name + "_";
 
@@ -59,6 +62,10 @@ public final class ControlFlowGraph {
 
 	public List<FuncDeclarationParameter> getParameters() {
 		return parameters.getParameters();
+	}
+
+	public Type getType() {
+		return type;
 	}
 
 	public AbstractBlock getFirstBlock() {
