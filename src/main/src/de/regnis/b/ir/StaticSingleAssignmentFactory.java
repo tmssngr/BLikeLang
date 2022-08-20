@@ -1,8 +1,10 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
+import de.regnis.utils.Tuple;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -24,6 +26,18 @@ public final class StaticSingleAssignmentFactory {
 		final StaticSingleAssignmentFactory ssaFactory = new StaticSingleAssignmentFactory(graph);
 		ssaFactory.transform();
 		ssaFactory.removeObsoletePhiFunctions();
+	}
+
+	@Nullable
+	public static Tuple<String, List<String>> getPhiFunction(SimpleStatement statement) {
+		if (statement instanceof VarDeclaration declaration
+				&& declaration.expression instanceof FuncCall call
+				&& call.name.equals(PHI)) {
+			final List<String> variants = Utils.convert(call.getParameters(), new ArrayList<>(),
+			                                           expression -> ((VarRead) expression).name);
+			return new Tuple<>(declaration.name, variants);
+		}
+		return null;
 	}
 
 	// Fields =================================================================
@@ -143,15 +157,14 @@ public final class StaticSingleAssignmentFactory {
 			}
 			final StatementsBlock statementsBlock = (StatementsBlock) block;
 			for (SimpleStatement statement : statementsBlock.getStatements()) {
-				if (!(statement instanceof VarDeclaration)) {
+				final Tuple<String, List<String>> phiFunction = getPhiFunction(statement);
+				if (phiFunction == null) {
 					continue;
 				}
 
-				final VarDeclaration declaration = (VarDeclaration) statement;
-				if (declaration.expression instanceof FuncCall call && call.name.equals(PHI) && call.getParameters().size() == 1) {
-					final Expression expression = call.getParameters().get(0);
-					final String var = ((VarRead) expression).name;
-					if (obsoletePhiVariantToPreviousVariant.put(declaration.name, new VarRead(var)) != null) {
+				if (phiFunction.second.size() == 1) {
+					final String var = phiFunction.second.get(0);
+					if (obsoletePhiVariantToPreviousVariant.put(phiFunction.first, new VarRead(var)) != null) {
 						throw new IllegalStateException();
 					}
 				}
@@ -285,7 +298,7 @@ public final class StaticSingleAssignmentFactory {
 
 		private PhiFunction(String originalName, String ssaName) {
 			this.originalName = originalName;
-			this.ssaName = ssaName;
+			this.ssaName      = ssaName;
 		}
 
 		@Override

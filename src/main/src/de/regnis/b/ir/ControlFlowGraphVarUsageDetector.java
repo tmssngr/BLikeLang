@@ -64,12 +64,17 @@ public final class ControlFlowGraphVarUsageDetector {
 	}
 
 	@NotNull
-	public Set<String> getVarsBefore(AbstractBlock block) {
+	public Set<String> getVarsBefore(@NotNull AbstractBlock block) {
 		return Collections.unmodifiableSet(usageMap.get(block).lifeBefore);
 	}
 
 	@NotNull
-	public Set<String> getVarsAfter(SimpleStatement statement) {
+	public Set<String> getVarsAfter(@NotNull AbstractBlock block) {
+		return Collections.unmodifiableSet(usageMap.get(block).lifeAfter);
+	}
+
+	@NotNull
+	public Set<String> getVarsAfter(@NotNull SimpleStatement statement) {
 		return Collections.unmodifiableSet(liveVars.get(statement));
 	}
 
