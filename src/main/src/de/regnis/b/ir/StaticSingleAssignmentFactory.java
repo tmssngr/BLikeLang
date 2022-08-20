@@ -16,7 +16,7 @@ public final class StaticSingleAssignmentFactory {
 
 	// Constants ==============================================================
 
-	public static final String PHI = "phi ";
+	private static final String PHI = "phi ";
 
 	// Static =================================================================
 
@@ -113,7 +113,7 @@ public final class StaticSingleAssignmentFactory {
 				}
 
 				final FuncCallParameters parameters = new FuncCallParameters();
-				for (String ssaSource : Utils.toSortedList(phiFunction.ssaSources)) {
+				for (String ssaSource : phiFunction.ssaSources) {
 					parameters.add(new VarRead(ssaSource));
 				}
 				statements.add(new VarDeclaration(phiFunction.ssaName, new FuncCall(PHI, parameters)));
@@ -281,7 +281,7 @@ public final class StaticSingleAssignmentFactory {
 	private static final class PhiFunction {
 		public final String originalName;
 		public final String ssaName;
-		private final Set<String> ssaSources = new HashSet<>();
+		private final Set<String> ssaSources = new LinkedHashSet<>();
 
 		private PhiFunction(String originalName, String ssaName) {
 			this.originalName = originalName;
@@ -293,7 +293,7 @@ public final class StaticSingleAssignmentFactory {
 			final StringBuilder buffer = new StringBuilder();
 			buffer.append(ssaName);
 			buffer.append(" = phi(");
-			Utils.appendCommaSeparated(Utils.toSortedList(ssaSources), buffer);
+			Utils.appendCommaSeparated(ssaSources, buffer);
 			buffer.append(")");
 			return buffer.toString();
 		}

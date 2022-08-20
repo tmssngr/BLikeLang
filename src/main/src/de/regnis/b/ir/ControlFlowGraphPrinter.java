@@ -5,7 +5,6 @@ import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -81,7 +80,7 @@ public class ControlFlowGraphPrinter {
 			}
 
 			private void printLabel(AbstractBlock block) {
-				output.print(block.label + ":");
+				output.print(getLabelText(block));
 				output.println();
 			}
 		};
@@ -91,6 +90,11 @@ public class ControlFlowGraphPrinter {
 		}
 
 		return output;
+	}
+
+	@NotNull
+	protected String getLabelText(AbstractBlock block) {
+		return block.label + ":";
 	}
 
 	protected final void printlnIndented(String s) {

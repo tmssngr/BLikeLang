@@ -8,10 +8,13 @@ import de.regnis.b.ast.FuncDeclaration;
 import de.regnis.b.ast.SimpleExpression;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import static de.regnis.utils.Utils.notNull;
 import static org.junit.Assert.assertEquals;
@@ -47,7 +50,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        v2 := v0
 				                                        v0 = v1 + v2
 				                                        print(v0)
-				                                    main_exit:
+				                                    main_exit:  // main_start
 				                                        return
 				                                    """,
 		                                    """
@@ -59,7 +62,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        v2_0 := v0_1
 				                                        v0_2 := v1_1 + v2_0
 				                                        print(v0_2)
-				                                    main_exit:
+				                                    main_exit:  // main_start
 				                                        return
 				                                    """);
 		while (true) {
@@ -74,7 +77,7 @@ public class StaticSingleAssignmentFactoryTest {
 		assertEquals("""
 				             main_start:
 				                 print(4)
-				             main_exit:
+				             main_exit:  // main_start
 				                 return
 				             """, toString(graph));
 	}
@@ -100,60 +103,60 @@ public class StaticSingleAssignmentFactoryTest {
 		                                    """
 				                                    test_start:
 				                                        v0 := p0
-				                                    test_if_1:
+				                                    test_if_1:  // test_start
 				                                        if p0 < 0
 				                                        if ! goto test_else_1
-				                                    test_then_1:
+				                                    test_then_1:  // test_if_1
 				                                        p0 = 0 - p0
-				                                    test_if_2:
+				                                    test_if_2:  // test_then_1
 				                                        if p0 % 2 == 1
 				                                        if ! goto test_else_2
-				                                    test_then_2:
+				                                    test_then_2:  // test_if_2
 				                                        v0 = v0 + 1
-				                                    test_after_if_2:
-				                                    test_after_if_1:
+				                                    test_after_if_2:  // test_then_2, test_else_2
+				                                    test_after_if_1:  // test_after_if_2, test_else_1
 				                                        p0 = p0 + 2
 				                                        result = v0
 				                                        goto test_exit
 
-				                                    test_else_2:
+				                                    test_else_2:  // test_if_2
 				                                        goto test_after_if_2
 
-				                                    test_else_1:
+				                                    test_else_1:  // test_if_1
 				                                        goto test_after_if_1
 
-				                                    test_exit:
+				                                    test_exit:  // test_after_if_1
 				                                        return
 				                                    """,
 		                                    """
 				                                    test_start:
 				                                        v0_0 := p0_0
-				                                    test_if_1:
+				                                    test_if_1:  // test_start
 				                                        if p0_0 < 0
 				                                        if ! goto test_else_1
-				                                    test_then_1:
+				                                    test_then_1:  // test_if_1
 				                                        p0_1 := 0 - p0_0
-				                                    test_if_2:
+				                                    test_if_2:  // test_then_1
 				                                        if p0_1 % 2 == 1
 				                                        if ! goto test_else_2
-				                                    test_then_2:
+				                                    test_then_2:  // test_if_2
 				                                        v0_2 := v0_0 + 1
-				                                    test_after_if_2:
-				                                        v0_3 := phi (v0_0, v0_2)
-				                                    test_after_if_1:
-				                                        p0_2 := phi (p0_0, p0_1)
-				                                        v0_1 := phi (v0_0, v0_3)
+				                                    test_after_if_2:  // test_then_2, test_else_2
+				                                        v0_3 := phi (v0_2, v0_0)
+				                                    test_after_if_1:  // test_after_if_2, test_else_1
+				                                        p0_2 := phi (p0_1, p0_0)
+				                                        v0_1 := phi (v0_3, v0_0)
 				                                        p0_3 := p0_2 + 2
 				                                        result := v0_1
 				                                        goto test_exit
 
-				                                    test_else_2:
+				                                    test_else_2:  // test_if_2
 				                                        goto test_after_if_2
 
-				                                    test_else_1:
+				                                    test_else_1:  // test_if_1
 				                                        goto test_after_if_1
 
-				                                    test_exit:
+				                                    test_exit:  // test_after_if_1
 				                                        return
 				                                    """);
 		removeUnusedVars("p0_3 p0_2", graph);
@@ -161,30 +164,30 @@ public class StaticSingleAssignmentFactoryTest {
 		assertEquals("""
 				             test_start:
 				                 v0_0 := p0_0
-				             test_if_1:
+				             test_if_1:  // test_start
 				                 if p0_0 < 0
 				                 if ! goto test_else_1
-				             test_then_1:
+				             test_then_1:  // test_if_1
 				                 p0_1 := 0 - p0_0
-				             test_if_2:
+				             test_if_2:  // test_then_1
 				                 if p0_1 % 2 == 1
 				                 if ! goto test_else_2
-				             test_then_2:
+				             test_then_2:  // test_if_2
 				                 v0_2 := v0_0 + 1
-				             test_after_if_2:
-				                 v0_3 := phi (v0_0, v0_2)
-				             test_after_if_1:
-				                 v0_1 := phi (v0_0, v0_3)
+				             test_after_if_2:  // test_then_2, test_else_2
+				                 v0_3 := phi (v0_2, v0_0)
+				             test_after_if_1:  // test_after_if_2, test_else_1
+				                 v0_1 := phi (v0_3, v0_0)
 				                 result := v0_1
 				                 goto test_exit
 
-				             test_else_2:
+				             test_else_2:  // test_if_2
 				                 goto test_after_if_2
 
-				             test_else_1:
+				             test_else_1:  // test_if_1
 				                 goto test_after_if_1
 
-				             test_exit:
+				             test_exit:  // test_after_if_1
 				                 return
 				             """, toString(graph));
 	}
@@ -208,43 +211,43 @@ public class StaticSingleAssignmentFactoryTest {
 		     """
 				     test_start:
 				         v0 := p0
-				     test_if_1:
+				     test_if_1:  // test_start
 				         if p0 > 10
 				         if ! goto test_else_1
-				     test_then_1:
+				     test_then_1:  // test_if_1
 				         v0 = 0
 				         p0 = p0 - 1
-				     test_after_if_1:
+				     test_after_if_1:  // test_then_1, test_else_1
 				         p0 = p0 + 2
 				         result = v0
 				         goto test_exit
 
-				     test_else_1:
+				     test_else_1:  // test_if_1
 				         goto test_after_if_1
 
-				     test_exit:
+				     test_exit:  // test_after_if_1
 				         return
 				     """,
 		     """
 				     test_start:
 				         v0_0 := p0_0
-				     test_if_1:
+				     test_if_1:  // test_start
 				         if p0_0 > 10
 				         if ! goto test_else_1
-				     test_then_1:
+				     test_then_1:  // test_if_1
 				         v0_1 := 0
 				         p0_1 := p0_0 - 1
-				     test_after_if_1:
-				         p0_2 := phi (p0_0, p0_1)
-				         v0_2 := phi (v0_0, v0_1)
+				     test_after_if_1:  // test_then_1, test_else_1
+				         p0_2 := phi (p0_1, p0_0)
+				         v0_2 := phi (v0_1, v0_0)
 				         p0_3 := p0_2 + 2
 				         result := v0_2
 				         goto test_exit
 
-				     test_else_1:
+				     test_else_1:  // test_if_1
 				         goto test_after_if_1
 
-				     test_exit:
+				     test_exit:  // test_after_if_1
 				         return
 				     """);
 	}
@@ -265,39 +268,39 @@ public class StaticSingleAssignmentFactoryTest {
 				     main_start:
 				         v0 := 1
 				         v1 := 2
-				     main_if_1:
+				     main_if_1:  // main_start
 				         if v0 < v1
 				         if ! goto main_else_1
-				     main_then_1:
+				     main_then_1:  // main_if_1
 				         v0 = v1
-				     main_after_if_1:
+				     main_after_if_1:  // main_then_1, main_else_1
 				         v0 = v0 + 1
 				         goto main_exit
 
-				     main_else_1:
+				     main_else_1:  // main_if_1
 				         goto main_after_if_1
 
-				     main_exit:
+				     main_exit:  // main_after_if_1
 				         return
 				     """,
 		     """
 				     main_start:
 				         v0_0 := 1
 				         v1_0 := 2
-				     main_if_1:
+				     main_if_1:  // main_start
 				         if v0_0 < v1_0
 				         if ! goto main_else_1
-				     main_then_1:
+				     main_then_1:  // main_if_1
 				         v0_1 := v1_0
-				     main_after_if_1:
-				         v0_2 := phi (v0_0, v0_1)
+				     main_after_if_1:  // main_then_1, main_else_1
+				         v0_2 := phi (v0_1, v0_0)
 				         v0_3 := v0_2 + 1
 				         goto main_exit
 
-				     main_else_1:
+				     main_else_1:  // main_if_1
 				         goto main_after_if_1
 
-				     main_exit:
+				     main_exit:  // main_after_if_1
 				         return
 				     """);
 	}
@@ -334,45 +337,45 @@ public class StaticSingleAssignmentFactoryTest {
 				                                      printHex16(192);
 				                                    }""",
 		                                    "printHex4",
-				                            """
+		                                    """
 				                                    printHex4_start:
 				                                        p0 = p0 & 15
 				                                        v0 := 0
-				                                    printHex4_if_1:
+				                                    printHex4_if_1:  // printHex4_start
 				                                        if p0 < 10
 				                                        if ! goto printHex4_else_1
-				                                    printHex4_then_1:
+				                                    printHex4_then_1:  // printHex4_if_1
 				                                        v0 = p0 + 48
-				                                    printHex4_after_if_1:
+				                                    printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                                        print(v0)
 				                                        goto printHex4_exit
 
-				                                    printHex4_else_1:
+				                                    printHex4_else_1:  // printHex4_if_1
 				                                        v0 = p0 - 10 + 65
 				                                        goto printHex4_after_if_1
 
-				                                    printHex4_exit:
+				                                    printHex4_exit:  // printHex4_after_if_1
 				                                        return
 				                                    """,
-				                            """
+		                                    """
 				                                    printHex4_start:
 				                                        p0_1 := p0_0 & 15
 				                                        v0_0 := 0
-				                                    printHex4_if_1:
+				                                    printHex4_if_1:  // printHex4_start
 				                                        if p0_1 < 10
 				                                        if ! goto printHex4_else_1
-				                                    printHex4_then_1:
+				                                    printHex4_then_1:  // printHex4_if_1
 				                                        v0_1 := p0_1 + 48
-				                                    printHex4_after_if_1:
+				                                    printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                                        v0_3 := phi (v0_1, v0_2)
 				                                        print(v0_3)
 				                                        goto printHex4_exit
 
-				                                    printHex4_else_1:
+				                                    printHex4_else_1:  // printHex4_if_1
 				                                        v0_2 := p0_1 - 10 + 65
 				                                        goto printHex4_after_if_1
 
-				                                    printHex4_exit:
+				                                    printHex4_exit:  // printHex4_after_if_1
 				                                        return
 				                                    """);
 		removeUnusedVars("v0_0", graph);
@@ -380,21 +383,21 @@ public class StaticSingleAssignmentFactoryTest {
 		assertEquals("""
 				             printHex4_start:
 				                 p0_1 := p0_0 & 15
-				             printHex4_if_1:
+				             printHex4_if_1:  // printHex4_start
 				                 if p0_1 < 10
 				                 if ! goto printHex4_else_1
-				             printHex4_then_1:
+				             printHex4_then_1:  // printHex4_if_1
 				                 v0_1 := p0_1 + 48
-				             printHex4_after_if_1:
+				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 v0_3 := phi (v0_1, v0_2)
 				                 print(v0_3)
 				                 goto printHex4_exit
 
-				             printHex4_else_1:
+				             printHex4_else_1:  // printHex4_if_1
 				                 v0_2 := p0_1 - 10 + 65
 				                 goto printHex4_after_if_1
 
-				             printHex4_exit:
+				             printHex4_exit:  // printHex4_after_if_1
 				                 return
 				             """, toString(graph));
 
@@ -404,24 +407,24 @@ public class StaticSingleAssignmentFactoryTest {
 				             printHex4_start:
 				                 p0_1 := p0_0
 				                 p0_1 &= 15
-				             printHex4_if_1:
+				             printHex4_if_1:  // printHex4_start
 				                 if p0_1 < 10
 				                 if ! goto printHex4_else_1
-				             printHex4_then_1:
+				             printHex4_then_1:  // printHex4_if_1
 				                 v0_1 := p0_1
 				                 v0_1 += 48
-				             printHex4_after_if_1:
+				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 v0_3 := phi (v0_1, v0_2)
 				                 print(v0_3)
 				                 goto printHex4_exit
 
-				             printHex4_else_1:
+				             printHex4_else_1:  // printHex4_if_1
 				                 v0_2 := p0_1
 				                 v0_2 -= 10
 				                 v0_2 += 65
 				                 goto printHex4_after_if_1
 
-				             printHex4_exit:
+				             printHex4_exit:  // printHex4_after_if_1
 				                 return
 				             """, toString(graph));
 	}
@@ -461,6 +464,27 @@ public class StaticSingleAssignmentFactoryTest {
 	}
 
 	private String toString(ControlFlowGraph graph) {
-		return ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString();
+		final ControlFlowGraphPrinter printer = new ControlFlowGraphPrinter(graph, new StringStringOutput()) {
+			@NotNull
+			@Override
+			protected String getLabelText(AbstractBlock block) {
+				final StringBuilder buffer = new StringBuilder();
+				buffer.append(super.getLabelText(block));
+
+				final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
+				if (prevBlocks.size() > 0) {
+					buffer.append("  // ");
+					Utils.appendCommaSeparated(Utils.convert(prevBlocks, new Function<>() {
+						@Override
+						public String apply(AbstractBlock block) {
+							return block.label;
+						}
+					}), buffer);
+				}
+
+				return buffer.toString();
+			}
+		};
+		return printer.print().toString();
 	}
 }
