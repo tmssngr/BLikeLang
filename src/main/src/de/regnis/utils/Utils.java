@@ -11,6 +11,8 @@ import java.util.function.Function;
  */
 public final class Utils {
 
+	// Static =================================================================
+
 	@NotNull
 	public static <O> O notNull(@Nullable O value) {
 		Objects.requireNonNull(value);
@@ -99,5 +101,35 @@ public final class Utils {
 		if (!value) {
 			throw new IllegalStateException();
 		}
+	}
+
+	public static <S, T, C extends Collection<T>> C convert(Collection<S> source, C target, Function<S, T> function) {
+		for (S sourceItem : source) {
+			final T targetItem = function.apply(sourceItem);
+			target.add(targetItem);
+		}
+		return target;
+	}
+
+	public static <S, T> Iterable<T> convert(Iterable<S> source, Function<S, T> function) {
+		return new Iterable<>() {
+			@NotNull
+			@Override
+			public Iterator<T> iterator() {
+				final Iterator<S> iterator = source.iterator();
+				return new Iterator<>() {
+					@Override
+					public boolean hasNext() {
+						return iterator.hasNext();
+					}
+
+					@Override
+					public T next() {
+						final S sourceItem = iterator.next();
+						return function.apply(sourceItem);
+					}
+				};
+			}
+		};
 	}
 }
