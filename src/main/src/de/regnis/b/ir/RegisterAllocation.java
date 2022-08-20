@@ -44,12 +44,10 @@ public final class RegisterAllocation {
 	// Accessing ==============================================================
 
 	public void initializeParameters(@NotNull FuncDeclaration function) {
-		int i = 0;
 		int register = 0;
 		for (FuncDeclarationParameter parameter : function.parameters.getParameters()) {
 			interferenceGraph.addEdgesBetween(parameter.name);
 			setRegister(parameter.name, register);
-			i++;
 			register++;
 		}
 	}
