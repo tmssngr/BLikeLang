@@ -190,6 +190,69 @@ public class StaticSingleAssignmentFactoryTest {
 				             test_exit:  // test_after_if_1
 				                 return
 				             """, toString(graph));
+
+		SsaRemovePhiFunctions.transform(graph);
+
+		assertEquals("""
+				             test_start:
+				                 v0_0 := p0_0
+				             test_if_1:  // test_start
+				                 if p0_0 < 0
+				                 if ! goto test_else_1
+				             test_then_1:  // test_if_1
+				                 p0_1 := 0 - p0_0
+				             test_if_2:  // test_then_1
+				                 if p0_1 % 2 == 1
+				                 if ! goto test_else_2
+				             test_then_2:  // test_if_2
+				                 v0_1 := v0_0 + 1
+				             test_after_if_2:  // test_then_2, test_else_2
+				             test_after_if_1:  // test_after_if_2, test_else_1
+				                 result := v0_1
+				                 goto test_exit
+
+				             test_else_2:  // test_if_2
+				                 v0_1 := v0_0
+				                 goto test_after_if_2
+
+				             test_else_1:  // test_if_1
+				                 v0_1 := v0_0
+				                 goto test_after_if_1
+
+				             test_exit:  // test_after_if_1
+				                 return
+				             """, toString(graph));
+
+		graph.compact();
+
+		assertEquals("""
+				             test_start:
+				                 v0_0 := p0_0
+				             test_if_1:  // test_start
+				                 if p0_0 < 0
+				                 if ! goto test_else_1
+				             test_then_1:  // test_if_1
+				                 p0_1 := 0 - p0_0
+				             test_if_2:  // test_then_1
+				                 if p0_1 % 2 == 1
+				                 if ! goto test_else_2
+				             test_then_2:  // test_if_2
+				                 v0_1 := v0_0 + 1
+				             test_after_if_1:  // test_else_1, test_then_2, test_else_2
+				                 result := v0_1
+				                 goto test_exit
+
+				             test_else_2:  // test_if_2
+				                 v0_1 := v0_0
+				                 goto test_after_if_1
+
+				             test_else_1:  // test_if_1
+				                 v0_1 := v0_0
+				                 goto test_after_if_1
+
+				             test_exit:  // test_after_if_1
+				                 return
+				             """, toString(graph));
 	}
 
 	@Test
@@ -401,6 +464,28 @@ public class StaticSingleAssignmentFactoryTest {
 				                 return
 				             """, toString(graph));
 
+		SsaRemovePhiFunctions.transform(graph);
+
+		assertEquals("""
+				             printHex4_start:
+				                 p0_1 := p0_0 & 15
+				             printHex4_if_1:  // printHex4_start
+				                 if p0_1 < 10
+				                 if ! goto printHex4_else_1
+				             printHex4_then_1:  // printHex4_if_1
+				                 v0_3 := p0_1 + 48
+				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
+				                 print(v0_3)
+				                 goto printHex4_exit
+
+				             printHex4_else_1:  // printHex4_if_1
+				                 v0_3 := p0_1 - 10 + 65
+				                 goto printHex4_after_if_1
+
+				             printHex4_exit:  // printHex4_after_if_1
+				                 return
+				             """, toString(graph));
+
 		SsaToModifyAssignments.transform(graph);
 
 		assertEquals("""
@@ -411,17 +496,16 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 < 10
 				                 if ! goto printHex4_else_1
 				             printHex4_then_1:  // printHex4_if_1
-				                 v0_1 := p0_1
-				                 v0_1 += 48
+				                 v0_3 := p0_1
+				                 v0_3 += 48
 				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
-				                 v0_3 := phi (v0_1, v0_2)
 				                 print(v0_3)
 				                 goto printHex4_exit
 
 				             printHex4_else_1:  // printHex4_if_1
-				                 v0_2 := p0_1
-				                 v0_2 -= 10
-				                 v0_2 += 65
+				                 v0_3 := p0_1
+				                 v0_3 -= 10
+				                 v0_3 += 65
 				                 goto printHex4_after_if_1
 
 				             printHex4_exit:  // printHex4_after_if_1
