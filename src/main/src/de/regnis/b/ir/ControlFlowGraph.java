@@ -86,6 +86,10 @@ public final class ControlFlowGraph {
 		}
 	}
 
+	public void iterate(@NotNull BlockVisitor visitor) {
+		iterate(block -> block.visit(visitor));
+	}
+
 	public void compact() {
 		if (firstBlock instanceof BasicBlock block && block.getStatements().isEmpty()) {
 			firstBlock = block.getSingleNext();
