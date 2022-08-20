@@ -397,6 +397,33 @@ public class StaticSingleAssignmentFactoryTest {
 				             printHex4_exit:
 				                 return
 				             """, toString(graph));
+
+		SsaToModifyAssignments.transform(graph);
+
+		assertEquals("""
+				             printHex4_start:
+				                 p0_1 := p0_0
+				                 p0_1 &= 15
+				             printHex4_if_1:
+				                 if p0_1 < 10
+				                 if ! goto printHex4_else_1
+				             printHex4_then_1:
+				                 v0_1 := p0_1
+				                 v0_1 += 48
+				             printHex4_after_if_1:
+				                 v0_3 := phi (v0_1, v0_2)
+				                 print(v0_3)
+				                 goto printHex4_exit
+
+				             printHex4_else_1:
+				                 v0_2 := p0_1
+				                 v0_2 -= 10
+				                 v0_2 += 65
+				                 goto printHex4_after_if_1
+
+				             printHex4_exit:
+				                 return
+				             """, toString(graph));
 	}
 
 	// Utils ==================================================================
