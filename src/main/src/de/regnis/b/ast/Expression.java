@@ -1,16 +1,11 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
-public abstract class Expression {
+public interface Expression {
 
-	// Abstract ===============================================================
-
-	public abstract <O> O visit(ExpressionVisitor<O> visitor);
-
-	// Setup ==================================================================
-
-	protected Expression() {
-	}
+	<O> O visit(@NotNull ExpressionVisitor<O> visitor);
 }

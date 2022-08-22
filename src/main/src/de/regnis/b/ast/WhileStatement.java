@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class WhileStatement extends ControlFlowStatement {
+public final class WhileStatement implements ControlFlowStatement {
 
 	// Fields =================================================================
 
@@ -28,7 +28,7 @@ public final class WhileStatement extends ControlFlowStatement {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitWhile(this);
 	}
 }

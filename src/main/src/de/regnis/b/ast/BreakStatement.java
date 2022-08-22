@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class BreakStatement extends ControlFlowStatement {
+public final class BreakStatement implements ControlFlowStatement {
 
 	// Fields =================================================================
 
@@ -20,7 +20,7 @@ public final class BreakStatement extends ControlFlowStatement {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitBreak(this);
 	}
 }

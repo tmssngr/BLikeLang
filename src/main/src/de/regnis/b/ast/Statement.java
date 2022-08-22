@@ -5,21 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public abstract class Statement {
+public interface Statement {
 
-	// Abstract ===============================================================
-
-	public abstract <O> O visit(StatementVisitor<O> visitor);
-
-	// Setup ==================================================================
-
-	protected Statement() {
-	}
-
-	// Accessing ==============================================================
+	<O> O visit(@NotNull StatementVisitor<O> visitor);
 
 	@NotNull
-	public StatementList toStatementList() {
+	default StatementList toStatementList() {
 		final StatementList statementList = new StatementList();
 		statementList.add(this);
 		return statementList;

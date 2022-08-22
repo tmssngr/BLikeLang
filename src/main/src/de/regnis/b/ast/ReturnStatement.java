@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Thomas Singer
  */
-public final class ReturnStatement extends ControlFlowStatement {
+public final class ReturnStatement implements ControlFlowStatement {
 
 	// Fields =================================================================
 
@@ -28,7 +28,7 @@ public final class ReturnStatement extends ControlFlowStatement {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitReturn(this);
 	}
 }
