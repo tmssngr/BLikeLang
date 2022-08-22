@@ -3,7 +3,7 @@ package de.regnis.b.ast;
 /**
  * @author Thomas Singer
  */
-public abstract class Expression extends Node {
+public abstract class Expression {
 
 	// Abstract ===============================================================
 
