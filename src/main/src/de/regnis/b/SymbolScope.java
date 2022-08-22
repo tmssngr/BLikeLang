@@ -1,5 +1,6 @@
 package de.regnis.b;
 
+import de.regnis.b.ast.Position;
 import de.regnis.b.out.StringOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +58,7 @@ public final class SymbolScope {
 	}
 
 	@NotNull
-	public Variable variableRead(@NotNull String name, int line, int column) {
+	public Variable variableRead(@NotNull String name, @NotNull Position position) {
 		SymbolScope scope = this;
 		while (scope != null) {
 			final Variable variable = scope.variables.get(name);
@@ -68,7 +69,7 @@ public final class SymbolScope {
 
 			scope = scope.parentScope;
 		}
-		throw new TransformationFailedException(Messages.errorUndeclaredVariable(line, column, name));
+		throw new TransformationFailedException(Messages.errorUndeclaredVariable(position.line(), position.column(), name));
 	}
 
 	public void reportUnusedVariables(@NotNull StringOutput output) {

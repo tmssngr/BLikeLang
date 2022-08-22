@@ -10,19 +10,17 @@ public final class VarRead extends SimpleExpression {
 	// Fields =================================================================
 
 	public final String name;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public VarRead(@NotNull String name) {
-		this(name, -1, -1);
+		this(name, Position.DUMMY);
 	}
 
-	public VarRead(@NotNull String name, int line, int column) {
+	public VarRead(@NotNull String name, @NotNull Position position) {
 		this.name = name;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 	}
 
 	// Implemented ============================================================

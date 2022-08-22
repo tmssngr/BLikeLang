@@ -14,20 +14,18 @@ public final class CallStatement extends SimpleStatement {
 	// Fields =================================================================
 
 	public final String name;
-	public final int line;
-	public final int column;
+	public final Position position;
 	private final List<Expression> parameters;
 
 	// Setup ==================================================================
 
 	public CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters) {
-		this(name, parameters, -1, -1);
+		this(name, parameters, Position.DUMMY);
 	}
 
-	public CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters, int line, int column) {
+	public CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters, @NotNull Position position) {
 		this.name = name;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 		this.parameters = Collections.unmodifiableList(new ArrayList<>(parameters.getExpressions()));
 	}
 

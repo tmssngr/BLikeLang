@@ -18,20 +18,18 @@ public final class VarDeclaration extends SimpleStatement {
 
 	public final String name;
 	public final Expression expression;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public VarDeclaration(@NotNull String name, @NotNull Expression expression) {
-		this(name, expression, -1, -1);
+		this(name, expression, Position.DUMMY);
 	}
 
-	public VarDeclaration(@NotNull String name, @NotNull Expression expression, int line, int column) {
+	public VarDeclaration(@NotNull String name, @NotNull Expression expression, @NotNull Position position) {
 		this.name = name;
 		this.expression = expression;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 	}
 
 	// Implemented ============================================================
@@ -54,6 +52,6 @@ public final class VarDeclaration extends SimpleStatement {
 	// Accessing ==============================================================
 
 	public VarDeclaration derive(@NotNull Expression expression) {
-		return new VarDeclaration(name, expression, line, column);
+		return new VarDeclaration(name, expression, position);
 	}
 }

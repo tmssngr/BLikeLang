@@ -1,5 +1,7 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
@@ -9,20 +11,18 @@ public final class WhileStatement extends ControlFlowStatement {
 
 	public final Expression expression;
 	public final StatementList statements;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public WhileStatement(Expression expression, StatementList statements) {
-		this(expression, statements, -1, -1);
+		this(expression, statements, Position.DUMMY);
 	}
 
-	public WhileStatement(Expression expression, StatementList statements, int line, int column) {
+	public WhileStatement(Expression expression, StatementList statements, @NotNull Position position) {
 		this.expression = expression;
 		this.statements = statements;
-		this.line = line;
-		this.column = column;
+		this.position   = position;
 	}
 
 	// Implemented ============================================================

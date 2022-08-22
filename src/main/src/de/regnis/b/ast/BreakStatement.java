@@ -1,5 +1,7 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
@@ -7,14 +9,12 @@ public final class BreakStatement extends ControlFlowStatement {
 
 	// Fields =================================================================
 
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
-	public BreakStatement(int line, int column) {
-		this.line = line;
-		this.column = column;
+	public BreakStatement(@NotNull Position position) {
+		this.position = position;
 	}
 
 	// Implemented ============================================================

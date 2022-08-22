@@ -12,21 +12,19 @@ public final class Assignment extends SimpleStatement {
 	public final Op operation;
 	public final String name;
 	public final Expression expression;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression) {
-		this(operation, name, expression, -1, -1);
+		this(operation, name, expression, Position.DUMMY);
 	}
 
-	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, int line, int column) {
+	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, @NotNull Position position) {
 		this.operation = operation;
 		this.name = name;
 		this.expression = expression;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 	}
 
 	// Implemented ============================================================

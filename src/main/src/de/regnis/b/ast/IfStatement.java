@@ -1,5 +1,7 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
@@ -10,21 +12,19 @@ public final class IfStatement extends ControlFlowStatement {
 	public final Expression expression;
 	public final StatementList trueStatements;
 	public final StatementList falseStatements;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements) {
-		this(expression, trueStatements, falseStatements, -1, -1);
+		this(expression, trueStatements, falseStatements, Position.DUMMY);
 	}
 
-	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements, int line, int column) {
+	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements, @NotNull Position position) {
 		this.expression = expression;
 		this.trueStatements = trueStatements;
 		this.falseStatements = falseStatements;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 	}
 
 	// Implemented ============================================================

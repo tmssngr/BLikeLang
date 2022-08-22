@@ -1,5 +1,6 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -11,19 +12,17 @@ public final class ReturnStatement extends ControlFlowStatement {
 
 	@Nullable
 	public final Expression expression;
-	public final int line;
-	public final int column;
+	public final Position position;
 
 	// Setup ==================================================================
 
 	public ReturnStatement(@Nullable Expression expression) {
-		this(expression, -1, -1);
+		this(expression, Position.DUMMY);
 	}
 
-	public ReturnStatement(@Nullable Expression expression, int line, int column) {
+	public ReturnStatement(@Nullable Expression expression, @NotNull Position position) {
 		this.expression = expression;
-		this.line = line;
-		this.column = column;
+		this.position = position;
 	}
 
 	// Implemented ============================================================

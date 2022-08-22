@@ -56,10 +56,10 @@ public final class DetermineTypesTransformation {
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final int parameterCount = node.parameters.getParameters().size();
 					if (functions.containsKey(node.name)) {
-						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.line, node.column, node.name));
+						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.position.line(), node.position.column(), node.name));
 					}
 
-					functions.put(node.name, new Function(node.type, parameterCount, node.line, node.column));
+					functions.put(node.name, new Function(node.type, parameterCount, node.position.line(), node.position.column()));
 
 					return node;
 				}
@@ -136,7 +136,7 @@ public final class DetermineTypesTransformation {
 			final String newName = "p" + i;
 			i++;
 
-			symbolMap.declareVariable(parameter.name, newName, parameter.line, parameter.column);
+			symbolMap.declareVariable(parameter.name, newName, parameter.position.line(), parameter.position.column());
 
 			renamedParameters.add(new FuncDeclarationParameter(newName));
 		}
@@ -292,12 +292,12 @@ public final class DetermineTypesTransformation {
 	private VarDeclaration visitVarDeclaration(VarDeclaration varDeclaration, String newName) {
 		final Expression newExpression = visitExpression(varDeclaration.expression);
 
-		symbolMap.declareVariable(varDeclaration.name, newName, varDeclaration.line, varDeclaration.column);
+		symbolMap.declareVariable(varDeclaration.name, newName, varDeclaration.position.line(), varDeclaration.position.column());
 		return new VarDeclaration(newName, newExpression);
 	}
 
 	private Assignment visitAssignment(Assignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.line, node.column);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.position);
 		final Expression newExpression = visitExpression(node.expression);
 
 		return new Assignment(node.operation, variable.newName, newExpression);
@@ -337,10 +337,10 @@ public final class DetermineTypesTransformation {
 	private FuncCall visitFunctionCall(FuncCall node) {
 		final FuncCallParameters newParameters = new FuncCallParameters();
 
-		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
+		final Function function = handleCall(node.name, node.getParameters(), node.position.line(), node.position.column(), newParameters);
 
 		if (function.type == BasicTypes.VOID) {
-			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.line, node.column, node.name));
+			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.position.line(), node.position.column(), node.name));
 		}
 
 		return new FuncCall(node.name, newParameters);
@@ -349,10 +349,10 @@ public final class DetermineTypesTransformation {
 	private CallStatement visitCall(CallStatement node) {
 		final FuncCallParameters newParameters = new FuncCallParameters();
 
-		final Function function = handleCall(node.name, node.getParameters(), node.line, node.column, newParameters);
+		final Function function = handleCall(node.name, node.getParameters(), node.position.line(), node.position.column(), newParameters);
 
 		if (function.type != BasicTypes.VOID) {
-			warning(Messages.warningIgnoredReturnValue(node.line, node.column, node.name, function.type));
+			warning(Messages.warningIgnoredReturnValue(node.position.line(), node.position.column(), node.name, function.type));
 		}
 
 		return new CallStatement(node.name, newParameters);
@@ -384,13 +384,13 @@ public final class DetermineTypesTransformation {
 
 		if (functionReturnType == BasicTypes.VOID) {
 			if (node.expression != null) {
-				throw new TransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(node.line, node.column));
+				throw new TransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(node.position.line(), node.position.column()));
 			}
 			return node;
 		}
 
 		if (node.expression == null) {
-			throw new TransformationFailedException(Messages.errorReturnExpressionExpected(node.line, node.column, functionReturnType));
+			throw new TransformationFailedException(Messages.errorReturnExpressionExpected(node.position.line(), node.position.column(), functionReturnType));
 		}
 
 		final Expression newExpression = visitExpression(node.expression);
@@ -408,7 +408,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private VarRead visitVarRead(VarRead node) {
-		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name, node.line, node.column);
+		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name, node.position);
 		return new VarRead(typeName.newName);
 	}
 
@@ -480,7 +480,7 @@ public final class DetermineTypesTransformation {
 
 				@Override
 				public Object visitBreak(BreakStatement node) {
-					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.line, node.column));
+					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.position.line(), node.position.column()));
 				}
 			});
 		}
