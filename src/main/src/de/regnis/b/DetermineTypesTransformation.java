@@ -131,7 +131,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private FuncDeclarationParameters declareParameters(FuncDeclarationParameters parameters) {
-		final FuncDeclarationParameters renamedParameters = new FuncDeclarationParameters();
+		final List<FuncDeclarationParameter> renamedParameters = new ArrayList<>();
 		int i = 0;
 		for (FuncDeclarationParameter parameter : parameters.getParameters()) {
 			final String newName = "p" + i;
@@ -141,7 +141,7 @@ public final class DetermineTypesTransformation {
 
 			renamedParameters.add(new FuncDeclarationParameter(newName));
 		}
-		return renamedParameters;
+		return FuncDeclarationParameters.of(renamedParameters);
 	}
 
 	private Statement visitStatement(Statement statement) {

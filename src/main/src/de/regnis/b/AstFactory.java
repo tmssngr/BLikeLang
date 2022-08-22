@@ -89,12 +89,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 
 	@Override
 	public FuncDeclarationParameters visitParameterDeclarations(BLikeLangParser.ParameterDeclarationsContext ctx) {
-		final FuncDeclarationParameters parameters = new FuncDeclarationParameters();
+		final List<FuncDeclarationParameter> parameters = new ArrayList<>();
 		final List<BLikeLangParser.ParameterDeclarationContext> declarations = ctx.parameterDeclaration();
 		for (BLikeLangParser.ParameterDeclarationContext declaration : declarations) {
 			parameters.add(visitParameterDeclaration(declaration));
 		}
-		return parameters;
+		return FuncDeclarationParameters.of(parameters);
 	}
 
 	@Override
