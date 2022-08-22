@@ -52,7 +52,7 @@ public final class SplitExpressionsTransformation {
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
 		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		return new Assignment(node.operation, node.name, expression, node.line, node.column);
+		return new Assignment(node.operation, node.name, expression, node.position);
 	}
 
 	private VarDeclaration handleVarDeclaration(VarDeclaration node, TempVarFactory tempVarFactory) {
@@ -171,7 +171,7 @@ public final class SplitExpressionsTransformation {
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
-		return new FuncCall(node.name, parameters, node.line, node.column);
+		return new FuncCall(node.name, parameters, node.position);
 	}
 
 	@NotNull

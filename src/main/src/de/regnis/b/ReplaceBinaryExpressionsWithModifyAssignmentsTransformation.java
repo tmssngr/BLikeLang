@@ -1,7 +1,6 @@
 package de.regnis.b;
 
 import de.regnis.b.ast.*;
-import de.regnis.b.type.BasicTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -239,7 +238,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
-		return new FuncCall(node.name, parameters, node.line, node.column);
+		return new FuncCall(node.name, parameters, node.position);
 	}
 
 	@NotNull

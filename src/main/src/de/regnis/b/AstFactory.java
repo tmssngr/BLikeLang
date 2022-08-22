@@ -9,6 +9,7 @@ import de.regnis.b.type.Type;
 import de.regnis.utils.Utils;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 		final FuncDeclarationParameters parameters = visitParameterDeclarations(ctx.parameterDeclarations());
 		final Statement statement = (Statement) visit(ctx.statement());
 		final StatementList statementList = statement.toStatementList();
-		declarationList.add(new FuncDeclaration(type, name, parameters, statementList, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+		declarationList.add(new FuncDeclaration(type, name, parameters, statementList, positionFromToken(ctx.name)));
 		return null;
 	}
 
@@ -98,13 +99,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 	@Override
 	public FuncDeclarationParameter visitParameterDeclaration(BLikeLangParser.ParameterDeclarationContext ctx) {
 		final String name = ctx.name.getText();
-		return new FuncDeclarationParameter(name, ctx.name.getLine(), ctx.name.getCharPositionInLine());
+		return new FuncDeclarationParameter(name, positionFromToken(ctx.name));
 	}
 
 	@Override
 	public CallStatement visitCallStatement(BLikeLangParser.CallStatementContext ctx) {
 		final FuncCallParameters parameters = visitFunctionCallParameters(ctx.functionCallParameters());
-		return new CallStatement(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
+		return new CallStatement(ctx.func.getText(), parameters, positionFromToken(ctx.func));
 	}
 
 	@Override
@@ -139,7 +140,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 			case BLikeLangParser.XorAssign -> Assignment.Op.bitXor;
 			default -> throw new ParseCancellationException();
 		};
-		return new Assignment(operation, ctx.var.getText(), expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new Assignment(operation, ctx.var.getText(), expression, positionFromToken(ctx.var));
 	}
 
 	@Override
@@ -151,14 +152,14 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 	public VarDeclaration visitInferVarDeclaration(BLikeLangParser.InferVarDeclarationContext ctx) {
 		final String name = ctx.var.getText();
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new VarDeclaration(name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclaration(name, expression, positionFromToken(ctx.var));
 	}
 
 	@Override
 	public VarDeclaration visitTypeVarDeclaration(BLikeLangParser.TypeVarDeclarationContext ctx) {
 		final String name = ctx.var.getText();
 		final Expression expression = (Expression) visit(ctx.expression());
-		return new VarDeclaration(name, expression, ctx.var.getLine(), ctx.var.getCharPositionInLine());
+		return new VarDeclaration(name, expression, positionFromToken(ctx.var));
 	}
 
 	@Override
@@ -166,12 +167,10 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
 		if (expressionContext != null) {
 			final Expression expression = (Expression) visit(expressionContext);
-			final Token start = expressionContext.getStart();
-			return new ReturnStatement(expression, start.getLine(), start.getCharPositionInLine());
+			return new ReturnStatement(expression, positionFromToken(expressionContext.getStart()));
 		}
 
-		final Token start = ctx.start;
-		return new ReturnStatement(null, start.getLine(), start.getCharPositionInLine());
+		return new ReturnStatement(null, positionFromToken(ctx.start));
 	}
 
 	@Override
@@ -191,8 +190,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 			falseStatements = new StatementList();
 		}
 
-		final Token start = expressionContext.getStart();
-		return new IfStatement(expression, trueStatements, falseStatements, start.getLine(), start.getCharPositionInLine());
+		return new IfStatement(expression, trueStatements, falseStatements, positionFromToken(expressionContext.getStart()));
 	}
 
 	@Override
@@ -203,13 +201,12 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 		final Statement statement = (Statement) visit(ctx.statement());
 		final StatementList statementList = statement.toStatementList();
 
-		final Token start = expressionContext.getStart();
-		return new WhileStatement(expression, statementList, start.getLine(), start.getCharPositionInLine());
+		return new WhileStatement(expression, statementList, positionFromToken(expressionContext.getStart()));
 	}
 
 	@Override
 	public BreakStatement visitBreakStatement(BLikeLangParser.BreakStatementContext ctx) {
-		return new BreakStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
+		return new BreakStatement(positionFromToken(ctx.start));
 	}
 
 	@Override
@@ -284,7 +281,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 	@Override
 	public FuncCall visitFunctionCall(BLikeLangParser.FunctionCallContext ctx) {
 		final FuncCallParameters parameters = visitFunctionCallParameters(ctx.functionCallParameters());
-		return new FuncCall(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
+		return new FuncCall(ctx.func.getText(), parameters, positionFromToken(ctx.func));
 	}
 
 	@Override
@@ -346,7 +343,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 	@Override
 	public VarRead visitReadVariable(BLikeLangParser.ReadVariableContext ctx) {
 		final Token varName = ctx.Identifier().getSymbol();
-		return new VarRead(varName.getText(), varName.getLine(), varName.getCharPositionInLine());
+		return new VarRead(varName.getText(), positionFromToken(varName));
 	}
 
 	// Utils ==================================================================
@@ -357,6 +354,11 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 			return Integer.parseInt(text.substring(hexPrefix.length()), 16);
 		}
 		return Integer.parseInt(text);
+	}
+
+	@NotNull
+	private static Position positionFromToken(@NotNull Token token) {
+		return new Position(token.getLine(), token.getCharPositionInLine());
 	}
 
 	private static DeclarationList parse(CharStream charStream) {
