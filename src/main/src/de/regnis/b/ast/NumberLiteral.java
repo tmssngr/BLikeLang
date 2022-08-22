@@ -1,9 +1,11 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
-public final class NumberLiteral extends SimpleExpression {
+public final class NumberLiteral implements SimpleExpression {
 
 	// Constants ==============================================================
 
@@ -34,7 +36,7 @@ public final class NumberLiteral extends SimpleExpression {
 	}
 
 	@Override
-	public <O> O visit(ExpressionVisitor<O> visitor) {
+	public <O> O visit(@NotNull ExpressionVisitor<O> visitor) {
 		return visitor.visitNumber(this);
 	}
 }

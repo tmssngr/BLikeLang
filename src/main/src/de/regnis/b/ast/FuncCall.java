@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class FuncCall extends Expression {
+public final class FuncCall implements Expression {
 
 	// Fields =================================================================
 
@@ -28,7 +28,7 @@ public final class FuncCall extends Expression {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(ExpressionVisitor<O> visitor) {
+	public <O> O visit(@NotNull ExpressionVisitor<O> visitor) {
 		return visitor.visitFunctionCall(this);
 	}
 

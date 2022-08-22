@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class CallStatement extends SimpleStatement {
+public final class CallStatement implements SimpleStatement {
 
 	// Fields =================================================================
 
@@ -28,12 +28,12 @@ public final class CallStatement extends SimpleStatement {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitCall(this);
 	}
 
 	@Override
-	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull SimpleStatementVisitor<O> visitor) {
 		return visitor.visitCall(this);
 	}
 }

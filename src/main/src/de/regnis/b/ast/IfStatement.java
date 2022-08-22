@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class IfStatement extends ControlFlowStatement {
+public final class IfStatement implements ControlFlowStatement {
 
 	// Fields =================================================================
 
@@ -30,7 +30,7 @@ public final class IfStatement extends ControlFlowStatement {
 	// Implemented ============================================================
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitIf(this);
 	}
 }

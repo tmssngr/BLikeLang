@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class VarDeclaration extends SimpleStatement {
+public final class VarDeclaration implements SimpleStatement {
 
 	// Static =================================================================
 
@@ -40,12 +40,12 @@ public final class VarDeclaration extends SimpleStatement {
 	}
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitLocalVarDeclaration(this);
 	}
 
 	@Override
-	public <O> O visit(SimpleStatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull SimpleStatementVisitor<O> visitor) {
 		return visitor.visitLocalVarDeclaration(this);
 	}
 

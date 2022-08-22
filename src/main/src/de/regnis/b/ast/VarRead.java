@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class VarRead extends SimpleExpression {
+public final class VarRead implements SimpleExpression {
 
 	// Fields =================================================================
 
@@ -31,7 +31,7 @@ public final class VarRead extends SimpleExpression {
 	}
 
 	@Override
-	public <O> O visit(ExpressionVisitor<O> visitor) {
+	public <O> O visit(@NotNull ExpressionVisitor<O> visitor) {
 		return visitor.visitVarRead(this);
 	}
 }

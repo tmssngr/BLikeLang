@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class StatementList extends Statement {
+public final class StatementList implements Statement {
 
 	// Fields =================================================================
 
@@ -41,7 +41,7 @@ public final class StatementList extends Statement {
 	}
 
 	@Override
-	public <O> O visit(StatementVisitor<O> visitor) {
+	public <O> O visit(@NotNull StatementVisitor<O> visitor) {
 		return visitor.visitStatementList(this);
 	}
 

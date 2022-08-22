@@ -1,9 +1,11 @@
 package de.regnis.b.ast;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Thomas Singer
  */
-public abstract class SimpleStatement extends Statement {
+public interface SimpleStatement extends Statement {
 
-	public abstract <O> O visit(SimpleStatementVisitor<O> visitor);
+	<O> O visit(@NotNull SimpleStatementVisitor<O> visitor);
 }

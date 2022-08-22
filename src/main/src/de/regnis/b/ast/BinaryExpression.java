@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class BinaryExpression extends Expression {
+public final class BinaryExpression implements Expression {
 
 	// Static =================================================================
 
@@ -41,7 +41,7 @@ public final class BinaryExpression extends Expression {
 	}
 
 	@Override
-	public <O> O visit(ExpressionVisitor<O> visitor) {
+	public <O> O visit(@NotNull ExpressionVisitor<O> visitor) {
 		return visitor.visitBinary(this);
 	}
 

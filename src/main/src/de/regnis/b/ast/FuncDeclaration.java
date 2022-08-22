@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class FuncDeclaration extends Declaration {
+public final class FuncDeclaration implements Declaration {
 
 	// Fields =================================================================
 
