@@ -23,8 +23,7 @@ public class CodePrinterTest {
 		                    CodePrinter.print(
 				                    new DeclarationList()
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "sqr",
-						                                             new FuncDeclarationParameters()
-								                                             .add(new FuncDeclarationParameter("x")),
+						                                             FuncDeclarationParameters.of(new FuncDeclarationParameter("x")),
 						                                             new StatementList()
 								                                             .add(new Assignment(Assignment.Op.add, "x", new NumberLiteral(1)))
 								                                             .add(new ReturnStatement(
@@ -47,7 +46,7 @@ public class CodePrinterTest {
 		                    CodePrinter.print(
 				                    new DeclarationList()
 						                    .add(new FuncDeclaration(BasicTypes.INT16, "foo",
-						                                             new FuncDeclarationParameters(),
+						                                             FuncDeclarationParameters.empty(),
 						                                             new StatementList()
 								                                             .add(new IfStatement(new BinaryExpression(new VarRead("a"),
 								                                                                                       BinaryExpression.Op.greaterThan,
