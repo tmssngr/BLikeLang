@@ -33,7 +33,7 @@ public final class StaticSingleAssignmentFactory {
 		if (statement instanceof VarDeclaration declaration
 				&& declaration.expression instanceof FuncCall call
 				&& call.name.equals(PHI)) {
-			final List<String> variants = Utils.convert(call.getParameters(), new ArrayList<>(),
+			final List<String> variants = Utils.convert(call.parameters.getExpressions(), new ArrayList<>(),
 			                                           expression -> ((VarRead) expression).name);
 			return new Tuple<>(declaration.name, variants);
 		}
@@ -126,11 +126,8 @@ public final class StaticSingleAssignmentFactory {
 					phiFunction.ssaSources.add(ssaName);
 				}
 
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (String ssaSource : phiFunction.ssaSources) {
-					parameters.add(new VarRead(ssaSource));
-				}
-				statements.add(new VarDeclaration(phiFunction.ssaName, new FuncCall(PHI, parameters)));
+				final List<Expression> parameters = Utils.convert(phiFunction.ssaSources, new ArrayList<>(), VarRead::new);
+				statements.add(new VarDeclaration(phiFunction.ssaName, new FuncCall(PHI, FuncCallParameters.of(parameters))));
 			}
 
 			statements.addAll(statementsBlock.getStatements());
@@ -195,10 +192,7 @@ public final class StaticSingleAssignmentFactory {
 
 			@Override
 			public SimpleStatement visitCall(CallStatement node) {
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (Expression parameter : node.getParameters()) {
-					parameters.add(visitExpression(parameter, varToVariant));
-				}
+				final FuncCallParameters parameters = node.parameters.transform(expression -> visitExpression(expression, varToVariant));
 				consumer.accept(new CallStatement(node.name, parameters));
 				return node;
 			}
@@ -216,10 +210,7 @@ public final class StaticSingleAssignmentFactory {
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (Expression parameter : node.getParameters()) {
-					parameters.add(visitExpression(parameter, varToVariant));
-				}
+				final FuncCallParameters parameters = node.parameters.transform(expression -> visitExpression(expression, varToVariant));
 				return new FuncCall(node.name, parameters);
 			}
 

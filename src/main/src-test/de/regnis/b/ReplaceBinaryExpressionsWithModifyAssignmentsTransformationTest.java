@@ -25,16 +25,14 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				assignment("a", new VarRead("b")));
 
 		assertEquals("a = foo()", f -> f.
-				assignment("a", new FuncCall("foo", new FuncCallParameters())));
+				assignment("a", new FuncCall("foo", FuncCallParameters.empty())));
 
 		assertEquals("a = foo(1)", f -> f.
 				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new NumberLiteral(1)))));
+				                             FuncCallParameters.of(new NumberLiteral(1)))));
 		assertEquals("a = foo(b)", f -> f.
 				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new VarRead("b")))));
+				                             FuncCallParameters.of(new VarRead("b")))));
 	}
 
 	@Test
@@ -101,26 +99,23 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				               a = $1""", f -> f.
 				assignment("a",
 				           new BinaryExpression(new FuncCall("foo",
-				                                             new FuncCallParameters()),
+				                                             FuncCallParameters.empty()),
 				                                BinaryExpression.Op.add,
 				                                new NumberLiteral(3))));
 		assertEquals("""
 				             $1 := bar(1)
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new FuncCall("bar",
-						                                               new FuncCallParameters()
-								                                               .add(new NumberLiteral(1)))))));
+				                             FuncCallParameters.of(new FuncCall("bar",
+				                                                                FuncCallParameters.of(new NumberLiteral(1)))))));
 		assertEquals("""
 				             $1 := 1
 				               $1 -= 2
 				               a = foo($1)""", f -> f.
 				assignment("a", new FuncCall("foo",
-				                             new FuncCallParameters()
-						                             .add(new BinaryExpression(new NumberLiteral(1),
-						                                                       BinaryExpression.Op.sub,
-						                                                       new NumberLiteral(2))))));
+				                             FuncCallParameters.of(new BinaryExpression(new NumberLiteral(1),
+				                                                                        BinaryExpression.Op.sub,
+				                                                                        new NumberLiteral(2))))));
 
 		assertEquals("""
 				             $1 := 1
@@ -146,13 +141,12 @@ public class ReplaceBinaryExpressionsWithModifyAssignmentsTransformationTest ext
 				               a := foo($1, $2)""", f -> f.
 				varDeclaration("a",
 				               new FuncCall("foo",
-				                            new FuncCallParameters()
-						                            .add(new BinaryExpression(new NumberLiteral(1),
-						                                                      BinaryExpression.Op.add,
-						                                                      new VarRead("b")))
-						                            .add(new BinaryExpression(new NumberLiteral(3),
-						                                                      BinaryExpression.Op.multiply,
-						                                                      new NumberLiteral(4))))));
+				                            FuncCallParameters.of(new BinaryExpression(new NumberLiteral(1),
+				                                                                       BinaryExpression.Op.add,
+				                                                                       new VarRead("b")),
+				                                                  new BinaryExpression(new NumberLiteral(3),
+				                                                                       BinaryExpression.Op.multiply,
+				                                                                       new NumberLiteral(4))))));
 		assertEquals("""
 				             void main() {
 				               $1 := 2

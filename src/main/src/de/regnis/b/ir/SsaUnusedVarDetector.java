@@ -73,9 +73,7 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 
 	@Override
 	public SimpleStatement visitCall(CallStatement node) {
-		for (Expression parameter : node.getParameters()) {
-			parameter.visit(this);
-		}
+		processParameters(node.parameters);
 		return node;
 	}
 
@@ -88,9 +86,7 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 
 	@Override
 	public Expression visitFunctionCall(FuncCall node) {
-		for (Expression parameter : node.getParameters()) {
-			parameter.visit(this);
-		}
+		processParameters(node.parameters);
 		return node;
 	}
 
@@ -106,6 +102,12 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 	}
 
 	// Utils ==================================================================
+
+	private void processParameters(FuncCallParameters node) {
+		for (Expression parameter : node.getExpressions()) {
+			parameter.visit(this);
+		}
+	}
 
 	private void visitStatements(@NotNull StatementsBlock block) {
 		for (SimpleStatement statement : block.getStatements()) {

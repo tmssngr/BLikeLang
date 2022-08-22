@@ -143,7 +143,7 @@ public abstract class CommandFactory {
 			@Override
 			public Object visitCall(CallStatement node) {
 				final Type returnType = functionNameToReturnType.apply(node.name);
-				handleCall(node.name, node.getParameters(), returnType != BasicTypes.VOID, null);
+				handleCall(node.name, node.parameters, returnType != BasicTypes.VOID, null);
 				return node;
 			}
 		});
@@ -171,7 +171,7 @@ public abstract class CommandFactory {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name, node.getParameters(), true, name);
+				handleCall(node.name, node.parameters, true, name);
 				return node;
 			}
 
@@ -191,7 +191,8 @@ public abstract class CommandFactory {
 		});
 	}
 
-	private void handleCall(String functionName, List<Expression> parameters, boolean nonVoidReturnType, @Nullable String storeName) {
+	private void handleCall(String functionName, FuncCallParameters callParameters, boolean nonVoidReturnType, @Nullable String storeName) {
+		final List<Expression> parameters = callParameters.getExpressions();
 		if (parameters.size() > 0) {
 			for (Expression parameter : parameters) {
 				literalOrVar(parameter,

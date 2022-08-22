@@ -66,7 +66,7 @@ public class TreePrinter {
 	public List<String> getStrings(CallStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("call " + node.name);
-		final List<Expression> expressions = node.getParameters();
+		final List<Expression> expressions = node.parameters.getExpressions();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
 			final Expression expressionNode = expressions.get(i);
 			append(getStrings(expressionNode), i < size - 1, strings);
@@ -230,7 +230,7 @@ public class TreePrinter {
 	private List<String> getStrings(FuncCall node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("function call " + node.name);
-		final List<Expression> expressions = node.getParameters();
+		final List<Expression> expressions = node.parameters.getExpressions();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
 			final Expression expressionNode = expressions.get(i);
 			append(getStrings(expressionNode), i < size - 1, strings);

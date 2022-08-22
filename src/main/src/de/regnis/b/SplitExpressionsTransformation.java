@@ -3,8 +3,6 @@ package de.regnis.b;
 import de.regnis.b.ast.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * @author Thomas Singer
  */
@@ -61,7 +59,8 @@ public final class SplitExpressionsTransformation {
 	}
 
 	private Statement handleCall(CallStatement node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
+		final FuncCallParameters parameters = node.parameters.transform(expression ->
+				                                                                splitInnerExpression(expression, tempVarFactory));
 		return new CallStatement(node.name, parameters);
 	}
 
@@ -170,18 +169,9 @@ public final class SplitExpressionsTransformation {
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
+		final FuncCallParameters parameters = node.parameters.transform(expression ->
+				                                                                splitInnerExpression(expression, tempVarFactory));
 		return new FuncCall(node.name, parameters, node.position);
-	}
-
-	@NotNull
-	private FuncCallParameters handleFuncCallParameters(List<Expression> parameters, TempVarFactory tempVarFactory) {
-		final FuncCallParameters newParameters = new FuncCallParameters();
-		for (Expression parameter : parameters) {
-			final Expression simplifiedParameter = splitInnerExpression(parameter, tempVarFactory);
-			newParameters.add(simplifiedParameter);
-		}
-		return newParameters;
 	}
 
 	@NotNull

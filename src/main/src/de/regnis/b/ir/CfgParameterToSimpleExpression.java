@@ -47,11 +47,8 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 
 			@Override
 			public Object visitCall(CallStatement node) {
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (Expression parameter : node.getParameters()) {
-					final Expression expression = toSimpleExpression(parameter, true, consumer);
-					parameters.add(expression);
-				}
+				final FuncCallParameters parameters = node.parameters.transform(expression ->
+						                                                                toSimpleExpression(expression, true, consumer));
 				consumer.accept(new CallStatement(node.name, parameters));
 				return node;
 			}
@@ -85,11 +82,8 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (Expression parameter : node.getParameters()) {
-					final Expression expression = toSimpleExpression(parameter, true, consumer);
-					parameters.add(expression);
-				}
+				final FuncCallParameters parameters = node.parameters.transform(expression ->
+						                                                                toSimpleExpression(expression, true, consumer));
 				return maybeWrapInTempVar(new FuncCall(node.name, parameters));
 			}
 

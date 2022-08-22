@@ -121,7 +121,7 @@ public final class PureFunctionDetection {
 
 				@Override
 				public Object visitCall(CallStatement node) {
-					functionCalled(node.name, node.getParameters());
+					functionCalled(node.name, node.parameters);
 					return node;
 				}
 
@@ -167,7 +167,7 @@ public final class PureFunctionDetection {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				functionCalled(node.name, node.getParameters());
+				functionCalled(node.name, node.parameters);
 				return node;
 			}
 
@@ -186,13 +186,13 @@ public final class PureFunctionDetection {
 		});
 	}
 
-	private void functionCalled(String name, List<Expression> parameters) {
+	private void functionCalled(String name, FuncCallParameters parameters) {
 		if (!name.equals(currentFunction)) {
 			final Set<String> calledByFunctions = functionCalledByFunctions.get(name);
 			calledByFunctions.add(currentFunction);
 		}
 
-		for (Expression parameter : parameters) {
+		for (Expression parameter : parameters.getExpressions()) {
 			visitExpression(parameter);
 		}
 	}
