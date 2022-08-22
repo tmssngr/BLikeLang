@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class DeclarationList extends Node {
+public final class DeclarationList {
 
 	// Fields =================================================================
 

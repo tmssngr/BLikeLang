@@ -22,7 +22,7 @@ import java.util.Objects;
  * @author Thomas Singer
  */
 @SuppressWarnings("MethodDoesntCallSuperMethod")
-public final class AstFactory extends BLikeLangBaseVisitor<Node> {
+public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 
 	// Static =================================================================
 
@@ -102,13 +102,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitCallStatement(BLikeLangParser.CallStatementContext ctx) {
+	public CallStatement visitCallStatement(BLikeLangParser.CallStatementContext ctx) {
 		final FuncCallParameters parameters = visitFunctionCallParameters(ctx.functionCallParameters());
 		return new CallStatement(ctx.func.getText(), parameters, ctx.func.getLine(), ctx.func.getCharPositionInLine());
 	}
 
 	@Override
-	public Node visitBlockStatement(BLikeLangParser.BlockStatementContext ctx) {
+	public StatementList visitBlockStatement(BLikeLangParser.BlockStatementContext ctx) {
 		final StatementList statementList = new StatementList();
 		for (BLikeLangParser.StatementContext statementCtx : ctx.statement()) {
 			if (statementCtx instanceof BLikeLangParser.EmptyStatementContext) {
@@ -123,7 +123,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
+	public Assignment visitAssignStatement(BLikeLangParser.AssignStatementContext ctx) {
 		final Expression expression = (Expression) visit(ctx.expression());
 		final Assignment.Op operation = switch (ctx.operator.getType()) {
 			case BLikeLangParser.Assign -> Assignment.Op.assign;
@@ -162,7 +162,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
+	public ReturnStatement visitReturnStatement(BLikeLangParser.ReturnStatementContext ctx) {
 		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
 		if (expressionContext != null) {
 			final Expression expression = (Expression) visit(expressionContext);
@@ -175,7 +175,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitIfStatement(BLikeLangParser.IfStatementContext ctx) {
+	public IfStatement visitIfStatement(BLikeLangParser.IfStatementContext ctx) {
 		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
 		final Expression expression = (Expression) visit(expressionContext);
 
@@ -196,7 +196,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitWhileStatement(BLikeLangParser.WhileStatementContext ctx) {
+	public WhileStatement visitWhileStatement(BLikeLangParser.WhileStatementContext ctx) {
 		final BLikeLangParser.ExpressionContext expressionContext = ctx.expression();
 		final Expression expression = (Expression) visit(expressionContext);
 
@@ -208,17 +208,17 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitBreakStatement(BLikeLangParser.BreakStatementContext ctx) {
+	public BreakStatement visitBreakStatement(BLikeLangParser.BreakStatementContext ctx) {
 		return new BreakStatement(ctx.start.getLine(), ctx.start.getCharPositionInLine());
 	}
 
 	@Override
-	public Node visitEmptyStatement(BLikeLangParser.EmptyStatementContext ctx) {
+	public Object visitEmptyStatement(BLikeLangParser.EmptyStatementContext ctx) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Node visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) {
+	public BinaryExpression visitBinaryExpressionDash(BLikeLangParser.BinaryExpressionDashContext ctx) {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);
 
@@ -232,7 +232,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) {
+	public BinaryExpression visitBinaryExpressionPoint(BLikeLangParser.BinaryExpressionPointContext ctx) {
 		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
 		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
 
@@ -249,7 +249,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitBinaryExpressionBits(BLikeLangParser.BinaryExpressionBitsContext ctx) {
+	public BinaryExpression visitBinaryExpressionBits(BLikeLangParser.BinaryExpressionBitsContext ctx) {
 		final Expression left = (Expression) Objects.requireNonNull(visit(ctx.left));
 		final Expression right = (Expression) Objects.requireNonNull(visit(ctx.right));
 
@@ -264,7 +264,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) {
+	public BinaryExpression visitBinaryExpressionBool(BLikeLangParser.BinaryExpressionBoolContext ctx) {
 		final Expression left = (Expression) visit(ctx.left);
 		final Expression right = (Expression) visit(ctx.right);
 
@@ -322,7 +322,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitCharLiteral(BLikeLangParser.CharLiteralContext ctx) {
+	public NumberLiteral visitCharLiteral(BLikeLangParser.CharLiteralContext ctx) {
 		final String text = ctx.getText();
 		final String parsed = Utils.parseString(text, '\'');
 		if (parsed == null || parsed.length() != 1) {
@@ -338,7 +338,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Node> {
 	}
 
 	@Override
-	public Node visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) {
+	public NumberLiteral visitBooleanLiteral(BLikeLangParser.BooleanLiteralContext ctx) {
 		final String text = ctx.BooleanLiteral().getText();
 		return NumberLiteral.get("true".equals(text));
 	}

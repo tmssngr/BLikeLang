@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public abstract class Statement extends Node {
+public abstract class Statement {
 
 	// Abstract ===============================================================
 

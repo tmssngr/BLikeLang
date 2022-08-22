@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class FuncDeclarationParameter extends Node {
+public final class FuncDeclarationParameter {
 
 	// Fields =================================================================
 

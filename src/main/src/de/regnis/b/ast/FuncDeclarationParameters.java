@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class FuncDeclarationParameters extends Node {
+public final class FuncDeclarationParameters {
 
 	// Fields =================================================================
 
