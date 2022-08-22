@@ -14,7 +14,7 @@ public final class WhileBlock extends ControlFlowBlock {
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public WhileBlock(@NotNull BasicBlock prev, @NotNull WhileStatement node, @NotNull String prefix, @NotNull Integer labelIndex) {
-		super(node.expression, prefix + "while_" + labelIndex, prev);
+		super(node.expression(), prefix + "while_" + labelIndex, prev);
 
 		new BasicBlock(prefix + "do_" + labelIndex, this);
 		new BasicBlock(prefix + "after_while_" + labelIndex, this);

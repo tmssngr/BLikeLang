@@ -45,8 +45,8 @@ public final class PureFunctionDetection {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					if (functionCalledByFunctions.put(node.name, new HashSet<>()) != null) {
-						throw new IllegalStateException("Duplicate function " + node.name);
+					if (functionCalledByFunctions.put(node.name(), new HashSet<>()) != null) {
+						throw new IllegalStateException("Duplicate function " + node.name());
 					}
 					return node;
 				}
@@ -59,9 +59,9 @@ public final class PureFunctionDetection {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					currentFunction = node.name;
+					currentFunction = node.name();
 
-					visitStatements(node.statementList);
+					visitStatements(node.statementList());
 					return node;
 				}
 			});
@@ -103,7 +103,7 @@ public final class PureFunctionDetection {
 			statement.visit(new StatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
-					visitExpression(node.expression);
+					visitExpression(node.expression());
 					return node;
 				}
 
@@ -115,36 +115,36 @@ public final class PureFunctionDetection {
 
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					visitExpression(node.expression);
+					visitExpression(node.expression());
 					return node;
 				}
 
 				@Override
 				public Object visitCall(CallStatement node) {
-					functionCalled(node.name, node.parameters);
+					functionCalled(node.name(), node.parameters());
 					return node;
 				}
 
 				@Override
 				public Object visitReturn(ReturnStatement node) {
-					if (node.expression != null) {
-						visitExpression(node.expression);
+					if (node.expression() != null) {
+						visitExpression(node.expression());
 					}
 					return node;
 				}
 
 				@Override
 				public Object visitIf(IfStatement node) {
-					visitExpression(node.expression);
-					visitStatements(node.trueStatements);
-					visitStatements(node.falseStatements);
+					visitExpression(node.expression());
+					visitStatements(node.trueStatements());
+					visitStatements(node.falseStatements());
 					return node;
 				}
 
 				@Override
 				public Object visitWhile(WhileStatement node) {
-					visitExpression(node.expression);
-					visitStatements(node.statements);
+					visitExpression(node.expression());
+					visitStatements(node.statements());
 					return node;
 				}
 
@@ -160,14 +160,14 @@ public final class PureFunctionDetection {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				visitExpression(node.left);
-				visitExpression(node.right);
+				visitExpression(node.left());
+				visitExpression(node.right());
 				return node;
 			}
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				functionCalled(node.name, node.parameters);
+				functionCalled(node.name(), node.parameters());
 				return node;
 			}
 
@@ -178,7 +178,7 @@ public final class PureFunctionDetection {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				if (globalVariables.contains(node.name)) {
+				if (globalVariables.contains(node.name())) {
 					nonPureFunctions.add(currentFunction);
 				}
 				return node;

@@ -27,15 +27,15 @@ public final class CfgSimplifyExpressions implements BlockVisitor {
 		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
-				final Expression expression = toSimpleExpression(node.expression);
-				consumer.accept(new Assignment(node.operation, node.name, expression));
+				final Expression expression = toSimpleExpression(node.expression());
+				consumer.accept(new Assignment(node.operation(), node.name(), expression));
 				return node;
 			}
 
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				final Expression expression = toSimpleExpression(node.expression);
-				consumer.accept(new VarDeclaration(node.name, expression));
+				final Expression expression = toSimpleExpression(node.expression());
+				consumer.accept(new VarDeclaration(node.name(), expression));
 				return node;
 			}
 
@@ -67,9 +67,9 @@ public final class CfgSimplifyExpressions implements BlockVisitor {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final Expression left = toSimpleExpression(node.left);
-				final Expression right = toSimpleExpression(node.right);
-				return simplify(left, node.operator, right);
+				final Expression left = toSimpleExpression(node.left());
+				final Expression right = toSimpleExpression(node.right());
+				return simplify(left, node.operator(), right);
 			}
 
 			@Override
@@ -94,43 +94,43 @@ public final class CfgSimplifyExpressions implements BlockVisitor {
 		if (left instanceof NumberLiteral leftNumber && right instanceof NumberLiteral rightNumber) {
 			switch (operator) {
 				case add:
-					return new NumberLiteral(leftNumber.value + rightNumber.value);
+					return new NumberLiteral(leftNumber.value() + rightNumber.value());
 				case sub:
-					return new NumberLiteral(leftNumber.value - rightNumber.value);
+					return new NumberLiteral(leftNumber.value() - rightNumber.value());
 				case multiply:
-					return new NumberLiteral(leftNumber.value * rightNumber.value);
+					return new NumberLiteral(leftNumber.value() * rightNumber.value());
 				case divide:
-					return new NumberLiteral(leftNumber.value / rightNumber.value);
+					return new NumberLiteral(leftNumber.value() / rightNumber.value());
 				case modulo:
-					return new NumberLiteral(leftNumber.value % rightNumber.value);
+					return new NumberLiteral(leftNumber.value() % rightNumber.value());
 				case bitAnd:
-					return new NumberLiteral(leftNumber.value & rightNumber.value);
+					return new NumberLiteral(leftNumber.value() & rightNumber.value());
 				case bitOr:
-					return new NumberLiteral(leftNumber.value | rightNumber.value);
+					return new NumberLiteral(leftNumber.value() | rightNumber.value());
 				case bitXor:
-					return new NumberLiteral(leftNumber.value ^ rightNumber.value);
+					return new NumberLiteral(leftNumber.value() ^ rightNumber.value());
 			}
 		}
 		if (left instanceof BinaryExpression leftBin
 				&& right instanceof NumberLiteral) {
 			if (operator == BinaryExpression.Op.add) {
-				if (leftBin.operator == BinaryExpression.Op.add) {
-					return new BinaryExpression(leftBin.left, BinaryExpression.Op.add,
-					                            simplify(leftBin.right, BinaryExpression.Op.add, right));
+				if (leftBin.operator() == BinaryExpression.Op.add) {
+					return new BinaryExpression(leftBin.left(), BinaryExpression.Op.add,
+					                            simplify(leftBin.right(), BinaryExpression.Op.add, right));
 				}
-				if (leftBin.operator == BinaryExpression.Op.sub) {
-					return new BinaryExpression(leftBin.left, BinaryExpression.Op.add,
-					                            simplify(right, BinaryExpression.Op.sub, leftBin.right));
+				if (leftBin.operator() == BinaryExpression.Op.sub) {
+					return new BinaryExpression(leftBin.left(), BinaryExpression.Op.add,
+					                            simplify(right, BinaryExpression.Op.sub, leftBin.right()));
 				}
 			}
 			if (operator == BinaryExpression.Op.sub) {
-				if (leftBin.operator == BinaryExpression.Op.add) {
-					return new BinaryExpression(leftBin.left, BinaryExpression.Op.sub,
-					                            simplify(leftBin.right, BinaryExpression.Op.sub, right));
+				if (leftBin.operator() == BinaryExpression.Op.add) {
+					return new BinaryExpression(leftBin.left(), BinaryExpression.Op.sub,
+					                            simplify(leftBin.right(), BinaryExpression.Op.sub, right));
 				}
-				if (leftBin.operator == BinaryExpression.Op.sub) {
-					return new BinaryExpression(leftBin.left, BinaryExpression.Op.sub,
-					                            simplify(leftBin.right, BinaryExpression.Op.add, right));
+				if (leftBin.operator() == BinaryExpression.Op.sub) {
+					return new BinaryExpression(leftBin.left(), BinaryExpression.Op.sub,
+					                            simplify(leftBin.right(), BinaryExpression.Op.add, right));
 				}
 			}
 		}

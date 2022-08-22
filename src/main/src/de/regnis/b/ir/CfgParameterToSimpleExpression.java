@@ -33,23 +33,23 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
-				final Expression expression = toSimpleExpression(node.expression, false, consumer);
-				consumer.accept(new Assignment(node.operation, node.name, expression));
+				final Expression expression = toSimpleExpression(node.expression(), false, consumer);
+				consumer.accept(new Assignment(node.operation(), node.name(), expression));
 				return node;
 			}
 
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				final Expression expression = toSimpleExpression(node.expression, false, consumer);
-				consumer.accept(new VarDeclaration(node.name, expression));
+				final Expression expression = toSimpleExpression(node.expression(), false, consumer);
+				consumer.accept(new VarDeclaration(node.name(), expression));
 				return node;
 			}
 
 			@Override
 			public Object visitCall(CallStatement node) {
-				final FuncCallParameters parameters = node.parameters.transform(expression ->
+				final FuncCallParameters parameters = node.parameters().transform(expression ->
 						                                                                toSimpleExpression(expression, true, consumer));
-				consumer.accept(new CallStatement(node.name, parameters));
+				consumer.accept(new CallStatement(node.name(), parameters));
 				return node;
 			}
 		}));
@@ -75,16 +75,16 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final Expression left = toSimpleExpression(node.left, createTempVar, consumer);
-				final Expression right = toSimpleExpression(node.right, createTempVar, consumer);
-				return maybeWrapInTempVar(new BinaryExpression(left, node.operator, right));
+				final Expression left = toSimpleExpression(node.left(), createTempVar, consumer);
+				final Expression right = toSimpleExpression(node.right(), createTempVar, consumer);
+				return maybeWrapInTempVar(new BinaryExpression(left, node.operator(), right));
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				final FuncCallParameters parameters = node.parameters.transform(expression ->
+				final FuncCallParameters parameters = node.parameters().transform(expression ->
 						                                                                toSimpleExpression(expression, true, consumer));
-				return maybeWrapInTempVar(new FuncCall(node.name, parameters));
+				return maybeWrapInTempVar(new FuncCall(node.name(), parameters));
 			}
 
 			@Override

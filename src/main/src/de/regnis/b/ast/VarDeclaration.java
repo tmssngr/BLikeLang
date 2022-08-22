@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class VarDeclaration implements SimpleStatement {
+public record VarDeclaration(@NotNull String name, @NotNull Expression expression,
+                             @NotNull Position position) implements SimpleStatement {
 
 	// Static =================================================================
 
@@ -14,22 +15,10 @@ public final class VarDeclaration implements SimpleStatement {
 		return new VarDeclaration(name, expression);
 	}
 
-	// Fields =================================================================
-
-	public final String name;
-	public final Expression expression;
-	public final Position position;
-
 	// Setup ==================================================================
 
 	public VarDeclaration(@NotNull String name, @NotNull Expression expression) {
 		this(name, expression, Position.DUMMY);
-	}
-
-	public VarDeclaration(@NotNull String name, @NotNull Expression expression, @NotNull Position position) {
-		this.name = name;
-		this.expression = expression;
-		this.position = position;
 	}
 
 	// Implemented ============================================================

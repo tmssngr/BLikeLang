@@ -78,19 +78,19 @@ public abstract class CommandFactory {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				if (!(node.left instanceof VarRead leftVar)
-						|| !(node.right instanceof SimpleExpression right)) {
+				if (!(node.left() instanceof VarRead leftVar)
+						|| !(node.right() instanceof SimpleExpression right)) {
 					throw new IllegalStateException();
 				}
 
-				switch (node.operator) {
-					case lessThan -> handleIf(leftVar.name, right, JumpCondition.lt, JumpCondition.ge, trueLabel, falseLabel);
-					case lessEqual -> handleIf(leftVar.name, right, JumpCondition.le, JumpCondition.gt, trueLabel, falseLabel);
-					case equal -> handleIf(leftVar.name, right, JumpCondition.z, JumpCondition.nz, trueLabel, falseLabel);
-					case notEqual -> handleIf(leftVar.name, right, JumpCondition.nz, JumpCondition.z, trueLabel, falseLabel);
-					case greaterEqual -> handleIf(leftVar.name, right, JumpCondition.ge, JumpCondition.lt, trueLabel, falseLabel);
-					case greaterThan -> handleIf(leftVar.name, right, JumpCondition.gt, JumpCondition.le, trueLabel, falseLabel);
-					default -> throw new UnsupportedOperationException(node.operator.text);
+				switch (node.operator()) {
+					case lessThan -> handleIf(leftVar.name(), right, JumpCondition.lt, JumpCondition.ge, trueLabel, falseLabel);
+					case lessEqual -> handleIf(leftVar.name(), right, JumpCondition.le, JumpCondition.gt, trueLabel, falseLabel);
+					case equal -> handleIf(leftVar.name(), right, JumpCondition.z, JumpCondition.nz, trueLabel, falseLabel);
+					case notEqual -> handleIf(leftVar.name(), right, JumpCondition.nz, JumpCondition.z, trueLabel, falseLabel);
+					case greaterEqual -> handleIf(leftVar.name(), right, JumpCondition.ge, JumpCondition.lt, trueLabel, falseLabel);
+					case greaterThan -> handleIf(leftVar.name(), right, JumpCondition.gt, JumpCondition.le, trueLabel, falseLabel);
+					default -> throw new UnsupportedOperationException(node.operator().text);
 				}
 				return node;
 			}
@@ -107,7 +107,7 @@ public abstract class CommandFactory {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				addCommand(new Load(0, node.name));
+				addCommand(new Load(0, node.name()));
 				addCommand(new CmpCJump(0, 0,
 				                        JumpCondition.nz, trueLabel,
 				                        JumpCondition.z, falseLabel));
@@ -120,8 +120,8 @@ public abstract class CommandFactory {
 		statement.visit(new SimpleStatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
-				switch (node.operation) {
-					case assign -> handleAssignOrDeclareVar(node.name, node.expression);
+				switch (node.operation()) {
+					case assign -> handleAssignOrDeclareVar(node.name(), node.expression());
 					case add -> handleAssignment(node, ArithmeticOp.add);
 					case sub -> handleAssignment(node, ArithmeticOp.sub);
 					case bitAnd -> handleAssignment(node, ArithmeticOp.and);
@@ -129,21 +129,21 @@ public abstract class CommandFactory {
 					case bitXor -> handleAssignment(node, ArithmeticOp.xor);
 					case shiftL -> handleShift(node, RegisterCommand.Op.shiftL);
 					case shiftR -> handleShift(node, RegisterCommand.Op.shiftR);
-					default -> throw new UnsupportedOperationException(node.operation.toString());
+					default -> throw new UnsupportedOperationException(node.operation().toString());
 				}
 				return node;
 			}
 
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				handleAssignOrDeclareVar(node.name, node.expression);
+				handleAssignOrDeclareVar(node.name(), node.expression());
 				return node;
 			}
 
 			@Override
 			public Object visitCall(CallStatement node) {
-				final Type returnType = functionNameToReturnType.apply(node.name);
-				handleCall(node.name, node.parameters, returnType != BasicTypes.VOID, null);
+				final Type returnType = functionNameToReturnType.apply(node.name());
+				handleCall(node.name(), node.parameters(), returnType != BasicTypes.VOID, null);
 				return node;
 			}
 		});
@@ -171,20 +171,20 @@ public abstract class CommandFactory {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name, node.parameters, true, name);
+				handleCall(node.name(), node.parameters(), true, name);
 				return node;
 			}
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				addCommand(new LoadC(0, node.value));
+				addCommand(new LoadC(0, node.value()));
 				addCommand(new Store(name, 0));
 				return node;
 			}
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				addCommand(new Load(0, node.name));
+				addCommand(new Load(0, node.name()));
 				addCommand(new Store(name, 0));
 				return node;
 			}
@@ -222,19 +222,19 @@ public abstract class CommandFactory {
 	}
 
 	private void handleAssignment(Assignment node, ArithmeticOp op) {
-		addCommand(new Load(0, node.name));
-		literalOrVar(node.expression,
+		addCommand(new Load(0, node.name()));
+		literalOrVar(node.expression(),
 		             literal -> addCommand(new ArithmeticC(op, 0, literal)),
 		             var -> {
 			             addCommand(new Load(1, var));
 			             addCommand(new Arithmetic(op, 0, 1));
 		             });
-		addCommand(new Store(node.name, 0));
+		addCommand(new Store(node.name(), 0));
 	}
 
 	private void handleShift(Assignment node, RegisterCommand.Op op) {
-		addCommand(new Load(0, node.name));
-		literalOrVar(node.expression,
+		addCommand(new Load(0, node.name()));
+		literalOrVar(node.expression(),
 		             literal -> {
 			             for (int i = 0; i < literal; i++) {
 				             addCommand(new RegisterCommand(op, 0));
@@ -243,15 +243,15 @@ public abstract class CommandFactory {
 		             var -> {
 			             throw new UnsupportedOperationException();
 		             });
-		addCommand(new Store(node.name, 0));
+		addCommand(new Store(node.name(), 0));
 	}
 
 	private void literalOrVar(Expression expression, IntConsumer literalConsumer, Consumer<String> varConsumer) {
 		if (expression instanceof final NumberLiteral literal) {
-			literalConsumer.accept(literal.value);
+			literalConsumer.accept(literal.value());
 		}
 		else if (expression instanceof VarRead varRead) {
-			varConsumer.accept(varRead.name);
+			varConsumer.accept(varRead.name());
 		}
 		else {
 			throw new UnsupportedOperationException(expression.toString());
@@ -268,13 +268,13 @@ public abstract class CommandFactory {
 		final SimpleStatementVisitor<Object> statementVisitor = new SimpleStatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
-				variables.add(node.name);
+				variables.add(node.name());
 				return node;
 			}
 
 			@Override
 			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				variables.add(node.name);
+				variables.add(node.name());
 				return node;
 			}
 

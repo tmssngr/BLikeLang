@@ -314,7 +314,7 @@ public class AstFactoryTest {
 
 	private String parseAndPrintStatement(String statements) {
 		final DeclarationList root = AstFactory.parseString("int method() {\n" + statements + "\n}");
-		final StatementList statementsList = root.getFunction("method").statementList;
+		final StatementList statementsList = root.getFunction("method").statementList();
 		final StringOutput output = new StringStringOutput();
 		for (String string : new TreePrinter().getStrings(null, statementsList)) {
 			output.print(string);

@@ -32,8 +32,8 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final StatementList newStatementList = handleStatementList(node.statementList);
-				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+				final StatementList newStatementList = handleStatementList(node.statementList());
+				return new FuncDeclaration(node.type(), node.name(), node.parameters(), newStatementList);
 			}
 		};
 		return declarationList.transform(declaration -> declaration.visit(visitor));
@@ -41,7 +41,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	@Nullable
 	private Assignment.Op toAssignmentOperator(BinaryExpression binEx) {
-		return switch (binEx.operator) {
+		return switch (binEx.operator()) {
 			case add -> Assignment.Op.add;
 			case sub -> Assignment.Op.sub;
 			case multiply -> Assignment.Op.multiply;
@@ -60,11 +60,11 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final Expression left = splitExpression(node.left, true, tempVarFactory);
-				final Expression right = splitExpression(node.right, true, tempVarFactory);
+				final Expression left = splitExpression(node.left(), true, tempVarFactory);
+				final Expression right = splitExpression(node.right(), true, tempVarFactory);
 				final Assignment.Op op = toAssignmentOperator(node);
 				if (op == null) {
-					final BinaryExpression expression = new BinaryExpression(left, node.operator, right);
+					final BinaryExpression expression = new BinaryExpression(left, node.operator(), right);
 					if (assignToTempVar) {
 						final String tempVar = tempVarFactory.createTempVarDeclaration(expression);
 						return new VarRead(tempVar);
@@ -73,8 +73,8 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 					return expression;
 				}
 
-				final String tempVar = left != node.left && left instanceof VarRead leftTempVar
-						? leftTempVar.name
+				final String tempVar = left != node.left() && left instanceof VarRead leftTempVar
+						? leftTempVar.name()
 						: tempVarFactory.createTempVarDeclaration(left);
 				tempVarFactory.createAssignment(op, tempVar, right);
 				return new VarRead(tempVar);
@@ -103,35 +103,35 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	}
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
-		if (node.operation == Assignment.Op.assign && node.expression instanceof BinaryExpression binEx) {
+		if (node.operation() == Assignment.Op.assign && node.expression() instanceof BinaryExpression binEx) {
 			final Assignment.Op op = toAssignmentOperator(binEx);
 			if (op != null) {
-				final Expression left = splitExpression(binEx.left, true, tempVarFactory);
-				final Expression right = splitExpression(binEx.right, true, tempVarFactory);
+				final Expression left = splitExpression(binEx.left(), true, tempVarFactory);
+				final Expression right = splitExpression(binEx.right(), true, tempVarFactory);
 				String tempVar = null;
 				if (left instanceof VarRead leftVar) {
-					if (leftVar.name.equals(node.name)) {
-						return createAssignment(op, node.name, right);
+					if (leftVar.name().equals(node.name())) {
+						return createAssignment(op, node.name(), right);
 					}
 
-					if (left != binEx.left) {
-						tempVar = leftVar.name;
+					if (left != binEx.left()) {
+						tempVar = leftVar.name();
 					}
 				}
 				if (tempVar == null) {
 					tempVar = tempVarFactory.createTempVarDeclaration(left);
 				}
 				tempVarFactory.createAssignment(op, tempVar, right);
-				return createAssignment(Assignment.Op.assign, node.name, new VarRead(tempVar));
+				return createAssignment(Assignment.Op.assign, node.name(), new VarRead(tempVar));
 			}
 
 			// boolean
-			final Expression expression = splitExpression(node.expression, true, tempVarFactory);
-			return createAssignment(node.operation, node.name, expression);
+			final Expression expression = splitExpression(node.expression(), true, tempVarFactory);
+			return createAssignment(node.operation(), node.name(), expression);
 		}
 
-		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
-		return createAssignment(node.operation, node.name, expression);
+		final Expression expression = splitExpression(node.expression(), false, tempVarFactory);
+		return createAssignment(node.operation(), node.name(), expression);
 	}
 
 	@NotNull
@@ -140,35 +140,35 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	}
 
 	private VarDeclaration handleVarDeclaration(VarDeclaration node, TempVarFactory tempVarFactory) {
-		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
+		final Expression expression = splitExpression(node.expression(), false, tempVarFactory);
 		return node.derive(expression);
 	}
 
 	private Statement handleCall(CallStatement node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = node.parameters.transform(expression ->
+		final FuncCallParameters parameters = node.parameters().transform(expression ->
 				                                                                splitExpression(expression, true, tempVarFactory));
-		return new CallStatement(node.name, parameters);
+		return new CallStatement(node.name(), parameters);
 	}
 
 	private Statement handleReturn(ReturnStatement node, TempVarFactory tempVarFactory) {
-		if (node.expression == null) {
+		if (node.expression() == null) {
 			return node;
 		}
 
-		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
+		final Expression expression = splitExpression(node.expression(), false, tempVarFactory);
 		return new ReturnStatement(expression);
 	}
 
 	private Statement handleIfStatement(IfStatement node, TempVarFactory tempVarFactory) {
-		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
-		final StatementList ifStatements = handleStatementList(node.trueStatements);
-		final StatementList elseStatements = handleStatementList(node.falseStatements);
+		final Expression expression = splitExpression(node.expression(), false, tempVarFactory);
+		final StatementList ifStatements = handleStatementList(node.trueStatements());
+		final StatementList elseStatements = handleStatementList(node.falseStatements());
 		return new IfStatement(expression, ifStatements, elseStatements);
 	}
 
 	private Statement handleWhileStatement(WhileStatement node, TempVarFactory tempVarFactory) {
-		final Expression expression = splitExpression(node.expression, false, tempVarFactory);
-		final StatementList statements = handleStatementList(node.statements);
+		final Expression expression = splitExpression(node.expression(), false, tempVarFactory);
+		final StatementList statements = handleStatementList(node.statements());
 		return new WhileStatement(expression, statements);
 	}
 
@@ -225,9 +225,9 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = node.parameters.transform(expression ->
+		final FuncCallParameters parameters = node.parameters().transform(expression ->
 				                                                                splitExpression(expression, true, tempVarFactory));
-		return new FuncCall(node.name, parameters, node.position);
+		return new FuncCall(node.name(), parameters, node.position());
 	}
 
 	private TempVarFactory createTempVarFactory(StatementList statementList) {

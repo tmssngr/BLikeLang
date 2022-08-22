@@ -14,8 +14,8 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final StatementList newStatementList = handleStatementList(node.statementList);
-				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+				final StatementList newStatementList = handleStatementList(node.statementList());
+				return new FuncDeclaration(node.type(), node.name(), node.parameters(), newStatementList);
 			}
 		};
 		return root.transform(declaration -> declaration.visit(visitor));
@@ -32,17 +32,17 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 			newStatementList.add(statement.visit(new StatementVisitor<>() {
 				@Override
 				public Statement visitAssignment(Assignment node) {
-					return switch (node.operation) {
-						case add -> replaceWithAssignment(BinaryExpression.Op.add, node.name, node.expression);
-						case bitAnd -> replaceWithAssignment(BinaryExpression.Op.bitAnd, node.name, node.expression);
-						case bitOr -> replaceWithAssignment(BinaryExpression.Op.bitOr, node.name, node.expression);
-						case bitXor -> replaceWithAssignment(BinaryExpression.Op.bitXor, node.name, node.expression);
-						case divide -> replaceWithAssignment(BinaryExpression.Op.divide, node.name, node.expression);
-						case modulo -> replaceWithAssignment(BinaryExpression.Op.modulo, node.name, node.expression);
-						case multiply -> replaceWithAssignment(BinaryExpression.Op.multiply, node.name, node.expression);
-						case shiftL -> replaceWithAssignment(BinaryExpression.Op.shiftL, node.name, node.expression);
-						case shiftR -> replaceWithAssignment(BinaryExpression.Op.shiftR, node.name, node.expression);
-						case sub -> replaceWithAssignment(BinaryExpression.Op.sub, node.name, node.expression);
+					return switch (node.operation()) {
+						case add -> replaceWithAssignment(BinaryExpression.Op.add, node.name(), node.expression());
+						case bitAnd -> replaceWithAssignment(BinaryExpression.Op.bitAnd, node.name(), node.expression());
+						case bitOr -> replaceWithAssignment(BinaryExpression.Op.bitOr, node.name(), node.expression());
+						case bitXor -> replaceWithAssignment(BinaryExpression.Op.bitXor, node.name(), node.expression());
+						case divide -> replaceWithAssignment(BinaryExpression.Op.divide, node.name(), node.expression());
+						case modulo -> replaceWithAssignment(BinaryExpression.Op.modulo, node.name(), node.expression());
+						case multiply -> replaceWithAssignment(BinaryExpression.Op.multiply, node.name(), node.expression());
+						case shiftL -> replaceWithAssignment(BinaryExpression.Op.shiftL, node.name(), node.expression());
+						case shiftR -> replaceWithAssignment(BinaryExpression.Op.shiftR, node.name(), node.expression());
+						case sub -> replaceWithAssignment(BinaryExpression.Op.sub, node.name(), node.expression());
 						default -> node;
 					};
 				}
@@ -69,14 +69,14 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 
 				@Override
 				public Statement visitIf(IfStatement node) {
-					final StatementList ifStatements = handleStatementList(node.trueStatements);
-					final StatementList elseStatements = handleStatementList(node.falseStatements);
-					return new IfStatement(node.expression, ifStatements, elseStatements);
+					final StatementList ifStatements = handleStatementList(node.trueStatements());
+					final StatementList elseStatements = handleStatementList(node.falseStatements());
+					return new IfStatement(node.expression(), ifStatements, elseStatements);
 				}
 
 				@Override
 				public Statement visitWhile(WhileStatement node) {
-					return new WhileStatement(node.expression, handleStatementList(node.statements));
+					return new WhileStatement(node.expression(), handleStatementList(node.statements()));
 				}
 
 				@Override

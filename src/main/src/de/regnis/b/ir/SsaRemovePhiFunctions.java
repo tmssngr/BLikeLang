@@ -65,15 +65,15 @@ public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
 				statements.add(prevBlockStatement.visit(new SimpleStatementVisitor<>() {
 					@Override
 					public SimpleStatement visitAssignment(Assignment node) {
-						return prevVar.equals(node.name)
-								? new Assignment(node.operation, newVar, node.expression)
+						return prevVar.equals(node.name())
+								? new Assignment(node.operation(), newVar, node.expression())
 								: node;
 					}
 
 					@Override
 					public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
-						return prevVar.equals(node.name)
-								? new VarDeclaration(newVar, node.expression)
+						return prevVar.equals(node.name())
+								? new VarDeclaration(newVar, node.expression())
 								: node;
 					}
 
@@ -95,7 +95,7 @@ public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
 	private boolean containsVarDeclarationFor(String var, List<? extends SimpleStatement> statements) {
 		for (SimpleStatement statement : statements) {
 			if (statement instanceof VarDeclaration declaration
-					&& declaration.name.equals(var)) {
+					&& declaration.name().equals(var)) {
 				return true;
 			}
 		}

@@ -31,17 +31,17 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 		graph.iterate(new SsaSearchAndReplace() {
 			@Override
 			protected void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
-				if (fromTo.containsKey(node.name)) {
+				if (fromTo.containsKey(node.name())) {
 					return;
 				}
 
-				final Expression newExpression = node.expression.visit(this);
-				consumer.accept(new VarDeclaration(node.name, newExpression));
+				final Expression newExpression = node.expression().visit(this);
+				consumer.accept(new VarDeclaration(node.name(), newExpression));
 			}
 
 			@Override
 			public Expression visitVarRead(VarRead node) {
-				final SimpleExpression replace = fromTo.get(node.name);
+				final SimpleExpression replace = fromTo.get(node.name());
 				return replace != null ? replace : node;
 			}
 		});
@@ -51,21 +51,21 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 		graph.iterate(new SsaSearchAndReplace() {
 			@Override
 			protected void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
-				final Expression newExpression = node.expression.visit(this);
-				final String name = fromTo.getOrDefault(node.name, node.name);
+				final Expression newExpression = node.expression().visit(this);
+				final String name = fromTo.getOrDefault(node.name(), node.name());
 				consumer.accept(new VarDeclaration(name, newExpression));
 			}
 
 			@Override
 			protected void processAssignment(Assignment node, Consumer<SimpleStatement> consumer) {
-				final Expression newExpression = node.expression.visit(this);
-				final String name = fromTo.getOrDefault(node.name, node.name);
-				consumer.accept(new Assignment(node.operation, name, newExpression));
+				final Expression newExpression = node.expression().visit(this);
+				final String name = fromTo.getOrDefault(node.name(), node.name());
+				consumer.accept(new Assignment(node.operation(), name, newExpression));
 			}
 
 			@Override
 			public Expression visitVarRead(VarRead node) {
-				final String name = fromTo.getOrDefault(node.name, node.name);
+				final String name = fromTo.getOrDefault(node.name(), node.name());
 				return new VarRead(name);
 			}
 		});
@@ -101,15 +101,15 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 
 	@Override
 	public Expression visitBinary(BinaryExpression node) {
-		final Expression left = node.left.visit(this);
-		final Expression right = node.right.visit(this);
-		return new BinaryExpression(left, node.operator, right);
+		final Expression left = node.left().visit(this);
+		final Expression right = node.right().visit(this);
+		return new BinaryExpression(left, node.operator(), right);
 	}
 
 	@Override
 	public Expression visitFunctionCall(FuncCall node) {
-		final FuncCallParameters parameters = node.parameters.transform(expression -> expression.visit(this));
-		return new FuncCall(node.name, parameters);
+		final FuncCallParameters parameters = node.parameters().transform(expression -> expression.visit(this));
+		return new FuncCall(node.name(), parameters);
 	}
 
 	@Override
@@ -145,8 +145,8 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 
 			@Override
 			public SimpleStatement visitCall(CallStatement node) {
-				final FuncCallParameters parameters = node.parameters.transform(expression -> expression.visit(SsaSearchAndReplace.this));
-				consumer.accept(new CallStatement(node.name, parameters));
+				final FuncCallParameters parameters = node.parameters().transform(expression -> expression.visit(SsaSearchAndReplace.this));
+				consumer.accept(new CallStatement(node.name(), parameters));
 				return node;
 			}
 		}));

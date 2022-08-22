@@ -30,48 +30,48 @@ public final class SplitExpressionsTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final StatementList newStatementList = handleStatementList(node.statementList);
-				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+				final StatementList newStatementList = handleStatementList(node.statementList());
+				return new FuncDeclaration(node.type(), node.name(), node.parameters(), newStatementList);
 			}
 		};
 		return declarationList.transform(declaration -> declaration.visit(visitor));
 	}
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {
-		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		return new Assignment(node.operation, node.name, expression, node.position);
+		final Expression expression = handleExpression(node.expression(), tempVarFactory);
+		return new Assignment(node.operation(), node.name(), expression, node.position());
 	}
 
 	private VarDeclaration handleVarDeclaration(VarDeclaration node, TempVarFactory tempVarFactory) {
-		final Expression expression = handleExpression(node.expression, tempVarFactory);
+		final Expression expression = handleExpression(node.expression(), tempVarFactory);
 		return node.derive(expression);
 	}
 
 	private Statement handleCall(CallStatement node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = node.parameters.transform(expression ->
+		final FuncCallParameters parameters = node.parameters().transform(expression ->
 				                                                                splitInnerExpression(expression, tempVarFactory));
-		return new CallStatement(node.name, parameters);
+		return new CallStatement(node.name(), parameters);
 	}
 
 	private Statement handleReturn(ReturnStatement node, TempVarFactory tempVarFactory) {
-		if (node.expression == null) {
+		if (node.expression() == null) {
 			return node;
 		}
 
-		final Expression expression = handleExpression(node.expression, tempVarFactory);
+		final Expression expression = handleExpression(node.expression(), tempVarFactory);
 		return new ReturnStatement(expression);
 	}
 
 	private Statement handleIfStatement(IfStatement node, TempVarFactory tempVarFactory) {
-		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		final StatementList ifStatements = handleStatementList(node.trueStatements);
-		final StatementList elseStatements = handleStatementList(node.falseStatements);
+		final Expression expression = handleExpression(node.expression(), tempVarFactory);
+		final StatementList ifStatements = handleStatementList(node.trueStatements());
+		final StatementList elseStatements = handleStatementList(node.falseStatements());
 		return new IfStatement(expression, ifStatements, elseStatements);
 	}
 
 	private Statement handleWhileStatement(WhileStatement node, TempVarFactory tempVarFactory) {
-		final Expression expression = handleExpression(node.expression, tempVarFactory);
-		final StatementList statements = handleStatementList(node.statements);
+		final Expression expression = handleExpression(node.expression(), tempVarFactory);
+		final StatementList statements = handleStatementList(node.statements());
 		return new WhileStatement(expression, statements);
 	}
 
@@ -152,15 +152,15 @@ public final class SplitExpressionsTransformation {
 	}
 
 	private BinaryExpression handleBinary(BinaryExpression node, TempVarFactory tempVarFactory) {
-		final Expression left = splitInnerExpression(node.left, tempVarFactory);
-		final Expression right = splitInnerExpression(node.right, tempVarFactory);
-		return new BinaryExpression(left, node.operator, right);
+		final Expression left = splitInnerExpression(node.left(), tempVarFactory);
+		final Expression right = splitInnerExpression(node.right(), tempVarFactory);
+		return new BinaryExpression(left, node.operator(), right);
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = node.parameters.transform(expression ->
+		final FuncCallParameters parameters = node.parameters().transform(expression ->
 				                                                                splitInnerExpression(expression, tempVarFactory));
-		return new FuncCall(node.name, parameters, node.position);
+		return new FuncCall(node.name(), parameters, node.position());
 	}
 
 	@NotNull

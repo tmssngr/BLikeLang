@@ -5,24 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class CallStatement implements SimpleStatement {
-
-	// Fields =================================================================
-
-	public final String name;
-	public final FuncCallParameters parameters;
-	public final Position position;
+public record CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters, @NotNull Position position) implements SimpleStatement {
 
 	// Setup ==================================================================
 
 	public CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters) {
 		this(name, parameters, Position.DUMMY);
-	}
-
-	public CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters, @NotNull Position position) {
-		this.name       = name;
-		this.parameters = parameters;
-		this.position   = position;
 	}
 
 	// Implemented ============================================================

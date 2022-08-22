@@ -5,24 +5,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class WhileStatement implements ControlFlowStatement {
-
-	// Fields =================================================================
-
-	public final Expression expression;
-	public final StatementList statements;
-	public final Position position;
+public record WhileStatement(@NotNull Expression expression, @NotNull StatementList statements,
+                             @NotNull Position position) implements ControlFlowStatement {
 
 	// Setup ==================================================================
 
-	public WhileStatement(Expression expression, StatementList statements) {
+	public WhileStatement(@NotNull Expression expression, @NotNull StatementList statements) {
 		this(expression, statements, Position.DUMMY);
-	}
-
-	public WhileStatement(Expression expression, StatementList statements, @NotNull Position position) {
-		this.expression = expression;
-		this.statements = statements;
-		this.position   = position;
 	}
 
 	// Implemented ============================================================

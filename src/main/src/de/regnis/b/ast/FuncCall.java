@@ -5,24 +5,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class FuncCall implements Expression {
-
-	// Fields =================================================================
-
-	public final FuncCallParameters parameters;
-	public final String name;
-	public final Position position;
+public record FuncCall(@NotNull String name, @NotNull FuncCallParameters parameters,
+                       @NotNull Position position) implements Expression {
 
 	// Setup ==================================================================
 
 	public FuncCall(@NotNull String name, @NotNull FuncCallParameters parameters) {
 		this(name, parameters, Position.DUMMY);
-	}
-
-	public FuncCall(@NotNull String name, @NotNull FuncCallParameters parameters, @NotNull Position position) {
-		this.name       = name;
-		this.parameters = parameters;
-		this.position   = position;
 	}
 
 	// Implemented ============================================================

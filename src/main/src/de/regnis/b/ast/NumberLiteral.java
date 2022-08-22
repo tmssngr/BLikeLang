@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class NumberLiteral implements SimpleExpression {
+public record NumberLiteral(int value) implements SimpleExpression {
 
 	// Constants ==============================================================
 
@@ -16,16 +16,6 @@ public final class NumberLiteral implements SimpleExpression {
 
 	public static NumberLiteral get(boolean value) {
 		return value ? TRUE : FALSE;
-	}
-
-	// Fields =================================================================
-
-	public final int value;
-
-	// Setup ==================================================================
-
-	public NumberLiteral(int value) {
-		this.value = value;
 	}
 
 	// Implemented ============================================================

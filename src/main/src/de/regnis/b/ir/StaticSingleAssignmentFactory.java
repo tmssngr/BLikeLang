@@ -31,11 +31,11 @@ public final class StaticSingleAssignmentFactory {
 	@Nullable
 	public static Tuple<String, List<String>> getPhiFunction(SimpleStatement statement) {
 		if (statement instanceof VarDeclaration declaration
-				&& declaration.expression instanceof FuncCall call
-				&& call.name.equals(PHI)) {
-			final List<String> variants = Utils.convert(call.parameters.getExpressions(), new ArrayList<>(),
-			                                           expression -> ((VarRead) expression).name);
-			return new Tuple<>(declaration.name, variants);
+				&& declaration.expression() instanceof FuncCall call
+				&& call.name().equals(PHI)) {
+			final List<String> variants = Utils.convert(call.parameters().getExpressions(), new ArrayList<>(),
+			                                           expression -> ((VarRead) expression).name());
+			return new Tuple<>(declaration.name(), variants);
 		}
 		return null;
 	}
@@ -174,26 +174,26 @@ public final class StaticSingleAssignmentFactory {
 		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
 			@Override
 			public SimpleStatement visitAssignment(Assignment node) {
-				assertTrue(node.operation == Assignment.Op.assign);
+				assertTrue(node.operation() == Assignment.Op.assign);
 
-				final Expression newExpression = visitExpression(node.expression, varToVariant);
-				final String newName = varToVariant.getAssignmentName(node.name);
+				final Expression newExpression = visitExpression(node.expression(), varToVariant);
+				final String newName = varToVariant.getAssignmentName(node.name());
 				consumer.accept(new VarDeclaration(newName, newExpression));
 				return node;
 			}
 
 			@Override
 			public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
-				final Expression newExpression = visitExpression(node.expression, varToVariant);
-				final String newName = varToVariant.getDeclarationName(node.name);
+				final Expression newExpression = visitExpression(node.expression(), varToVariant);
+				final String newName = varToVariant.getDeclarationName(node.name());
 				consumer.accept(new VarDeclaration(newName, newExpression));
 				return node;
 			}
 
 			@Override
 			public SimpleStatement visitCall(CallStatement node) {
-				final FuncCallParameters parameters = node.parameters.transform(expression -> visitExpression(expression, varToVariant));
-				consumer.accept(new CallStatement(node.name, parameters));
+				final FuncCallParameters parameters = node.parameters().transform(expression -> visitExpression(expression, varToVariant));
+				consumer.accept(new CallStatement(node.name(), parameters));
 				return node;
 			}
 		}));
@@ -203,15 +203,15 @@ public final class StaticSingleAssignmentFactory {
 		return expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
-				final Expression left = visitExpression(node.left, varToVariant);
-				final Expression right = visitExpression(node.right, varToVariant);
-				return new BinaryExpression(left, node.operator, right);
+				final Expression left = visitExpression(node.left(), varToVariant);
+				final Expression right = visitExpression(node.right(), varToVariant);
+				return new BinaryExpression(left, node.operator(), right);
 			}
 
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
-				final FuncCallParameters parameters = node.parameters.transform(expression -> visitExpression(expression, varToVariant));
-				return new FuncCall(node.name, parameters);
+				final FuncCallParameters parameters = node.parameters().transform(expression -> visitExpression(expression, varToVariant));
+				return new FuncCall(node.name(), parameters);
 			}
 
 			@Override
@@ -221,7 +221,7 @@ public final class StaticSingleAssignmentFactory {
 
 			@Override
 			public Expression visitVarRead(VarRead node) {
-				final String ssaName = varToVariant.getUsageName(node.name);
+				final String ssaName = varToVariant.getUsageName(node.name());
 				return new VarRead(ssaName);
 			}
 		});
@@ -241,7 +241,7 @@ public final class StaticSingleAssignmentFactory {
 
 		public void initializeFromParameters(@NotNull ControlFlowGraph graph) {
 			for (FuncDeclarationParameter parameter : graph.getParameters()) {
-				getDeclarationName(parameter.name);
+				getDeclarationName(parameter.name());
 			}
 		}
 

@@ -62,31 +62,31 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 
 	@Override
 	public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
-		node.expression.visit(this);
+		node.expression().visit(this);
 
-		if (!node.name.equals(ControlFlowGraph.RESULT)
-				&& !declaredVariables.add(node.name)) {
-			throw new UnsupportedOperationException("Variable " + node.name + " declared multiple times");
+		if (!node.name().equals(ControlFlowGraph.RESULT)
+				&& !declaredVariables.add(node.name())) {
+			throw new UnsupportedOperationException("Variable " + node.name() + " declared multiple times");
 		}
 		return node;
 	}
 
 	@Override
 	public SimpleStatement visitCall(CallStatement node) {
-		processParameters(node.parameters);
+		processParameters(node.parameters());
 		return node;
 	}
 
 	@Override
 	public Expression visitBinary(BinaryExpression node) {
-		node.left.visit(this);
-		node.right.visit(this);
+		node.left().visit(this);
+		node.right().visit(this);
 		return node;
 	}
 
 	@Override
 	public Expression visitFunctionCall(FuncCall node) {
-		processParameters(node.parameters);
+		processParameters(node.parameters());
 		return node;
 	}
 
@@ -97,7 +97,7 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 
 	@Override
 	public Expression visitVarRead(VarRead node) {
-		usedVariables.add(node.name);
+		usedVariables.add(node.name());
 		return node;
 	}
 
