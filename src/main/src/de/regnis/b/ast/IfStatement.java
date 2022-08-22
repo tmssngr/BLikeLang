@@ -5,26 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class IfStatement implements ControlFlowStatement {
-
-	// Fields =================================================================
-
-	public final Expression expression;
-	public final StatementList trueStatements;
-	public final StatementList falseStatements;
-	public final Position position;
+public record IfStatement(@NotNull Expression expression, @NotNull StatementList trueStatements, @NotNull StatementList falseStatements, @NotNull Position position) implements ControlFlowStatement {
 
 	// Setup ==================================================================
 
-	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements) {
+	public IfStatement(@NotNull Expression expression, @NotNull StatementList trueStatements, @NotNull StatementList falseStatements) {
 		this(expression, trueStatements, falseStatements, Position.DUMMY);
-	}
-
-	public IfStatement(Expression expression, StatementList trueStatements, StatementList falseStatements, @NotNull Position position) {
-		this.expression = expression;
-		this.trueStatements = trueStatements;
-		this.falseStatements = falseStatements;
-		this.position = position;
 	}
 
 	// Implemented ============================================================

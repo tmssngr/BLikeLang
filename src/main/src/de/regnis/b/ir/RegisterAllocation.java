@@ -45,9 +45,9 @@ public final class RegisterAllocation {
 
 	public void initializeParameters(@NotNull FuncDeclaration function) {
 		int register = 0;
-		for (FuncDeclarationParameter parameter : function.parameters.getParameters()) {
-			interferenceGraph.addEdgesBetween(parameter.name);
-			setRegister(parameter.name, register);
+		for (FuncDeclarationParameter parameter : function.parameters().getParameters()) {
+			interferenceGraph.addEdgesBetween(parameter.name());
+			setRegister(parameter.name(), register);
 			register++;
 		}
 	}

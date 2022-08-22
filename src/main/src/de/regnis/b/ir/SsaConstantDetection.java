@@ -59,8 +59,8 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 
 	@Override
 	public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
-		final String varName = node.name;
-		node.expression.visit(new ExpressionVisitor<Expression>() {
+		final String varName = node.name();
+		node.expression().visit(new ExpressionVisitor<Expression>() {
 			@Override
 			public Expression visitBinary(BinaryExpression node) {
 				final Expression simplifiedExpression = ConstantFoldingTransformation.simplifyBinaryExpression(node);

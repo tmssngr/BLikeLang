@@ -5,26 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class Assignment implements SimpleStatement {
-
-	// Fields =================================================================
-
-	public final Op operation;
-	public final String name;
-	public final Expression expression;
-	public final Position position;
+public record Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, @NotNull Position position) implements SimpleStatement {
 
 	// Setup ==================================================================
 
 	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression) {
 		this(operation, name, expression, Position.DUMMY);
-	}
-
-	public Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, @NotNull Position position) {
-		this.operation = operation;
-		this.name = name;
-		this.expression = expression;
-		this.position = position;
 	}
 
 	// Implemented ============================================================

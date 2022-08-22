@@ -61,7 +61,7 @@ public final class DeclarationList {
 				@Nullable
 				@Override
 				public FuncDeclaration visitFunctionDeclaration(FuncDeclaration node) {
-					if (node.name.equals(name)) {
+					if (node.name().equals(name)) {
 						return node;
 					}
 					return null;

@@ -167,26 +167,26 @@ public final class ControlFlowGraphVarUsageDetector {
 			statement.visit(new SimpleStatementVisitor<>() {
 				@Override
 				public Object visitAssignment(Assignment node) {
-					if (node.operation == Assignment.Op.assign) {
-						live.remove(node.name);
+					if (node.operation() == Assignment.Op.assign) {
+						live.remove(node.name());
 					}
 					else {
-						live.add(node.name);
+						live.add(node.name());
 					}
-					detectRequiredVars(node.expression, live);
+					detectRequiredVars(node.expression(), live);
 					return node;
 				}
 
 				@Override
 				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					live.remove(node.name);
-					detectRequiredVars(node.expression, live);
+					live.remove(node.name());
+					detectRequiredVars(node.expression(), live);
 					return node;
 				}
 
 				@Override
 				public Object visitCall(CallStatement node) {
-					for (Expression parameter : node.parameters.getExpressions()) {
+					for (Expression parameter : node.parameters().getExpressions()) {
 						detectRequiredVars(parameter, live);
 					}
 					return node;
@@ -199,14 +199,14 @@ public final class ControlFlowGraphVarUsageDetector {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				detectRequiredVars(node.left, live);
-				detectRequiredVars(node.right, live);
+				detectRequiredVars(node.left(), live);
+				detectRequiredVars(node.right(), live);
 				return node;
 			}
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				for (Expression parameter : node.parameters.getExpressions()) {
+				for (Expression parameter : node.parameters().getExpressions()) {
 					detectRequiredVars(parameter, live);
 				}
 				return node;
@@ -219,7 +219,7 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				live.add(node.name);
+				live.add(node.name());
 				return node;
 			}
 		});

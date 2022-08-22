@@ -14,7 +14,7 @@ public final class IfBlock extends ControlFlowBlock {
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public IfBlock(@NotNull BasicBlock prevBlock, @NotNull IfStatement node, String prefix, @NotNull Integer labelIndex) {
-		super(node.expression, prefix + "if_" + labelIndex, prevBlock);
+		super(node.expression(), prefix + "if_" + labelIndex, prevBlock);
 
 		// they might get replaced by direct links during compacting
 		new BasicBlock(prefix + "then_" + labelIndex, this);

@@ -5,22 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class VarRead implements SimpleExpression {
-
-	// Fields =================================================================
-
-	public final String name;
-	public final Position position;
+public record VarRead(@NotNull String name, @NotNull Position position) implements SimpleExpression {
 
 	// Setup ==================================================================
 
 	public VarRead(@NotNull String name) {
 		this(name, Position.DUMMY);
-	}
-
-	public VarRead(@NotNull String name, @NotNull Position position) {
-		this.name = name;
-		this.position = position;
 	}
 
 	// Implemented ============================================================

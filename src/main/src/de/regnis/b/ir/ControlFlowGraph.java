@@ -29,10 +29,10 @@ public final class ControlFlowGraph {
 	// Setup ==================================================================
 
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
-		parameters = declaration.parameters;
-		type       = declaration.type;
+		parameters = declaration.parameters();
+		type       = declaration.type();
 
-		final String prefix = declaration.name + "_";
+		final String prefix = declaration.name() + "_";
 
 		exitBlock = new ExitBlock(prefix);
 
@@ -48,7 +48,7 @@ public final class ControlFlowGraph {
 			}
 		};
 		final BasicBlock lastBlock = new Builder(firstBlock, exitBlock, null, prefix, labelIndexSupplier)
-				.processStatements(declaration.statementList);
+				.processStatements(declaration.statementList());
 		if (lastBlock != null) {
 			exitBlock.addPrev(lastBlock);
 		}
@@ -160,10 +160,10 @@ public final class ControlFlowGraph {
 			final IfBlock ifBlock = new IfBlock(basicBlock, node, prefix, labelIndex);
 
 			final BasicBlock trueBlock = new Builder((BasicBlock) ifBlock.getTrueBlock(), exitBlock, breakBlock, prefix, labelIndexSupplier)
-					.processStatements(node.trueStatements);
+					.processStatements(node.trueStatements());
 
 			final BasicBlock falseBlock = new Builder((BasicBlock) ifBlock.getFalseBlock(), exitBlock, breakBlock, prefix, labelIndexSupplier)
-					.processStatements(node.falseStatements);
+					.processStatements(node.falseStatements());
 
 			final String nextLabel = prefix + "after_if_" + labelIndex;
 			if (trueBlock == null) {
@@ -187,7 +187,7 @@ public final class ControlFlowGraph {
 			final BasicBlock leaveBlock = (BasicBlock) whileBlock.getLeaveBlock();
 
 			final BasicBlock lastInnerBlock = new Builder((BasicBlock) whileBlock.getInnerBlock(), exitBlock, leaveBlock, prefix, labelIndexSupplier)
-					.processStatements(node.statements);
+					.processStatements(node.statements());
 
 			if (lastInnerBlock != null) {
 				whileBlock.addPrev(lastInnerBlock);
@@ -199,8 +199,8 @@ public final class ControlFlowGraph {
 		@Nullable
 		@Override
 		public BasicBlock visitReturn(ReturnStatement node) {
-			if (node.expression != null) {
-				basicBlock.add(new Assignment(Assignment.Op.assign, RESULT, node.expression));
+			if (node.expression() != null) {
+				basicBlock.add(new Assignment(Assignment.Op.assign, RESULT, node.expression()));
 			}
 			exitBlock.addPrev(basicBlock);
 			return null;

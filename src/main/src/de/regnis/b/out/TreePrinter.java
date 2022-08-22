@@ -43,30 +43,30 @@ public class TreePrinter {
 
 	public List<String> getStrings(BinaryExpression node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("operator " + node.operator.text);
-		append(getStrings(node.left), true, strings);
-		append(getStrings(node.right), false, strings);
+		strings.add("operator " + node.operator().text);
+		append(getStrings(node.left()), true, strings);
+		append(getStrings(node.right()), false, strings);
 		return strings;
 	}
 
 	public List<String> getStrings(Assignment node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.name + " " + node.operation.text);
-		append(getStrings(node.expression), false, strings);
+		strings.add(node.name() + " " + node.operation().text);
+		append(getStrings(node.expression()), false, strings);
 		return strings;
 	}
 
 	public List<String> getStrings(VarDeclaration node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add(node.name + " :=");
-		append(getStrings(node.expression), false, strings);
+		strings.add(node.name() + " :=");
+		append(getStrings(node.expression()), false, strings);
 		return strings;
 	}
 
 	public List<String> getStrings(CallStatement node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("call " + node.name);
-		final List<Expression> expressions = node.parameters.getExpressions();
+		strings.add("call " + node.name());
+		final List<Expression> expressions = node.parameters().getExpressions();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
 			final Expression expressionNode = expressions.get(i);
 			append(getStrings(expressionNode), i < size - 1, strings);
@@ -77,8 +77,8 @@ public class TreePrinter {
 	public List<String> getStrings(ReturnStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("return");
-		if (node.expression != null) {
-			append(getStrings(node.expression), false, strings);
+		if (node.expression() != null) {
+			append(getStrings(node.expression()), false, strings);
 		}
 		return strings;
 	}
@@ -86,9 +86,9 @@ public class TreePrinter {
 	public List<String> getStrings(IfStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("if");
-		append(getStrings(node.expression), true, strings);
-		append(getStrings("then", node.trueStatements), true, strings);
-		append(getStrings("else", node.falseStatements), false, strings);
+		append(getStrings(node.expression()), true, strings);
+		append(getStrings("then", node.trueStatements()), true, strings);
+		append(getStrings("else", node.falseStatements()), false, strings);
 		return strings;
 	}
 
@@ -110,8 +110,8 @@ public class TreePrinter {
 	private List<String> getStrings(WhileStatement node) {
 		final List<String> strings = new ArrayList<>();
 		strings.add("While");
-		append(getStrings(node.expression), true, strings);
-		append(getStrings("do", node.statements), false, strings);
+		append(getStrings(node.expression()), true, strings);
+		append(getStrings("do", node.statements()), false, strings);
 		return strings;
 	}
 
@@ -133,12 +133,12 @@ public class TreePrinter {
 			@Override
 			public List<String> visitFunctionDeclaration(FuncDeclaration node) {
 				final StringBuilder buffer = new StringBuilder();
-				buffer.append(node.type);
+				buffer.append(node.type());
 				buffer.append(" ");
-				buffer.append(node.name);
+				buffer.append(node.name());
 				buffer.append("(");
 				boolean isFirst = true;
-				for (FuncDeclarationParameter parameter : node.parameters.getParameters()) {
+				for (FuncDeclarationParameter parameter : node.parameters().getParameters()) {
 					if (isFirst) {
 						isFirst = false;
 					}
@@ -148,12 +148,12 @@ public class TreePrinter {
 
 					buffer.append("int");
 					buffer.append(" ");
-					buffer.append(parameter.name);
+					buffer.append(parameter.name());
 				}
 				buffer.append(")");
 				final List<String> strings = new ArrayList<>();
 				strings.add(buffer.toString());
-				append(getStrings(node.statementList), false, strings);
+				append(getStrings(node.statementList()), false, strings);
 				return strings;
 			}
 		});
@@ -229,8 +229,8 @@ public class TreePrinter {
 
 	private List<String> getStrings(FuncCall node) {
 		final List<String> strings = new ArrayList<>();
-		strings.add("function call " + node.name);
-		final List<Expression> expressions = node.parameters.getExpressions();
+		strings.add("function call " + node.name());
+		final List<Expression> expressions = node.parameters().getExpressions();
 		for (int i = 0, size = expressions.size(); i < size; i++) {
 			final Expression expressionNode = expressions.get(i);
 			append(getStrings(expressionNode), i < size - 1, strings);
@@ -239,11 +239,11 @@ public class TreePrinter {
 	}
 
 	private List<String> getStrings(VarRead node) {
-		return Collections.singletonList("read var " + node.name);
+		return Collections.singletonList("read var " + node.name());
 	}
 
 	private List<String> getStrings(NumberLiteral node) {
-		return Collections.singletonList("literal " + node.value);
+		return Collections.singletonList("literal " + node.value());
 	}
 
 	private void append(List<String> lines, boolean furtherSiblingFollows, List<? super String> target) {

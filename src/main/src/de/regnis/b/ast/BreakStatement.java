@@ -5,17 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class BreakStatement implements ControlFlowStatement {
-
-	// Fields =================================================================
-
-	public final Position position;
-
-	// Setup ==================================================================
-
-	public BreakStatement(@NotNull Position position) {
-		this.position = position;
-	}
+public record BreakStatement(@NotNull Position position) implements ControlFlowStatement {
 
 	// Implemented ============================================================
 

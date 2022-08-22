@@ -38,12 +38,12 @@ public class CodePrinter {
 	// Utils ==================================================================
 
 	private void printFunctionDeclaration(FuncDeclaration declaration, StringOutput output) {
-		output.print(declaration.type.toString());
+		output.print(declaration.type().toString());
 		output.print(" ");
-		output.print(declaration.name);
+		output.print(declaration.name());
 		output.print("(");
 		boolean isFirst = true;
-		for (FuncDeclarationParameter parameter : declaration.parameters.getParameters()) {
+		for (FuncDeclarationParameter parameter : declaration.parameters().getParameters()) {
 			if (isFirst) {
 				isFirst = false;
 			}
@@ -53,10 +53,10 @@ public class CodePrinter {
 
 			output.print("int");
 			output.print(" ");
-			output.print(parameter.name);
+			output.print(parameter.name());
 		}
 		output.print(") ");
-		print(declaration.statementList, 0, output);
+		print(declaration.statementList(), 0, output);
 	}
 
 	private static void print(StatementList listNode, int indentation, StringOutput output) {
@@ -130,10 +130,10 @@ public class CodePrinter {
 	private static void print(VarDeclaration node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		output.print(node.name);
+		output.print(node.name());
 		output.print(" := ");
 
-		print(node.expression, output);
+		print(node.expression(), output);
 
 		output.println();
 	}
@@ -141,12 +141,12 @@ public class CodePrinter {
 	private static void print(Assignment node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		output.print(node.name);
+		output.print(node.name());
 		output.print(" ");
-		output.print(node.operation.text);
+		output.print(node.operation().text);
 		output.print(" ");
 
-		print(node.expression, output);
+		print(node.expression(), output);
 
 		output.println();
 	}
@@ -154,7 +154,7 @@ public class CodePrinter {
 	private static void print(CallStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		handleCall(node.name, node.parameters, output);
+		handleCall(node.name(), node.parameters(), output);
 
 		output.println();
 	}
@@ -164,10 +164,10 @@ public class CodePrinter {
 
 		output.print("return");
 
-		if (node.expression != null) {
+		if (node.expression() != null) {
 			output.print(" ");
 
-			print(node.expression, output);
+			print(node.expression(), output);
 		}
 
 		output.println();
@@ -176,27 +176,27 @@ public class CodePrinter {
 	private static void print(IfStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("if ");
-		print(node.expression, output);
+		print(node.expression(), output);
 		output.println();
 
-		print(node.trueStatements, indentation, output);
+		print(node.trueStatements(), indentation, output);
 
-		if (node.falseStatements.getStatements().size() > 0) {
+		if (node.falseStatements().getStatements().size() > 0) {
 			printIndentation(indentation, output);
 			output.print("else");
 			output.println();
 
-			print(node.falseStatements, indentation, output);
+			print(node.falseStatements(), indentation, output);
 		}
 	}
 
 	private static void print(WhileStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 		output.print("while ");
-		print(node.expression, output);
+		print(node.expression(), output);
 		output.println();
 
-		print(node.statements, indentation, output);
+		print(node.statements(), indentation, output);
 	}
 
 	private static void print(BreakStatement ignoredNode, int indentation, StringOutput output) {
@@ -209,29 +209,29 @@ public class CodePrinter {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				print(node.left, output);
+				print(node.left(), output);
 				output.print(" ");
-				output.print(node.operator.text);
+				output.print(node.operator().text);
 				output.print(" ");
-				print(node.right, output);
+				print(node.right(), output);
 				return node;
 			}
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name, node.parameters, output);
+				handleCall(node.name(), node.parameters(), output);
 				return node;
 			}
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				output.print(String.valueOf(node.value));
+				output.print(String.valueOf(node.value()));
 				return node;
 			}
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				output.print(node.name);
+				output.print(node.name());
 				return node;
 			}
 		});

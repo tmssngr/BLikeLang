@@ -18,11 +18,11 @@ public final class ConstantFoldingTransformation {
 	}
 
 	public static Expression simplifyBinaryExpression(BinaryExpression node) {
-		if (node.left instanceof NumberLiteral
-				&& node.right instanceof NumberLiteral) {
-			final int left = ((NumberLiteral) node.left).value;
-			final int right = ((NumberLiteral) node.right).value;
-			return switch (node.operator) {
+		if (node.left() instanceof NumberLiteral
+				&& node.right() instanceof NumberLiteral) {
+			final int left = ((NumberLiteral) node.left()).value();
+			final int right = ((NumberLiteral) node.right()).value();
+			return switch (node.operator()) {
 				case add -> new NumberLiteral(left + right);
 				case sub -> new NumberLiteral(left - right);
 				case multiply -> new NumberLiteral(left * right);
@@ -42,101 +42,101 @@ public final class ConstantFoldingTransformation {
 			};
 		}
 
-		if (node.left instanceof NumberLiteral) {
-			final int left = ((NumberLiteral) node.left).value;
-			if (node.operator == BinaryExpression.Op.add) {
+		if (node.left() instanceof NumberLiteral) {
+			final int left = ((NumberLiteral) node.left()).value();
+			if (node.operator() == BinaryExpression.Op.add) {
 				if (left == 0) {
-					return node.right;
+					return node.right();
 				}
 				// put constant on right side
-				return new BinaryExpression(node.right, node.operator, node.left);
+				return new BinaryExpression(node.right(), node.operator(), node.left());
 			}
-			if (node.operator == BinaryExpression.Op.multiply) {
+			if (node.operator() == BinaryExpression.Op.multiply) {
 				if (left == 1) {
-					return node.right;
+					return node.right();
 				}
-				if (left == 0 && node.right instanceof VarRead) {
+				if (left == 0 && node.right() instanceof VarRead) {
 					return new NumberLiteral(0);
 				}
 				// put constant on right side
-				return new BinaryExpression(node.right, node.operator, node.left);
+				return new BinaryExpression(node.right(), node.operator(), node.left());
 			}
-			if (node.operator == BinaryExpression.Op.bitAnd) {
+			if (node.operator() == BinaryExpression.Op.bitAnd) {
 				if (left == 0) {
 					return new NumberLiteral(0);
 				}
 			}
 		}
 
-		if (node.right instanceof NumberLiteral) {
-			final int right = ((NumberLiteral) node.right).value;
+		if (node.right() instanceof NumberLiteral) {
+			final int right = ((NumberLiteral) node.right()).value();
 			//noinspection IfCanBeSwitch
-			if (node.operator == BinaryExpression.Op.add
-					|| node.operator == BinaryExpression.Op.sub) {
+			if (node.operator() == BinaryExpression.Op.add
+					|| node.operator() == BinaryExpression.Op.sub) {
 				if (right == 0) {
-					return node.left;
+					return node.left();
 				}
 			}
-			else if (node.operator == BinaryExpression.Op.multiply) {
+			else if (node.operator() == BinaryExpression.Op.multiply) {
 				if (right == 1) {
-					return node.left;
+					return node.left();
 				}
-				if (right == 0 && node.left instanceof VarRead) {
+				if (right == 0 && node.left() instanceof VarRead) {
 					return new NumberLiteral(0);
 				}
 			}
-			else if (node.operator == BinaryExpression.Op.divide) {
+			else if (node.operator() == BinaryExpression.Op.divide) {
 				if (right == 1) {
-					return node.left;
+					return node.left();
 				}
 			}
-			else if (node.operator == BinaryExpression.Op.shiftL
-					|| node.operator == BinaryExpression.Op.shiftR) {
+			else if (node.operator() == BinaryExpression.Op.shiftL
+					|| node.operator() == BinaryExpression.Op.shiftR) {
 				if (right == 0) {
-					return node.left;
+					return node.left();
 				}
 			}
-			else if (node.operator == BinaryExpression.Op.bitAnd) {
+			else if (node.operator() == BinaryExpression.Op.bitAnd) {
 				if (right == 0) {
 					return new NumberLiteral(0);
 				}
 			}
 		}
 
-		if (node.left instanceof VarRead
-				&& node.right instanceof VarRead) {
-			final String left = ((VarRead) node.left).name;
-			final String right = ((VarRead) node.right).name;
+		if (node.left() instanceof VarRead
+				&& node.right() instanceof VarRead) {
+			final String left = ((VarRead) node.left()).name();
+			final String right = ((VarRead) node.right()).name();
 
 			if (Objects.equals(left, right)) {
-				if (node.operator == BinaryExpression.Op.sub) {
+				if (node.operator() == BinaryExpression.Op.sub) {
 					return new NumberLiteral(0);
 				}
-				if (node.operator == BinaryExpression.Op.bitAnd) {
-					return node.left;
+				if (node.operator() == BinaryExpression.Op.bitAnd) {
+					return node.left();
 				}
-				if (node.operator == BinaryExpression.Op.bitOr) {
-					return node.left;
+				if (node.operator() == BinaryExpression.Op.bitOr) {
+					return node.left();
 				}
-				if (node.operator == BinaryExpression.Op.bitXor) {
+				if (node.operator() == BinaryExpression.Op.bitXor) {
 					return new NumberLiteral(0);
 				}
-				if (node.operator == BinaryExpression.Op.lessThan) {
+				if (node.operator() == BinaryExpression.Op.lessThan) {
 					return NumberLiteral.FALSE;
 				}
-				if (node.operator == BinaryExpression.Op.lessEqual) {
+				if (node.operator() == BinaryExpression.Op.lessEqual) {
 					return NumberLiteral.TRUE;
 				}
-				if (node.operator == BinaryExpression.Op.equal) {
+				if (node.operator() == BinaryExpression.Op.equal) {
 					return NumberLiteral.TRUE;
 				}
-				if (node.operator == BinaryExpression.Op.greaterEqual) {
+				if (node.operator() == BinaryExpression.Op.greaterEqual) {
 					return NumberLiteral.TRUE;
 				}
-				if (node.operator == BinaryExpression.Op.greaterThan) {
+				if (node.operator() == BinaryExpression.Op.greaterThan) {
 					return NumberLiteral.FALSE;
 				}
-				if (node.operator == BinaryExpression.Op.notEqual) {
+				if (node.operator() == BinaryExpression.Op.notEqual) {
 					return NumberLiteral.FALSE;
 				}
 			}
@@ -155,8 +155,8 @@ public final class ConstantFoldingTransformation {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final StatementList newStatementList = handleStatementList(node.statementList);
-				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+				final StatementList newStatementList = handleStatementList(node.statementList());
+				return new FuncDeclaration(node.type(), node.name(), node.parameters(), newStatementList);
 			}
 		};
 		return declarationList.transform(declaration -> declaration.visit(visitor));
@@ -170,8 +170,8 @@ public final class ConstantFoldingTransformation {
 			final Statement newStatement = statement.visit(new StatementVisitor<>() {
 				@Override
 				public Statement visitAssignment(Assignment node) {
-					final Expression expression = handleExpression(node.expression);
-					return new Assignment(node.operation, node.name, expression, node.position);
+					final Expression expression = handleExpression(node.expression());
+					return new Assignment(node.operation(), node.name(), expression, node.position());
 				}
 
 				@Override
@@ -181,7 +181,7 @@ public final class ConstantFoldingTransformation {
 
 				@Override
 				public Statement visitLocalVarDeclaration(VarDeclaration node) {
-					final Expression expression = handleExpression(node.expression);
+					final Expression expression = handleExpression(node.expression());
 					return node.derive(expression);
 				}
 

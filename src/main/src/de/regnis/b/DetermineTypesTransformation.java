@@ -55,12 +55,12 @@ public final class DetermineTypesTransformation {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					final int parameterCount = node.parameters.getParameters().size();
-					if (functions.containsKey(node.name)) {
-						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.position.line(), node.position.column(), node.name));
+					final int parameterCount = node.parameters().getParameters().size();
+					if (functions.containsKey(node.name())) {
+						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.position().line(), node.position().column(), node.name()));
 					}
 
-					functions.put(node.name, new Function(node.type, parameterCount, node.position.line(), node.position.column()));
+					functions.put(node.name(), new Function(node.type(), parameterCount, node.position().line(), node.position().column()));
 
 					return node;
 				}
@@ -78,22 +78,22 @@ public final class DetermineTypesTransformation {
 
 	private Declaration visitFunctionDeclaration(FuncDeclaration node) {
 		final SymbolScope outerSymbolMap = symbolMap;
-		functionReturnType = node.type;
+		functionReturnType = node.type();
 		symbolMap          = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
 		localVarCount      = 0;
 		try {
-			final FuncDeclarationParameters renamedParameters = declareParameters(node.parameters);
+			final FuncDeclarationParameters renamedParameters = declareParameters(node.parameters());
 
-			final StatementList newStatementList = visitStatementList(node.statementList);
+			final StatementList newStatementList = visitStatementList(node.statementList());
 			symbolMap.reportUnusedVariables(warningOutput);
 
 			if (functionReturnType != BasicTypes.VOID) {
 				if (!hasReturnStatement(newStatementList)) {
-					throw new TransformationFailedException(Messages.errorMissingReturnStatement(node.name));
+					throw new TransformationFailedException(Messages.errorMissingReturnStatement(node.name()));
 				}
 			}
 
-			return new FuncDeclaration(node.type, node.name, renamedParameters, newStatementList);
+			return new FuncDeclaration(node.type(), node.name(), renamedParameters, newStatementList);
 		}
 		finally {
 			symbolMap          = outerSymbolMap;
@@ -114,8 +114,8 @@ public final class DetermineTypesTransformation {
 
 		if (lastStatement instanceof IfStatement) {
 			final IfStatement ifStatement = (IfStatement) lastStatement;
-			return hasReturnStatement(ifStatement.trueStatements)
-					&& hasReturnStatement(ifStatement.falseStatements);
+			return hasReturnStatement(ifStatement.trueStatements())
+					&& hasReturnStatement(ifStatement.falseStatements());
 		}
 
 		return false;
@@ -128,7 +128,7 @@ public final class DetermineTypesTransformation {
 			final String newName = "p" + i;
 			i++;
 
-			symbolMap.declareVariable(parameter.name, newName, parameter.position.line(), parameter.position.column());
+			symbolMap.declareVariable(parameter.name(), newName, parameter.position().line(), parameter.position().column());
 
 			renamedParameters.add(new FuncDeclarationParameter(newName));
 		}
@@ -282,17 +282,17 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	private VarDeclaration visitVarDeclaration(VarDeclaration varDeclaration, String newName) {
-		final Expression newExpression = visitExpression(varDeclaration.expression);
+		final Expression newExpression = visitExpression(varDeclaration.expression());
 
-		symbolMap.declareVariable(varDeclaration.name, newName, varDeclaration.position.line(), varDeclaration.position.column());
+		symbolMap.declareVariable(varDeclaration.name(), newName, varDeclaration.position().line(), varDeclaration.position().column());
 		return new VarDeclaration(newName, newExpression);
 	}
 
 	private Assignment visitAssignment(Assignment node) {
-		final SymbolScope.Variable variable = symbolMap.variableRead(node.name, node.position);
-		final Expression newExpression = visitExpression(node.expression);
+		final SymbolScope.Variable variable = symbolMap.variableRead(node.name(), node.position());
+		final Expression newExpression = visitExpression(node.expression());
 
-		return new Assignment(node.operation, variable.newName, newExpression);
+		return new Assignment(node.operation(), variable.newName, newExpression);
 	}
 
 	private Expression visitExpression(Expression expression) {
@@ -320,30 +320,30 @@ public final class DetermineTypesTransformation {
 	}
 
 	private BinaryExpression visitBinary(BinaryExpression node) {
-		final Expression newLeft = visitExpression(node.left);
-		final Expression newRight = visitExpression(node.right);
+		final Expression newLeft = visitExpression(node.left());
+		final Expression newRight = visitExpression(node.right());
 
-		return new BinaryExpression(newLeft, node.operator, newRight);
+		return new BinaryExpression(newLeft, node.operator(), newRight);
 	}
 
 	private FuncCall visitFunctionCall(FuncCall node) {
-		final Tuple<Function, FuncCallParameters> function = handleCall(node.name, node.parameters, node.position.line(), node.position.column());
+		final Tuple<Function, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
 		final Type type = function.first.type;
 		if (type == BasicTypes.VOID) {
-			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.position.line(), node.position.column(), node.name));
+			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.position().line(), node.position().column(), node.name()));
 		}
 
-		return new FuncCall(node.name, function.second);
+		return new FuncCall(node.name(), function.second);
 	}
 
 	private CallStatement visitCall(CallStatement node) {
-		final Tuple<Function, FuncCallParameters> function = handleCall(node.name, node.parameters, node.position.line(), node.position.column());
+		final Tuple<Function, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
 		final Type type = function.first.type;
 		if (type != BasicTypes.VOID) {
-			warning(Messages.warningIgnoredReturnValue(node.position.line(), node.position.column(), node.name, type));
+			warning(Messages.warningIgnoredReturnValue(node.position().line(), node.position().column(), node.name(), type));
 		}
 
-		return new CallStatement(node.name, function.second);
+		return new CallStatement(node.name(), function.second);
 	}
 
 	@NotNull
@@ -370,32 +370,32 @@ public final class DetermineTypesTransformation {
 		}
 
 		if (functionReturnType == BasicTypes.VOID) {
-			if (node.expression != null) {
-				throw new TransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(node.position.line(), node.position.column()));
+			if (node.expression() != null) {
+				throw new TransformationFailedException(Messages.errorNoReturnExpressionExpectedForVoid(node.position().line(), node.position().column()));
 			}
 			return node;
 		}
 
-		if (node.expression == null) {
-			throw new TransformationFailedException(Messages.errorReturnExpressionExpected(node.position.line(), node.position.column(), functionReturnType));
+		if (node.expression() == null) {
+			throw new TransformationFailedException(Messages.errorReturnExpressionExpected(node.position().line(), node.position().column(), functionReturnType));
 		}
 
-		final Expression newExpression = visitExpression(node.expression);
+		final Expression newExpression = visitExpression(node.expression());
 		return new ReturnStatement(newExpression);
 	}
 
 	private IfStatement visitIf(IfStatement node) {
-		final Expression newExpression = visitExpression(node.expression);
-		return new IfStatement(newExpression, visitStatementList(node.trueStatements), visitStatementList(node.falseStatements));
+		final Expression newExpression = visitExpression(node.expression());
+		return new IfStatement(newExpression, visitStatementList(node.trueStatements()), visitStatementList(node.falseStatements()));
 	}
 
 	private WhileStatement visitWhile(WhileStatement node) {
-		final Expression newExpression = visitExpression(node.expression);
-		return new WhileStatement(newExpression, visitStatementList(node.statements));
+		final Expression newExpression = visitExpression(node.expression());
+		return new WhileStatement(newExpression, visitStatementList(node.statements()));
 	}
 
 	private VarRead visitVarRead(VarRead node) {
-		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name, node.position);
+		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name(), node.position());
 		return new VarRead(typeName.newName);
 	}
 
@@ -417,7 +417,7 @@ public final class DetermineTypesTransformation {
 			declaration.visit(new DeclarationVisitor<>() {
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					reportIllegalBreakStatement(node.statementList);
+					reportIllegalBreakStatement(node.statementList());
 					return node;
 				}
 			});
@@ -455,8 +455,8 @@ public final class DetermineTypesTransformation {
 
 				@Override
 				public Object visitIf(IfStatement node) {
-					reportIllegalBreakStatement(node.trueStatements);
-					reportIllegalBreakStatement(node.falseStatements);
+					reportIllegalBreakStatement(node.trueStatements());
+					reportIllegalBreakStatement(node.falseStatements());
 					return node;
 				}
 
@@ -467,7 +467,7 @@ public final class DetermineTypesTransformation {
 
 				@Override
 				public Object visitBreak(BreakStatement node) {
-					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.position.line(), node.position.column()));
+					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.position().line(), node.position().column()));
 				}
 			});
 		}
@@ -478,12 +478,12 @@ public final class DetermineTypesTransformation {
 			@Nullable
 			@Override
 			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final Function function = functions.get(node.name);
+				final Function function = functions.get(node.name());
 				if (function.used) {
 					return node;
 				}
 
-				warning(Messages.warningUnusedFunction(function.line, function.column, node.name));
+				warning(Messages.warningUnusedFunction(function.line, function.column, node.name()));
 				return null;
 			}
 		}));

@@ -61,8 +61,8 @@ public class SsaToModifyAssignments implements BlockVisitor {
 	}
 
 	private void processDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
-		if (node.expression instanceof BinaryExpression binEx) {
-			handleBinaryExpression(node.name, binEx, consumer);
+		if (node.expression() instanceof BinaryExpression binEx) {
+			handleBinaryExpression(node.name(), binEx, consumer);
 		}
 		else {
 			consumer.accept(node);
@@ -71,7 +71,7 @@ public class SsaToModifyAssignments implements BlockVisitor {
 
 	@Nullable
 	private Assignment.Op toAssignmentOperator(BinaryExpression binEx) {
-		return switch (binEx.operator) {
+		return switch (binEx.operator()) {
 			case add -> Assignment.Op.add;
 			case sub -> Assignment.Op.sub;
 			case multiply -> Assignment.Op.multiply;
@@ -87,13 +87,13 @@ public class SsaToModifyAssignments implements BlockVisitor {
 	}
 
 	private void handleBinaryExpression(String name, BinaryExpression expression, Consumer<SimpleStatement> consumer) {
-		processDeclaration(new VarDeclaration(name, expression.left), consumer);
+		processDeclaration(new VarDeclaration(name, expression.left()), consumer);
 
 		final Assignment.Op op = toAssignmentOperator(expression);
 		if (op == null) {
 			throw new IllegalStateException();
 		}
 
-		consumer.accept(new Assignment(op, name, expression.right));
+		consumer.accept(new Assignment(op, name, expression.right()));
 	}
 }
