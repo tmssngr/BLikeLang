@@ -108,10 +108,7 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 
 	@Override
 	public Expression visitFunctionCall(FuncCall node) {
-		final FuncCallParameters parameters = new FuncCallParameters();
-		for (Expression parameter : node.getParameters()) {
-			parameters.add(parameter.visit(this));
-		}
+		final FuncCallParameters parameters = node.parameters.transform(expression -> expression.visit(this));
 		return new FuncCall(node.name, parameters);
 	}
 
@@ -148,10 +145,7 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 
 			@Override
 			public SimpleStatement visitCall(CallStatement node) {
-				final FuncCallParameters parameters = new FuncCallParameters();
-				for (Expression parameter : node.getParameters()) {
-					parameters.add(parameter.visit(SsaSearchAndReplace.this));
-				}
+				final FuncCallParameters parameters = node.parameters.transform(expression -> expression.visit(SsaSearchAndReplace.this));
 				consumer.accept(new CallStatement(node.name, parameters));
 				return node;
 			}

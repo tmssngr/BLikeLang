@@ -4,8 +4,6 @@ import de.regnis.b.ast.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 /**
  * @author Thomas Singer
  */
@@ -158,7 +156,8 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	}
 
 	private Statement handleCall(CallStatement node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
+		final FuncCallParameters parameters = node.parameters.transform(expression ->
+				                                                                splitExpression(expression, true, tempVarFactory));
 		return new CallStatement(node.name, parameters);
 	}
 
@@ -237,18 +236,9 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 	}
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
-		final FuncCallParameters parameters = handleFuncCallParameters(node.getParameters(), tempVarFactory);
+		final FuncCallParameters parameters = node.parameters.transform(expression ->
+				                                                                splitExpression(expression, true, tempVarFactory));
 		return new FuncCall(node.name, parameters, node.position);
-	}
-
-	@NotNull
-	private FuncCallParameters handleFuncCallParameters(List<Expression> parameters, TempVarFactory tempVarFactory) {
-		final FuncCallParameters newParameters = new FuncCallParameters();
-		for (Expression parameter : parameters) {
-			final Expression simplifiedParameter = splitExpression(parameter, true, tempVarFactory);
-			newParameters.add(simplifiedParameter);
-		}
-		return newParameters;
 	}
 
 	private TempVarFactory createTempVarFactory(StatementList statementList) {

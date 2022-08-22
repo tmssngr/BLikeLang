@@ -3,8 +3,6 @@ package de.regnis.b.out;
 import de.regnis.b.ast.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 /**
  * @author Thomas Singer
  */
@@ -156,7 +154,7 @@ public class CodePrinter {
 	private static void print(CallStatement node, int indentation, StringOutput output) {
 		printIndentation(indentation, output);
 
-		handleCall(node.name, node.getParameters(), output);
+		handleCall(node.name, node.parameters, output);
 
 		output.println();
 	}
@@ -221,7 +219,7 @@ public class CodePrinter {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name, node.getParameters(), output);
+				handleCall(node.name, node.parameters, output);
 				return node;
 			}
 
@@ -239,11 +237,11 @@ public class CodePrinter {
 		});
 	}
 
-	private static void handleCall(String name, List<Expression> parameters, StringOutput output) {
+	private static void handleCall(String name, FuncCallParameters parameters, StringOutput output) {
 		output.print(name);
 		output.print("(");
 		boolean isFirst = true;
-		for (Expression expressionNode : parameters) {
+		for (Expression expressionNode : parameters.getExpressions()) {
 			if (isFirst) {
 				isFirst = false;
 			}

@@ -186,7 +186,7 @@ public final class ControlFlowGraphVarUsageDetector {
 
 				@Override
 				public Object visitCall(CallStatement node) {
-					for (Expression parameter : node.getParameters()) {
+					for (Expression parameter : node.parameters.getExpressions()) {
 						detectRequiredVars(parameter, live);
 					}
 					return node;
@@ -206,7 +206,7 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				for (Expression parameter : node.getParameters()) {
+				for (Expression parameter : node.parameters.getExpressions()) {
 					detectRequiredVars(parameter, live);
 				}
 				return node;

@@ -4,6 +4,7 @@ import de.regnis.b.ast.*;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
+import de.regnis.utils.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -335,31 +336,27 @@ public final class DetermineTypesTransformation {
 	}
 
 	private FuncCall visitFunctionCall(FuncCall node) {
-		final FuncCallParameters newParameters = new FuncCallParameters();
-
-		final Function function = handleCall(node.name, node.getParameters(), node.position.line(), node.position.column(), newParameters);
-
-		if (function.type == BasicTypes.VOID) {
+		final Tuple<Function, FuncCallParameters> function = handleCall(node.name, node.parameters, node.position.line(), node.position.column());
+		final Type type = function.first.type;
+		if (type == BasicTypes.VOID) {
 			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.position.line(), node.position.column(), node.name));
 		}
 
-		return new FuncCall(node.name, newParameters);
+		return new FuncCall(node.name, function.second);
 	}
 
 	private CallStatement visitCall(CallStatement node) {
-		final FuncCallParameters newParameters = new FuncCallParameters();
-
-		final Function function = handleCall(node.name, node.getParameters(), node.position.line(), node.position.column(), newParameters);
-
-		if (function.type != BasicTypes.VOID) {
-			warning(Messages.warningIgnoredReturnValue(node.position.line(), node.position.column(), node.name, function.type));
+		final Tuple<Function, FuncCallParameters> function = handleCall(node.name, node.parameters, node.position.line(), node.position.column());
+		final Type type = function.first.type;
+		if (type != BasicTypes.VOID) {
+			warning(Messages.warningIgnoredReturnValue(node.position.line(), node.position.column(), node.name, type));
 		}
 
-		return new CallStatement(node.name, newParameters);
+		return new CallStatement(node.name, function.second);
 	}
 
 	@NotNull
-	private Function handleCall(String name, List<Expression> parameters, int line, int column, FuncCallParameters newParameters) {
+	private Tuple<Function, FuncCallParameters> handleCall(String name, FuncCallParameters callParameters, int line, int column) {
 		final Function function = functions.get(name);
 		if (function == null) {
 			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
@@ -367,14 +364,13 @@ public final class DetermineTypesTransformation {
 
 		function.setUsed();
 
+		final List<Expression> parameters = callParameters.getExpressions();
 		if (parameters.size() != function.parameterCount) {
 			throw new TransformationFailedException("Function " + name + " expects " + function.parameterCount + " expressions, but got " + parameters.size());
 		}
 
-		for (Expression parameter : parameters) {
-			newParameters.add(visitExpression(parameter));
-		}
-		return function;
+		final FuncCallParameters newParameters = callParameters.transform(expression -> visitExpression(expression));
+		return new Tuple<>(function, newParameters);
 	}
 
 	private ReturnStatement visitReturn(ReturnStatement node) {

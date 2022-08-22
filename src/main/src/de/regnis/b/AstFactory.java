@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -286,13 +287,13 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 
 	@Override
 	public FuncCallParameters visitFunctionCallParameters(BLikeLangParser.FunctionCallParametersContext ctx) {
-		final FuncCallParameters parameters = new FuncCallParameters();
-		final List<BLikeLangParser.ExpressionContext> expressions = ctx.expression();
-		for (BLikeLangParser.ExpressionContext expression : expressions) {
+		final List<BLikeLangParser.ExpressionContext> expressionCtxs = ctx.expression();
+		final List<Expression> expressions = new ArrayList<>();
+		for (BLikeLangParser.ExpressionContext expression : expressionCtxs) {
 			final Expression expressionNode = (Expression) Objects.requireNonNull(visit(expression));
-			parameters.add(expressionNode);
+			expressions.add(expressionNode);
 		}
-		return parameters;
+		return FuncCallParameters.of(expressions);
 	}
 
 	@Override
