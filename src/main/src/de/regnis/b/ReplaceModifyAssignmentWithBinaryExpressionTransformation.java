@@ -18,13 +18,7 @@ public final class ReplaceModifyAssignmentWithBinaryExpressionTransformation {
 				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 			}
 		};
-
-		final DeclarationList newDeclarationList = new DeclarationList();
-		for (Declaration declaration : root.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(visitor);
-			newDeclarationList.add(newDeclaration);
-		}
-		return newDeclarationList;
+		return root.transform(declaration -> declaration.visit(visitor));
 	}
 
 	private ReplaceModifyAssignmentWithBinaryExpressionTransformation() {

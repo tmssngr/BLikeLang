@@ -41,9 +41,7 @@ public abstract class AbstractTransformationTest {
 			}
 		});
 
-		final DeclarationList root = new DeclarationList();
-		root.add(new FuncDeclaration(BasicTypes.VOID, "test", FuncDeclarationParameters.empty(), statementList));
-		return root;
+		return DeclarationList.of(new FuncDeclaration(BasicTypes.VOID, "test", FuncDeclarationParameters.empty(), statementList));
 	}
 
 	protected static void assertEquals(String expected, DeclarationList root) {
