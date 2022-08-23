@@ -26,16 +26,6 @@ public final class SplitExpressionsTransformation {
 
 	// Utils ==================================================================
 
-	@NotNull
-	private DeclarationList processDeclarations(@NotNull DeclarationList declarationList, DeclarationVisitor<Declaration> visitor) {
-		final DeclarationList newDeclarationList = new DeclarationList();
-		for (Declaration declaration : declarationList.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(visitor);
-			newDeclarationList.add(newDeclaration);
-		}
-		return newDeclarationList;
-	}
-
 	private DeclarationList splitExpressions(@NotNull DeclarationList declarationList) {
 		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
 			@Override
@@ -44,8 +34,7 @@ public final class SplitExpressionsTransformation {
 				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
 			}
 		};
-
-		return processDeclarations(declarationList, visitor);
+		return declarationList.transform(declaration -> declaration.visit(visitor));
 	}
 
 	private Statement handleAssignment(Assignment node, TempVarFactory tempVarFactory) {

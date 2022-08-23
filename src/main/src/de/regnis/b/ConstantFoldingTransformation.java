@@ -152,19 +152,14 @@ public final class ConstantFoldingTransformation {
 	// Utils ==================================================================
 
 	private DeclarationList handleDeclarationList(@NotNull DeclarationList declarationList) {
-		final DeclarationList newDeclarationList = new DeclarationList();
-
-		for (Declaration declaration : declarationList.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-					final StatementList newStatementList = handleStatementList(node.statementList);
-					return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
-				}
-			});
-			newDeclarationList.add(newDeclaration);
-		}
-		return newDeclarationList;
+		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
+			@Override
+			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+				final StatementList newStatementList = handleStatementList(node.statementList);
+				return new FuncDeclaration(node.type, node.name, node.parameters, newStatementList);
+			}
+		};
+		return declarationList.transform(declaration -> declaration.visit(visitor));
 	}
 
 	@NotNull

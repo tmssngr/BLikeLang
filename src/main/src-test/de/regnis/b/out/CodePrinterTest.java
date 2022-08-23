@@ -21,15 +21,14 @@ public class CodePrinterTest {
 				                    }
 				                    """,
 		                    CodePrinter.print(
-				                    new DeclarationList()
-						                    .add(new FuncDeclaration(BasicTypes.INT16, "sqr",
-						                                             FuncDeclarationParameters.of(new FuncDeclarationParameter("x")),
-						                                             new StatementList()
-								                                             .add(new Assignment(Assignment.Op.add, "x", new NumberLiteral(1)))
-								                                             .add(new ReturnStatement(
-										                                             new BinaryExpression(new VarRead("x"),
-										                                                                  BinaryExpression.Op.multiply,
-										                                                                  new VarRead("x"))))))
+				                    DeclarationList.of(new FuncDeclaration(BasicTypes.INT16, "sqr",
+				                                                           FuncDeclarationParameters.of(new FuncDeclarationParameter("x")),
+				                                                           new StatementList()
+						                                                           .add(new Assignment(Assignment.Op.add, "x", new NumberLiteral(1)))
+						                                                           .add(new ReturnStatement(
+								                                                           new BinaryExpression(new VarRead("x"),
+								                                                                                BinaryExpression.Op.multiply,
+								                                                                                new VarRead("x"))))))
 		                    ));
 		Assert.assertEquals("""
 				                    int foo() {
@@ -44,17 +43,16 @@ public class CodePrinterTest {
 				                    }
 				                    """,
 		                    CodePrinter.print(
-				                    new DeclarationList()
-						                    .add(new FuncDeclaration(BasicTypes.INT16, "foo",
-						                                             FuncDeclarationParameters.empty(),
-						                                             new StatementList()
-								                                             .add(new IfStatement(new BinaryExpression(new VarRead("a"),
-								                                                                                       BinaryExpression.Op.greaterThan,
-								                                                                                       new NumberLiteral(0)),
-								                                                                  new StatementList()
-										                                                                  .add(new VarDeclaration("b", new NumberLiteral(1))),
-								                                                                  new StatementList()
-										                                                                  .add(new ReturnStatement(new VarRead("a"))))
-								                                             )))));
+				                    DeclarationList.of(new FuncDeclaration(BasicTypes.INT16, "foo",
+				                                                           FuncDeclarationParameters.empty(),
+				                                                           new StatementList()
+						                                                           .add(new IfStatement(new BinaryExpression(new VarRead("a"),
+						                                                                                                     BinaryExpression.Op.greaterThan,
+						                                                                                                     new NumberLiteral(0)),
+						                                                                                new StatementList()
+								                                                                                .add(new VarDeclaration("b", new NumberLiteral(1))),
+						                                                                                new StatementList()
+								                                                                                .add(new ReturnStatement(new VarRead("a"))))
+						                                                           )))));
 	}
 }

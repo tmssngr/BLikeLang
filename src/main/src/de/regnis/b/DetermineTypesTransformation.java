@@ -69,16 +69,7 @@ public final class DetermineTypesTransformation {
 	}
 
 	private DeclarationList visitDeclarationList(DeclarationList root) {
-		final DeclarationList newRoot = new DeclarationList();
-		for (Declaration declaration : root.getDeclarations()) {
-			final Declaration newDeclaration = declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-					return DetermineTypesTransformation.this.visitFunctionDeclaration(node);
-				}
-			});
-			newRoot.add(newDeclaration);
-		}
+		final DeclarationList newRoot = root.transform(declaration -> declaration.visit(this::visitFunctionDeclaration));
 
 		symbolMap.reportUnusedVariables(warningOutput);
 
@@ -88,8 +79,8 @@ public final class DetermineTypesTransformation {
 	private Declaration visitFunctionDeclaration(FuncDeclaration node) {
 		final SymbolScope outerSymbolMap = symbolMap;
 		functionReturnType = node.type;
-		symbolMap = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
-		localVarCount = 0;
+		symbolMap          = symbolMap.createChildMap(SymbolScope.ScopeKind.Parameter);
+		localVarCount      = 0;
 		try {
 			final FuncDeclarationParameters renamedParameters = declareParameters(node.parameters);
 
@@ -105,7 +96,7 @@ public final class DetermineTypesTransformation {
 			return new FuncDeclaration(node.type, node.name, renamedParameters, newStatementList);
 		}
 		finally {
-			symbolMap = outerSymbolMap;
+			symbolMap          = outerSymbolMap;
 			functionReturnType = null;
 		}
 	}
@@ -483,25 +474,19 @@ public final class DetermineTypesTransformation {
 	}
 
 	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
-		final DeclarationList newRoot = new DeclarationList();
-
-		for (Declaration declaration : root.getDeclarations()) {
-			declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					final Function function = functions.get(node.name);
-					if (function.used) {
-						newRoot.add(node);
-					}
-					else {
-						warning(Messages.warningUnusedFunction(function.line, function.column, node.name));
-					}
+		return root.transform(declaration -> declaration.visit(new DeclarationVisitor<>() {
+			@Nullable
+			@Override
+			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+				final Function function = functions.get(node.name);
+				if (function.used) {
 					return node;
 				}
-			});
-		}
 
-		return newRoot;
+				warning(Messages.warningUnusedFunction(function.line, function.column, node.name));
+				return null;
+			}
+		}));
 	}
 
 	private boolean isMainFunction(String name, Function function) {
@@ -526,10 +511,10 @@ public final class DetermineTypesTransformation {
 		private boolean used;
 
 		private Function(Type type, int parameterCount, int line, int column) {
-			this.type = type;
+			this.type           = type;
 			this.parameterCount = parameterCount;
-			this.line = line;
-			this.column = column;
+			this.line           = line;
+			this.column         = column;
 		}
 
 		public void setUsed() {

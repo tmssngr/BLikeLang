@@ -40,7 +40,7 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 
 	// Fields =================================================================
 
-	private final DeclarationList declarationList = new DeclarationList();
+	private final List<Declaration> declarationList = new ArrayList<>();
 
 	// Setup ==================================================================
 
@@ -57,17 +57,17 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 	@Override
 	public DeclarationList visitDeclarations(BLikeLangParser.DeclarationsContext ctx) {
 		visitChildren(ctx);
-		return declarationList;
+		return DeclarationList.of(declarationList);
 	}
 
 	@Override
-	public FuncDeclaration visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) {
+	public Object visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) {
 		return visitFunctionDeclaration(ctx.functionDeclaration());
 	}
 
 	@Nullable
 	@Override
-	public FuncDeclaration visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
+	public Object visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {
 		final String typeString = ctx.type.getText();
 		final Type type;
 		if ("void".equals(typeString)) {
