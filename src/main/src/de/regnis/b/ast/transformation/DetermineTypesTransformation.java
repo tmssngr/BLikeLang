@@ -22,15 +22,12 @@ public final class DetermineTypesTransformation {
 	// Static =================================================================
 
 	@NotNull
-	public static DeclarationList transform(DeclarationList root, StringOutput warningOutput) {
+	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull StringOutput warningOutput) {
 		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
 		transformation.determineFunctions(root);
-		transformation.reportMissingMainFunction();
 		transformation.reportIllegalBreakStatement(root);
 
-		DeclarationList newRoot = transformation.visitDeclarationList(root);
-		newRoot = transformation.reportAndRemoveUnusedFunctions(newRoot);
-		return newRoot;
+		return transformation.visitDeclarationList(root);
 	}
 
 	// Fields =================================================================
@@ -61,7 +58,7 @@ public final class DetermineTypesTransformation {
 						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.position().line(), node.position().column(), node.name()));
 					}
 
-					functions.put(node.name(), new Function(node.type(), parameterCount, node.position().line(), node.position().column()));
+					functions.put(node.name(), new Function(node.type(), parameterCount));
 
 					return node;
 				}
@@ -354,14 +351,12 @@ public final class DetermineTypesTransformation {
 			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
 		}
 
-		function.setUsed();
-
 		final List<Expression> parameters = callParameters.getExpressions();
 		if (parameters.size() != function.parameterCount) {
 			throw new TransformationFailedException("Function " + name + " expects " + function.parameterCount + " expressions, but got " + parameters.size());
 		}
 
-		final FuncCallParameters newParameters = callParameters.transform(expression -> visitExpression(expression));
+		final FuncCallParameters newParameters = callParameters.transform(this::visitExpression);
 		return new Tuple<>(function, newParameters);
 	}
 
@@ -400,19 +395,6 @@ public final class DetermineTypesTransformation {
 		return new VarRead(typeName.newName);
 	}
 
-	private void reportMissingMainFunction() {
-		for (Map.Entry<String, Function> entry : functions.entrySet()) {
-			final String name = entry.getKey();
-			final Function function = entry.getValue();
-			if (isMainFunction(name, function)) {
-				function.setUsed();
-				return;
-			}
-		}
-
-		throw new TransformationFailedException(Messages.errorMissingMain());
-	}
-
 	private void reportIllegalBreakStatement(DeclarationList root) {
 		new AstWalker() {
 			private boolean breakAllowed;
@@ -438,28 +420,6 @@ public final class DetermineTypesTransformation {
 		}.visit(root);
 	}
 
-	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
-		return root.transform(declaration -> declaration.visit(new DeclarationVisitor<>() {
-			@Nullable
-			@Override
-			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
-				final Function function = functions.get(node.name());
-				if (function.used) {
-					return node;
-				}
-
-				warning(Messages.warningUnusedFunction(function.line, function.column, node.name()));
-				return null;
-			}
-		}));
-	}
-
-	private boolean isMainFunction(String name, Function function) {
-		return "main".equals(name)
-				&& function.type == BasicTypes.VOID
-				&& function.parameterCount == 0;
-	}
-
 	private void warning(String message) {
 		warningOutput.print(message);
 		warningOutput.println();
@@ -470,20 +430,10 @@ public final class DetermineTypesTransformation {
 	private static final class Function {
 		public final Type type;
 		private final int parameterCount;
-		private final int line;
-		private final int column;
 
-		private boolean used;
-
-		private Function(Type type, int parameterCount, int line, int column) {
+		private Function(Type type, int parameterCount) {
 			this.type           = type;
 			this.parameterCount = parameterCount;
-			this.line           = line;
-			this.column         = column;
-		}
-
-		public void setUsed() {
-			used = true;
 		}
 	}
 }

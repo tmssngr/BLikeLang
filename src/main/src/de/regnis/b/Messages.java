@@ -1,6 +1,5 @@
 package de.regnis.b;
 
-import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,6 +40,11 @@ public final class Messages {
 	@NotNull
 	public static String errorMissingMain() {
 		return "Missing function 'void main()'";
+	}
+
+	@NotNull
+	public static String errorMainHasWrongSignature(int line, int column) {
+		return line + ":" + column + ": Main function has wrong signature - needs to be 'void main()'";
 	}
 
 	@NotNull
