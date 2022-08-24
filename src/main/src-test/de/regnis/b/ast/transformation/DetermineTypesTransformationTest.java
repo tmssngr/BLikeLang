@@ -257,9 +257,12 @@ public final class DetermineTypesTransformationTest {
 				                              int one() {
 				                                return 1
 				                              }
+				                              int zero() {
+				                                one()
+				                                return 0
+				                              }
 				                              """ + VOID_MAIN,
-		                              Messages.warningIgnoredReturnValue(3, 2, "one", BasicTypes.INT16) + "\n" +
-				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
+		                              Messages.warningIgnoredReturnValue(3, 2, "one", BasicTypes.INT16) + "\n",
 		                              """
 				                              int one() return 1
 				                              int zero() {
@@ -271,10 +274,18 @@ public final class DetermineTypesTransformationTest {
 
 	@Test
 	public void testValidDuplicateDeclarations() {
-		assertSuccessfullyTransformed(VOID_MAIN,
-		                              Messages.warningUnusedParameter(1, 21, "b") + "\n" +
-				                              Messages.warningUnusedFunction(1, 4, "twice") + "\n" +
-				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
+		assertSuccessfullyTransformed("""
+				                              int twice(int p0, int p1) {
+				                                return p0 * 2
+				                              }
+				                              int zero() {
+				                                v0 := 0
+				                                return v0
+				                              }
+				                              void main() {
+				                              }
+				                              """,
+		                              Messages.warningUnusedParameter(1, 21, "b") + "\n",
 		                              """
 				                              int twice(int a, int b) return a * 2
 				                              int zero() {
@@ -287,9 +298,17 @@ public final class DetermineTypesTransformationTest {
 				                              int twice(int p0, int p1) {
 				                                return p0 * 2
 				                              }
-				                              """ + VOID_MAIN,
-		                              Messages.warningUnusedParameter(1, 21, "b") + "\n" +
-				                              Messages.warningUnusedFunction(2, 4, "zero") + "\n",
+				                              int zero() {
+				                                v0 := 1000
+				                                v1 := 1
+				                                v0 = twice(v1, v1)
+				                                v2 := 0
+				                                return v2
+				                              }
+				                              void main() {
+				                              }
+				                              """,
+		                              Messages.warningUnusedParameter(1, 21, "b") + "\n",
 		                              """
 				                              int twice(int a, int b) return a * 2
 				                              int zero() {
@@ -399,23 +418,6 @@ public final class DetermineTypesTransformationTest {
 				                                    void main() {
 				                                    }
 				                                    """);
-	}
-
-	@Test
-	public void testMain() {
-		assertSuccessfullyTransformed(VOID_MAIN,
-		                              NO_WARNING,
-		                              VOID_MAIN);
-		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, "");
-		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, """
-				void foo() {
-				}""");
-		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, """
-				int main() {
-				}""");
-		assertTransformationFailedException(Messages.errorMissingMain(), NO_WARNING, """
-				void main(int a) {
-				}""");
 	}
 
 	// Utils ==================================================================
