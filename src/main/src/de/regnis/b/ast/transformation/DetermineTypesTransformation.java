@@ -414,64 +414,28 @@ public final class DetermineTypesTransformation {
 	}
 
 	private void reportIllegalBreakStatement(DeclarationList root) {
-		for (Declaration declaration : root.getDeclarations()) {
-			declaration.visit(new DeclarationVisitor<>() {
-				@Override
-				public Object visitFunctionDeclaration(FuncDeclaration node) {
-					reportIllegalBreakStatement(node.statementList());
-					return node;
-				}
-			});
-		}
-	}
+		new AstWalker() {
+			private boolean breakAllowed;
 
-	private void reportIllegalBreakStatement(StatementList statementList) {
-		for (Statement statement : statementList.getStatements()) {
-			statement.visit(new StatementVisitor<>() {
-				@Override
-				public Object visitAssignment(Assignment node) {
-					return node;
+			@Override
+			public Object visitWhile(WhileStatement node) {
+				breakAllowed = true;
+				try {
+					return super.visitWhile(node);
 				}
-
-				@Override
-				public Object visitStatementList(StatementList node) {
-					reportIllegalBreakStatement(node);
-					return node;
+				finally {
+					breakAllowed = false;
 				}
+			}
 
-				@Override
-				public Object visitLocalVarDeclaration(VarDeclaration node) {
-					return node;
-				}
-
-				@Override
-				public Object visitCall(CallStatement node) {
-					return node;
-				}
-
-				@Override
-				public Object visitReturn(ReturnStatement node) {
-					return node;
-				}
-
-				@Override
-				public Object visitIf(IfStatement node) {
-					reportIllegalBreakStatement(node.trueStatements());
-					reportIllegalBreakStatement(node.falseStatements());
-					return node;
-				}
-
-				@Override
-				public Object visitWhile(WhileStatement node) {
-					return node;
-				}
-
-				@Override
-				public Object visitBreak(BreakStatement node) {
+			@Override
+			public Object visitBreak(BreakStatement node) {
+				if (!breakAllowed) {
 					throw new TransformationFailedException(Messages.errorBreakStatementNotInWhile(node.position().line(), node.position().column()));
 				}
-			});
-		}
+				return node;
+			}
+		}.visit(root);
 	}
 
 	private DeclarationList reportAndRemoveUnusedFunctions(DeclarationList root) {
