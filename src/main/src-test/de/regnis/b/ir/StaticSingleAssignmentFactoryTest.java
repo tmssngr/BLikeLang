@@ -1,8 +1,8 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.AstFactory;
-import de.regnis.b.DetermineTypesTransformation;
-import de.regnis.b.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
+import de.regnis.b.ast.AstFactory;
+import de.regnis.b.ast.transformation.DetermineTypesTransformation;
+import de.regnis.b.ast.transformation.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
 import de.regnis.b.out.StringStringOutput;

@@ -1,6 +1,6 @@
 package de.regnis.b.type;
 
-import de.regnis.b.TransformationFailedException;
+import de.regnis.b.ast.transformation.TransformationFailedException;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -1,4 +1,4 @@
-package de.regnis.b;
+package de.regnis.b.ast.transformation;
 
 /**
  * @author Thomas Singer

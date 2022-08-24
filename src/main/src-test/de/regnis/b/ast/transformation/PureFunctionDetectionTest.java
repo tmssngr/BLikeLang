@@ -1,5 +1,6 @@
-package de.regnis.b;
+package de.regnis.b.ast.transformation;
 
+import de.regnis.b.ast.AstFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

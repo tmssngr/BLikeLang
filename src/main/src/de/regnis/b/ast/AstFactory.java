@@ -1,9 +1,9 @@
-package de.regnis.b;
+package de.regnis.b.ast;
 
 import com.syntevo.antlr.b.BLikeLangBaseVisitor;
 import com.syntevo.antlr.b.BLikeLangLexer;
 import com.syntevo.antlr.b.BLikeLangParser;
-import de.regnis.b.ast.*;
+import de.regnis.b.ParseFailedException;
 import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
 import de.regnis.utils.Utils;

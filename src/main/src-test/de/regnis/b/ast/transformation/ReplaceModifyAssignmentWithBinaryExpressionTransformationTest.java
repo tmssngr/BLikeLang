@@ -1,5 +1,6 @@
-package de.regnis.b;
+package de.regnis.b.ast.transformation;
 
+import de.regnis.b.ast.AstFactory;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;

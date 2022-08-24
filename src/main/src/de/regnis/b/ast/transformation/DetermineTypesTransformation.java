@@ -1,5 +1,6 @@
-package de.regnis.b;
+package de.regnis.b.ast.transformation;
 
+import de.regnis.b.Messages;
 import de.regnis.b.ast.*;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.type.BasicTypes;

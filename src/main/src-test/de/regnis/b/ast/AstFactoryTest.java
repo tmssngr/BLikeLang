@@ -1,7 +1,5 @@
-package de.regnis.b;
+package de.regnis.b.ast;
 
-import de.regnis.b.ast.DeclarationList;
-import de.regnis.b.ast.StatementList;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.b.out.TreePrinter;
