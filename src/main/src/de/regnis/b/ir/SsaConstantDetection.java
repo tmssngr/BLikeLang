@@ -1,7 +1,7 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.ConstantFoldingTransformation;
 import de.regnis.b.ast.*;
+import de.regnis.b.ast.transformation.ConstantFoldingTransformation;
 import de.regnis.utils.Tuple;
 import org.jetbrains.annotations.NotNull;
 

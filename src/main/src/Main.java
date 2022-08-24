@@ -1,7 +1,7 @@
-import de.regnis.b.AstFactory;
-import de.regnis.b.ConstantFoldingTransformation;
-import de.regnis.b.DetermineTypesTransformation;
-import de.regnis.b.SplitExpressionsTransformation;
+import de.regnis.b.ast.AstFactory;
+import de.regnis.b.ast.transformation.ConstantFoldingTransformation;
+import de.regnis.b.ast.transformation.DetermineTypesTransformation;
+import de.regnis.b.ast.transformation.SplitExpressionsTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
