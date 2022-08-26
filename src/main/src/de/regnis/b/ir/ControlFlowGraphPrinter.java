@@ -39,7 +39,7 @@ public class ControlFlowGraphPrinter {
 
 	@NotNull
 	public final StringOutput print() {
-		final List<AbstractBlock> blocks = CfgBlockLinearizer.linearize(graph);
+		final List<AbstractBlock> blocks = graph.getLinearizedBlocks();
 
 		final BlockVisitor visitor = new BlockVisitor() {
 			@Override

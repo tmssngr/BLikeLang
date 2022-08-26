@@ -102,15 +102,13 @@ public class ControlFlowGraphTest {
 				    if ! goto printHex4_else_1
 				printHex4_then_1:
 				    v0 = p0 + 48
-				printHex4_after_if_1:
-				    print(v0)
-				    goto printHex4_exit
+				    goto printHex4_after_if_1
 
 				printHex4_else_1:
 				    $1 := p0 - 10
 				    v0 = $1 + 65
-				    goto printHex4_after_if_1
-
+				printHex4_after_if_1:
+				    print(v0)
 				printHex4_exit:
 				    return
 				""";
@@ -179,11 +177,7 @@ public class ControlFlowGraphTest {
 				                 // [p0]
 				                 v0 = p0 + 48
 				                 // [v0]
-				             printHex4_after_if_1:
-				                 // [v0]
-				                 print(v0)
-				                 // []
-				                 goto printHex4_exit
+				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:
 				                 // [p0]
@@ -191,8 +185,10 @@ public class ControlFlowGraphTest {
 				                 // [$1]
 				                 v0 = $1 + 65
 				                 // [v0]
-				                 goto printHex4_after_if_1
-
+				             printHex4_after_if_1:
+				                 // [v0]
+				                 print(v0)
+				                 // []
 				             printHex4_exit:
 				                 return
 				             """,
@@ -279,8 +275,7 @@ public class ControlFlowGraphTest {
 				                 if v1 == v0
 				                 if ! goto main_else_2
 				             main_then_2:
-				             main_after_while_1:
-				                 goto main_exit
+				                 goto main_after_while_1
 
 				             main_else_2:
 				             main_after_if_2:
@@ -289,13 +284,14 @@ public class ControlFlowGraphTest {
 				                 if ! goto main_else_3
 				             main_then_3:
 				                 print(60)
-				             main_after_if_3:
-				                 goto main_while_1
+				                 goto main_after_if_3
 
 				             main_else_3:
 				                 print(62)
-				                 goto main_after_if_3
+				             main_after_if_3:
+				                 goto main_while_1
 
+				             main_after_while_1:
 				             main_exit:
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
@@ -364,11 +360,11 @@ public class ControlFlowGraphTest {
 						    if (input == 0) {
 						      break;
 						    }
-						    
+
 						    count = count + 1;
 						    sum = sum + input;
 						  }
-						  
+
 						  if (count > 0) {
 						    print(sum / count);
 						  }
@@ -396,6 +392,16 @@ public class ControlFlowGraphTest {
 				                 // [v0, v1, v2]
 				                 if v2 == 0
 				                 if ! goto main_after_if_2
+				                 goto main_if_3
+
+				             main_after_if_2:
+				                 // [v0, v1, v2]
+				                 v0 = v0 + 1
+				                 // [v0, v1, v2]
+				                 v1 = v1 + v2
+				                 // [v0, v1]
+				                 goto main_while_1
+
 				             main_if_3:
 				                 // [v0, v1]
 				                 if v0 > 0
@@ -406,16 +412,6 @@ public class ControlFlowGraphTest {
 				                 // [$1]
 				                 print($1)
 				                 // []
-				                 goto main_exit
-				                              
-				             main_after_if_2:
-				                 // [v0, v1, v2]
-				                 v0 = v0 + 1
-				                 // [v0, v1, v2]
-				                 v1 = v1 + v2
-				                 // [v0, v1]
-				                 goto main_while_1
-				                              
 				             main_exit:
 				                 return
 				             """,
