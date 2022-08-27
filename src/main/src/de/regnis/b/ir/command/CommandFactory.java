@@ -21,25 +21,36 @@ public abstract class CommandFactory {
 
 	protected abstract void addCommand(@NotNull Command command);
 
+	// Constants ==============================================================
+
+	static final String SP = "SP";
+	static final int VAR_ACCESS_REGISTER = 14;
+	static final String VAR_ACCESS_REGISTER_NAME = "@rr" + VAR_ACCESS_REGISTER;
+
+	static final int REG_A = 0;
+	static final int REG_B = 2;
+
 	// Fields =================================================================
 
+	private final StackPositionProvider stackPositionProvider;
 	private final Function<String, Type> functionNameToReturnType;
 
 	private int variableCount;
 
 	// Setup ==================================================================
 
-	protected CommandFactory(@NotNull Function<String, Type> functionNameToReturnType) {
+	protected CommandFactory(@NotNull StackPositionProvider stackPositionProvider, @NotNull Function<String, Type> functionNameToReturnType) {
+		this.stackPositionProvider    = stackPositionProvider;
 		this.functionNameToReturnType = functionNameToReturnType;
 	}
 
 	// Accessing ==============================================================
 
-	public final void addPrelude(@NotNull ControlFlowGraph graph, Set<String> parameterVars) {
-		variableCount = determineVariableCount(graph, parameterVars);
+	public final void addPrelude(int variableCount) {
+		this.variableCount = variableCount;
 		// reserve space for local variables
 		for (int i = 0; i < variableCount; i++) {
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, 0));
+			addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
 		}
 	}
 
@@ -60,13 +71,12 @@ public abstract class CommandFactory {
 
 			@Override
 			public void visitWhile(WhileBlock block) {
-
 			}
 
 			@Override
 			public void visitExit(ExitBlock block) {
 				for (int i = 0; i < variableCount; i++) {
-					addCommand(new RegisterCommand(RegisterCommand.Op.pop, 0));
+					addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
 				}
 
 				addCommand(NoArgCommand.Return);
@@ -107,8 +117,8 @@ public abstract class CommandFactory {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				addCommand(new Load(0, node.name()));
-				addCommand(new CmpCJump(0, 0,
+				load(REG_A, node.name());
+				addCommand(new CmpCJump(REG_A, 0,
 				                        JumpCondition.nz, trueLabel,
 				                        JumpCondition.z, falseLabel));
 				return node;
@@ -152,13 +162,13 @@ public abstract class CommandFactory {
 	// Utils ==================================================================
 
 	private void handleIf(String leftVar, SimpleExpression right, JumpCondition trueCondition, JumpCondition falseCondition, String trueLabel, String falseLabel) {
-		addCommand(new Load(0, leftVar));
+		load(REG_A, leftVar);
 
 		literalOrVar(right,
-		             literal -> addCommand(new CmpCJump(0, literal, trueCondition, trueLabel, falseCondition, falseLabel)),
+		             literal -> addCommand(new CmpCJump(REG_A, literal, trueCondition, trueLabel, falseCondition, falseLabel)),
 		             rightVar -> {
-			             addCommand(new Load(1, rightVar));
-			             addCommand(new CmpJump(0, 1, trueCondition, trueLabel, falseCondition, falseLabel));
+			             load(REG_B, rightVar);
+			             addCommand(new CmpJump(REG_A, REG_B, trueCondition, trueLabel, falseCondition, falseLabel));
 		             });
 	}
 
@@ -177,15 +187,15 @@ public abstract class CommandFactory {
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				addCommand(new LoadC(0, node.value()));
-				addCommand(new Store(name, 0));
+				addCommand(new LoadC(REG_A, node.value()));
+				storeA(name);
 				return node;
 			}
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				addCommand(new Load(0, node.name()));
-				addCommand(new Store(name, 0));
+				load(REG_A, node.name());
+				storeA(name);
 				return node;
 			}
 		});
@@ -196,54 +206,54 @@ public abstract class CommandFactory {
 		if (parameters.size() > 0) {
 			for (Expression parameter : parameters) {
 				literalOrVar(parameter,
-				             literal -> addCommand(new LoadC(0, literal)),
-				             name -> addCommand(new Load(0, name)));
-				addCommand(new RegisterCommand(RegisterCommand.Op.push, 0));
+				             literal -> addCommand(new LoadC(REG_A, literal)),
+				             name -> load(REG_A, name));
+				addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
 			}
 		}
 		else if (nonVoidReturnType) {
 			// to reserve space for the result
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, 0));
+			addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
 		}
 
 		addCommand(new CallCommand(functionName));
 		if (storeName != null) {
-			addCommand(new Store(storeName, 0));
+			storeA(storeName);
 		}
 
 		if (parameters.size() > 0) {
 			for (int i = parameters.size(); i-- > 0; ) {
-				addCommand(new RegisterCommand(RegisterCommand.Op.pop, 0));
+				addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
 			}
 		}
 		else if (nonVoidReturnType) {
-			addCommand(new RegisterCommand(RegisterCommand.Op.pop, 0));
+			addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
 		}
 	}
 
 	private void handleAssignment(Assignment node, ArithmeticOp op) {
-		addCommand(new Load(0, node.name()));
+		load(REG_A, node.name());
 		literalOrVar(node.expression(),
-		             literal -> addCommand(new ArithmeticC(op, 0, literal)),
+		             literal -> addCommand(new ArithmeticC(op, REG_A, literal)),
 		             var -> {
-			             addCommand(new Load(1, var));
-			             addCommand(new Arithmetic(op, 0, 1));
+			             load(REG_B, var);
+			             addCommand(new Arithmetic(op, REG_A, REG_B));
 		             });
-		addCommand(new Store(node.name(), 0));
+		storeA(node.name());
 	}
 
 	private void handleShift(Assignment node, RegisterCommand.Op op) {
-		addCommand(new Load(0, node.name()));
+		load(REG_A, node.name());
 		literalOrVar(node.expression(),
 		             literal -> {
 			             for (int i = 0; i < literal; i++) {
-				             addCommand(new RegisterCommand(op, 0));
+				             addCommand(new RegisterCommand(op, REG_A));
 			             }
 		             },
 		             var -> {
 			             throw new UnsupportedOperationException();
 		             });
-		addCommand(new Store(node.name(), 0));
+		storeA(node.name());
 	}
 
 	private void literalOrVar(Expression expression, IntConsumer literalConsumer, Consumer<String> varConsumer) {
@@ -258,54 +268,19 @@ public abstract class CommandFactory {
 		}
 	}
 
-	private static int determineVariableCount(@NotNull ControlFlowGraph graph, Set<String> parameterVars) {
-		final Set<String> variables = new HashSet<>(parameterVars);
-		if (graph.getType() != BasicTypes.VOID) {
-			variables.add(ControlFlowGraph.RESULT);
-		}
-		final Set<String> parametersAndReturnValue = new HashSet<>(variables);
+	private void load(int register, @NotNull String varName) {
+		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+		addCommand(new Load(VAR_ACCESS_REGISTER, SP));
+		addCommand(new ArithmeticC(ArithmeticOp.add, VAR_ACCESS_REGISTER, stackPosition));
 
-		final SimpleStatementVisitor<Object> statementVisitor = new SimpleStatementVisitor<>() {
-			@Override
-			public Object visitAssignment(Assignment node) {
-				variables.add(node.name());
-				return node;
-			}
+		addCommand(new Load(register, VAR_ACCESS_REGISTER_NAME));
+	}
 
-			@Override
-			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				variables.add(node.name());
-				return node;
-			}
+	private void storeA(@NotNull String varName) {
+		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+		addCommand(new Load(VAR_ACCESS_REGISTER, SP));
+		addCommand(new ArithmeticC(ArithmeticOp.add, VAR_ACCESS_REGISTER, stackPosition));
 
-			@Override
-			public Object visitCall(CallStatement node) {
-				return node;
-			}
-		};
-
-		graph.iterate(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				for (SimpleStatement statement : block.getStatements()) {
-					statement.visit(statementVisitor);
-				}
-			}
-
-			@Override
-			public void visitIf(IfBlock block) {
-			}
-
-			@Override
-			public void visitWhile(WhileBlock block) {
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
-			}
-		});
-
-		variables.removeAll(parametersAndReturnValue);
-		return variables.size();
+		addCommand(new Store(VAR_ACCESS_REGISTER_NAME, REG_A));
 	}
 }
