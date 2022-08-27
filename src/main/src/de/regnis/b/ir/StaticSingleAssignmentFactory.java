@@ -69,9 +69,11 @@ public final class StaticSingleAssignmentFactory {
 			else {
 				final Set<String> incomingVars = usages.getVarsBefore(block);
 				if (prevBlocks.size() > 1) {
-					for (String incomingVar : incomingVars) {
-						final String ssaName = info.getAssignmentName(incomingVar);
-						info.phiFunctions.add(new PhiFunction(incomingVar, ssaName));
+					if (!(block instanceof ExitBlock)) {
+						for (String incomingVar : incomingVars) {
+							final String ssaName = info.getAssignmentName(incomingVar);
+							info.phiFunctions.add(new PhiFunction(incomingVar, ssaName));
+						}
 					}
 				}
 				else {

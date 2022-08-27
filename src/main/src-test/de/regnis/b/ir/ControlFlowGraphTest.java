@@ -684,7 +684,7 @@ public class ControlFlowGraphTest {
 				                 $13 := $12 + 4
 				                 // [$13]
 				                 result = $13 % 7
-				                 // []
+				                 // [result]
 				             calculate_exit:
 				                 return
 				             """,
@@ -704,6 +704,17 @@ public class ControlFlowGraphTest {
 		assertEquals(7, registerAllocation.getMaxRegisterCount());
 
 		final Map<String, Integer> expected = new HashMap<>();
+		expected.put("p0", 0);
+		expected.put("p1", 1);
+		expected.put("p2", 2);
+		expected.put("result", 0);
+		expected.put("v0", 6);
+		expected.put("v1", 4);
+		expected.put("v2", 3);
+		expected.put("v3", 5);
+		expected.put("v4", 6);
+		expected.put("v5", 4);
+		expected.put("v6", 2);
 		expected.put("$1", 3);
 		expected.put("$10", 0);
 		expected.put("$11", 0);
@@ -717,16 +728,6 @@ public class ControlFlowGraphTest {
 		expected.put("$7", 5);
 		expected.put("$8", 5);
 		expected.put("$9", 6);
-		expected.put("p0", 0);
-		expected.put("p1", 1);
-		expected.put("p2", 2);
-		expected.put("v0", 6);
-		expected.put("v1", 4);
-		expected.put("v2", 3);
-		expected.put("v3", 5);
-		expected.put("v4", 6);
-		expected.put("v5", 4);
-		expected.put("v6", 2);
 		assertEquals(expected, varToRegister);
 	}
 }

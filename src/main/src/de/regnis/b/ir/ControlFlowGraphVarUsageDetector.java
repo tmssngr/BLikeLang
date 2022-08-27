@@ -2,6 +2,7 @@ package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
 import de.regnis.b.out.StringOutput;
+import de.regnis.b.type.BasicTypes;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -134,6 +135,9 @@ public final class ControlFlowGraphVarUsageDetector {
 
 			@Override
 			public void visitExit(ExitBlock block) {
+				if (graph.getType() != BasicTypes.VOID) {
+					live.add(ControlFlowGraph.RESULT);
+				}
 			}
 		});
 
