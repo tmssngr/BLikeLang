@@ -1,6 +1,7 @@
 package de.regnis.b.ir.command;
 
 import de.regnis.b.ast.*;
+import de.regnis.b.ir.StackPositionProvider;
 import de.regnis.b.type.BasicTypes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -15,14 +16,28 @@ import java.util.List;
  */
 public class CommandFactoryTest {
 
+	// Constants ==============================================================
+
+	private static final int STACKPOS_A = 10;
+	private static final int STACKPOS_B = 12;
+
 	// Accessing ==============================================================
 
 	@Test
 	public void testAssign() {
-		test(List.of(new LoadC(0, 1),
-		             new Store("a", 0)), new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1)));
-		test(List.of(new Load(0, "b"),
-		             new Store("a", 0)), new Assignment(Assignment.Op.assign, "a", new VarRead("b")));
+		test(List.of(new LoadC(CommandFactory.REG_A, 1),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1)));
+
+		test(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_B),
+		             new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(Assignment.Op.assign, "a", new VarRead("b")));
 	}
 
 	@Test
@@ -41,8 +56,11 @@ public class CommandFactoryTest {
 	public void testIf() {
 		final TestCommandFactory factory = new TestCommandFactory();
 		factory.addIf(new VarRead("a"), "trueLabel", "falseLabel");
-		Assert.assertEquals(List.of(new Load(0, "a"),
-		                            new CmpCJump(0, 0,
+		Assert.assertEquals(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		                            new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		                            new CmpCJump(CommandFactory.REG_A, 0,
 		                                         JumpCondition.nz, "trueLabel",
 		                                         JumpCondition.z, "falseLabel")), factory.getCommands());
 
@@ -61,9 +79,15 @@ public class CommandFactoryTest {
 		factory.addIf(new BinaryExpression(new VarRead("a"),
 		                                   operator,
 		                                   new VarRead("b")), "trueLabel", "falseLabel");
-		Assert.assertEquals(List.of(new Load(0, "a"),
-		                            new Load(1, "b"),
-		                            new CmpJump(0, 1,
+		Assert.assertEquals(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		                            new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		                            new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_B),
+		                            new Load(CommandFactory.REG_B, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		                            new CmpJump(CommandFactory.REG_A, CommandFactory.REG_B,
 		                                        trueCondition, "trueLabel",
 		                                        falseCondition, "falseLabel")), factory.getCommands());
 
@@ -71,30 +95,62 @@ public class CommandFactoryTest {
 		factory.addIf(new BinaryExpression(new VarRead("a"),
 		                                   operator,
 		                                   new NumberLiteral(100)), "trueLabel", "falseLabel");
-		Assert.assertEquals(List.of(new Load(0, "a"),
-		                            new CmpCJump(0, 100,
+		Assert.assertEquals(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		                            new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		                            new CmpCJump(CommandFactory.REG_A, 100,
 		                                         trueCondition, "trueLabel",
 		                                         falseCondition, "falseLabel")), factory.getCommands());
 	}
 
 	private void testArithmetic(ArithmeticOp op, Assignment.Op operation) {
-		test(List.of(new Load(0, "a"),
-		             new ArithmeticC(op, 0, 1),
-		             new Store("a", 0)), new Assignment(operation, "a", new NumberLiteral(1)));
-		test(List.of(new Load(0, "a"),
-		             new Load(1, "b"),
-		             new Arithmetic(op, 0, 1),
-		             new Store("a", 0)), new Assignment(operation, "a", new VarRead("b")));
+		test(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new ArithmeticC(op, CommandFactory.REG_A, 1),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(operation, "a", new NumberLiteral(1)));
+
+		test(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_B),
+		             new Load(CommandFactory.REG_B, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new Arithmetic(op, CommandFactory.REG_A, CommandFactory.REG_B),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(operation, "a", new VarRead("b")));
 	}
 
 	private void testShift(RegisterCommand.Op op, Assignment.Op operation) {
-		test(List.of(new Load(0, "a"),
-		             new RegisterCommand(op, 0),
-		             new Store("a", 0)), new Assignment(operation, "a", new NumberLiteral(1)));
-		test(List.of(new Load(0, "a"),
-		             new RegisterCommand(op, 0),
-		             new RegisterCommand(op, 0),
-		             new Store("a", 0)), new Assignment(operation, "a", new NumberLiteral(2)));
+		test(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new RegisterCommand(op, CommandFactory.REG_A),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(operation, "a", new NumberLiteral(1)));
+
+		test(List.of(new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
+
+		             new RegisterCommand(op, CommandFactory.REG_A),
+		             new RegisterCommand(op, CommandFactory.REG_A),
+
+		             new Load(CommandFactory.VAR_ACCESS_REGISTER, CommandFactory.SP),
+		             new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
+		             new Store(CommandFactory.VAR_ACCESS_REGISTER_NAME, CommandFactory.REG_A)), new Assignment(operation, "a", new NumberLiteral(2)));
 	}
 
 	private void test(List<Command> expected, SimpleStatement statement) {
@@ -105,11 +161,22 @@ public class CommandFactoryTest {
 
 	// Inner Classes ==========================================================
 
+	private static class TestStackPositionProvider implements StackPositionProvider {
+		@Override
+		public int getStackPosition(@NotNull String varName) {
+			return switch (varName) {
+				case "a" -> STACKPOS_A;
+				case "b" -> STACKPOS_B;
+				default -> throw new IllegalArgumentException(varName);
+			};
+		}
+	}
+
 	private static class TestCommandFactory extends CommandFactory {
 		private final List<Command> commands = new ArrayList<>();
 
 		public TestCommandFactory() {
-			super(funcName -> BasicTypes.INT16);
+			super(new TestStackPositionProvider(), funcName -> BasicTypes.INT16);
 		}
 
 		@Override
