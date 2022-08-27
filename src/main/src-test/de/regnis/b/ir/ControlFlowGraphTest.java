@@ -694,14 +694,14 @@ public class ControlFlowGraphTest {
 				             .print()
 				             .toString());
 
-		final RegisterAllocation registerAllocation = new RegisterAllocation(graph);
-		registerAllocation.initializeParameters(function);
-		final Map<String, Integer> varToRegister = registerAllocation.run();
+		final RegisterAllocation.Result varToRegister = RegisterAllocation.run(graph);
 		if (false) {
-			Utils.print(varToRegister, "expected.put(\"", "\", ", ");\n");
+			Utils.print(varToRegister.debugToMap(), "expected.put(\"", "\", ", ");\n");
 		}
 
-		assertEquals(7, registerAllocation.getMaxRegisterCount());
+		assertEquals(3, varToRegister.parameterCount);
+		assertEquals(1, varToRegister.returnVarCount);
+		assertEquals(4, varToRegister.localVarRegisterCount);
 
 		final Map<String, Integer> expected = new HashMap<>();
 		expected.put("p0", 0);
@@ -728,6 +728,6 @@ public class ControlFlowGraphTest {
 		expected.put("$7", 5);
 		expected.put("$8", 5);
 		expected.put("$9", 6);
-		assertEquals(expected, varToRegister);
+		assertEquals(expected, varToRegister.debugToMap());
 	}
 }
