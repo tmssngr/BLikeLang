@@ -101,22 +101,6 @@ public final class ControlFlowGraph {
 		iterate(block -> block.visit(visitor));
 	}
 
-	public void compact() {
-		if (firstBlock instanceof BasicBlock block && block.getStatements().isEmpty()) {
-			linearizedBlocks.remove(firstBlock);
-			firstBlock = block.getSingleNext();
-		}
-
-		iterate(block -> {
-			if (block instanceof BasicBlock basic && basic.getStatements().isEmpty()) {
-				linearizedBlocks.remove(basic);
-				basic.remove();
-			}
-		});
-
-		checkIntegrity();
-	}
-
 	public List<AbstractBlock> getLinearizedBlocks() {
 		return Collections.unmodifiableList(linearizedBlocks);
 	}

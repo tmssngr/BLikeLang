@@ -54,13 +54,10 @@ public class RegisterAllocationTest {
 				             print_exit:
 				                 return
 				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
-		graph.compact();
-		assertEquals("""
-				             print_exit:
-				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
 		assertEquals("""
+				             print_start:
+				                 // []
 				             print_exit:
 				                 return
 				             """,
@@ -109,13 +106,6 @@ public class RegisterAllocationTest {
 		final FuncDeclaration function = Utils.notNull(root.getFunction("inc"));
 		final ControlFlowGraph graph = new ControlFlowGraph(function);
 
-		assertEquals("""
-				             inc_start:
-				                 result = p0 + 1
-				             inc_exit:
-				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
-		graph.compact();
 		assertEquals("""
 				             inc_start:
 				                 result = p0 + 1
@@ -177,13 +167,6 @@ public class RegisterAllocationTest {
 		final FuncDeclaration function = Utils.notNull(root.getFunction("add"));
 		final ControlFlowGraph graph = new ControlFlowGraph(function);
 
-		assertEquals("""
-				             add_start:
-				                 result = p0 + p1
-				             add_exit:
-				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
-		graph.compact();
 		assertEquals("""
 				             add_start:
 				                 result = p0 + p1
@@ -252,17 +235,6 @@ public class RegisterAllocationTest {
 		final FuncDeclaration function = Utils.notNull(root.getFunction("calc"));
 		final ControlFlowGraph graph = new ControlFlowGraph(function);
 
-		assertEquals("""
-				             calc_start:
-				                 v0 := p0 * p0
-				                 v1 := p1 * p1
-				                 $1 := v0 + v1
-				                 $2 := $1 + p0
-				                 result = $2 - p1
-				             calc_exit:
-				                 return
-				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
-		graph.compact();
 		assertEquals("""
 				             calc_start:
 				                 v0 := p0 * p0
