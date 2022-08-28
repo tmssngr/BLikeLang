@@ -18,6 +18,11 @@ public record FuncDeclaration(@NotNull Type type, @NotNull String name, @NotNull
 	// Implemented ============================================================
 
 	@Override
+	public String toString() {
+		return name + "(" + parameters.getParameters().size() + ") -> " + type;
+	}
+
+	@Override
 	public <O> O visit(DeclarationVisitor<O> visitor) {
 		return visitor.visitFunctionDeclaration(this);
 	}
