@@ -15,11 +15,7 @@ import java.util.function.IntConsumer;
 /**
  * @author Thomas Singer
  */
-public abstract class CommandFactory {
-
-	// Abstract ===============================================================
-
-	protected abstract void addCommand(@NotNull Command command);
+public final class CommandFactory {
 
 	// Constants ==============================================================
 
@@ -34,19 +30,23 @@ public abstract class CommandFactory {
 
 	private final StackPositionProvider stackPositionProvider;
 	private final Function<String, Type> functionNameToReturnType;
+	private final CommandList commandList;
 
 	private int variableCount;
 
 	// Setup ==================================================================
 
-	protected CommandFactory(@NotNull StackPositionProvider stackPositionProvider, @NotNull Function<String, Type> functionNameToReturnType) {
+	public CommandFactory(@NotNull StackPositionProvider stackPositionProvider, @NotNull Function<String, Type> functionNameToReturnType, @NotNull CommandList commandList) {
 		this.stackPositionProvider    = stackPositionProvider;
 		this.functionNameToReturnType = functionNameToReturnType;
+		this.commandList              = commandList;
 	}
 
 	// Accessing ==============================================================
 
-	public final void addPrelude(int variableCount) {
+	public void addPrelude(@NotNull FuncDeclaration declaration, int variableCount) {
+		commandList.add(new Label(declaration.name()));
+
 		this.variableCount = variableCount;
 		// reserve space for local variables
 		for (int i = 0; i < variableCount; i++) {
@@ -54,7 +54,9 @@ public abstract class CommandFactory {
 		}
 	}
 
-	public final void add(@NotNull AbstractBlock block) {
+	public void add(@NotNull AbstractBlock block) {
+		commandList.add(new Label(block.label));
+
 		block.visit(new BlockVisitor() {
 			@Override
 			public void visitBasic(BasicBlock block) {
@@ -84,7 +86,7 @@ public abstract class CommandFactory {
 		});
 	}
 
-	public final void addIf(@NotNull Expression expression, @NotNull String trueLabel, @NotNull String falseLabel) {
+	public void addIf(@NotNull Expression expression, @NotNull String trueLabel, @NotNull String falseLabel) {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
@@ -126,7 +128,7 @@ public abstract class CommandFactory {
 		});
 	}
 
-	public final void add(@NotNull SimpleStatement statement) {
+	public void add(@NotNull SimpleStatement statement) {
 		statement.visit(new SimpleStatementVisitor<>() {
 			@Override
 			public Object visitAssignment(Assignment node) {
@@ -282,5 +284,9 @@ public abstract class CommandFactory {
 		addCommand(new ArithmeticC(ArithmeticOp.add, VAR_ACCESS_REGISTER, stackPosition));
 
 		addCommand(new Store(VAR_ACCESS_REGISTER_NAME, REG_A));
+	}
+
+	private void addCommand(@NotNull Command command) {
+		commandList.add(command);
 	}
 }
