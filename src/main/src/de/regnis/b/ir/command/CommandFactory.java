@@ -120,9 +120,9 @@ public final class CommandFactory {
 			@Override
 			public Object visitVarRead(VarRead node) {
 				load(REG_A, node.name());
-				addCommand(new CmpCJump(REG_A, 0,
-				                        JumpCondition.nz, trueLabel,
-				                        JumpCondition.z, falseLabel));
+				addCommand(new ArithmeticC(ArithmeticOp.cmp, REG_A, 0));
+				addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
+				addCommand(new JumpCommand(trueLabel));
 				return node;
 			}
 		});
@@ -167,10 +167,16 @@ public final class CommandFactory {
 		load(REG_A, leftVar);
 
 		literalOrVar(right,
-		             literal -> addCommand(new CmpCJump(REG_A, literal, trueCondition, trueLabel, falseCondition, falseLabel)),
+		             literal -> {
+			             addCommand(new ArithmeticC(ArithmeticOp.cmp, REG_A, literal));
+						 addCommand(new JumpCommand(falseCondition, falseLabel));
+						 addCommand(new JumpCommand(trueLabel));
+		             },
 		             rightVar -> {
 			             load(REG_B, rightVar);
-			             addCommand(new CmpJump(REG_A, REG_B, trueCondition, trueLabel, falseCondition, falseLabel));
+			             addCommand(new Arithmetic(ArithmeticOp.cmp, REG_A, REG_B));
+						 addCommand(new JumpCommand(falseCondition, falseLabel));
+						 addCommand(new JumpCommand(trueLabel));
 		             });
 	}
 

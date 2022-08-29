@@ -112,39 +112,7 @@ public final class CommandList {
 				if (command instanceof JumpCommand jumpCommand) {
 					final String newLabel = labelToLabel.get(jumpCommand.label());
 					if (newLabel != null) {
-						return new JumpCommand(newLabel);
-					}
-				}
-
-				if (command instanceof CmpJump cmpJump) {
-					String newTrueLabel = labelToLabel.get(cmpJump.trueLabel());
-					String newFalseLabel = labelToLabel.get(cmpJump.falseLabel());
-					if (newTrueLabel != null || newFalseLabel != null) {
-						if (newTrueLabel == null) {
-							newTrueLabel = cmpJump.trueLabel();
-						}
-						if (newFalseLabel == null) {
-							newFalseLabel = cmpJump.falseLabel();
-						}
-						return new CmpJump(cmpJump.destRegister(), cmpJump.srcRegister(),
-						                   cmpJump.trueCondition(), newTrueLabel,
-						                   cmpJump.falseCondition(), newFalseLabel);
-					}
-				}
-
-				if (command instanceof CmpCJump cmpJump) {
-					String newTrueLabel = labelToLabel.get(cmpJump.trueLabel());
-					String newFalseLabel = labelToLabel.get(cmpJump.falseLabel());
-					if (newTrueLabel != null || newFalseLabel != null) {
-						if (newTrueLabel == null) {
-							newTrueLabel = cmpJump.trueLabel();
-						}
-						if (newFalseLabel == null) {
-							newFalseLabel = cmpJump.falseLabel();
-						}
-						return new CmpCJump(cmpJump.register(), cmpJump.literal(),
-						                    cmpJump.trueCondition(), newTrueLabel,
-						                    cmpJump.falseCondition(), newFalseLabel);
+						return new JumpCommand(jumpCommand.condition(), newLabel);
 					}
 				}
 
@@ -198,14 +166,6 @@ public final class CommandList {
 		for (Command command : commands) {
 			if (command instanceof JumpCommand jump) {
 				usedLabels.add(jump.label());
-			}
-			else if (command instanceof CmpJump jump) {
-				usedLabels.add(jump.trueLabel());
-				usedLabels.add(jump.falseLabel());
-			}
-			else if (command instanceof CmpCJump jump) {
-				usedLabels.add(jump.trueLabel());
-				usedLabels.add(jump.falseLabel());
 			}
 		}
 		return usedLabels;

@@ -30,7 +30,9 @@ public final class CommandListTest {
 	public void testReplaceLabel() {
 		final CommandList list = new CommandList();
 		list.add(new Label("start"));
-		list.add(new CmpCJump(0, 1, JumpCondition.z, "if_then", JumpCondition.nz, "if_else"));
+		list.add(new ArithmeticC(ArithmeticOp.cmp, 0, 1));
+		list.add(new JumpCommand(JumpCondition.nz, "if_else"));
+		list.add(new JumpCommand("if_then"));
 		list.add(new Label("if_then"));
 		list.add(new LoadC(0, 1));
 		list.add(new JumpCommand("next1"));
@@ -41,8 +43,8 @@ public final class CommandListTest {
 		list.add(NoArgCommand.Return);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
-		                            new CmpCJump(0, 1, JumpCondition.z, "if_then", JumpCondition.nz, "if_else"),
-		                            new Label("if_then"),
+		                            new ArithmeticC(ArithmeticOp.cmp, 0, 1),
+		                            new JumpCommand(JumpCondition.nz, "if_else"),
 		                            new LoadC(0, 1),
 		                            new JumpCommand("next"),
 		                            new Label("if_else"),
@@ -55,7 +57,9 @@ public final class CommandListTest {
 	public void testReplaceLabelIfElse() {
 		final CommandList list = new CommandList();
 		list.add(new Label("start"));
-		list.add(new CmpCJump(0, 1, JumpCondition.z, "if_then", JumpCondition.nz, "if_else"));
+		list.add(new ArithmeticC(ArithmeticOp.cmp, 0, 1));
+		list.add(new JumpCommand(JumpCondition.nz, "if_else"));
+		list.add(new JumpCommand("if_then"));
 		list.add(new Label("if_then"));
 		list.add(new LoadC(0, 1));
 		list.add(new JumpCommand("next"));
@@ -64,8 +68,8 @@ public final class CommandListTest {
 		list.add(NoArgCommand.Return);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
-		                            new CmpCJump(0, 1, JumpCondition.z, "if_then", JumpCondition.nz, "next"),
-		                            new Label("if_then"),
+		                            new ArithmeticC(ArithmeticOp.cmp, 0, 1),
+		                            new JumpCommand(JumpCondition.nz, "next"),
 		                            new LoadC(0, 1),
 		                            new Label("next"),
 		                            NoArgCommand.Return), list.getCommands());

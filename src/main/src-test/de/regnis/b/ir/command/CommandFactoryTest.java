@@ -59,9 +59,9 @@ public class CommandFactoryTest {
 		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
 		                            new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
 
-		                            new CmpCJump(CommandFactory.REG_A, 0,
-		                                         JumpCondition.nz, "trueLabel",
-		                                         JumpCondition.z, "falseLabel")), commandList.getCommands());
+		                            new ArithmeticC(ArithmeticOp.cmp, CommandFactory.REG_A, 0),
+		                            new JumpCommand(JumpCondition.nz, "falseLabel"),
+		                            new JumpCommand("trueLabel")), commandList.getCommands());
 
 		testIf(BinaryExpression.Op.lessThan, JumpCondition.lt, JumpCondition.ge);
 		testIf(BinaryExpression.Op.lessEqual, JumpCondition.le, JumpCondition.gt);
@@ -87,12 +87,12 @@ public class CommandFactoryTest {
 		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_B),
 		                            new Load(CommandFactory.REG_B, CommandFactory.VAR_ACCESS_REGISTER_NAME),
 
-		                            new CmpJump(CommandFactory.REG_A, CommandFactory.REG_B,
-		                                        trueCondition, "trueLabel",
-		                                        falseCondition, "falseLabel")), commandList.getCommands());
+									new Arithmetic(ArithmeticOp.cmp, CommandFactory.REG_A, CommandFactory.REG_B),
+									new JumpCommand(falseCondition, "falseLabel"),
+									new JumpCommand("trueLabel")), commandList.getCommands());
 
 		commandList = new CommandList();
-		factory = createCommandFactory(commandList);
+		factory     = createCommandFactory(commandList);
 		factory.addIf(new BinaryExpression(new VarRead("a"),
 		                                   operator,
 		                                   new NumberLiteral(100)), "trueLabel", "falseLabel");
@@ -100,9 +100,9 @@ public class CommandFactoryTest {
 		                            new ArithmeticC(ArithmeticOp.add, CommandFactory.VAR_ACCESS_REGISTER, STACKPOS_A),
 		                            new Load(CommandFactory.REG_A, CommandFactory.VAR_ACCESS_REGISTER_NAME),
 
-		                            new CmpCJump(CommandFactory.REG_A, 100,
-		                                         trueCondition, "trueLabel",
-		                                         falseCondition, "falseLabel")), commandList.getCommands());
+		                            new ArithmeticC(ArithmeticOp.cmp, CommandFactory.REG_A, 100),
+		                            new JumpCommand(falseCondition, "falseLabel"),
+		                            new JumpCommand("trueLabel")), commandList.getCommands());
 	}
 
 	private void testArithmetic(ArithmeticOp op, Assignment.Op operation) {
