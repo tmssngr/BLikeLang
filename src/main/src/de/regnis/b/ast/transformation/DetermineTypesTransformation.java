@@ -23,7 +23,12 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull StringOutput warningOutput) {
-		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(warningOutput);
+		return transform(root, new BuiltInFunctions(), warningOutput);
+	}
+
+	@NotNull
+	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull BuiltInFunctions builtInFunctions, @NotNull StringOutput warningOutput) {
+		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(builtInFunctions, warningOutput);
 		transformation.determineFunctions(root);
 		transformation.reportIllegalBreakStatement(root);
 
@@ -33,6 +38,7 @@ public final class DetermineTypesTransformation {
 	// Fields =================================================================
 
 	private final Map<String, FunctionSignature> functions = new LinkedHashMap<>();
+	private final BuiltInFunctions builtInFunctions;
 	private final StringOutput warningOutput;
 
 	private SymbolScope symbolMap = SymbolScope.createRootInstance();
@@ -42,8 +48,9 @@ public final class DetermineTypesTransformation {
 
 	// Setup ==================================================================
 
-	private DetermineTypesTransformation(StringOutput warningOutput) {
-		this.warningOutput = warningOutput;
+	private DetermineTypesTransformation(@NotNull BuiltInFunctions builtInFunctions, @NotNull StringOutput warningOutput) {
+		this.builtInFunctions = builtInFunctions;
+		this.warningOutput    = warningOutput;
 	}
 
 	// Utils ==================================================================
@@ -346,9 +353,12 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	private Tuple<FunctionSignature, FuncCallParameters> handleCall(String name, FuncCallParameters callParameters, int line, int column) {
-		final FunctionSignature function = functions.get(name);
+		FunctionSignature function = functions.get(name);
 		if (function == null) {
-			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
+			function = builtInFunctions.get(name);
+			if (function == null) {
+				throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
+			}
 		}
 
 		final List<Expression> parameters = callParameters.getExpressions();

@@ -2,6 +2,7 @@ package de.regnis.b.ast.transformation;
 
 import de.regnis.b.Messages;
 import de.regnis.b.ast.AstFactory;
+import de.regnis.b.ast.BuiltInFunctions;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
@@ -176,7 +177,7 @@ public final class RemovedUnusedFunctionsTransformationTest {
 	private void assertSuccessfullyTransformed(String expectedCode, String expectedWarnings, String code) {
 		final DeclarationList root = AstFactory.parseString(code);
 		final StringOutput out = new StringStringOutput();
-		final DeclarationList newRoot = RemoveUnusedFunctionsTransformation.transform(root, out);
+		final DeclarationList newRoot = RemoveUnusedFunctionsTransformation.transform(root, new BuiltInFunctions(), out);
 		assertEquals(expectedCode, CodePrinter.print(newRoot));
 		assertEquals(expectedWarnings, out.toString());
 	}
@@ -184,7 +185,7 @@ public final class RemovedUnusedFunctionsTransformationTest {
 	private void assertTransformationFailedException(String expectedExceptionMsg, String expectedWarnings, String code) {
 		final StringOutput out = new StringStringOutput();
 		try {
-			RemoveUnusedFunctionsTransformation.transform(AstFactory.parseString(code), out);
+			RemoveUnusedFunctionsTransformation.transform(AstFactory.parseString(code), new BuiltInFunctions(), out);
 			fail();
 		}
 		catch (TransformationFailedException ex) {

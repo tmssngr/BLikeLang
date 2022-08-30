@@ -7,7 +7,7 @@ import de.regnis.b.type.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
@@ -30,15 +30,17 @@ public final class CommandFactory {
 
 	private final StackPositionProvider stackPositionProvider;
 	private final Function<String, Type> functionNameToReturnType;
+	private final BuiltInFunctions builtInFunctions;
 	private final CommandList commandList;
 
 	private int variableCount;
 
 	// Setup ==================================================================
 
-	public CommandFactory(@NotNull StackPositionProvider stackPositionProvider, @NotNull Function<String, Type> functionNameToReturnType, @NotNull CommandList commandList) {
+	public CommandFactory(@NotNull StackPositionProvider stackPositionProvider, @NotNull Function<String, Type> functionNameToReturnType, @NotNull BuiltInFunctions builtInFunctions, @NotNull CommandList commandList) {
 		this.stackPositionProvider    = stackPositionProvider;
 		this.functionNameToReturnType = functionNameToReturnType;
+		this.builtInFunctions         = builtInFunctions;
 		this.commandList              = commandList;
 	}
 
@@ -154,8 +156,14 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitCall(CallStatement node) {
-				final Type returnType = functionNameToReturnType.apply(node.name());
-				handleCall(node.name(), node.parameters(), returnType != BasicTypes.VOID, null);
+				final String name = node.name();
+				final Type returnType = functionNameToReturnType.apply(name);
+				if (returnType != null) {
+					handleCall(name, node.parameters(), returnType != BasicTypes.VOID, null);
+				}
+				else {
+					handleBuiltInFunctionCall(name, node.parameters(), null);
+				}
 				return node;
 			}
 		});
@@ -169,14 +177,14 @@ public final class CommandFactory {
 		literalOrVar(right,
 		             literal -> {
 			             addCommand(new ArithmeticC(ArithmeticOp.cmp, REG_A, literal));
-						 addCommand(new JumpCommand(falseCondition, falseLabel));
-						 addCommand(new JumpCommand(trueLabel));
+			             addCommand(new JumpCommand(falseCondition, falseLabel));
+			             addCommand(new JumpCommand(trueLabel));
 		             },
 		             rightVar -> {
 			             load(REG_B, rightVar);
 			             addCommand(new Arithmetic(ArithmeticOp.cmp, REG_A, REG_B));
-						 addCommand(new JumpCommand(falseCondition, falseLabel));
-						 addCommand(new JumpCommand(trueLabel));
+			             addCommand(new JumpCommand(falseCondition, falseLabel));
+			             addCommand(new JumpCommand(trueLabel));
 		             });
 	}
 
@@ -189,7 +197,13 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name(), node.parameters(), true, name);
+				final Type returnType = functionNameToReturnType.apply(node.name());
+				if (returnType != null) {
+					handleCall(node.name(), node.parameters(), true, name);
+				}
+				else {
+					handleBuiltInFunctionCall(node.name(), node.parameters(), name);
+				}
 				return node;
 			}
 
@@ -237,6 +251,27 @@ public final class CommandFactory {
 		else if (nonVoidReturnType) {
 			addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
 		}
+	}
+
+	private void handleBuiltInFunctionCall(@NotNull String name, @NotNull FuncCallParameters parameters, @Nullable String assignReturnToVar) {
+		final BuiltInFunctions.FunctionCommandFactory factory = builtInFunctions.getFactory(name);
+		if (factory == null) {
+			throw new IllegalStateException("function " + name + " not found");
+		}
+
+		factory.handleCall(parameters.getExpressions(), assignReturnToVar, new BuiltInFunctions.CommandFactory() {
+			@Override
+			public void loadToRegister(@NotNull Expression parameterExpression, int register) {
+				literalOrVar(parameterExpression,
+				             literal -> addCommand(new LoadC(register, literal)),
+				             name -> load(register, name));
+			}
+
+			@Override
+			public void addCommand(@NotNull Command command) {
+				CommandFactory.this.addCommand(command);
+			}
+		});
 	}
 
 	private void handleAssignment(Assignment node, ArithmeticOp op) {
