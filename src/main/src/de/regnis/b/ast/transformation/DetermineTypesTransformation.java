@@ -32,7 +32,7 @@ public final class DetermineTypesTransformation {
 
 	// Fields =================================================================
 
-	private final Map<String, Function> functions = new LinkedHashMap<>();
+	private final Map<String, FunctionSignature> functions = new LinkedHashMap<>();
 	private final StringOutput warningOutput;
 
 	private SymbolScope symbolMap = SymbolScope.createRootInstance();
@@ -58,7 +58,7 @@ public final class DetermineTypesTransformation {
 						throw new TransformationFailedException(Messages.errorFunctionAlreadyDeclared(node.position().line(), node.position().column(), node.name()));
 					}
 
-					functions.put(node.name(), new Function(node.type(), parameterCount));
+					functions.put(node.name(), new FunctionSignature(node.type(), parameterCount));
 
 					return node;
 				}
@@ -325,8 +325,8 @@ public final class DetermineTypesTransformation {
 	}
 
 	private FuncCall visitFunctionCall(FuncCall node) {
-		final Tuple<Function, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
-		final Type type = function.first.type;
+		final Tuple<FunctionSignature, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
+		final Type type = function.first.returnType();
 		if (type == BasicTypes.VOID) {
 			throw new TransformationFailedException(Messages.errorFunctionDoesNotReturnAValue(node.position().line(), node.position().column(), node.name()));
 		}
@@ -335,8 +335,8 @@ public final class DetermineTypesTransformation {
 	}
 
 	private CallStatement visitCall(CallStatement node) {
-		final Tuple<Function, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
-		final Type type = function.first.type;
+		final Tuple<FunctionSignature, FuncCallParameters> function = handleCall(node.name(), node.parameters(), node.position().line(), node.position().column());
+		final Type type = function.first.returnType();
 		if (type != BasicTypes.VOID) {
 			warning(Messages.warningIgnoredReturnValue(node.position().line(), node.position().column(), node.name(), type));
 		}
@@ -345,15 +345,15 @@ public final class DetermineTypesTransformation {
 	}
 
 	@NotNull
-	private Tuple<Function, FuncCallParameters> handleCall(String name, FuncCallParameters callParameters, int line, int column) {
-		final Function function = functions.get(name);
+	private Tuple<FunctionSignature, FuncCallParameters> handleCall(String name, FuncCallParameters callParameters, int line, int column) {
+		final FunctionSignature function = functions.get(name);
 		if (function == null) {
 			throw new TransformationFailedException(Messages.errorUndeclaredFunction(line, column, name));
 		}
 
 		final List<Expression> parameters = callParameters.getExpressions();
-		if (parameters.size() != function.parameterCount) {
-			throw new TransformationFailedException("Function " + name + " expects " + function.parameterCount + " expressions, but got " + parameters.size());
+		if (parameters.size() != function.parameterCount()) {
+			throw new TransformationFailedException("Function " + name + " expects " + function.parameterCount() + " expressions, but got " + parameters.size());
 		}
 
 		final FuncCallParameters newParameters = callParameters.transform(this::visitExpression);
@@ -423,17 +423,5 @@ public final class DetermineTypesTransformation {
 	private void warning(String message) {
 		warningOutput.print(message);
 		warningOutput.println();
-	}
-
-	// Inner Classes ==========================================================
-
-	private static final class Function {
-		public final Type type;
-		private final int parameterCount;
-
-		private Function(Type type, int parameterCount) {
-			this.type           = type;
-			this.parameterCount = parameterCount;
-		}
 	}
 }
