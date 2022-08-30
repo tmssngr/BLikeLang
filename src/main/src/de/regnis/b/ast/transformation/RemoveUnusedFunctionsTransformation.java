@@ -17,7 +17,7 @@ public final class RemoveUnusedFunctionsTransformation {
 	// Static =================================================================
 
 	@NotNull
-	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull StringOutput warningOutput) {
+	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull BuiltInFunctions builtInFunctions, @NotNull StringOutput warningOutput) {
 		final String entryPoint = "main";
 		final FuncDeclaration entryFunction = root.getFunction(entryPoint);
 		if (entryFunction == null) {
@@ -28,7 +28,7 @@ public final class RemoveUnusedFunctionsTransformation {
 			throw new TransformationFailedException(Messages.errorMainHasWrongSignature(entryFunction.position().line(), entryFunction.position().column()));
 		}
 
-		final Set<String> usedFunctions = determineUsedFunctions(entryFunction, root);
+		final Set<String> usedFunctions = determineUsedFunctions(entryFunction, root, builtInFunctions);
 		return reportAndRemoveUnusedFunctions(root, usedFunctions, warningOutput);
 	}
 
@@ -40,7 +40,7 @@ public final class RemoveUnusedFunctionsTransformation {
 	// Utils ==================================================================
 
 	@NotNull
-	private static Set<String> determineUsedFunctions(@NotNull FuncDeclaration entryFunction, @NotNull DeclarationList root) {
+	private static Set<String> determineUsedFunctions(@NotNull FuncDeclaration entryFunction, @NotNull DeclarationList root, @NotNull BuiltInFunctions builtInFunctions) {
 		final List<FuncDeclaration> pendingFunctions = new LinkedList<>();
 		pendingFunctions.add(entryFunction);
 		final AstWalker functionVisitor = new AstWalker() {
@@ -48,9 +48,13 @@ public final class RemoveUnusedFunctionsTransformation {
 			protected void visitCall(@NotNull String name, FuncCallParameters node) {
 				final FuncDeclaration function = root.getFunction(name);
 				if (function == null) {
-					throw new TransformationFailedException("Function '" + name + "' not found");
+					if (builtInFunctions.get(name) == null) {
+						throw new TransformationFailedException("Function '" + name + "' not found");
+					}
 				}
-				pendingFunctions.add(function);
+				else {
+					pendingFunctions.add(function);
+				}
 				super.visitCall(name, node);
 			}
 		};

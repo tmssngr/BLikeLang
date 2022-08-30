@@ -163,7 +163,7 @@ public class CommandFactoryTest {
 
 	@NotNull
 	private CommandFactory createCommandFactory(@NotNull CommandList commandList) {
-		return new CommandFactory(new TestStackPositionProvider(), funcName -> BasicTypes.INT16, commandList);
+		return new CommandFactory(new TestStackPositionProvider(), funcName -> BasicTypes.INT16, new BuiltInFunctions(), commandList);
 	}
 
 	// Inner Classes ==========================================================
