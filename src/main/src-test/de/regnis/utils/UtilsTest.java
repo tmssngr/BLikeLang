@@ -21,4 +21,16 @@ public class UtilsTest {
 		Assert.assertNull(Utils.parseString(" '", '\''));
 		Assert.assertNull(Utils.parseString("\\1", '\''));
 	}
+
+	@Test
+	public void testToHex() {
+		Assert.assertEquals('0', Utils.toHex(0));
+		Assert.assertEquals('0', Utils.toHex(16));
+		Assert.assertEquals('0', Utils.toHex(0xF0));
+		Assert.assertEquals('9', Utils.toHex(0xF9));
+		Assert.assertEquals('A', Utils.toHex(0xFA));
+		Assert.assertEquals('F', Utils.toHex(0xFF));
+
+		Assert.assertEquals("ABCD", Utils.toHex4(0xabcd, new StringBuilder()).toString());
+	}
 }

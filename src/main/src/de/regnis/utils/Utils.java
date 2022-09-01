@@ -132,4 +132,35 @@ public final class Utils {
 			}
 		};
 	}
+
+	public static String toHex4(int v) {
+		return toHex4(v, new StringBuilder()).toString();
+	}
+
+	public static StringBuilder toHex4(int v, StringBuilder buffer) {
+		toHex2(v >> 8, buffer);
+		return toHex2(v, buffer);
+	}
+
+	public static String toHex2(int v) {
+		return toHex2(v, new StringBuilder()).toString();
+	}
+
+	public static StringBuilder toHex2(int v, StringBuilder buffer) {
+		toHex(v >> 4, buffer);
+		return toHex(v, buffer);
+	}
+
+	public static StringBuilder toHex(int v, StringBuilder buffer) {
+		buffer.append(toHex(v));
+		return buffer;
+	}
+
+	public static char toHex(int v) {
+		v = v & 0x0F;
+		if (v >= 10) {
+			v += 'A' - '9' - 1;
+		}
+		return (char) (v + '0');
+	}
 }
