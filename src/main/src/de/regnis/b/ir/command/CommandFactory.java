@@ -94,6 +94,7 @@ public final class CommandFactory {
 
 			@Override
 			public void visitWhile(WhileBlock block) {
+				addIf(block.getExpression(), block.getInnerBlock().label, block.getLeaveBlock().label);
 			}
 
 			@Override
@@ -102,7 +103,7 @@ public final class CommandFactory {
 					popA();
 				}
 
-				addCommand(NoArgCommand.Return);
+				addCommand(NoArgCommand.Ret);
 			}
 		});
 	}
@@ -449,8 +450,10 @@ public final class CommandFactory {
 		final int stackPosition = stackPositionProvider.getStackPosition(varName);
 		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_L), SP_L));
 		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
-		addCommand(new ArithmeticC(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_L), stackPosition));
-		addCommand(new ArithmeticC(ArithmeticOp.adc, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition >> 8));
+		if (stackPosition != 0) {
+			addCommand(new ArithmeticC(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_L), stackPosition));
+			addCommand(new ArithmeticC(ArithmeticOp.adc, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition >> 8));
+		}
 	}
 
 	private void addCommand(@NotNull Command command) {

@@ -20,12 +20,12 @@ public final class CommandListTest {
 		list.add(new LdLiteral(CommandFactory.workingRegister(0), 0));
 		list.add(new JumpCommand("useless2"));
 		list.add(new Label("useless2"));
-		list.add(NoArgCommand.Return);
+		list.add(NoArgCommand.Ret);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
-		                            NoArgCommand.Return), list.getCommands());
+		                            NoArgCommand.Ret), list.getCommands());
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public final class CommandListTest {
 		list.add(new LdLiteral(CommandFactory.workingRegister(0), 0));
 		list.add(new Label("next1"));
 		list.add(new Label("next"));
-		list.add(NoArgCommand.Return);
+		list.add(NoArgCommand.Ret);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new ArithmeticC(ArithmeticOp.cp, 0, 1),
@@ -56,7 +56,7 @@ public final class CommandListTest {
 		                            new LdLiteral(CommandFactory.workingRegister(1), 2),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
 		                            new Label("next"),
-		                            NoArgCommand.Return), list.getCommands());
+		                            NoArgCommand.Ret), list.getCommands());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public final class CommandListTest {
 		list.add(new JumpCommand("next"));
 		list.add(new Label("if_else"));
 		list.add(new Label("next"));
-		list.add(NoArgCommand.Return);
+		list.add(NoArgCommand.Ret);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new ArithmeticC(ArithmeticOp.cp, 0, 1),
@@ -80,7 +80,7 @@ public final class CommandListTest {
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
 		                            new Label("next"),
-		                            NoArgCommand.Return), list.getCommands());
+		                            NoArgCommand.Ret), list.getCommands());
 	}
 
 	@Test
@@ -92,11 +92,11 @@ public final class CommandListTest {
 		list.add(new LdLiteral(CommandFactory.workingRegister(0), 0));
 		list.add(new Label("if_else"));
 		list.add(new Label("next"));
-		list.add(NoArgCommand.Return);
+		list.add(NoArgCommand.Ret);
 		list.compact();
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
-		                            NoArgCommand.Return), list.getCommands());
+		                            NoArgCommand.Ret), list.getCommands());
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Locale;
  */
 public enum NoArgCommand implements Command {
 
-	Return, Scf, Ccf;
+	Ret, Scf, Ccf;
 
 	// Implemented ============================================================
 
