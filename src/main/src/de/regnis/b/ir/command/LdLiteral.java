@@ -1,16 +1,16 @@
 package de.regnis.b.ir.command;
 
-import org.jetbrains.annotations.NotNull;
+import de.regnis.utils.Utils;
 
 /**
  * @author Thomas Singer
  */
-public record Load(int register, @NotNull String varName) implements Command {
+public record LdLiteral(int register, int literal) implements Command {
 
 	// Implemented ============================================================
 
 	@Override
 	public String toString() {
-		return "load %" + register + ", " + varName;
+		return "ld " + Command.register(register) + ", #%" + Utils.toHex2(literal);
 	}
 }
