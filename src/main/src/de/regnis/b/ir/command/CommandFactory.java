@@ -4,6 +4,7 @@ import de.regnis.b.ast.*;
 import de.regnis.b.ir.*;
 import de.regnis.b.type.BasicTypes;
 import de.regnis.b.type.Type;
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,16 +16,34 @@ import java.util.function.IntConsumer;
 /**
  * @author Thomas Singer
  */
+@SuppressWarnings("PointlessArithmeticExpression")
 public final class CommandFactory {
 
 	// Constants ==============================================================
 
-	static final String SP = "SP";
-	static final int VAR_ACCESS_REGISTER = 14;
-	static final String VAR_ACCESS_REGISTER_NAME = "@rr" + VAR_ACCESS_REGISTER;
+	static final int SP_L = 0xFF;
+	static final int SP_H = 0xFE;
+	static final int VAR_ACCESS_REGISTER_L = 15;
+	static final int VAR_ACCESS_REGISTER_H = 14;
 
 	static final int REG_A = 0;
 	static final int REG_B = 2;
+
+	// Static =================================================================
+
+	public static boolean isWorkingRegister(int register) {
+		return (register & 0xF0) == 0xE0;
+	}
+
+	public static int getWorkingRegister(int register) {
+		return register & 0x0F;
+	}
+
+	public static int workingRegister(int register) {
+		Utils.assertTrue(register >= 0 && register <= 15);
+
+		return 0xE0 + register;
+	}
 
 	// Fields =================================================================
 
@@ -52,7 +71,7 @@ public final class CommandFactory {
 		this.variableCount = variableCount;
 		// reserve space for local variables
 		for (int i = 0; i < variableCount; i++) {
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
+			pushA();
 		}
 	}
 
@@ -80,7 +99,7 @@ public final class CommandFactory {
 			@Override
 			public void visitExit(ExitBlock block) {
 				for (int i = 0; i < variableCount; i++) {
-					addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
+					popA();
 				}
 
 				addCommand(NoArgCommand.Return);
@@ -97,14 +116,10 @@ public final class CommandFactory {
 					throw new IllegalStateException();
 				}
 
-				switch (node.operator()) {
-					case lessThan -> handleIf(leftVar.name(), right, JumpCondition.lt, JumpCondition.ge, trueLabel, falseLabel);
-					case lessEqual -> handleIf(leftVar.name(), right, JumpCondition.le, JumpCondition.gt, trueLabel, falseLabel);
-					case equal -> handleIf(leftVar.name(), right, JumpCondition.z, JumpCondition.nz, trueLabel, falseLabel);
-					case notEqual -> handleIf(leftVar.name(), right, JumpCondition.nz, JumpCondition.z, trueLabel, falseLabel);
-					case greaterEqual -> handleIf(leftVar.name(), right, JumpCondition.ge, JumpCondition.lt, trueLabel, falseLabel);
-					case greaterThan -> handleIf(leftVar.name(), right, JumpCondition.gt, JumpCondition.le, trueLabel, falseLabel);
-					default -> throw new UnsupportedOperationException(node.operator().text);
+				final BinaryExpression.Op operator = node.operator();
+				switch (operator) {
+					case lessThan, lessEqual, equal, notEqual, greaterEqual, greaterThan -> handleIf(leftVar.name(), right, operator, trueLabel, falseLabel);
+					default -> throw new UnsupportedOperationException(operator.text);
 				}
 				return node;
 			}
@@ -121,10 +136,7 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				load(REG_A, node.name());
-				addCommand(new ArithmeticC(ArithmeticOp.cmp, REG_A, 0));
-				addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
-				addCommand(new JumpCommand(trueLabel));
+				handleIf(node.name(), new NumberLiteral(0), BinaryExpression.Op.notEqual, trueLabel, falseLabel);
 				return node;
 			}
 		});
@@ -136,13 +148,13 @@ public final class CommandFactory {
 			public Object visitAssignment(Assignment node) {
 				switch (node.operation()) {
 					case assign -> handleAssignOrDeclareVar(node.name(), node.expression());
-					case add -> handleAssignment(node, ArithmeticOp.add);
-					case sub -> handleAssignment(node, ArithmeticOp.sub);
-					case bitAnd -> handleAssignment(node, ArithmeticOp.and);
-					case bitOr -> handleAssignment(node, ArithmeticOp.or);
-					case bitXor -> handleAssignment(node, ArithmeticOp.xor);
-					case shiftL -> handleShift(node, RegisterCommand.Op.shiftL);
-					case shiftR -> handleShift(node, RegisterCommand.Op.shiftR);
+					case add -> handleAssignment(node, ArithmeticOp.adc, ArithmeticOp.add);
+					case sub -> handleAssignment(node, ArithmeticOp.sbc, ArithmeticOp.sub);
+					case bitAnd -> handleAssignment(node, ArithmeticOp.and, ArithmeticOp.and);
+					case bitOr -> handleAssignment(node, ArithmeticOp.or, ArithmeticOp.or);
+					case bitXor -> handleAssignment(node, ArithmeticOp.xor, ArithmeticOp.xor);
+					case shiftL -> handleShift(node, true);
+					case shiftR -> handleShift(node, false);
 					default -> throw new UnsupportedOperationException(node.operation().toString());
 				}
 				return node;
@@ -171,21 +183,67 @@ public final class CommandFactory {
 
 	// Utils ==================================================================
 
-	private void handleIf(String leftVar, SimpleExpression right, JumpCondition trueCondition, JumpCondition falseCondition, String trueLabel, String falseLabel) {
+	private void handleIf(String leftVar, SimpleExpression right, BinaryExpression.Op operator, String trueLabel, String falseLabel) {
 		load(REG_A, leftVar);
 
 		literalOrVar(right,
 		             literal -> {
-			             addCommand(new ArithmeticC(ArithmeticOp.cmp, REG_A, literal));
-			             addCommand(new JumpCommand(falseCondition, falseLabel));
-			             addCommand(new JumpCommand(trueLabel));
+			             addCommand(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A), literal >> 8));
+			             addMsbJumps(operator, trueLabel, falseLabel);
+			             addCommand(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A + 1), literal));
+			             addLsbJump(operator, falseLabel);
 		             },
 		             rightVar -> {
 			             load(REG_B, rightVar);
-			             addCommand(new Arithmetic(ArithmeticOp.cmp, REG_A, REG_B));
-			             addCommand(new JumpCommand(falseCondition, falseLabel));
-			             addCommand(new JumpCommand(trueLabel));
+			             addCommand(new Arithmetic(ArithmeticOp.cp, workingRegister(REG_A), workingRegister(REG_B)));
+			             addMsbJumps(operator, trueLabel, falseLabel);
+			             addCommand(new Arithmetic(ArithmeticOp.cp, workingRegister(REG_A + 1), workingRegister(REG_B + 1)));
+			             addLsbJump(operator, falseLabel);
 		             });
+	}
+
+	private void addMsbJumps(BinaryExpression.Op operator, String trueLabel, String falseLabel) {
+		if (operator == BinaryExpression.Op.lessThan || operator == BinaryExpression.Op.lessEqual) {
+			addCommand(new JumpCommand(JumpCondition.lt, trueLabel));
+			addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.greaterThan || operator == BinaryExpression.Op.greaterEqual) {
+			addCommand(new JumpCommand(JumpCondition.gt, trueLabel));
+			addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.equal) {
+			addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.notEqual) {
+			addCommand(new JumpCommand(JumpCondition.nz, trueLabel));
+		}
+		else {
+			throw new UnsupportedOperationException(operator.text);
+		}
+	}
+
+	private void addLsbJump(BinaryExpression.Op operator, String falseLabel) {
+		if (operator == BinaryExpression.Op.lessThan) {
+			addCommand(new JumpCommand(JumpCondition.uge, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.lessEqual) {
+			addCommand(new JumpCommand(JumpCondition.ugt, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.greaterThan) {
+			addCommand(new JumpCommand(JumpCondition.ule, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.greaterEqual) {
+			addCommand(new JumpCommand(JumpCondition.ult, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.equal) {
+			addCommand(new JumpCommand(JumpCondition.nz, falseLabel));
+		}
+		else if (operator == BinaryExpression.Op.notEqual) {
+			addCommand(new JumpCommand(JumpCondition.z, falseLabel));
+		}
+		else {
+			throw new UnsupportedOperationException(operator.text);
+		}
 	}
 
 	private void handleAssignOrDeclareVar(String name, Expression expression) {
@@ -209,7 +267,7 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				addCommand(new LoadC(REG_A, node.value()));
+				ldALiteral(node.value());
 				storeA(name);
 				return node;
 			}
@@ -228,14 +286,15 @@ public final class CommandFactory {
 		if (parameters.size() > 0) {
 			for (Expression parameter : parameters) {
 				literalOrVar(parameter,
-				             literal -> addCommand(new LoadC(REG_A, literal)),
+				             literal -> ldALiteral(literal),
 				             name -> load(REG_A, name));
-				addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
+				pushA();
 			}
 		}
 		else if (nonVoidReturnType) {
 			// to reserve space for the result
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, REG_A));
+			addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A)));
+			addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A + 1)));
 		}
 
 		addCommand(new CallCommand(functionName));
@@ -245,12 +304,31 @@ public final class CommandFactory {
 
 		if (parameters.size() > 0) {
 			for (int i = parameters.size(); i-- > 0; ) {
-				addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
+				popA();
 			}
 		}
 		else if (nonVoidReturnType) {
-			addCommand(new RegisterCommand(RegisterCommand.Op.pop, REG_A));
+			popA();
 		}
+	}
+
+	private void pushA() {
+		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A)));
+		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A + 1)));
+	}
+
+	private void popA() {
+		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(REG_A + 1)));
+		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(REG_A)));
+	}
+
+	private void ldALiteral(int literal) {
+		ldLiteral(REG_A, literal);
+	}
+
+	private void ldLiteral(int register, int literal) {
+		addCommand(new LdLiteral(workingRegister(register + 1), literal));
+		addCommand(new LdLiteral(workingRegister(register), literal >> 8));
 	}
 
 	private void handleBuiltInFunctionCall(@NotNull String name, @NotNull FuncCallParameters parameters, @Nullable String assignReturnToVar) {
@@ -263,8 +341,13 @@ public final class CommandFactory {
 			@Override
 			public void loadToRegister(@NotNull Expression parameterExpression, int register) {
 				literalOrVar(parameterExpression,
-				             literal -> addCommand(new LoadC(register, literal)),
+				             literal -> ldLiteral(register, literal),
 				             name -> load(register, name));
+			}
+
+			@Override
+			public void saveToVar(@NotNull String var, int register) {
+				store(var, register);
 			}
 
 			@Override
@@ -274,29 +357,60 @@ public final class CommandFactory {
 		});
 	}
 
-	private void handleAssignment(Assignment node, ArithmeticOp op) {
+	private void handleAssignment(Assignment node, ArithmeticOp msbOp, ArithmeticOp lsbOp) {
 		load(REG_A, node.name());
 		literalOrVar(node.expression(),
-		             literal -> addCommand(new ArithmeticC(op, REG_A, literal)),
+		             literal -> {
+			             addCommand(new ArithmeticC(lsbOp, workingRegister(REG_A + 1), literal));
+			             addCommand(new ArithmeticC(msbOp, workingRegister(REG_A), literal >> 8));
+		             },
 		             var -> {
 			             load(REG_B, var);
-			             addCommand(new Arithmetic(op, REG_A, REG_B));
+			             addCommand(new Arithmetic(lsbOp, workingRegister(REG_A + 1), workingRegister(REG_B + 1)));
+			             addCommand(new Arithmetic(msbOp, workingRegister(REG_A), workingRegister(REG_B)));
 		             });
 		storeA(node.name());
 	}
 
-	private void handleShift(Assignment node, RegisterCommand.Op op) {
-		load(REG_A, node.name());
+	private void handleShift(Assignment node, boolean left) {
 		literalOrVar(node.expression(),
 		             literal -> {
-			             for (int i = 0; i < literal; i++) {
-				             addCommand(new RegisterCommand(op, REG_A));
+			             if (literal == 0) {
+				             return;
 			             }
+
+			             load(REG_A, node.name());
+
+			             if (left) {
+				             if (literal >= 8) {
+								 addCommand(new Ld(workingRegister(REG_A), workingRegister(REG_A + 1)));
+								 addCommand(new LdLiteral(workingRegister(REG_A + 1), 0));
+					             literal -= 8;
+				             }
+				             for (int i = 0; i < literal; i++) {
+								 addCommand(NoArgCommand.Ccf);
+					             addCommand(new RegisterCommand(RegisterCommand.Op.rlc, workingRegister(REG_A + 1)));
+					             addCommand(new RegisterCommand(RegisterCommand.Op.rlc, workingRegister(REG_A)));
+				             }
+			             }
+			             else {
+				             if (literal >= 8) {
+								 addCommand(new Ld(workingRegister(REG_A + 1), workingRegister(REG_A)));
+								 addCommand(new LdLiteral(workingRegister(REG_A), 0));
+					             literal -= 8;
+				             }
+				             for (int i = 0; i < literal; i++) {
+					             addCommand(NoArgCommand.Ccf);
+					             addCommand(new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A)));
+					             addCommand(new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A + 1)));
+				             }
+			             }
+
+			             storeA(node.name());
 		             },
 		             var -> {
 			             throw new UnsupportedOperationException();
 		             });
-		storeA(node.name());
 	}
 
 	private void literalOrVar(Expression expression, IntConsumer literalConsumer, Consumer<String> varConsumer) {
@@ -312,19 +426,31 @@ public final class CommandFactory {
 	}
 
 	private void load(int register, @NotNull String varName) {
-		final int stackPosition = stackPositionProvider.getStackPosition(varName);
-		addCommand(new Load(VAR_ACCESS_REGISTER, SP));
-		addCommand(new ArithmeticC(ArithmeticOp.add, VAR_ACCESS_REGISTER, stackPosition));
+		loadVarAddress(varName);
 
-		addCommand(new Load(register, VAR_ACCESS_REGISTER_NAME));
+		addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER_H));
+		addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
+		addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER_H));
 	}
 
 	private void storeA(@NotNull String varName) {
-		final int stackPosition = stackPositionProvider.getStackPosition(varName);
-		addCommand(new Load(VAR_ACCESS_REGISTER, SP));
-		addCommand(new ArithmeticC(ArithmeticOp.add, VAR_ACCESS_REGISTER, stackPosition));
+		store(varName, REG_A);
+	}
 
-		addCommand(new Store(VAR_ACCESS_REGISTER_NAME, REG_A));
+	private void store(@NotNull String varName, int register) {
+		loadVarAddress(varName);
+
+		addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register));
+		addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
+		addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register + 1));
+	}
+
+	private void loadVarAddress(@NotNull String varName) {
+		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_L), SP_L));
+		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
+		addCommand(new ArithmeticC(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_L), stackPosition));
+		addCommand(new ArithmeticC(ArithmeticOp.adc, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition >> 8));
 	}
 
 	private void addCommand(@NotNull Command command) {

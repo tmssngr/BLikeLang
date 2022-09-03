@@ -3,12 +3,12 @@ package de.regnis.b.ir.command;
 /**
  * @author Thomas Singer
  */
-public record LoadC(int register, int literal) implements Command {
+public record LdToMem(int targetRegister, int sourceRegister) implements Command {
 
 	// Implemented ============================================================
 
 	@Override
 	public String toString() {
-		return "load %" + register + ", #" + literal;
+		return "lde @rr" + targetRegister + ", r" + sourceRegister;
 	}
 }

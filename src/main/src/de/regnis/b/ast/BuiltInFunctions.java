@@ -53,6 +53,8 @@ public final class BuiltInFunctions {
 	public interface CommandFactory {
 		void loadToRegister(@NotNull Expression parameterExpression, int register);
 
+		void saveToVar(@NotNull String var, int register);
+
 		void addCommand(@NotNull Command command);
 	}
 }

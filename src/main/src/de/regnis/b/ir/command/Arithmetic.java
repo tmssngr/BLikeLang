@@ -11,6 +11,6 @@ public record Arithmetic(@NotNull ArithmeticOp op, int destRegister, int srcRegi
 
 	@Override
 	public String toString() {
-		return op + " %" + destRegister + ", %" + srcRegister;
+		return op + " " + Command.register(destRegister) + ", " + Command.register(srcRegister);
 	}
 }

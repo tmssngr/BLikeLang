@@ -1,5 +1,6 @@
 package de.regnis.b.ir.command;
 
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,6 +12,6 @@ public record ArithmeticC(@NotNull ArithmeticOp op, int register, int literal) i
 
 	@Override
 	public String toString() {
-		return op + " %" + register + ", #" + literal;
+		return op + " " + Command.register(register) + ", #%" + Utils.toHex2(literal);
 	}
 }
