@@ -369,6 +369,75 @@ public class StaticSingleAssignmentFactoryTest {
 	}
 
 	@Test
+	public void testWhile() {
+		final ControlFlowGraph graph = test("""
+				                                    void print(int a) {
+				                                    }
+				                                    void main() {
+				                                      int a = 10
+				                                      while (a > 0) {
+				                                        print(a)
+				                                        a -= 1
+				                                      }
+				                                    }""",
+		                                    "main",
+		                                    """
+				                                    main_start:
+				                                        v0 := 10
+				                                    main_while_1:  // main_start, main_do_1
+				                                        while v0 > 0
+				                                    main_do_1:  // main_while_1
+				                                        print(v0)
+				                                        v0 = v0 - 1
+				                                        goto main_while_1
+
+				                                    main_after_while_1:  // main_while_1
+				                                    main_exit:  // main_after_while_1
+				                                        return
+				                                    """,
+		                                    """
+				                                    main_start:
+				                                        v0_0 := 10
+				                                    main_while_1:  // main_start, main_do_1
+				                                        v0_1 := phi (v0_0, v0_2)
+				                                        while v0_1 > 0
+				                                    main_do_1:  // main_while_1
+				                                        print(v0_1)
+				                                        v0_2 := v0_1 - 1
+				                                        goto main_while_1
+
+				                                    main_after_while_1:  // main_while_1
+				                                    main_exit:  // main_after_while_1
+				                                        return
+				                                    """);
+		// v0_0 must not be considered as inline-able constant
+		while (true) {
+			final Map<String, SimpleExpression> constants = SsaConstantDetection.detectConstants(graph);
+			if (constants.isEmpty()) {
+				break;
+			}
+
+			SsaSearchAndReplace.replace(graph, constants);
+		}
+
+		assertEquals("""
+				             main_start:
+				                 v0_0 := 10
+				             main_while_1:  // main_start, main_do_1
+				                 v0_1 := phi (v0_0, v0_2)
+				                 while v0_1 > 0
+				             main_do_1:  // main_while_1
+				                 print(v0_1)
+				                 v0_2 := v0_1 - 1
+				                 goto main_while_1
+
+				             main_after_while_1:  // main_while_1
+				             main_exit:  // main_after_while_1
+				                 return
+				             """, toString(graph));
+	}
+
+	@Test
 	public void testCall() {
 		final ControlFlowGraph graph = test("""
 				                                    void print(int chr) {
