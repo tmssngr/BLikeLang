@@ -2,10 +2,10 @@ package de.regnis.b.ir;
 
 import de.regnis.b.ConstantFoldingTransformation;
 import de.regnis.b.ast.*;
+import de.regnis.utils.Tuple;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Thomas Singer
@@ -14,17 +14,17 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 
 	// Static =================================================================
 
-	@SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")
 	@NotNull
 	public static Map<String, SimpleExpression> detectConstants(@NotNull ControlFlowGraph graph) {
 		final SsaConstantDetection detector = new SsaConstantDetection();
 		graph.iterate(detector);
-		return detector.constants;
+		return detector.getVarsWithReplacements();
 	}
 
 	// Fields =================================================================
 
 	private final Map<String, SimpleExpression> constants = new HashMap<>();
+	private final Set<String> varsUsedInPhiFunctions = new HashSet<>();
 
 	// Setup ==================================================================
 
@@ -59,6 +59,11 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 
 	@Override
 	public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
+		final Tuple<String, List<String>> phiFunction = StaticSingleAssignmentFactory.getPhiFunction(node);
+		if (phiFunction != null) {
+			varsUsedInPhiFunctions.addAll(phiFunction.second);
+		}
+
 		final String varName = node.name();
 		node.expression().visit(new ExpressionVisitor<Expression>() {
 			@Override
@@ -96,6 +101,24 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 	}
 
 	// Utils ==================================================================
+
+	private Map<String, SimpleExpression> getVarsWithReplacements() {
+		final Map<String, SimpleExpression> varToReplacement = new HashMap<>(constants);
+
+		for (String var : varsUsedInPhiFunctions) {
+			final SimpleExpression simpleExpression = varToReplacement.get(var);
+			if (simpleExpression == null) {
+				continue;
+			}
+
+			if (simpleExpression instanceof VarRead) {
+				continue;
+			}
+
+			varToReplacement.remove(var);
+		}
+		return varToReplacement;
+	}
 
 	private void addConstant(String name, SimpleExpression expression) {
 		if (ControlFlowGraph.RESULT.equals(name)) {
