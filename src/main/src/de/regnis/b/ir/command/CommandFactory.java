@@ -53,6 +53,8 @@ public final class CommandFactory {
 	private final CommandList commandList;
 
 	private int variableCount;
+	private String labelPrefix = "_";
+	private int labelIndex;
 
 	// Setup ==================================================================
 
@@ -73,6 +75,8 @@ public final class CommandFactory {
 		for (int i = 0; i < variableCount; i++) {
 			pushA();
 		}
+
+		labelPrefix = "_" + declaration.name();
 	}
 
 	public void add(@NotNull AbstractBlock block) {
@@ -251,7 +255,32 @@ public final class CommandFactory {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				throw new UnsupportedOperationException(node.toString());
+				if (!(node.left() instanceof VarRead leftVar)
+						|| !(node.right() instanceof SimpleExpression right)) {
+					throw new IllegalStateException();
+				}
+
+				final BinaryExpression.Op operator = node.operator();
+				switch (operator) {
+					case lessThan, lessEqual, equal, notEqual, greaterEqual, greaterThan
+							-> {
+						labelIndex++;
+						final String trueLabel = labelPrefix + "_relation_" + labelIndex + "_true";
+						final String falseLabel = labelPrefix + "_relation_" + labelIndex + "_false";
+						final String nextLabel = labelPrefix + "_relation_" + labelIndex + "_next";
+
+						handleIf(leftVar.name(), right, operator, trueLabel, falseLabel);
+						addCommand(new Label(trueLabel));
+						ldALiteral(-1);
+						addCommand(new JumpCommand(nextLabel));
+						addCommand(new Label(falseLabel));
+						ldALiteral(0);
+						addCommand(new Label(nextLabel));
+						storeA(name);
+					}
+					default -> throw new UnsupportedOperationException(operator.text);
+				}
+				return node;
 			}
 
 			@Override
@@ -384,20 +413,20 @@ public final class CommandFactory {
 
 			             if (left) {
 				             if (literal >= 8) {
-								 addCommand(new Ld(workingRegister(REG_A), workingRegister(REG_A + 1)));
-								 addCommand(new LdLiteral(workingRegister(REG_A + 1), 0));
+					             addCommand(new Ld(workingRegister(REG_A), workingRegister(REG_A + 1)));
+					             addCommand(new LdLiteral(workingRegister(REG_A + 1), 0));
 					             literal -= 8;
 				             }
 				             for (int i = 0; i < literal; i++) {
-								 addCommand(NoArgCommand.Ccf);
+					             addCommand(NoArgCommand.Ccf);
 					             addCommand(new RegisterCommand(RegisterCommand.Op.rlc, workingRegister(REG_A + 1)));
 					             addCommand(new RegisterCommand(RegisterCommand.Op.rlc, workingRegister(REG_A)));
 				             }
 			             }
 			             else {
 				             if (literal >= 8) {
-								 addCommand(new Ld(workingRegister(REG_A + 1), workingRegister(REG_A)));
-								 addCommand(new LdLiteral(workingRegister(REG_A), 0));
+					             addCommand(new Ld(workingRegister(REG_A + 1), workingRegister(REG_A)));
+					             addCommand(new LdLiteral(workingRegister(REG_A), 0));
 					             literal -= 8;
 				             }
 				             for (int i = 0; i < literal; i++) {
