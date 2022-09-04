@@ -1,21 +1,18 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.AstFactory;
-import de.regnis.b.ast.transformation.DetermineTypesTransformation;
-import de.regnis.b.ast.transformation.SplitExpressionsTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
+import de.regnis.b.ast.transformation.DetermineTypesTransformation;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Singer
@@ -26,7 +23,7 @@ public class ControlFlowGraphTest {
 
 	@Test
 	public void testIf() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						void print(int chr) {
 						}
@@ -56,109 +53,51 @@ public class ControlFlowGraphTest {
 						void main() {
 						  printHex16(192);
 						}"""
-		), new StringStringOutput()));
-
-		assertEquals("""
-				             void print(int p0) {
-				             }
-				             void printHex4(int p0) {
-				               p0 = p0 & 15
-				               v0 := 0
-				               if p0 < 10
-				               {
-				                 v0 = p0 + 48
-				               }
-				               else
-				               {
-				                 $1 := p0 - 10
-				                 v0 = $1 + 65
-				               }
-				               print(v0)
-				             }
-				             void printHex8(int p0) {
-				               $2 := p0 >> 4
-				               printHex4($2)
-				               printHex4(p0)
-				             }
-				             void printHex16(int p0) {
-				               $3 := p0 >> 8
-				               printHex8($3)
-				               printHex8(p0)
-				             }
-				             void main() {
-				               printHex16(192)
-				             }
-				             """, CodePrinter.print(root));
+		), new StringStringOutput());
 
 		final FuncDeclaration printHex4 = Utils.notNull(root.getFunction("printHex4"));
 		final ControlFlowGraph graph = new ControlFlowGraph(printHex4);
 
-		final String expectedOutput = """
-				printHex4_start:
-				    p0 = p0 & 15
-				    v0 := 0
-				printHex4_if_1:
-				    if p0 < 10
-				    if ! goto printHex4_else_1
-				printHex4_then_1:
-				    v0 = p0 + 48
-				    goto printHex4_after_if_1
+		assertEquals("""
+				             printHex4_start:
+				                 p0 = p0 & 15
+				                 v0 := 0
+				             printHex4_if_1:
+				                 if p0 < 10
+				                 if ! goto printHex4_else_1
+				             printHex4_then_1:
+				                 v0 = p0 + 48
+				                 goto printHex4_after_if_1
 
-				printHex4_else_1:
-				    $1 := p0 - 10
-				    v0 = $1 + 65
-				printHex4_after_if_1:
-				    print(v0)
-				printHex4_exit:
-				    return
-				""";
-		assertEquals(expectedOutput, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
+				             printHex4_else_1:
+				                 v0 = p0 - 10 + 65
+				             printHex4_after_if_1:
+				                 print(v0)
+				             printHex4_exit:
+				                 return
+				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
-		final BasicBlock firstBlock = (BasicBlock) graph.getFirstBlock();
+		SplitExpressionsTransformation.transform(graph);
 
 		assertEquals("""
-				             p0 = p0 & 15
-				             v0 := 0
-				             """, firstBlock.print(new StringStringOutput()).toString());
-		assertTrue(firstBlock.getPrevBlocks().isEmpty());
+				             printHex4_start:
+				                 p0 = p0 & 15
+				                 v0 := 0
+				             printHex4_if_1:
+				                 if p0 < 10
+				                 if ! goto printHex4_else_1
+				             printHex4_then_1:
+				                 v0 = p0 + 48
+				                 goto printHex4_after_if_1
 
-		final IfBlock ifBlock = (IfBlock) firstBlock.getSingleNext();
-
-		assertEquals(List.of(firstBlock), ifBlock.getPrevBlocks());
-
-		final List<AbstractBlock> trueFalseBlocks = ifBlock.getNextBlocks();
-
-		assertEquals(2, trueFalseBlocks.size());
-
-		final BasicBlock trueBlock = (BasicBlock) trueFalseBlocks.get(0);
-		assertEquals("""
-				             v0 = p0 + 48
-				             """,
-		             trueBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(ifBlock), trueBlock.getPrevBlocks());
-
-		final List<AbstractBlock> trueNext = trueBlock.getNextBlocks();
-
-		assertEquals(1, trueNext.size());
-
-		final BasicBlock postIfBlock = (BasicBlock) trueNext.get(0);
-
-		final BasicBlock falseBlock = (BasicBlock) trueFalseBlocks.get(1);
-		assertEquals("""
-				             $1 := p0 - 10
-				             v0 = $1 + 65
-				             """, falseBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(ifBlock), falseBlock.getPrevBlocks());
-
-		final List<AbstractBlock> falseNext = falseBlock.getNextBlocks();
-
-		assertEquals(trueNext, falseNext);
-		assertEquals("print(v0)\n", postIfBlock.print(new StringStringOutput()).toString());
-		assertEquals(List.of(trueBlock, falseBlock), postIfBlock.getPrevBlocks());
-
-		final AbstractBlock exitBlock = postIfBlock.getSingleNext();
-
-		assertEquals(List.of(), exitBlock.getNextBlocks());
+				             printHex4_else_1:
+				                 $1 := p0 - 10
+				                 v0 = $1 + 65
+				             printHex4_after_if_1:
+				                 print(v0)
+				             printHex4_exit:
+				                 return
+				             """, ControlFlowGraphPrinter.print(graph, new StringStringOutput()).toString());
 
 		assertEquals("""
 				             printHex4_start:
@@ -199,7 +138,7 @@ public class ControlFlowGraphTest {
 
 	@Test
 	public void testWhile() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int getNumber() {
 						  return 10;
@@ -228,7 +167,7 @@ public class ControlFlowGraphTest {
 						    }
 						  }
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 
 		assertEquals("""
 				             int getNumber() {
@@ -262,6 +201,7 @@ public class ControlFlowGraphTest {
 
 		final FuncDeclaration main = Utils.notNull(root.getFunction("main"));
 		final ControlFlowGraph graph = new ControlFlowGraph(main);
+		SplitExpressionsTransformation.transform(graph);
 		assertEquals("""
 				             main_start:
 				                 // []
@@ -318,7 +258,7 @@ public class ControlFlowGraphTest {
 
 	@Test
 	public void testAverage() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int getInput() {
 						  return 10;
@@ -344,9 +284,10 @@ public class ControlFlowGraphTest {
 						    print(sum / count);
 						  }
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 		final FuncDeclaration main = Utils.notNull(root.getFunction("main"));
 		final ControlFlowGraph graph = new ControlFlowGraph(main);
+		SplitExpressionsTransformation.transform(graph);
 		assertEquals("""
 				             main_start:
 				                 // []
@@ -452,7 +393,7 @@ public class ControlFlowGraphTest {
 		216 PRINT"-SAMSTAG-"
 		230 WAIT 800; GOTO 10
 		 */
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int calculate(int day, int month, int year) {
 						  var h = year / 100;
@@ -495,73 +436,11 @@ public class ControlFlowGraphTest {
 						void main() {
 						  print(calculate(9, 1, 2001));
 						}"""
-		), new StringStringOutput()));
-
-		assertEquals("""
-				             int calculate(int p0, int p1, int p2) {
-				               v0 := p2 / 100
-				               v1 := p2 / 400
-				               $1 := p2 / 4
-				               $2 := p2 + $1
-				               $3 := $2 - v0
-				               $4 := $3 + v1
-				               $5 := $4 + 1
-				               v2 := $5 % 7
-				               v3 := p2 % 4
-				               v0 = p2 % 100
-				               v1 = p2 % 400
-				               if v0 == 0
-				               {
-				                 v3 = v3 + 1
-				               }
-				               if v1 == 0
-				               {
-				                 v3 = v3 - 1
-				               }
-				               v4 := -30
-				               v5 := 1
-				               v6 := 0
-				               if v3 > 0
-				               {
-				                 v6 = 1
-				               }
-				               if p1 > 2
-				               {
-				                 $6 := v4 - 1
-				                 v4 = $6 - v6
-				               }
-				               if p1 > 8
-				               {
-				                 v5 = 2
-				               }
-				               while 1
-				               {
-				                 $7 := v4 + 30
-				                 $8 := $7 + p1
-				                 $9 := v5 % 2
-				                 v4 = $8 + $9
-				                 p1 = p1 - 1
-				                 if p1 <= 0
-				                 {
-				                   break
-				                 }
-				               }
-				               $10 := v4 + p0
-				               $11 := $10 + v2
-				               $12 := $11 + v6
-				               $13 := $12 + 4
-				               return $13 % 7
-				             }
-				             void print(int p0) {
-				             }
-				             void main() {
-				               $14 := calculate(9, 1, 2001)
-				               print($14)
-				             }
-				             """, CodePrinter.print(root));
+		), new StringStringOutput());
 
 		final FuncDeclaration function = Utils.notNull(root.getFunction("calculate"));
 		final ControlFlowGraph graph = new ControlFlowGraph(function);
+		SplitExpressionsTransformation.transform(graph);
 		assertEquals("""
 				             calculate_start:
 				                 // [p0, p1, p2]

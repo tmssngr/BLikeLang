@@ -4,7 +4,6 @@ import de.regnis.b.ast.AstFactory;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
 import de.regnis.b.ast.transformation.DetermineTypesTransformation;
-import de.regnis.b.ast.transformation.SplitExpressionsTransformation;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
@@ -28,7 +27,7 @@ public class RegisterAllocationTest {
 
 	@Test
 	public void testNoVar() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						void print(int chr) {
 						}
@@ -36,7 +35,7 @@ public class RegisterAllocationTest {
 						void main() {
 						  print(192);
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 
 		assertEquals("""
 				             void print(int p0) {
@@ -83,7 +82,7 @@ public class RegisterAllocationTest {
 
 	@Test
 	public void testSingleVar() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int inc(int i) {
 							return i + 1
@@ -92,7 +91,7 @@ public class RegisterAllocationTest {
 						void main() {
 						    int val = inc(0)
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 
 		assertEquals("""
 				             int inc(int p0) {
@@ -144,7 +143,7 @@ public class RegisterAllocationTest {
 
 	@Test
 	public void testTwoVars() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int add(int a, int b) {
 							return a + b
@@ -153,7 +152,7 @@ public class RegisterAllocationTest {
 						void main() {
 						    int val = add(1, 2)
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 
 		assertEquals("""
 				             int add(int p0, int p1) {
@@ -206,7 +205,7 @@ public class RegisterAllocationTest {
 
 	@Test
 	public void testMore() {
-		final DeclarationList root = SplitExpressionsTransformation.transform(DetermineTypesTransformation.transform(AstFactory.parseString(
+		final DeclarationList root = DetermineTypesTransformation.transform(AstFactory.parseString(
 				"""
 						int calc(int a, int b) {
 							int a2 = a * a
@@ -217,15 +216,13 @@ public class RegisterAllocationTest {
 						void main() {
 						    int val = calc(1, 2)
 						}"""
-		), new StringStringOutput()));
+		), new StringStringOutput());
 
 		assertEquals("""
 				             int calc(int p0, int p1) {
 				               v0 := p0 * p0
 				               v1 := p1 * p1
-				               $1 := v0 + v1
-				               $2 := $1 + p0
-				               return $2 - p1
+				               return v0 + v1 + p0 - p1
 				             }
 				             void main() {
 				               v0 := calc(1, 2)
@@ -234,7 +231,7 @@ public class RegisterAllocationTest {
 
 		final FuncDeclaration function = Utils.notNull(root.getFunction("calc"));
 		final ControlFlowGraph graph = new ControlFlowGraph(function);
-
+		SplitExpressionsTransformation.transform(graph);
 		assertEquals("""
 				             calc_start:
 				                 v0 := p0 * p0
