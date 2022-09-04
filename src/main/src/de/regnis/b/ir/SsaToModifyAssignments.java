@@ -1,7 +1,7 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.*;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -12,8 +12,12 @@ public class SsaToModifyAssignments implements BlockVisitor {
 
 	// Static =================================================================
 
-	public static void transform(ControlFlowGraph graph) {
+	public static void transform(@NotNull ControlFlowGraph graph) {
 		graph.iterate(new SsaToModifyAssignments());
+	}
+
+	public static void transform(@NotNull StatementsBlock block) {
+		block.visit(new SsaToModifyAssignments());
 	}
 
 	// Implemented ============================================================
@@ -61,17 +65,16 @@ public class SsaToModifyAssignments implements BlockVisitor {
 	}
 
 	private void processDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
-		if (node.expression() instanceof BinaryExpression binEx) {
-			handleBinaryExpression(node.name(), binEx, consumer);
+		if (node.expression() instanceof BinaryExpression binEx
+				&& handleBinaryExpression(node.name(), binEx, consumer)) {
+			return;
 		}
-		else {
-			consumer.accept(node);
-		}
+
+		consumer.accept(node);
 	}
 
-	@Nullable
-	private Assignment.Op toAssignmentOperator(BinaryExpression binEx) {
-		return switch (binEx.operator()) {
+	private boolean handleBinaryExpression(String name, BinaryExpression expression, Consumer<SimpleStatement> consumer) {
+		final Assignment.Op op = switch (expression.operator()) {
 			case add -> Assignment.Op.add;
 			case sub -> Assignment.Op.sub;
 			case multiply -> Assignment.Op.multiply;
@@ -84,16 +87,13 @@ public class SsaToModifyAssignments implements BlockVisitor {
 			case bitXor -> Assignment.Op.bitXor;
 			default -> null;
 		};
-	}
-
-	private void handleBinaryExpression(String name, BinaryExpression expression, Consumer<SimpleStatement> consumer) {
-		processDeclaration(new VarDeclaration(name, expression.left()), consumer);
-
-		final Assignment.Op op = toAssignmentOperator(expression);
 		if (op == null) {
-			throw new IllegalStateException();
+			return false;
 		}
 
+		processDeclaration(new VarDeclaration(name, expression.left()), consumer);
+
 		consumer.accept(new Assignment(op, name, expression.right()));
+		return true;
 	}
 }
