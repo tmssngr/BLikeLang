@@ -45,7 +45,10 @@ public class ControlFlowGraphPrinter {
 			@Override
 			public void visitBasic(BasicBlock block) {
 				printLabel(block);
-				print(block);
+
+				printBefore(INDENTATION, block);
+				printStatements(block);
+
 				printGoto(block, block.getSingleNext());
 			}
 
@@ -53,7 +56,14 @@ public class ControlFlowGraphPrinter {
 			public void visitIf(IfBlock block) {
 				printLabel(block);
 
-				print(block);
+				printBefore(INDENTATION, block);
+				printStatements(block);
+
+				output.print(INDENTATION);
+				output.print("if ");
+				CodePrinter.print(block.getExpression(), output);
+				output.println();
+
 				printlnIndented("if ! goto " + block.getFalseBlock().label);
 				printGoto(block, block.getTrueBlock());
 			}
@@ -62,7 +72,13 @@ public class ControlFlowGraphPrinter {
 			public void visitWhile(WhileBlock block) {
 				printLabel(block);
 
-				print(block);
+				printBefore(INDENTATION, block);
+				printStatements(block);
+
+				output.print(INDENTATION);
+				output.print("while ");
+				CodePrinter.print(block.getExpression(), output);
+				output.println();
 			}
 
 			@Override
@@ -112,23 +128,9 @@ public class ControlFlowGraphPrinter {
 
 	// Utils ==================================================================
 
-	private void print(BasicBlock block) {
-		printBefore(INDENTATION, block);
-
+	private void printStatements(StatementsBlock block) {
 		for (SimpleStatement statement : block.getStatements()) {
 			print(INDENTATION, statement);
 		}
-	}
-
-	private void print(IfBlock block) {
-		printBefore(INDENTATION, block);
-
-		block.print(INDENTATION, output);
-	}
-
-	private void print(WhileBlock block) {
-		printBefore(INDENTATION, block);
-
-		block.print(INDENTATION, output);
 	}
 }
