@@ -17,7 +17,6 @@ public abstract class AbstractTransformationTest {
 
 	protected static final String PREFIX = "void test() {\n  ";
 	protected static final String SUFFIX = "\n}\n";
-	protected static final String NL = "\n  ";
 
 	// Static =================================================================
 
