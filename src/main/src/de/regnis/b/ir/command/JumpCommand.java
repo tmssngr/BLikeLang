@@ -19,8 +19,8 @@ public record JumpCommand(@Nullable JumpCondition condition, @NotNull String lab
 	@Override
 	public String toString() {
 		if (condition != null) {
-			return "jp " + condition + ", " + label;
+			return ".jp " + condition + ", " + label;
 		}
-		return "jp " + label;
+		return ".jp " + label;
 	}
 }
