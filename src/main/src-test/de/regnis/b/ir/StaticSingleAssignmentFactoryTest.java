@@ -5,14 +5,12 @@ import de.regnis.b.DetermineTypesTransformation;
 import de.regnis.b.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
-import de.regnis.b.ast.SimpleExpression;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -65,14 +63,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    main_exit:  // main_start
 				                                        return
 				                                    """);
-		while (true) {
-			final Map<String, SimpleExpression> constants = SsaConstantDetection.detectConstants(graph);
-			if (constants.isEmpty()) {
-				break;
-			}
-
-			SsaSearchAndReplace.replace(graph, constants);
-		}
+		SsaConstantDetection.transform(graph);
 
 		assertEquals("""
 				             main_start:
@@ -411,14 +402,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        return
 				                                    """);
 		// v0_0 must not be considered as inline-able constant
-		while (true) {
-			final Map<String, SimpleExpression> constants = SsaConstantDetection.detectConstants(graph);
-			if (constants.isEmpty()) {
-				break;
-			}
-
-			SsaSearchAndReplace.replace(graph, constants);
-		}
+		SsaConstantDetection.transform(graph);
 
 		assertEquals("""
 				             main_start:
