@@ -17,6 +17,8 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 
 	protected abstract void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer);
 
+	protected abstract void processAssignment(Assignment node, Consumer<SimpleStatement> consumer);
+
 	// Static =================================================================
 
 	public static void remove(ControlFlowGraph graph, Set<String> vars) {
@@ -28,23 +30,11 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 	}
 
 	public static void replace(@NotNull ControlFlowGraph graph, @NotNull Map<String, ? extends SimpleExpression> fromTo) {
-		graph.iterate(new SsaSearchAndReplace() {
-			@Override
-			protected void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
-				if (fromTo.containsKey(node.name())) {
-					return;
-				}
+		graph.iterate(createReplace(fromTo));
+	}
 
-				final Expression newExpression = node.expression().visit(this);
-				consumer.accept(new VarDeclaration(node.name(), newExpression));
-			}
-
-			@Override
-			public Expression visitVarRead(VarRead node) {
-				final SimpleExpression replace = fromTo.get(node.name());
-				return replace != null ? replace : node;
-			}
-		});
+	public static void replace(StatementsBlock block, Map<String, SimpleExpression> fromTo) {
+		block.visit(createReplace(fromTo));
 	}
 
 	public static void rename(@NotNull ControlFlowGraph graph, @NotNull Map<String, String> fromTo) {
@@ -117,17 +107,7 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 		return node;
 	}
 
-	// Accessing ==============================================================
-
-	protected void processAssignment(Assignment node, Consumer<SimpleStatement> consumer) {
-		throw new UnsupportedOperationException();
-	}
-
 	// Utils ==================================================================
-
-	private void run(@NotNull ControlFlowGraph graph) {
-		graph.iterate(this);
-	}
 
 	private void processStatements(StatementsBlock block) {
 		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
@@ -150,5 +130,36 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 				return node;
 			}
 		}));
+	}
+
+	@NotNull
+	private static SsaSearchAndReplace createReplace(@NotNull Map<String, ? extends SimpleExpression> fromTo) {
+		return new SsaSearchAndReplace() {
+			@Override
+			protected void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
+				if (fromTo.containsKey(node.name())) {
+					return;
+				}
+
+				final Expression newExpression = node.expression().visit(this);
+				consumer.accept(new VarDeclaration(node.name(), newExpression));
+			}
+
+			@Override
+			protected void processAssignment(Assignment node, Consumer<SimpleStatement> consumer) {
+				if (fromTo.containsKey(node.name())) {
+					throw new UnsupportedOperationException("Can't replace assignments to var " + node.name());
+				}
+
+				final Expression newExpression = node.expression().visit(this);
+				consumer.accept(new Assignment(node.operation(), node.name(), newExpression));
+			}
+
+			@Override
+			public Expression visitVarRead(VarRead node) {
+				final SimpleExpression replace = fromTo.get(node.name());
+				return replace != null ? replace : node;
+			}
+		};
 	}
 }
