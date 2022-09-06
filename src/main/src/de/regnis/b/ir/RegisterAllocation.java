@@ -144,7 +144,7 @@ public final class RegisterAllocation {
 		public final int localVarRegisterCount;
 		private final Map<String, Integer> varToRegister;
 
-		private Result(int parameterCount, int returnVarCount, int localVarRegisterCount, @NotNull Map<String, Integer> varToRegister) {
+		public Result(int parameterCount, int returnVarCount, int localVarRegisterCount, @NotNull Map<String, Integer> varToRegister) {
 			assertTrue(parameterCount >= 0);
 			assertTrue(returnVarCount == 0 || returnVarCount == 1);
 			assertTrue(localVarRegisterCount >= 0);

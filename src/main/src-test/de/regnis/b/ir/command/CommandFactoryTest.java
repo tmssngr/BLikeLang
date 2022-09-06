@@ -254,6 +254,17 @@ public class CommandFactoryTest {
 	}
 
 	private static class TestStackPositionProvider implements StackPositionProvider {
+
+		@Override
+		public RegistersToPush getRegistersToPush() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getRegister(@NotNull String varName) {
+			return -1;
+		}
+
 		@Override
 		public int getStackPosition(@NotNull String varName) {
 			return switch (varName) {
