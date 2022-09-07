@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class CommandListTest {
+public final class CommandListOptimizationsTest {
 
 	@Test
 	public void testJumpsToNextCommand() {
@@ -21,11 +21,11 @@ public final class CommandListTest {
 		list.add(new JumpCommand("useless2"));
 		list.add(new Label("useless2"));
 		list.add(NoArgCommand.Ret);
-		list.compact();
+		final CommandList compact = CommandListOptimizations.optimize(list);
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
-		                            NoArgCommand.Ret), list.getCommands());
+		                            NoArgCommand.Ret), compact.getCommands());
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public final class CommandListTest {
 		list.add(new Label("next1"));
 		list.add(new Label("next"));
 		list.add(NoArgCommand.Ret);
-		list.compact();
+		final CommandList compact = CommandListOptimizations.optimize(list);
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new ArithmeticC(ArithmeticOp.cp, 0, 1),
 		                            new JumpCommand(JumpCondition.nz, "if_else"),
@@ -56,7 +56,7 @@ public final class CommandListTest {
 		                            new LdLiteral(CommandFactory.workingRegister(1), 2),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
 		                            new Label("next"),
-		                            NoArgCommand.Ret), list.getCommands());
+		                            NoArgCommand.Ret), compact.getCommands());
 	}
 
 	@Test
@@ -73,14 +73,14 @@ public final class CommandListTest {
 		list.add(new Label("if_else"));
 		list.add(new Label("next"));
 		list.add(NoArgCommand.Ret);
-		list.compact();
+		final CommandList compact = CommandListOptimizations.optimize(list);
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new ArithmeticC(ArithmeticOp.cp, 0, 1),
 		                            new JumpCommand(JumpCondition.nz, "next"),
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
 		                            new Label("next"),
-		                            NoArgCommand.Ret), list.getCommands());
+		                            NoArgCommand.Ret), compact.getCommands());
 	}
 
 	@Test
@@ -93,10 +93,10 @@ public final class CommandListTest {
 		list.add(new Label("if_else"));
 		list.add(new Label("next"));
 		list.add(NoArgCommand.Ret);
-		list.compact();
+		final CommandList compact = CommandListOptimizations.optimize(list);
 		Assert.assertEquals(List.of(new Label("start"),
 		                            new LdLiteral(CommandFactory.workingRegister(1), 1),
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
-		                            NoArgCommand.Ret), list.getCommands());
+		                            NoArgCommand.Ret), compact.getCommands());
 	}
 }
