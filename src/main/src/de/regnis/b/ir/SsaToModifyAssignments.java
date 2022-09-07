@@ -45,23 +45,23 @@ public class SsaToModifyAssignments implements BlockVisitor {
 
 	private void processStatements(StatementsBlock block) {
 		block.replace(((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
-					@Override
-					public Object visitAssignment(Assignment node) {
-						throw new IllegalStateException();
-					}
+			@Override
+			public Object visitAssignment(Assignment node) {
+				throw new IllegalStateException();
+			}
 
-					@Override
-					public Object visitLocalVarDeclaration(VarDeclaration node) {
-						processDeclaration(node, consumer);
-						return node;
-					}
+			@Override
+			public Object visitLocalVarDeclaration(VarDeclaration node) {
+				processDeclaration(node, consumer);
+				return node;
+			}
 
-					@Override
-					public Object visitCall(CallStatement node) {
-						consumer.accept(node);
-						return node;
-					}
-				})));
+			@Override
+			public Object visitCall(CallStatement node) {
+				consumer.accept(node);
+				return node;
+			}
+		})));
 	}
 
 	private void processDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
