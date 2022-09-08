@@ -144,24 +144,14 @@ public class CompilerTest {
 				         ld r0, #%00
 				         ld r8, r0
 				         ld r9, r1
-				         com r1
-				         ld r8, r0
-				         ld r9, r1
+				         com r9
 				         ld r0, r4
 				         ld r1, r5
 				         ld r2, r8
 				         ld r3, r9
 				         lde @rr0, r3
-				         ld r0, r4
-				         ld r1, r5
-				         incw r0
-				         ld r4, r0
-				         ld r5, r1
-				         ld r0, r6
-				         ld r1, r7
-				         decw r0
-				         ld r6, r0
-				         ld r7, r1
+				         incw r4
+				         decw r6
 				         .jp main_while_1
 				     main_exit:
 				         pop r9

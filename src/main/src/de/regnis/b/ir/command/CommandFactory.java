@@ -24,7 +24,6 @@ public final class CommandFactory {
 	// Constants ==============================================================
 
 	static final int SP_H = 0xFE;
-	static final int VAR_ACCESS_REGISTER_L = 15;
 	static final int VAR_ACCESS_REGISTER_H = 14;
 
 	static final int REG_A = 0;
@@ -161,11 +160,11 @@ public final class CommandFactory {
 			public Object visitAssignment(Assignment node) {
 				switch (node.operation()) {
 					case assign -> handleAssignOrDeclareVar(node.name(), node.expression());
-					case add -> handleAssignment(node, ArithmeticOp.add);
-					case sub -> handleAssignment(node, ArithmeticOp.sub);
-					case bitAnd -> handleAssignment(node, ArithmeticOp.and);
-					case bitOr -> handleAssignment(node, ArithmeticOp.or);
-					case bitXor -> handleAssignment(node, ArithmeticOp.xor);
+					case add -> handleAssignment(ArithmeticOp.add, node);
+					case sub -> handleAssignment(ArithmeticOp.sub, node);
+					case bitAnd -> handleAssignment(ArithmeticOp.and, node);
+					case bitOr -> handleAssignment(ArithmeticOp.or, node);
+					case bitXor -> handleAssignment(ArithmeticOp.xor, node);
 					case shiftL -> handleShift(node, true);
 					case shiftR -> handleShift(node, false);
 					default -> throw new UnsupportedOperationException(node.operation().toString());
@@ -402,15 +401,25 @@ public final class CommandFactory {
 		});
 	}
 
-	private void handleAssignment(Assignment node, ArithmeticOp lsbOp) {
-		load(REG_A, node.name());
+	private void handleAssignment(ArithmeticOp op, Assignment node) {
 		literalOrVar(node.expression(),
-		             literal -> addCommand(new TempArithmeticLiteral(lsbOp, workingRegister(REG_A), literal)),
+		             literal -> {
+			             final int register = stackPositionProvider.getRegister(node.name());
+			             if (register >= 0) {
+				             addCommand(new TempArithmeticLiteral(op, workingRegister(register), literal));
+			             }
+						 else {
+				             load(REG_A, node.name());
+				             addCommand(new TempArithmeticLiteral(op, workingRegister(REG_A), literal));
+				             storeA(node.name());
+			             }
+		             },
 		             var -> {
+			             load(REG_A, node.name());
 			             load(REG_B, var);
-						 addCommand(new TempArithmetic(lsbOp, workingRegister(REG_A), workingRegister(REG_B)));
+						 addCommand(new TempArithmetic(op, workingRegister(REG_A), workingRegister(REG_B)));
+			             storeA(node.name());
 		             });
-		storeA(node.name());
 	}
 
 	private void handleShift(Assignment node, boolean left) {
