@@ -8,6 +8,8 @@ import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -52,7 +54,7 @@ public final class CommandFactory {
 	private final BuiltInFunctions builtInFunctions;
 	private final CommandList commandList;
 
-	private int variableCount;
+	private List<Integer> pops;
 	private String labelPrefix = "_";
 	private int labelIndex;
 
@@ -67,14 +69,21 @@ public final class CommandFactory {
 
 	// Accessing ==============================================================
 
-	public void addPrelude(@NotNull FuncDeclaration declaration, int variableCount) {
+	public void addPrelude(@NotNull FuncDeclaration declaration, @NotNull RegisterAllocation.Result registers) {
 		commandList.add(new Label(declaration.name()));
 
-		this.variableCount = variableCount;
-		// reserve space for local variables
-		for (int i = 0; i < variableCount; i++) {
-			pushA();
+		pops = new ArrayList<>();
+		final StackPositionProvider.RegistersToPush registersToPush = stackPositionProvider.getRegistersToPush();
+		for (int i = registersToPush.count(), reg = registersToPush.startRegister(); i-- > 0; reg += 2) {
+			push(reg);
+			pops.add(reg);
 		}
+		// reserve space for local variables
+		for (int i = registersToPush.localVarsStoredOnStack(); i-- > 0; ) {
+			push(0);
+			pops.add(0);
+		}
+		Collections.reverse(pops);
 
 		labelPrefix = "_" + declaration.name();
 	}
@@ -103,8 +112,8 @@ public final class CommandFactory {
 
 			@Override
 			public void visitExit(ExitBlock block) {
-				for (int i = 0; i < variableCount; i++) {
-					popA();
+				for (Integer register : pops) {
+					pop(register);
 				}
 
 				addCommand(NoArgCommand.Ret);
@@ -323,8 +332,7 @@ public final class CommandFactory {
 		}
 		else if (nonVoidReturnType) {
 			// to reserve space for the result
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A)));
-			addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A + 1)));
+			pushA();
 		}
 
 		addCommand(new CallCommand(functionName));
@@ -343,13 +351,21 @@ public final class CommandFactory {
 	}
 
 	private void pushA() {
-		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A)));
-		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(REG_A + 1)));
+		push(REG_A);
+	}
+
+	private void push(int register) {
+		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(register)));
+		addCommand(new RegisterCommand(RegisterCommand.Op.push, workingRegister(register + 1)));
 	}
 
 	private void popA() {
-		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(REG_A + 1)));
-		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(REG_A)));
+		pop(REG_A);
+	}
+
+	private void pop(int register) {
+		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(register + 1)));
+		addCommand(new RegisterCommand(RegisterCommand.Op.pop, workingRegister(register)));
 	}
 
 	private void ldALiteral(int literal) {
@@ -456,11 +472,21 @@ public final class CommandFactory {
 	}
 
 	private void load(int register, @NotNull String varName) {
-		loadVarAddress(varName);
+		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+		if (stackPosition >= 0) {
+			loadVarAddress(stackPosition);
 
-		addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER_H));
-		addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-		addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER_H));
+			addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER_H));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
+			addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER_H));
+			return;
+		}
+
+		final int varRegister = stackPositionProvider.getRegister(varName);
+		Utils.assertTrue(varRegister >= 0);
+
+		addCommand(new Ld(workingRegister(register), workingRegister(varRegister)));
+		addCommand(new Ld(workingRegister(register + 1), workingRegister(varRegister + 1)));
 	}
 
 	private void storeA(@NotNull String varName) {
@@ -468,15 +494,26 @@ public final class CommandFactory {
 	}
 
 	private void store(@NotNull String varName, int register) {
-		loadVarAddress(varName);
+		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+		if (stackPosition >= 0) {
+			loadVarAddress(stackPosition);
 
-		addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register));
-		addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-		addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register + 1));
+			addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
+			addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register + 1));
+			return;
+		}
+
+		final int varRegister = stackPositionProvider.getRegister(varName);
+		Utils.assertTrue(varRegister >= 0);
+
+		addCommand(new Ld(workingRegister(varRegister), workingRegister(register)));
+		addCommand(new Ld(workingRegister(varRegister + 1), workingRegister(register + 1)));
 	}
 
-	private void loadVarAddress(@NotNull String varName) {
-		final int stackPosition = stackPositionProvider.getStackPosition(varName);
+	private void loadVarAddress(int stackPosition) {
+		Utils.assertTrue(stackPosition >= 0);
+
 		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_L), SP_L));
 		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
 		if (stackPosition != 0) {
