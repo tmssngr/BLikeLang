@@ -1,34 +1,34 @@
 todo:
-- continue
+- global constants
 - string constants
-- detect constant variables and inline them
-	example:
-	var columns = 40;
-	var rows = 24;
-	var charsPerScreen = columns * rows;
+- global variables
 - check if global var initialized from non-pure function
-- output ASM
+- continue
 
 nice-to-have:
+- foo++/foo-- as statement
 - &&, ||
 - optimize:
-	- copy propagation (inline unchanged variables like `int a = b;`)
-	- constant propagation (inline constants)
-	- sum: 1 + a + 2 -> a + 3
 	- if: move common part from begin of if/else basic block to previous basic block
 - move assignments the most way down
-- +=, -=, *=, <<=, >>=
 - detect/remove unused assignments
 - import
 
 done:
+- output ASM
+- support for stack and register variables
+- optimize:
+	- copy propagation (inline unchanged variables like `int a = b;`)
+	- constant propagation (inline constants)
+	- sum: 1 + a + 2 -> a + 3
+- +=, -=, *=, <<=, >>=
 - limit number of local variables (registers)
 - more complex, realistic example
 - / %
 - fix cast
 - hex numbers
 - while loop
+- break statement
 - pure function detection
 - linearize AST (IR) to basic blocks
 - determine needed/provided local variables
-- break statement
