@@ -23,7 +23,6 @@ public final class CommandFactory {
 
 	// Constants ==============================================================
 
-	static final int SP_L = 0xFF;
 	static final int SP_H = 0xFE;
 	static final int VAR_ACCESS_REGISTER_L = 15;
 	static final int VAR_ACCESS_REGISTER_H = 14;
@@ -162,11 +161,11 @@ public final class CommandFactory {
 			public Object visitAssignment(Assignment node) {
 				switch (node.operation()) {
 					case assign -> handleAssignOrDeclareVar(node.name(), node.expression());
-					case add -> handleAssignment(node, ArithmeticOp.adc, ArithmeticOp.add);
-					case sub -> handleAssignment(node, ArithmeticOp.sbc, ArithmeticOp.sub);
-					case bitAnd -> handleAssignment(node, ArithmeticOp.and, ArithmeticOp.and);
-					case bitOr -> handleAssignment(node, ArithmeticOp.or, ArithmeticOp.or);
-					case bitXor -> handleAssignment(node, ArithmeticOp.xor, ArithmeticOp.xor);
+					case add -> handleAssignment(node, ArithmeticOp.add);
+					case sub -> handleAssignment(node, ArithmeticOp.sub);
+					case bitAnd -> handleAssignment(node, ArithmeticOp.and);
+					case bitOr -> handleAssignment(node, ArithmeticOp.or);
+					case bitXor -> handleAssignment(node, ArithmeticOp.xor);
 					case shiftL -> handleShift(node, true);
 					case shiftR -> handleShift(node, false);
 					default -> throw new UnsupportedOperationException(node.operation().toString());
@@ -202,9 +201,9 @@ public final class CommandFactory {
 
 		literalOrVar(right,
 		             literal -> {
-			             addCommand(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A), literal >> 8));
+			             addCommand(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A), literal >> 8));
 			             addMsbJumps(operator, trueLabel, falseLabel);
-			             addCommand(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A + 1), literal));
+			             addCommand(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A + 1), literal));
 			             addLsbJump(operator, falseLabel);
 		             },
 		             rightVar -> {
@@ -374,8 +373,7 @@ public final class CommandFactory {
 	}
 
 	private void ldLiteral(int register, int literal) {
-		addCommand(new LdLiteral(workingRegister(register + 1), literal));
-		addCommand(new LdLiteral(workingRegister(register), literal >> 8));
+		addCommand(new TempLdLiteral(workingRegister(register), literal));
 	}
 
 	private void handleBuiltInFunctionCall(@NotNull String name, @NotNull FuncCallParameters parameters, @Nullable String assignReturnToVar) {
@@ -404,17 +402,13 @@ public final class CommandFactory {
 		});
 	}
 
-	private void handleAssignment(Assignment node, ArithmeticOp msbOp, ArithmeticOp lsbOp) {
+	private void handleAssignment(Assignment node, ArithmeticOp lsbOp) {
 		load(REG_A, node.name());
 		literalOrVar(node.expression(),
-		             literal -> {
-			             addCommand(new ArithmeticC(lsbOp, workingRegister(REG_A + 1), literal));
-			             addCommand(new ArithmeticC(msbOp, workingRegister(REG_A), literal >> 8));
-		             },
+		             literal -> addCommand(new TempArithmeticLiteral(lsbOp, workingRegister(REG_A), literal)),
 		             var -> {
 			             load(REG_B, var);
-			             addCommand(new Arithmetic(lsbOp, workingRegister(REG_A + 1), workingRegister(REG_B + 1)));
-			             addCommand(new Arithmetic(msbOp, workingRegister(REG_A), workingRegister(REG_B)));
+						 addCommand(new TempArithmetic(lsbOp, workingRegister(REG_A), workingRegister(REG_B)));
 		             });
 		storeA(node.name());
 	}
@@ -486,8 +480,7 @@ public final class CommandFactory {
 		final int varRegister = stackPositionProvider.getRegister(varName);
 		Utils.assertTrue(varRegister >= 0);
 
-		addCommand(new Ld(workingRegister(register), workingRegister(varRegister)));
-		addCommand(new Ld(workingRegister(register + 1), workingRegister(varRegister + 1)));
+		addCommand(new TempLd(workingRegister(register), workingRegister(varRegister)));
 	}
 
 	private void storeA(@NotNull String varName) {
@@ -508,18 +501,15 @@ public final class CommandFactory {
 		final int varRegister = stackPositionProvider.getRegister(varName);
 		Utils.assertTrue(varRegister >= 0);
 
-		addCommand(new Ld(workingRegister(varRegister), workingRegister(register)));
-		addCommand(new Ld(workingRegister(varRegister + 1), workingRegister(register + 1)));
+		addCommand(new TempLd(workingRegister(varRegister), workingRegister(register)));
 	}
 
 	private void loadVarAddress(int stackPosition) {
 		Utils.assertTrue(stackPosition >= 0);
 
-		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_L), SP_L));
-		addCommand(new Ld(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
+		addCommand(new TempLd(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
 		if (stackPosition != 0) {
-			addCommand(new ArithmeticC(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_L), stackPosition));
-			addCommand(new ArithmeticC(ArithmeticOp.adc, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition >> 8));
+			addCommand(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition));
 		}
 	}
 

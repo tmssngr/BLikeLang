@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public record ArithmeticC(@NotNull ArithmeticOp op, int register, int literal) implements Command {
+public record ArithmeticLiteral(@NotNull ArithmeticOp op, int register, int literal) implements Command {
 
 	// Implemented ============================================================
 

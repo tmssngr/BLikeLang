@@ -28,8 +28,7 @@ public class CommandFactoryTest {
 	@Test
 	public void testAssign() {
 		test(new ExpectedCommands()
-				     .add(new LdLiteral(workingRegister(REG_A + 1), 1))
-				     .add(new LdLiteral(workingRegister(REG_A), 0))
+				     .add(new TempLdLiteral(workingRegister(REG_A), 1))
 
 				     .varAddress(STACKPOS_A)
 				     .save(REG_A)
@@ -46,11 +45,11 @@ public class CommandFactoryTest {
 
 	@Test
 	public void testArithmetic() {
-		testArithmetic(ArithmeticOp.adc, ArithmeticOp.add, Assignment.Op.add);
-		testArithmetic(ArithmeticOp.sbc, ArithmeticOp.sub, Assignment.Op.sub);
-		testArithmetic(ArithmeticOp.and, ArithmeticOp.and, Assignment.Op.bitAnd);
-		testArithmetic(ArithmeticOp.or, ArithmeticOp.or, Assignment.Op.bitOr);
-		testArithmetic(ArithmeticOp.xor, ArithmeticOp.xor, Assignment.Op.bitXor);
+		testArithmetic(ArithmeticOp.add, Assignment.Op.add);
+		testArithmetic(ArithmeticOp.sub, Assignment.Op.sub);
+		testArithmetic(ArithmeticOp.and, Assignment.Op.bitAnd);
+		testArithmetic(ArithmeticOp.or, Assignment.Op.bitOr);
+		testArithmetic(ArithmeticOp.xor, Assignment.Op.bitXor);
 	}
 
 	@Test
@@ -61,9 +60,9 @@ public class CommandFactoryTest {
 		Assert.assertEquals(new ExpectedCommands()
 				                    .varAddress(STACKPOS_A)
 				                    .load(REG_A)
-				                    .add(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A), 0))
+				                    .add(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A), 0))
 				                    .add(new JumpCommand(JumpCondition.nz, "trueLabel"))
-				                    .add(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A + 1), 0))
+				                    .add(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A + 1), 0))
 				                    .add(new JumpCommand(JumpCondition.z, "falseLabel"))
 				                    .commands, commandList.getCommands());
 
@@ -111,21 +110,20 @@ public class CommandFactoryTest {
 				                    .varAddress(STACKPOS_A)
 				                    .load(REG_A)
 
-				                    .add(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A), 100 >> 8))
+				                    .add(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A), 100 >> 8))
 				                    .addAll(msbJumps)
 
-				                    .add(new ArithmeticC(ArithmeticOp.cp, workingRegister(REG_A + 1), 100))
+				                    .add(new ArithmeticLiteral(ArithmeticOp.cp, workingRegister(REG_A + 1), 100))
 				                    .add(new JumpCommand(lsbFalseCondition, "falseLabel"))
 				                    .commands, commandList.getCommands());
 	}
 
-	private void testArithmetic(ArithmeticOp msbOp, ArithmeticOp lsbOp, Assignment.Op operation) {
+	private void testArithmetic(ArithmeticOp op, Assignment.Op operation) {
 		test(new ExpectedCommands()
 				     .varAddress(STACKPOS_A)
 				     .load(REG_A)
 
-				     .add(new ArithmeticC(lsbOp, workingRegister(REG_A + 1), 1))
-				     .add(new ArithmeticC(msbOp, workingRegister(REG_A), 0))
+				     .add(new TempArithmeticLiteral(op, workingRegister(REG_A), 1))
 
 				     .varAddress(STACKPOS_A)
 				     .save(REG_A)
@@ -138,8 +136,7 @@ public class CommandFactoryTest {
 				     .varAddress(STACKPOS_B)
 				     .load(REG_B)
 
-				     .add(new Arithmetic(lsbOp, workingRegister(REG_A + 1), workingRegister(REG_B + 1)))
-				     .add(new Arithmetic(msbOp, workingRegister(REG_A), workingRegister(REG_B)))
+				     .add(new TempArithmetic(op, workingRegister(REG_A), workingRegister(REG_B)))
 
 				     .varAddress(STACKPOS_A)
 				     .save(REG_A)
@@ -231,10 +228,8 @@ public class CommandFactoryTest {
 		}
 
 		public ExpectedCommands varAddress(int stackPost) {
-			add(new Ld(workingRegister(VAR_ACCESS_REGISTER_L), SP_L));
-			add(new Ld(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
-			add(new ArithmeticC(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_L), stackPost));
-			add(new ArithmeticC(ArithmeticOp.adc, workingRegister(VAR_ACCESS_REGISTER_H), stackPost >> 8));
+			add(new TempLd(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
+			add(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_H), stackPost));
 			return this;
 		}
 

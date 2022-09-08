@@ -20,22 +20,23 @@ public final class CommandListOptimizations {
 		Utils.assertTrue(!(commands.get(commands.size() - 1) instanceof Label));
 
 		while (true) {
-			List<Command> processedCommands = removeUselessJumpsToNextCommand(commands);
-			processedCommands = replaceLabels(processedCommands);
-			processedCommands = removeUnusedLabels(processedCommands);
-			processedCommands = filterAddSub(processedCommands);
-			processedCommands = filterAndOrXor(processedCommands);
-			processedCommands = filterLd3(processedCommands);
-			processedCommands = filterLd2(processedCommands);
+			final List<Command> prevCommands = commands;
+			commands = removeUselessJumpsToNextCommand(commands);
+			commands = replaceLabels(commands);
+			commands = removeUnusedLabels(commands);
 
-			if (processedCommands.equals(commands)) {
-				final CommandList commandList = new CommandList();
-				processedCommands.forEach(commandList::add);
-				return commandList;
+			if (commands.equals(prevCommands)) {
+				break;
 			}
-
-			commands = processedCommands;
 		}
+
+		commands = filterTempLd(commands);
+		commands = replaceTempWithFinalCommands(commands);
+		commands = filterAndOrXor(commands);
+
+		final CommandList commandList = new CommandList();
+		commands.forEach(commandList::add);
+		return commandList;
 	}
 
 	// Utils ==================================================================
@@ -129,39 +130,11 @@ public final class CommandListOptimizations {
 	}
 
 	@NotNull
-	private static List<Command> filterAddSub(List<Command> commands) {
-		return filterCommands(commands, new DualCommandVisitor() {
-			@Override
-			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
-				if (command1 instanceof ArithmeticC ac1
-						&& command0 instanceof ArithmeticC ac0
-						&& ac1.register() == ac0.register() + 1
-						&& ac1.literal() == 1
-						&& ac0.literal() == 0) {
-					if (ac1.op() == ArithmeticOp.add
-							&& ac0.op() == ArithmeticOp.adc) {
-						stack.drop();
-						stack.drop();
-						stack.add(new RegisterCommand(RegisterCommand.Op.incw, ac0.register()));
-						return;
-					}
-					if (ac1.op() == ArithmeticOp.sub
-							&& ac0.op() == ArithmeticOp.sbc) {
-						stack.drop();
-						stack.drop();
-						stack.add(new RegisterCommand(RegisterCommand.Op.decw, ac0.register()));
-					}
-				}
-			}
-		});
-	}
-
-	@NotNull
 	private static List<Command> filterAndOrXor(List<Command> commands) {
 		return filterCommands(commands, new SingleCommandVisitor() {
 			@Override
 			public void visit(@NotNull Command command, @NotNull Stack stack) {
-				if (command instanceof ArithmeticC ac) {
+				if (command instanceof ArithmeticLiteral ac) {
 					if (ac.op() == ArithmeticOp.and) {
 						if (ac.literal() == 0xFF) {
 							stack.drop();
@@ -203,29 +176,6 @@ public final class CommandListOptimizations {
 		});
 	}
 
-	@NotNull
-	private static List<Command> filterLd3(List<Command> commands) {
-		return filterCommands(commands, new TripleCommandVisitor() {
-			@Override
-			public void visit(@NotNull Command command2, @NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
-				// Example:
-				// ld r8, r0 (ld2)
-				// ld r9, r1
-				// ld r0, r8 (ld0)
-				// ld r1, r9
-				if (command2 instanceof Ld ld2
-						&& command0 instanceof Ld ld0
-						&& ld2.sourceRegister() == ld0.targetRegister()
-						&& ld0.sourceRegister() == ld2.targetRegister()) {
-					if (!doesNotChange(command1, ld0.sourceRegister())) {
-						return;
-					}
-					stack.drop();
-				}
-			}
-		});
-	}
-
 	private static boolean doesNotChange(Command command, int register) {
 		if (command instanceof CallCommand
 				|| command instanceof JumpCommand
@@ -235,7 +185,7 @@ public final class CommandListOptimizations {
 		if (command instanceof Arithmetic a) {
 			return a.srcRegister() != register;
 		}
-		if (command instanceof ArithmeticC a) {
+		if (command instanceof ArithmeticLiteral a) {
 			return a.register() != register;
 		}
 		if (command instanceof Ld ld) {
@@ -263,20 +213,67 @@ public final class CommandListOptimizations {
 	}
 
 	@NotNull
-	private static List<Command> filterLd2(List<Command> commands) {
+	private static List<Command> filterTempLd(List<Command> commands) {
 		return filterCommands(commands, new DualCommandVisitor() {
 			@Override
 			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
 				// Example:
-				// ld r8, r0 (ld1)
-				// ld r0, r8 (ld0)
-				// ld r1, r9
-				if (command1 instanceof Ld ld1
-						&& command0 instanceof Ld ld0
-						&& ld1.sourceRegister() == ld0.targetRegister()
-						&& ld0.sourceRegister() == ld1.targetRegister()) {
+				// ldw r8, r0 (ld1)
+				// ldw r0, r8 (ld0)
+				if (command1 instanceof TempLd ld1
+						&& command0 instanceof TempLd ld0
+						&& ld1.srcRegister() == ld0.destRegister()
+						&& ld0.srcRegister() == ld1.destRegister()) {
 					stack.drop();
 				}
+			}
+		});
+	}
+
+	private static List<Command> replaceTempWithFinalCommands(List<Command> commands) {
+		return filterCommands(commands, new SingleCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command, @NotNull Stack stack) {
+				if (command instanceof TempLd temp) {
+					stack.drop();
+					stack.add(new Ld(temp.destRegister(), temp.srcRegister()));
+					stack.add(new Ld(temp.destRegister() + 1, temp.srcRegister() + 1));
+				}
+				else if (command instanceof TempArithmetic temp) {
+					stack.drop();
+					stack.add(new Arithmetic(temp.op(), temp.destRegister() + 1, temp.srcRegister() + 1));
+					stack.add(new Arithmetic(getMsbOp(temp.op()), temp.destRegister(), temp.srcRegister()));
+				}
+				else if (command instanceof TempLdLiteral temp) {
+					stack.drop();
+					stack.add(new LdLiteral(temp.register(), temp.literal() >> 8));
+					stack.add(new LdLiteral(temp.register() + 1, temp.literal() & 0xFF));
+				}
+				else if (command instanceof TempArithmeticLiteral temp) {
+					stack.drop();
+					if (temp.op() == ArithmeticOp.add && temp.literal() == 1) {
+						stack.add(new RegisterCommand(RegisterCommand.Op.incw, temp.register()));
+					}
+					else if (temp.op() == ArithmeticOp.sub && temp.literal() == 1) {
+						stack.add(new RegisterCommand(RegisterCommand.Op.decw, temp.register()));
+					}
+					else {
+						stack.add(new ArithmeticLiteral(temp.op(), temp.register() + 1, temp.literal() & 0xFF));
+						stack.add(new ArithmeticLiteral(getMsbOp(temp.op()), temp.register(), temp.literal() >> 8));
+					}
+				}
+			}
+
+			@NotNull
+			private ArithmeticOp getMsbOp(@NotNull ArithmeticOp op) {
+				ArithmeticOp msbOp = op;
+				if (msbOp == ArithmeticOp.add) {
+					msbOp = ArithmeticOp.adc;
+				}
+				else if (msbOp == ArithmeticOp.sub) {
+					msbOp = ArithmeticOp.sbc;
+				}
+				return msbOp;
 			}
 		});
 	}
