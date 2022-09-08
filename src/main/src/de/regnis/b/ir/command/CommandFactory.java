@@ -336,9 +336,6 @@ public final class CommandFactory {
 		}
 
 		addCommand(new CallCommand(functionName));
-		if (storeName != null) {
-			storeA(storeName);
-		}
 
 		if (parameters.size() > 0) {
 			for (int i = parameters.size(); i-- > 0; ) {
@@ -347,6 +344,10 @@ public final class CommandFactory {
 		}
 		else if (nonVoidReturnType) {
 			popA();
+		}
+
+		if (storeName != null) {
+			storeA(storeName);
 		}
 	}
 
