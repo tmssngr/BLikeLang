@@ -1,6 +1,5 @@
 package de.regnis.b.ir.command;
 
-import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,6 +17,6 @@ public record RegisterCommand(@NotNull Op op, int register) implements Command {
 	// Inner Classes ==========================================================
 
 	public enum Op {
-		push, pop, rlc, rrc, inc, incw, dec, decw
+		push, pop, rlc, rrc, inc, incw, dec, decw, com
 	}
 }

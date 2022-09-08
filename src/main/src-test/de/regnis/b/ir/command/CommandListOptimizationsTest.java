@@ -99,4 +99,55 @@ public final class CommandListOptimizationsTest {
 		                            new LdLiteral(CommandFactory.workingRegister(0), 0),
 		                            NoArgCommand.Ret), compact.getCommands());
 	}
+
+	@Test
+	public void testAddSub() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		list.add(new ArithmeticC(ArithmeticOp.add, 1, 1));
+		list.add(new ArithmeticC(ArithmeticOp.adc, 0, 0));
+		list.add(new ArithmeticC(ArithmeticOp.sub, 3, 1));
+		list.add(new ArithmeticC(ArithmeticOp.sbc, 2, 0));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+									new RegisterCommand(RegisterCommand.Op.incw, 0),
+									new RegisterCommand(RegisterCommand.Op.decw, 2),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
+
+	@Test
+	public void testAndOrXor() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		list.add(new ArithmeticC(ArithmeticOp.and, 0, 0xFF));
+		list.add(new ArithmeticC(ArithmeticOp.and, 1, 0));
+		list.add(new ArithmeticC(ArithmeticOp.or, 2, 0xFF));
+		list.add(new ArithmeticC(ArithmeticOp.or, 3, 0));
+		list.add(new ArithmeticC(ArithmeticOp.xor, 4, 0xFF));
+		list.add(new ArithmeticC(ArithmeticOp.xor, 5, 0));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+		                            new LdLiteral(1, 0),
+		                            new LdLiteral(2, 0xFF),
+		                            new RegisterCommand(RegisterCommand.Op.com, 4),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
+
+	@Test
+	public void testLd() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		list.add(new Ld(8, 0));
+		list.add(new Ld(9, 1));
+		list.add(new Ld(0, 8));
+		list.add(new Ld(1, 9));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+		                            new Ld(8, 0),
+		                          	new Ld(9, 1),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
 }
