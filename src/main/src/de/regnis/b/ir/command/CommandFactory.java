@@ -67,7 +67,7 @@ public final class CommandFactory {
 
 	// Accessing ==============================================================
 
-	public void addPrelude(@NotNull FuncDeclaration declaration, @NotNull RegisterAllocation.Result registers) {
+	public void addPrelude(@NotNull FuncDeclaration declaration) {
 		commandList.add(new Label(declaration.name()));
 
 		pops = new ArrayList<>();

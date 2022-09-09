@@ -203,7 +203,7 @@ public final class Compiler {
 		CommandList commandList = new CommandList();
 
 		final CommandFactory commandFactory = new CommandFactory(stackPositionProvider, functionNameToReturnType, builtInFunctions, commandList);
-		commandFactory.addPrelude(declaration, registers);
+		commandFactory.addPrelude(declaration);
 
 		final List<AbstractBlock> blocks = cfg.getLinearizedBlocks();
 		for (AbstractBlock block : blocks) {
