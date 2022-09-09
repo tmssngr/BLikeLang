@@ -54,11 +54,13 @@ public final class CfgReuseVarsTransformation {
 			@Override
 			public void visitIf(IfBlock block) {
 				processStatements(block);
+				block.setExpression(handleExpression(block.getExpression()));
 			}
 
 			@Override
 			public void visitWhile(WhileBlock block) {
 				processStatements(block);
+				block.setExpression(handleExpression(block.getExpression()));
 			}
 
 			@Override
