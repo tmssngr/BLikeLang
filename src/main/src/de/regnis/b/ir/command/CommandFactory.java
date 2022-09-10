@@ -170,6 +170,7 @@ public final class CommandFactory {
 					case bitXor -> handleAssignment(ArithmeticOp.xor, node);
 					case shiftL -> handleShift(node, true);
 					case shiftR -> handleShift(node, false);
+					case divide -> handleDivide(node);
 					default -> throw new UnsupportedOperationException(node.operation().toString());
 				}
 				return node;
@@ -467,6 +468,25 @@ public final class CommandFactory {
 		             },
 		             var -> {
 			             throw new UnsupportedOperationException();
+		             });
+	}
+
+	private void handleDivide(Assignment node) {
+		literalOrVar(node.expression(),
+		             literal -> {
+			             throw new UnsupportedOperationException();
+		             },
+		             var -> {
+			             loadA(node.name());
+			             loadB(var);
+			             addCommand(new TempLd(0x12, workingRegister(REG_A)));
+			             addCommand(new TempLd(0x14, workingRegister(REG_B)));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.push, SRP));
+			             addCommand(new LdLiteral(SRP, 0x10));
+			             addCommand(new CallCommand("%00E0"));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.pop, SRP));
+			             addCommand(new TempLd(workingRegister(REG_A), 0x12));
+			             storeA(node.name());
 		             });
 	}
 
