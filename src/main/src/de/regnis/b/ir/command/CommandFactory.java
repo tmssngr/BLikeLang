@@ -23,6 +23,8 @@ public final class CommandFactory {
 
 	// Constants ==============================================================
 
+	public static final int SRP = 0xFD;
+
 	static final int SP_H = 0xFE;
 	static final int VAR_ACCESS_REGISTER_H = 14;
 

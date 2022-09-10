@@ -62,8 +62,7 @@ public final class Compiler {
 			output.println();
 
 			output.print(ControlFlowGraphPrinter.INDENTATION);
-			// set RP
-			output.print("ld %FD, #%20");
+			output.print("srp #%20");
 			output.println();
 
 			compiler.compile(input, output);
