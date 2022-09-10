@@ -2,3 +2,6 @@
 !.git?*
 *.asm
 *.b
+*.bin
+*.exe
+*.bat
