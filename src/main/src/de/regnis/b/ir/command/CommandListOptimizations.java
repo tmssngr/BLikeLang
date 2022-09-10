@@ -195,7 +195,7 @@ public final class CommandListOptimizations {
 			return ld.register() != register;
 		}
 		if (command instanceof LdFromMem lfm) {
-			return lfm.targetRegister() != register;
+			return lfm.destRegister() != register;
 		}
 		if (command instanceof RegisterCommand r) {
 			if (r.op() == RegisterCommand.Op.push) {
