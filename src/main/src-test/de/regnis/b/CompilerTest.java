@@ -392,6 +392,81 @@ public class CompilerTest {
 				     """);
 	}
 
+	@Test
+	public void testAsciiListing() {
+		test("""
+				     void main() {
+				     	var chr = ' '
+				     	while (chr < 0x80) {
+				     		printChar(chr)
+				     		chr += 1
+				     		var tmp = chr & 0x0F
+				     		if (tmp == 0) {
+				     			printChar(0x0D)
+				     		}
+				     	}
+				     }
+				     """,
+		     "",
+		     """
+				     main:
+				         push r4
+				         push r5
+				         push r6
+				         push r7
+				         ld r0, #%00
+				         ld r1, #%20
+				         ld r4, r0
+				         ld r5, r1
+				     main_while_1:
+				         ld r0, r4
+				         ld r1, r5
+				         cp r0, #%00
+				         .jp lt, main_do_1
+				         .jp nz, main_exit
+				         cp r1, #%80
+				         .jp uge, main_exit
+				     main_do_1:
+				         ld r0, r4
+				         ld r1, r5
+				         ld %15, r1
+				         call %0818
+				         ld r0, r4
+				         ld r1, r5
+				         ld r6, r0
+				         ld r7, r1
+				         incw r6
+				         ld r0, r6
+				         ld r1, r7
+				         ld r4, r0
+				         ld r5, r1
+				         and r5, #%0F
+				         ld r4, #%00
+				         ld r0, r4
+				         ld r1, r5
+				         cp r0, #%00
+				         .jp nz, main_after_if_2
+				         cp r1, #%00
+				         .jp nz, main_after_if_2
+				         ld r0, #%00
+				         ld r1, #%0D
+				         ld %15, r1
+				         call %0818
+				     main_after_if_2:
+				         ld r0, r6
+				         ld r1, r7
+				         ld r4, r0
+				         ld r5, r1
+				         .jp main_while_1
+				     main_exit:
+				         pop r7
+				         pop r6
+				         pop r5
+				         pop r4
+				         ret
+				     """);
+	}
+
 	// Utils ==================================================================
 
 	private void test(String input, String expectedWarnings, String expectedOutput) {
