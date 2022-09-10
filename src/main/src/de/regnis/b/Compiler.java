@@ -114,6 +114,34 @@ public final class Compiler {
 				factory.addCommand(new LdToMem(0, 3));
 			}
 		});
+		builtInFunctions.add(BasicTypes.INT16, "readInt", 0, new BuiltInFunctions.FunctionCommandFactory() {
+			@Override
+			public void handleCall(@NotNull List<Expression> parameters, @Nullable String assignReturnToVar, @NotNull BuiltInFunctions.CommandFactory factory) {
+				Utils.assertTrue(parameters.size() == 0);
+				Utils.assertTrue(assignReturnToVar != null);
+
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.SRP));
+				factory.addCommand(new LdLiteral(CommandFactory.SRP, 0x10));
+				factory.addCommand(new CallCommand("%02E4"));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.SRP));
+				factory.addCommand(new TempLd(CommandFactory.workingRegister(0), 0x12));
+				factory.saveToVar(assignReturnToVar, 0);
+			}
+		});
+		builtInFunctions.add(BasicTypes.VOID, "printInt", 1, new BuiltInFunctions.FunctionCommandFactory() {
+			@Override
+			public void handleCall(@NotNull List<Expression> parameters, @Nullable String assignReturnToVar, @NotNull BuiltInFunctions.CommandFactory factory) {
+				Utils.assertTrue(parameters.size() == 1);
+				Utils.assertTrue(assignReturnToVar == null);
+
+				factory.loadToRegister(parameters.get(0), 0);
+				factory.addCommand(new TempLd(0x12, CommandFactory.workingRegister(0)));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.SRP));
+				factory.addCommand(new LdLiteral(CommandFactory.SRP, 0x10));
+				factory.addCommand(new CallCommand("%06e5"));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.SRP));
+			}
+		});
 	}
 
 	// Accessing ==============================================================

@@ -463,6 +463,219 @@ public class CompilerTest {
 				     """);
 	}
 
+	@Test
+	public void testAverage() {
+		test("""
+				     void main() {
+				         var i = 0
+				         var s = 0
+				         while (true) {
+				             printChar('W')
+				             printChar('e')
+				             printChar('r')
+				             printChar('t')
+				             printChar(':')
+				             var a = readInt()
+				             if a < 0 {
+				                 break
+				             }
+				             i += 1
+				             s += a
+				             printChar('S')
+				             printChar('u')
+				             printChar('m')
+				             printChar('m')
+				             printChar('e')
+				             printChar('=')
+				             printInt(s)
+				             printChar(0x0d)
+				             printChar('M')
+				             printChar('i')
+				             printChar('t')
+				             printChar('t')
+				             printChar('e')
+				             printChar('l')
+				             printChar('=')
+				             printInt(s / i)
+				             printChar(0x0d)
+				         }
+				     }
+				     """,
+		     "",
+		     """
+				     main:
+				         push r4
+				         push r5
+				         push r6
+				         push r7
+				         push r8
+				         push r9
+				         push r10
+				         push r11
+				         push r12
+				         push r13
+				         ld r0, #%00
+				         ld r1, #%00
+				         ld r6, r0
+				         ld r7, r1
+				         ld r0, #%00
+				         ld r1, #%00
+				         ld r10, r0
+				         ld r11, r1
+				     main_do_1:
+				         ld r0, #%00
+				         ld r1, #%57
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%65
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%72
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%74
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%3A
+				         ld %15, r1
+				         call %0818
+				         push %FD
+				         srp #%10
+				         call %02E4
+				         pop %FD
+				         ld r0, %12
+				         ld r1, %13
+				         ld r12, r0
+				         ld r13, r1
+				         cp r0, #%00
+				         .jp lt, main_then_2
+				         .jp nz, main_after_if_2
+				         cp r1, #%00
+				         .jp uge, main_after_if_2
+				     main_then_2:
+				         .jp main_exit
+				     main_after_if_2:
+				         incw r6
+				         ld r0, r10
+				         ld r1, r11
+				         ld r2, r12
+				         ld r3, r13
+				         add r1, r3
+				         adc r0, r2
+				         ld r10, r0
+				         ld r11, r1
+				         ld r0, #%00
+				         ld r1, #%53
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%75
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%6D
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%6D
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%65
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%3D
+				         ld %15, r1
+				         call %0818
+				         ld r0, r4
+				         ld r1, r5
+				         ld %12, r0
+				         ld %13, r1
+				         push %FD
+				         srp #%10
+				         call %06e5
+				         pop %FD
+				         ld r0, #%00
+				         ld r1, #%0D
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%4D
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%69
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%74
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%74
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%65
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%6C
+				         ld %15, r1
+				         call %0818
+				         ld r0, #%00
+				         ld r1, #%3D
+				         ld %15, r1
+				         call %0818
+				         ld r0, r4
+				         ld r1, r5
+				         ld r12, r0
+				         ld r13, r1
+				         ld r2, r8
+				         ld r3, r9
+				         ld %12, r0
+				         ld %13, r1
+				         ld %14, r2
+				         ld %15, r3
+				         push %FD
+				         srp #%10
+				         call %00E0
+				         pop %FD
+				         ld r0, %12
+				         ld r1, %13
+				         ld r12, r0
+				         ld r13, r1
+				         ld %12, r0
+				         ld %13, r1
+				         push %FD
+				         srp #%10
+				         call %06e5
+				         pop %FD
+				         ld r0, #%00
+				         ld r1, #%0D
+				         ld %15, r1
+				         call %0818
+				         .jp main_do_1
+				     main_exit:
+				         pop r13
+				         pop r12
+				         pop r11
+				         pop r10
+				         pop r9
+				         pop r8
+				         pop r7
+				         pop r6
+				         pop r5
+				         pop r4
+				         ret
+				     """);
+	}
+
 	// Utils ==================================================================
 
 	private void test(String input, String expectedWarnings, String expectedOutput) {
