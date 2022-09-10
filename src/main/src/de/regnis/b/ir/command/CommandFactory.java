@@ -92,19 +92,19 @@ public final class CommandFactory {
 		block.visit(new BlockVisitor() {
 			@Override
 			public void visitBasic(BasicBlock block) {
-				for (SimpleStatement statement : block.getStatements()) {
-					add(statement);
-				}
+				addStatements(block);
 				addCommand(new JumpCommand(block.getSingleNext().label));
 			}
 
 			@Override
 			public void visitIf(IfBlock block) {
+				addStatements(block);
 				addIf(block.getExpression(), block.getTrueBlock().label, block.getFalseBlock().label);
 			}
 
 			@Override
 			public void visitWhile(WhileBlock block) {
+				addStatements(block);
 				addIf(block.getExpression(), block.getInnerBlock().label, block.getLeaveBlock().label);
 			}
 
@@ -195,6 +195,12 @@ public final class CommandFactory {
 
 	// Utils ==================================================================
 
+	private void addStatements(StatementsBlock block) {
+		for (SimpleStatement statement : block.getStatements()) {
+			add(statement);
+		}
+	}
+
 	private void handleIf(String leftVar, SimpleExpression right, BinaryExpression.Op operator, String trueLabel, String falseLabel) {
 		load(REG_A, leftVar);
 
@@ -269,8 +275,7 @@ public final class CommandFactory {
 
 				final BinaryExpression.Op operator = node.operator();
 				switch (operator) {
-					case lessThan, lessEqual, equal, notEqual, greaterEqual, greaterThan
-							-> {
+					case lessThan, lessEqual, equal, notEqual, greaterEqual, greaterThan -> {
 						labelIndex++;
 						final String trueLabel = labelPrefix + "_relation_" + labelIndex + "_true";
 						final String falseLabel = labelPrefix + "_relation_" + labelIndex + "_false";
@@ -408,7 +413,7 @@ public final class CommandFactory {
 			             if (register >= 0) {
 				             addCommand(new TempArithmeticLiteral(op, workingRegister(register), literal));
 			             }
-						 else {
+			             else {
 				             load(REG_A, node.name());
 				             addCommand(new TempArithmeticLiteral(op, workingRegister(REG_A), literal));
 				             storeA(node.name());
@@ -417,7 +422,7 @@ public final class CommandFactory {
 		             var -> {
 			             load(REG_A, node.name());
 			             load(REG_B, var);
-						 addCommand(new TempArithmetic(op, workingRegister(REG_A), workingRegister(REG_B)));
+			             addCommand(new TempArithmetic(op, workingRegister(REG_A), workingRegister(REG_B)));
 			             storeA(node.name());
 		             });
 	}
