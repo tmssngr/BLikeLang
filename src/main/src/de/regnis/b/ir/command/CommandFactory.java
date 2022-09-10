@@ -205,7 +205,7 @@ public final class CommandFactory {
 	}
 
 	private void handleIf(String leftVar, SimpleExpression right, BinaryExpression.Op operator, String trueLabel, String falseLabel) {
-		load(REG_A, leftVar);
+		loadA(leftVar);
 
 		literalOrVar(right,
 		             literal -> {
@@ -215,7 +215,7 @@ public final class CommandFactory {
 			             addLsbJump(operator, falseLabel);
 		             },
 		             rightVar -> {
-			             load(REG_B, rightVar);
+			             loadB(rightVar);
 			             addCommand(new Arithmetic(ArithmeticOp.cp, workingRegister(REG_A), workingRegister(REG_B)));
 			             addMsbJumps(operator, trueLabel, falseLabel);
 			             addCommand(new Arithmetic(ArithmeticOp.cp, workingRegister(REG_A + 1), workingRegister(REG_B + 1)));
@@ -319,7 +319,7 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				load(REG_A, node.name());
+				loadA(node.name());
 				storeA(name);
 				return node;
 			}
@@ -332,7 +332,7 @@ public final class CommandFactory {
 			for (Expression parameter : parameters) {
 				literalOrVar(parameter,
 				             literal -> ldALiteral(literal),
-				             name -> load(REG_A, name));
+				             name -> loadA(name));
 				pushA();
 			}
 		}
@@ -417,14 +417,14 @@ public final class CommandFactory {
 				             addCommand(new TempArithmeticLiteral(op, workingRegister(register), literal));
 			             }
 			             else {
-				             load(REG_A, node.name());
+				             loadA(node.name());
 				             addCommand(new TempArithmeticLiteral(op, workingRegister(REG_A), literal));
 				             storeA(node.name());
 			             }
 		             },
 		             var -> {
-			             load(REG_A, node.name());
-			             load(REG_B, var);
+			             loadA(node.name());
+			             loadB(var);
 			             addCommand(new TempArithmetic(op, workingRegister(REG_A), workingRegister(REG_B)));
 			             storeA(node.name());
 		             });
@@ -437,7 +437,7 @@ public final class CommandFactory {
 				             return;
 			             }
 
-			             load(REG_A, node.name());
+			             loadA(node.name());
 
 			             if (left) {
 				             if (literal >= 8) {
@@ -480,6 +480,14 @@ public final class CommandFactory {
 		else {
 			throw new UnsupportedOperationException(expression.toString());
 		}
+	}
+
+	private void loadA(String name) {
+		load(REG_A, name);
+	}
+
+	private void loadB(String var) {
+		load(REG_B, var);
 	}
 
 	private void load(int register, @NotNull String varName) {
