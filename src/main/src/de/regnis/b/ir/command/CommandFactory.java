@@ -455,8 +455,7 @@ public final class CommandFactory {
 					             literal -= 8;
 				             }
 				             for (int i = 0; i < literal; i++) {
-					             addCommand(NoArgCommand.Ccf);
-					             addCommand(new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A)));
+					             addCommand(new RegisterCommand(RegisterCommand.Op.sra, workingRegister(REG_A)));
 					             addCommand(new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A + 1)));
 				             }
 			             }

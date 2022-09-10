@@ -17,6 +17,6 @@ public record RegisterCommand(@NotNull Op op, int register) implements Command {
 	// Inner Classes ==========================================================
 
 	public enum Op {
-		push, pop, rlc, rrc, inc, incw, dec, decw, com
+		push, pop, rlc, sra, rrc, inc, incw, dec, decw, com
 	}
 }

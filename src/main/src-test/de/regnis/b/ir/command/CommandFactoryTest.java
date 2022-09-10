@@ -166,16 +166,13 @@ public class CommandFactoryTest {
 
 		test(List.of(), new Assignment(Assignment.Op.shiftR, "a", new NumberLiteral(0)));
 
-		testShift(List.of(NoArgCommand.Ccf,
-		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A)),
+		testShift(List.of(new RegisterCommand(RegisterCommand.Op.sra, workingRegister(REG_A)),
 		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A + 1))),
 		          Assignment.Op.shiftR, 1);
 
-		testShift(List.of(NoArgCommand.Ccf,
-		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A)),
+		testShift(List.of(new RegisterCommand(RegisterCommand.Op.sra, workingRegister(REG_A)),
 		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A + 1)),
-		                  NoArgCommand.Ccf,
-		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A)),
+		                  new RegisterCommand(RegisterCommand.Op.sra, workingRegister(REG_A)),
 		                  new RegisterCommand(RegisterCommand.Op.rrc, workingRegister(REG_A + 1))),
 		          Assignment.Op.shiftR, 2);
 

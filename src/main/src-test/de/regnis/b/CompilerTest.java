@@ -318,17 +318,13 @@ public class CompilerTest {
 				         lde r1, @rr14
 				         ld r4, r0
 				         ld r5, r1
-				         ccf
-				         rrc r0
+				         sra r0
 				         rrc r1
-				         ccf
-				         rrc r0
+				         sra r0
 				         rrc r1
-				         ccf
-				         rrc r0
+				         sra r0
 				         rrc r1
-				         ccf
-				         rrc r0
+				         sra r0
 				         rrc r1
 				         ld r4, r0
 				         ld r5, r1
