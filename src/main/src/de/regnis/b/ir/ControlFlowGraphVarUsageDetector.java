@@ -126,11 +126,13 @@ public final class ControlFlowGraphVarUsageDetector {
 			@Override
 			public void visitIf(IfBlock block) {
 				detectRequiredVars(block.getExpression(), live);
+				detectRequiredAndProvidedVars(block, live);
 			}
 
 			@Override
 			public void visitWhile(WhileBlock block) {
 				detectRequiredVars(block.getExpression(), live);
+				detectRequiredAndProvidedVars(block, live);
 			}
 
 			@Override
@@ -162,7 +164,7 @@ public final class ControlFlowGraphVarUsageDetector {
 		liveVars.put(node, new HashSet<>(live));
 	}
 
-	private void detectRequiredAndProvidedVars(BasicBlock block, Set<String> live) {
+	private void detectRequiredAndProvidedVars(StatementsBlock block, Set<String> live) {
 		final List<? extends SimpleStatement> statements = new ArrayList<>(block.getStatements());
 		Collections.reverse(statements);
 		for (SimpleStatement statement : statements) {
