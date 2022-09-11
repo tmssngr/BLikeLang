@@ -85,7 +85,8 @@ public final class CfgReuseVarsTransformation {
 
 			@Override
 			public Object visitCall(CallStatement node) {
-				consumer.accept(node);
+				final FuncCallParameters newParameters = node.parameters().transform(expression -> handleExpression(expression));
+				consumer.accept(new CallStatement(node.name(), newParameters));
 				return node;
 			}
 
