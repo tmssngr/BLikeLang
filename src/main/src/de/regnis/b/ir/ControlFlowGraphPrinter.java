@@ -3,9 +3,11 @@ package de.regnis.b.ir;
 import de.regnis.b.ast.SimpleStatement;
 import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringOutput;
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -28,14 +30,21 @@ public class ControlFlowGraphPrinter {
 	private final ControlFlowGraph graph;
 	private final StringOutput output;
 
+	private boolean printPrevBlocks;
+
 	// Setup ==================================================================
 
 	public ControlFlowGraphPrinter(@NotNull ControlFlowGraph graph, @NotNull StringOutput output) {
-		this.graph = graph;
+		this.graph  = graph;
 		this.output = output;
 	}
 
 	// Accessing ==============================================================
+
+	public ControlFlowGraphPrinter setPrintPrevBlocks() {
+		this.printPrevBlocks = true;
+		return this;
+	}
 
 	@NotNull
 	public final StringOutput print() {
@@ -108,16 +117,6 @@ public class ControlFlowGraphPrinter {
 		return output;
 	}
 
-	@NotNull
-	protected String getLabelText(AbstractBlock block) {
-		return block.label + ":";
-	}
-
-	protected final void printlnIndented(String s) {
-		output.print(INDENTATION + s);
-		output.println();
-	}
-
 	protected void printBefore(String indentation, AbstractBlock block) {
 	}
 
@@ -127,6 +126,33 @@ public class ControlFlowGraphPrinter {
 	}
 
 	// Utils ==================================================================
+
+	@NotNull
+	private String getLabelText(AbstractBlock block) {
+		final StringBuilder buffer = new StringBuilder();
+		buffer.append(block.label);
+		buffer.append(":");
+
+		if (printPrevBlocks) {
+			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
+			if (prevBlocks.size() > 0) {
+				buffer.append("  // ");
+				Utils.appendCommaSeparated(Utils.convert(prevBlocks, new Function<>() {
+					@Override
+					public String apply(AbstractBlock block) {
+						return block.label;
+					}
+				}), buffer);
+			}
+		}
+
+		return buffer.toString();
+	}
+
+	private void printlnIndented(String s) {
+		output.print(INDENTATION + s);
+		output.println();
+	}
 
 	private void printStatements(StatementsBlock block) {
 		for (SimpleStatement statement : block.getStatements()) {

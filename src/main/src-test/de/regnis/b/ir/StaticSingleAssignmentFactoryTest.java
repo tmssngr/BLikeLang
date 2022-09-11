@@ -1,18 +1,15 @@
 package de.regnis.b.ir;
 
 import de.regnis.b.ast.AstFactory;
-import de.regnis.b.ast.transformation.DetermineTypesTransformation;
-import de.regnis.b.ast.transformation.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
 import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
+import de.regnis.b.ast.transformation.DetermineTypesTransformation;
+import de.regnis.b.ast.transformation.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import static de.regnis.utils.Utils.notNull;
 import static org.junit.Assert.assertEquals;
@@ -544,27 +541,8 @@ public class StaticSingleAssignmentFactoryTest {
 	}
 
 	private String toString(ControlFlowGraph graph) {
-		final ControlFlowGraphPrinter printer = new ControlFlowGraphPrinter(graph, new StringStringOutput()) {
-			@NotNull
-			@Override
-			protected String getLabelText(AbstractBlock block) {
-				final StringBuilder buffer = new StringBuilder();
-				buffer.append(super.getLabelText(block));
-
-				final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
-				if (prevBlocks.size() > 0) {
-					buffer.append("  // ");
-					Utils.appendCommaSeparated(Utils.convert(prevBlocks, new Function<>() {
-						@Override
-						public String apply(AbstractBlock block) {
-							return block.label;
-						}
-					}), buffer);
-				}
-
-				return buffer.toString();
-			}
-		};
+		final ControlFlowGraphPrinter printer = new ControlFlowGraphPrinter(graph, new StringStringOutput());
+		printer.setPrintPrevBlocks();
 		return printer.print().toString();
 	}
 }

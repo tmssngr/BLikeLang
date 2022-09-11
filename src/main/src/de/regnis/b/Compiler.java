@@ -215,6 +215,11 @@ public final class Compiler {
 		if (DEBUG) {
 			System.out.println("removed phi functions");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
+
+			final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsages(cfg);
+			detector.createPrinter(StringOutput.out)
+					.setPrintPrevBlocks()
+					.print();
 		}
 
 		final RegisterAllocation.Result registers = RegisterAllocation.run(cfg);
