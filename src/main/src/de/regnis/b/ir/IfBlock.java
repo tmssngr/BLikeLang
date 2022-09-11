@@ -24,11 +24,6 @@ public final class IfBlock extends ControlFlowBlock {
 	// Implemented ============================================================
 
 	@Override
-	public void visit(@NotNull BlockVisitor visitor) {
-		visitor.visitIf(this);
-	}
-
-	@Override
 	public StringOutput print(String indentation, StringOutput output) {
 		super.print(indentation, output);
 

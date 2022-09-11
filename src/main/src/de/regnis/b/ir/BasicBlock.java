@@ -23,13 +23,6 @@ public final class BasicBlock extends StatementsBlock {
 		super(label, prev);
 	}
 
-	// Implemented ============================================================
-
-	@Override
-	public void visit(@NotNull BlockVisitor visitor) {
-		visitor.visitBasic(this);
-	}
-
 	// Accessing ==============================================================
 
 	@NotNull

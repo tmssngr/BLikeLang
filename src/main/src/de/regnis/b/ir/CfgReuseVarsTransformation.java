@@ -45,28 +45,23 @@ public final class CfgReuseVarsTransformation {
 	// Utils ==================================================================
 
 	private void replaceWithRegisterVars() {
-		graph.iterate(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				processStatements(block);
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			switch (block) {
+				case BasicBlock basicBlock -> {
+					processStatements(basicBlock);
+				}
+				case IfBlock ifBlock -> {
+					processStatements(ifBlock);
+					ifBlock.setExpression(handleExpression(ifBlock.getExpression()));
+				}
+				case WhileBlock whileBlock -> {
+					processStatements(whileBlock);
+					whileBlock.setExpression(handleExpression(whileBlock.getExpression()));
+				}
+				case ExitBlock ignore -> {
+				}
 			}
-
-			@Override
-			public void visitIf(IfBlock block) {
-				processStatements(block);
-				block.setExpression(handleExpression(block.getExpression()));
-			}
-
-			@Override
-			public void visitWhile(WhileBlock block) {
-				processStatements(block);
-				block.setExpression(handleExpression(block.getExpression()));
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
-			}
-		});
+		}
 	}
 
 	private void processStatements(StatementsBlock block) {

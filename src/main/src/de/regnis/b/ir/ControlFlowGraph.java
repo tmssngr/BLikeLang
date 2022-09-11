@@ -97,10 +97,6 @@ public final class ControlFlowGraph {
 		}
 	}
 
-	public void iterate(@NotNull BlockVisitor visitor) {
-		iterate(block -> block.visit(visitor));
-	}
-
 	public List<AbstractBlock> getLinearizedBlocks() {
 		return Collections.unmodifiableList(linearizedBlocks);
 	}

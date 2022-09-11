@@ -86,37 +86,30 @@ public final class CommandFactory {
 		labelPrefix = "_" + declaration.name();
 	}
 
-	public void add(@NotNull AbstractBlock block) {
-		commandList.add(new Label(block.label));
+	public void add(@NotNull AbstractBlock abstractBlock) {
+		commandList.add(new Label(abstractBlock.label));
 
-		block.visit(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
+		switch (abstractBlock) {
+			case BasicBlock block -> {
 				for (SimpleStatement statement : block.getStatements()) {
 					add(statement);
 				}
 				addCommand(new JumpCommand(block.getSingleNext().label));
 			}
+			case IfBlock block ->
+					addIf(block.getExpression(), block.getTrueBlock().label, block.getFalseBlock().label);
 
-			@Override
-			public void visitIf(IfBlock block) {
-				addIf(block.getExpression(), block.getTrueBlock().label, block.getFalseBlock().label);
-			}
+			case WhileBlock block ->
+					addIf(block.getExpression(), block.getInnerBlock().label, block.getLeaveBlock().label);
 
-			@Override
-			public void visitWhile(WhileBlock block) {
-				addIf(block.getExpression(), block.getInnerBlock().label, block.getLeaveBlock().label);
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
+			case ExitBlock ignored -> {
 				for (Integer register : pops) {
 					pop(register);
 				}
 
 				addCommand(NoArgCommand.Ret);
 			}
-		});
+		}
 	}
 
 	public void addIf(@NotNull Expression expression, @NotNull String trueLabel, @NotNull String falseLabel) {

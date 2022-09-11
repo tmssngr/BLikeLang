@@ -10,14 +10,14 @@ import java.util.*;
 /**
  * @author Thomas Singer
  */
-public final class SsaConstantDetection implements BlockVisitor, SimpleStatementVisitor<SimpleStatement> {
+public final class SsaConstantDetection implements SimpleStatementVisitor<SimpleStatement> {
 
 	// Static =================================================================
 
 	@NotNull
 	public static Map<String, SimpleExpression> detectConstants(@NotNull StatementsBlock block) {
 		final SsaConstantDetection detector = new SsaConstantDetection();
-		block.visit(detector);
+		detector.handleBlock(block);
 		return detector.getVarsWithReplacements();
 	}
 
@@ -45,25 +45,6 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 	}
 
 	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		visitStatements(block);
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		visitStatements(block);
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		visitStatements(block);
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
-	}
 
 	@Override
 	public SimpleStatement visitAssignment(Assignment node) {
@@ -114,6 +95,14 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 	}
 
 	// Utils ==================================================================
+
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case StatementsBlock statementsBlock -> visitStatements(statementsBlock);
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 
 	private Map<String, SimpleExpression> getVarsWithReplacements() {
 		final Map<String, SimpleExpression> varToReplacement = new HashMap<>(constants);
@@ -174,7 +163,9 @@ public final class SsaConstantDetection implements BlockVisitor, SimpleStatement
 	@NotNull
 	private static Map<String, SimpleExpression> detectConstants(@NotNull ControlFlowGraph graph) {
 		final SsaConstantDetection detector = new SsaConstantDetection();
-		graph.iterate(detector);
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			detector.handleBlock(block);
+		}
 		return detector.getVarsWithReplacements();
 	}
 }

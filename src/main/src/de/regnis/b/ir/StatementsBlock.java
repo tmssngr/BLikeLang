@@ -15,7 +15,8 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public abstract class StatementsBlock extends AbstractBlock {
+public abstract sealed class StatementsBlock extends AbstractBlock
+		permits BasicBlock, ControlFlowBlock {
 
 	// Fields =================================================================
 

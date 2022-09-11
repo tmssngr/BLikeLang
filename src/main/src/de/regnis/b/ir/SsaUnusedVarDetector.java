@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * @author Thomas Singer
  */
-public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatementVisitor<SimpleStatement>, ExpressionVisitor<Expression> {
+public final class SsaUnusedVarDetector implements SimpleStatementVisitor<SimpleStatement>, ExpressionVisitor<Expression> {
 
 	// Static =================================================================
 
@@ -17,7 +17,9 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 	@NotNull
 	public static Set<String> detectUnusedVariables(@NotNull ControlFlowGraph graph) {
 		final SsaUnusedVarDetector detector = new SsaUnusedVarDetector();
-		graph.iterate(detector);
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			detector.handleBlock(block);
+		}
 		detector.declaredVariables.removeAll(detector.usedVariables);
 		return detector.declaredVariables;
 	}
@@ -33,27 +35,6 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 	}
 
 	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		visitStatements(block);
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		visitStatements(block);
-		block.getExpression().visit(this);
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		visitStatements(block);
-		block.getExpression().visit(this);
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
-	}
 
 	@Override
 	public SimpleStatement visitAssignment(Assignment node) {
@@ -103,6 +84,19 @@ public final class SsaUnusedVarDetector implements BlockVisitor, SimpleStatement
 
 	// Utils ==================================================================
 
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case BasicBlock basicBlock ->
+					visitStatements(basicBlock);
+
+			case ControlFlowBlock cfBlock -> {
+				visitStatements(cfBlock);
+				cfBlock.getExpression().visit(this);
+			}
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 	private void processParameters(FuncCallParameters node) {
 		for (Expression parameter : node.getExpressions()) {
 			parameter.visit(this);

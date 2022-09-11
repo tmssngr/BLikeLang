@@ -9,12 +9,15 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public final class CfgParameterToSimpleExpression implements BlockVisitor {
+public final class CfgParameterToSimpleExpression {
 
 	// Static =================================================================
 
 	public static void transform(@NotNull ControlFlowGraph graph) {
-		graph.iterate(new CfgParameterToSimpleExpression());
+		final CfgParameterToSimpleExpression transformation = new CfgParameterToSimpleExpression();
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			transformation.handleBlock(block);
+		}
 	}
 
 	// Fields =================================================================
@@ -26,50 +29,42 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 	private CfgParameterToSimpleExpression() {
 	}
 
-	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
-			@Override
-			public Object visitAssignment(Assignment node) {
-				final Expression expression = toSimpleExpression(node.expression(), false, consumer);
-				consumer.accept(new Assignment(node.operation(), node.name(), expression));
-				return node;
-			}
-
-			@Override
-			public Object visitLocalVarDeclaration(VarDeclaration node) {
-				final Expression expression = toSimpleExpression(node.expression(), false, consumer);
-				consumer.accept(new VarDeclaration(node.name(), expression));
-				return node;
-			}
-
-			@Override
-			public Object visitCall(CallStatement node) {
-				final FuncCallParameters parameters = node.parameters().transform(expression ->
-						                                                                toSimpleExpression(expression, true, consumer));
-				consumer.accept(new CallStatement(node.name(), parameters));
-				return node;
-			}
-		}));
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		Utils.assertTrue(block.getStatements().isEmpty());
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		Utils.assertTrue(block.getStatements().isEmpty());
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
-	}
-
 	// Utils ==================================================================
+
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case BasicBlock basicBlock -> {
+				basicBlock.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {
+					@Override
+					public Object visitAssignment(Assignment node) {
+						final Expression expression = toSimpleExpression(node.expression(), false, consumer);
+						consumer.accept(new Assignment(node.operation(), node.name(), expression));
+						return node;
+					}
+
+					@Override
+					public Object visitLocalVarDeclaration(VarDeclaration node) {
+						final Expression expression = toSimpleExpression(node.expression(), false, consumer);
+						consumer.accept(new VarDeclaration(node.name(), expression));
+						return node;
+					}
+
+					@Override
+					public Object visitCall(CallStatement node) {
+						final FuncCallParameters parameters = node.parameters().transform(expression ->
+								                                                                  toSimpleExpression(expression, true, consumer));
+						consumer.accept(new CallStatement(node.name(), parameters));
+						return node;
+					}
+				}));
+			}
+			case ControlFlowBlock cfBlock -> {
+				Utils.assertTrue(cfBlock.getStatements().isEmpty());
+			}
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 
 	private Expression toSimpleExpression(Expression expression, boolean createTempVar, Consumer<SimpleStatement> consumer) {
 		return expression.visit(new ExpressionVisitor<>() {
@@ -83,7 +78,7 @@ public final class CfgParameterToSimpleExpression implements BlockVisitor {
 			@Override
 			public Expression visitFunctionCall(FuncCall node) {
 				final FuncCallParameters parameters = node.parameters().transform(expression ->
-						                                                                toSimpleExpression(expression, true, consumer));
+						                                                                  toSimpleExpression(expression, true, consumer));
 				return maybeWrapInTempVar(new FuncCall(node.name(), parameters));
 			}
 

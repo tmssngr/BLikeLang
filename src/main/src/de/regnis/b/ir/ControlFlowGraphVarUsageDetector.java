@@ -117,29 +117,22 @@ public final class ControlFlowGraphVarUsageDetector {
 		final Usages usages = getUsages(block);
 		boolean changed = usages.lifeAfter.addAll(live);
 
-		block.visit(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				detectRequiredAndProvidedVars(block, live);
-			}
+		switch (block) {
+			case BasicBlock basicBlock ->
+					detectRequiredAndProvidedVars(basicBlock, live);
 
-			@Override
-			public void visitIf(IfBlock block) {
-				detectRequiredVars(block.getExpression(), live);
-			}
+			case IfBlock ifBlock ->
+					detectRequiredVars(ifBlock.getExpression(), live);
 
-			@Override
-			public void visitWhile(WhileBlock block) {
-				detectRequiredVars(block.getExpression(), live);
-			}
+			case WhileBlock whileBlock ->
+					detectRequiredVars(whileBlock.getExpression(), live);
 
-			@Override
-			public void visitExit(ExitBlock block) {
+			case ExitBlock ignore -> {
 				if (graph.getType() != BasicTypes.VOID) {
 					live.add(ControlFlowGraph.RESULT);
 				}
 			}
-		});
+		}
 
 		if (usages.lifeBefore.addAll(live)) {
 			changed = true;

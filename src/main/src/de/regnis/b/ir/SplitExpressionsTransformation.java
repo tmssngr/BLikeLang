@@ -9,12 +9,15 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class SplitExpressionsTransformation implements BlockVisitor {
+public final class SplitExpressionsTransformation {
 
 	// Static =================================================================
 
 	public static void transform(@NotNull ControlFlowGraph graph) {
-		graph.iterate(new SplitExpressionsTransformation());
+		final SplitExpressionsTransformation transformation = new SplitExpressionsTransformation();
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			transformation.handleBlock(block);
+		}
 	}
 
 	// Fields =================================================================
@@ -26,41 +29,28 @@ public final class SplitExpressionsTransformation implements BlockVisitor {
 	private SplitExpressionsTransformation() {
 	}
 
-	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		final List<SimpleStatement> newStatements = new ArrayList<>();
-		final TempVarFactory tempVarFactory = createTempVarFactory(newStatements);
-		handleStatements(block, newStatements, tempVarFactory);
-		block.set(newStatements);
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		final List<SimpleStatement> newStatements = new ArrayList<>();
-		final TempVarFactory tempVarFactory = createTempVarFactory(newStatements);
-		handleStatements(block, newStatements, tempVarFactory);
-		final Expression expression = handleExpression(block.getExpression(), tempVarFactory);
-		block.setExpression(expression);
-		block.set(newStatements);
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		final List<SimpleStatement> newStatements = new ArrayList<>();
-		final TempVarFactory tempVarFactory = createTempVarFactory(newStatements);
-		handleStatements(block, newStatements, tempVarFactory);
-		final Expression expression = handleExpression(block.getExpression(), tempVarFactory);
-		block.setExpression(expression);
-		block.set(newStatements);
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
-	}
-
 	// Utils ==================================================================
+
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case BasicBlock basicBlock -> {
+				final List<SimpleStatement> newStatements = new ArrayList<>();
+				final TempVarFactory tempVarFactory = createTempVarFactory(newStatements);
+				handleStatements(basicBlock, newStatements, tempVarFactory);
+				basicBlock.set(newStatements);
+			}
+			case ControlFlowBlock cfBlock -> {
+				final List<SimpleStatement> newStatements = new ArrayList<>();
+				final TempVarFactory tempVarFactory = createTempVarFactory(newStatements);
+				handleStatements(cfBlock, newStatements, tempVarFactory);
+				final Expression expression = handleExpression(cfBlock.getExpression(), tempVarFactory);
+				cfBlock.setExpression(expression);
+				cfBlock.set(newStatements);
+			}
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 
 	private void handleStatements(StatementsBlock block, List<SimpleStatement> newStatements, TempVarFactory tempVarFactory) {
 		for (SimpleStatement statement : block.getStatements()) {

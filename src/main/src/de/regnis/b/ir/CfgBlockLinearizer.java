@@ -31,31 +31,24 @@ public final class CfgBlockLinearizer {
 			return;
 		}
 
-		block.visit(new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				blocks.add(block);
+		switch (block) {
+			case BasicBlock basicBlock -> {
+				blocks.add(basicBlock);
 
-				linearizeBlocks(block.getSingleNext(), blocks);
+				linearizeBlocks(basicBlock.getSingleNext(), blocks);
 			}
-
-			@Override
-			public void visitIf(IfBlock block) {
-				blocks.add(block);
-				linearizeBlocks(block.getTrueBlock(), blocks);
-				linearizeBlocks(block.getFalseBlock(), blocks);
+			case IfBlock ifBlock -> {
+				blocks.add(ifBlock);
+				linearizeBlocks(ifBlock.getTrueBlock(), blocks);
+				linearizeBlocks(ifBlock.getFalseBlock(), blocks);
 			}
-
-			@Override
-			public void visitWhile(WhileBlock block) {
-				blocks.add(block);
-				linearizeBlocks(block.getInnerBlock(), blocks);
-				linearizeBlocks(block.getLeaveBlock(), blocks);
+			case WhileBlock whileBlock -> {
+				blocks.add(whileBlock);
+				linearizeBlocks(whileBlock.getInnerBlock(), blocks);
+				linearizeBlocks(whileBlock.getLeaveBlock(), blocks);
 			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
+			case ExitBlock ignored -> {
 			}
-		});
+		}
 	}
 }

@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVisitor<Expression> {
+public abstract class SsaSearchAndReplace implements ExpressionVisitor<Expression> {
 
 	// Abstract ===============================================================
 
@@ -30,15 +30,19 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 	}
 
 	public static void replace(@NotNull ControlFlowGraph graph, @NotNull Map<String, ? extends SimpleExpression> fromTo) {
-		graph.iterate(createReplace(fromTo));
+		final SsaSearchAndReplace transformation = createReplace(fromTo);
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			transformation.handleBlock(block);
+		}
 	}
 
 	public static void replace(StatementsBlock block, Map<String, SimpleExpression> fromTo) {
-		block.visit(createReplace(fromTo));
+		final SsaSearchAndReplace transformation = createReplace(fromTo);
+		transformation.handleBlock(block);
 	}
 
 	public static void rename(@NotNull ControlFlowGraph graph, @NotNull Map<String, String> fromTo) {
-		graph.iterate(new SsaSearchAndReplace() {
+		final SsaSearchAndReplace transformation = new SsaSearchAndReplace() {
 			@Override
 			protected void processLocalVarDeclaration(VarDeclaration node, Consumer<SimpleStatement> consumer) {
 				final Expression newExpression = node.expression().visit(this);
@@ -58,7 +62,10 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 				final String name = fromTo.getOrDefault(node.name(), node.name());
 				return new VarRead(name);
 			}
-		});
+		};
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			transformation.handleBlock(block);
+		}
 	}
 
 	// Setup ==================================================================
@@ -67,27 +74,6 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 	}
 
 	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		processStatements(block);
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		processStatements(block);
-		block.setExpression(block.getExpression().visit(this));
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		processStatements(block);
-		block.setExpression(block.getExpression().visit(this));
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
-	}
 
 	@Override
 	public Expression visitBinary(BinaryExpression node) {
@@ -108,6 +94,19 @@ public abstract class SsaSearchAndReplace implements BlockVisitor, ExpressionVis
 	}
 
 	// Utils ==================================================================
+
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case BasicBlock basicBlock -> processStatements(basicBlock);
+
+			case ControlFlowBlock cfBlock -> {
+				processStatements(cfBlock);
+				cfBlock.setExpression(cfBlock.getExpression().visit(this));
+			}
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 
 	private void processStatements(StatementsBlock block) {
 		block.replace((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {

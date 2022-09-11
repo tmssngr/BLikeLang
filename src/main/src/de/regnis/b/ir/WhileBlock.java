@@ -23,11 +23,6 @@ public final class WhileBlock extends ControlFlowBlock {
 	// Implemented ============================================================
 
 	@Override
-	public void visit(@NotNull BlockVisitor visitor) {
-		visitor.visitWhile(this);
-	}
-
-	@Override
 	public StringOutput print(String indentation, StringOutput output) {
 		super.print(indentation, output);
 

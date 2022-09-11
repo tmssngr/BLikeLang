@@ -8,40 +8,33 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public class SsaToModifyAssignments implements BlockVisitor {
+public class SsaToModifyAssignments {
 
 	// Static =================================================================
 
 	public static void transform(@NotNull ControlFlowGraph graph) {
-		graph.iterate(new SsaToModifyAssignments());
+		final SsaToModifyAssignments transformation = new SsaToModifyAssignments();
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+			transformation.handleBlock(block);
+		}
 	}
 
 	public static void transform(@NotNull StatementsBlock block) {
-		block.visit(new SsaToModifyAssignments());
-	}
-
-	// Implemented ============================================================
-
-	@Override
-	public void visitBasic(BasicBlock block) {
-		processStatements(block);
-	}
-
-	@Override
-	public void visitIf(IfBlock block) {
-		processStatements(block);
-	}
-
-	@Override
-	public void visitWhile(WhileBlock block) {
-		processStatements(block);
-	}
-
-	@Override
-	public void visitExit(ExitBlock block) {
+		new SsaToModifyAssignments()
+				.handleBlock(block);
 	}
 
 	// Utils ==================================================================
+
+	private void handleBlock(AbstractBlock block) {
+		switch (block) {
+			case StatementsBlock sBlock ->
+					processStatements(sBlock);
+
+			case ExitBlock ignore -> {
+			}
+		}
+	}
 
 	private void processStatements(StatementsBlock block) {
 		block.replace(((statement, consumer) -> statement.visit(new SimpleStatementVisitor<>() {

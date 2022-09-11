@@ -41,72 +41,64 @@ public class ControlFlowGraphPrinter {
 	public final StringOutput print() {
 		final List<AbstractBlock> blocks = graph.getLinearizedBlocks();
 
-		final BlockVisitor visitor = new BlockVisitor() {
-			@Override
-			public void visitBasic(BasicBlock block) {
-				printLabel(block);
+		for (AbstractBlock block : blocks) {
+			switch (block) {
+				case BasicBlock basicBlock -> {
+					printLabel(basicBlock);
 
-				printBefore(INDENTATION, block);
-				printStatements(block);
+					printBefore(INDENTATION, basicBlock);
+					printStatements(basicBlock);
 
-				printGoto(block, block.getSingleNext());
-			}
+					printGoto(basicBlock, basicBlock.getSingleNext(), blocks);
+				}
+				case IfBlock ifBlock -> {
+					printLabel(ifBlock);
 
-			@Override
-			public void visitIf(IfBlock block) {
-				printLabel(block);
+					printBefore(INDENTATION, ifBlock);
+					printStatements(ifBlock);
 
-				printBefore(INDENTATION, block);
-				printStatements(block);
+					output.print(INDENTATION);
+					output.print("if ");
+					CodePrinter.print(ifBlock.getExpression(), output);
+					output.println();
 
-				output.print(INDENTATION);
-				output.print("if ");
-				CodePrinter.print(block.getExpression(), output);
-				output.println();
+					printlnIndented("if ! goto " + ifBlock.getFalseBlock().label);
+					printGoto(ifBlock, ifBlock.getTrueBlock(), blocks);
+				}
+				case WhileBlock whileBlock -> {
+					printLabel(whileBlock);
 
-				printlnIndented("if ! goto " + block.getFalseBlock().label);
-				printGoto(block, block.getTrueBlock());
-			}
+					printBefore(INDENTATION, whileBlock);
+					printStatements(whileBlock);
 
-			@Override
-			public void visitWhile(WhileBlock block) {
-				printLabel(block);
-
-				printBefore(INDENTATION, block);
-				printStatements(block);
-
-				output.print(INDENTATION);
-				output.print("while ");
-				CodePrinter.print(block.getExpression(), output);
-				output.println();
-			}
-
-			@Override
-			public void visitExit(ExitBlock block) {
-				printLabel(block);
-
-				printlnIndented("return");
-			}
-
-			private void printGoto(AbstractBlock block, AbstractBlock next) {
-				if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
-					printlnIndented("goto " + next.label);
+					output.print(INDENTATION);
+					output.print("while ");
+					CodePrinter.print(whileBlock.getExpression(), output);
 					output.println();
 				}
-			}
+				case ExitBlock exitBlock -> {
+					printLabel(exitBlock);
 
-			private void printLabel(AbstractBlock block) {
-				output.print(getLabelText(block));
-				output.println();
+					printlnIndented("return");
+				}
 			}
-		};
-
-		for (AbstractBlock block : blocks) {
-			block.visit(visitor);
 		}
 
 		return output;
 	}
+
+	private void printGoto(AbstractBlock block, AbstractBlock next, List<AbstractBlock> blocks) {
+		if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
+			printlnIndented("goto " + next.label);
+			output.println();
+		}
+	}
+
+	private void printLabel(AbstractBlock block) {
+		output.print(getLabelText(block));
+		output.println();
+	}
+
 
 	@NotNull
 	protected String getLabelText(AbstractBlock block) {

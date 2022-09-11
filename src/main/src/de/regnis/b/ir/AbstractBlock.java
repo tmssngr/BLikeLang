@@ -8,11 +8,8 @@ import java.util.*;
 /**
  * @author Thomas Singer
  */
-public abstract class AbstractBlock {
-
-	// Abstract ===============================================================
-
-	public abstract void visit(@NotNull BlockVisitor visitor);
+public abstract sealed class AbstractBlock
+		permits StatementsBlock, ExitBlock {
 
 	// Fields =================================================================
 

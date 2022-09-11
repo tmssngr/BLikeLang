@@ -7,7 +7,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Thomas Singer
  */
-public abstract class ControlFlowBlock extends StatementsBlock {
+public abstract sealed class ControlFlowBlock extends StatementsBlock
+		permits IfBlock, WhileBlock {
 
 	// Fields =================================================================
 

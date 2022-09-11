@@ -34,7 +34,7 @@ public final class StaticSingleAssignmentFactory {
 				&& declaration.expression() instanceof FuncCall call
 				&& call.name().equals(PHI)) {
 			final List<String> variants = Utils.convert(call.parameters().getExpressions(), new ArrayList<>(),
-			                                           expression -> ((VarRead) expression).name());
+			                                            expression -> ((VarRead) expression).name());
 			return new Tuple<>(declaration.name(), variants);
 		}
 		return null;
@@ -82,28 +82,19 @@ public final class StaticSingleAssignmentFactory {
 				}
 			}
 
-			block.visit(new BlockVisitor() {
-				@Override
-				public void visitBasic(BasicBlock block) {
-					transform(block, info);
+			switch (block) {
+				case BasicBlock basicBlock -> transform(basicBlock, info);
+				case IfBlock ifBlock -> {
+					final Expression expression = visitExpression(ifBlock.getExpression(), info);
+					ifBlock.setExpression(expression);
 				}
-
-				@Override
-				public void visitIf(IfBlock block) {
-					final Expression expression = visitExpression(block.getExpression(), info);
-					block.setExpression(expression);
+				case WhileBlock whileBlock -> {
+					final Expression expression = visitExpression(whileBlock.getExpression(), info);
+					whileBlock.setExpression(expression);
 				}
-
-				@Override
-				public void visitWhile(WhileBlock block) {
-					final Expression expression = visitExpression(block.getExpression(), info);
-					block.setExpression(expression);
+				case ExitBlock ignored -> {
 				}
-
-				@Override
-				public void visitExit(ExitBlock block) {
-				}
-			});
+			}
 		});
 
 		graph.iterate(block -> {
