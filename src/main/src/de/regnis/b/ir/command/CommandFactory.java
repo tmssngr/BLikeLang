@@ -143,7 +143,8 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				throw new UnsupportedOperationException();
+				addCommand(new JumpCommand(node.value() != 0 ? trueLabel : falseLabel));
+				return node;
 			}
 
 			@Override
