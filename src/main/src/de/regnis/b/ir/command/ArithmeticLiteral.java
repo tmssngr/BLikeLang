@@ -8,6 +8,14 @@ import org.jetbrains.annotations.NotNull;
  */
 public record ArithmeticLiteral(@NotNull ArithmeticOp op, int register, int literal) implements Command {
 
+	// Setup ==================================================================
+
+	public ArithmeticLiteral(@NotNull ArithmeticOp op, int register, int literal) {
+		this.op       = op;
+		this.register = register;
+		this.literal  = literal & 0xFF;
+	}
+
 	// Implemented ============================================================
 
 	@Override
