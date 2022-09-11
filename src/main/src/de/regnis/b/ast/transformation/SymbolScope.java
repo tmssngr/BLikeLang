@@ -35,23 +35,23 @@ public final class SymbolScope {
 
 	// Accessing ==============================================================
 
-	public void declareVariable(@NotNull String name, @NotNull String newName, int line, int column) {
+	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Position position) {
 		if (variables.containsKey(name)) {
 			throw new TransformationFailedException(scopeKind == ScopeKind.Parameter
-					                                  ? Messages.errorParameterAlreadyDeclared(line, column, name)
-					                                  : Messages.errorVarAlreadyDeclared(line, column, name));
+					                                  ? Messages.errorParameterAlreadyDeclared(position.line(), position.column(), name)
+					                                  : Messages.errorVarAlreadyDeclared(position.line(), position.column(), name));
 		}
 
 		if (scopeKind == ScopeKind.Local) {
 			for (SymbolScope scope = parentScope; scope != null; scope = scope.parentScope) {
 				if (scope.scopeKind == ScopeKind.Parameter
 						&& scope.variables.containsKey(name)) {
-					throw new TransformationFailedException(Messages.errorVarAlreadyDeclaredAsParameter(line, column, name));
+					throw new TransformationFailedException(Messages.errorVarAlreadyDeclaredAsParameter(position.line(), position.column(), name));
 				}
 			}
 		}
 
-		variables.put(name, new Variable(newName, line, column));
+		variables.put(name, new Variable(newName, position));
 	}
 
 	public SymbolScope createChildMap(ScopeKind scopeKind) {
@@ -78,8 +78,8 @@ public final class SymbolScope {
 			final String name = entry.getKey();
 			final Variable variable = entry.getValue();
 			if (!variable.used) {
-				final int line = variable.line;
-				final int column = variable.column;
+				final int line = variable.position.line();
+				final int column = variable.position.column();
 				output.print(scopeKind == ScopeKind.Parameter
 						             ? Messages.warningUnusedParameter(line, column, name)
 						             : Messages.warningUnusedVar(line, column, name));
@@ -96,15 +96,13 @@ public final class SymbolScope {
 
 	public static final class Variable {
 		public final String newName;
-		private final int line;
-		private final int column;
+		private final Position position;
 
 		private boolean used;
 
-		private Variable(String newName, int line, int column) {
-			this.newName = newName;
-			this.line = line;
-			this.column = column;
+		private Variable(String newName, Position position) {
+			this.newName  = newName;
+			this.position = position;
 		}
 	}
 }

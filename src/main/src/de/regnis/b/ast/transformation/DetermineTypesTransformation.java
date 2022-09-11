@@ -133,7 +133,7 @@ public final class DetermineTypesTransformation {
 			final String newName = "p" + i;
 			i++;
 
-			symbolMap.declareVariable(parameter.name(), newName, parameter.position().line(), parameter.position().column());
+			symbolMap.declareVariable(parameter.name(), newName, parameter.position());
 
 			renamedParameters.add(new FuncDeclarationParameter(newName));
 		}
@@ -289,7 +289,7 @@ public final class DetermineTypesTransformation {
 	private VarDeclaration visitVarDeclaration(VarDeclaration varDeclaration, String newName) {
 		final Expression newExpression = visitExpression(varDeclaration.expression());
 
-		symbolMap.declareVariable(varDeclaration.name(), newName, varDeclaration.position().line(), varDeclaration.position().column());
+		symbolMap.declareVariable(varDeclaration.name(), newName, varDeclaration.position());
 		return new VarDeclaration(newName, newExpression);
 	}
 
