@@ -313,8 +313,15 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitNumber(NumberLiteral node) {
-				ldALiteral(node.value());
-				storeA(name);
+				final int varRegister = stackPositionProvider.getRegister(name);
+				if (varRegister >= 0) {
+					addCommand(new TempLdLiteral(workingRegister(varRegister), node.value()));
+				}
+				else {
+					ldALiteral(node.value());
+					store(name, REG_A);
+				}
+
 				return node;
 			}
 

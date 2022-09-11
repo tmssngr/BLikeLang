@@ -121,14 +121,10 @@ public class CompilerTest {
 				         push r7
 				         push r8
 				         push r9
-				         ld r0, #%40
-				         ld r1, #%00
-				         ld r6, r0
-				         ld r7, r1
-				         ld r0, #%00
-				         ld r1, #%40
-				         ld r4, r0
-				         ld r5, r1
+				         ld r6, #%40
+				         ld r7, #%00
+				         ld r4, #%00
+				         ld r5, #%40
 				     main_while_1:
 				         ld r0, r4
 				         ld r1, r5
@@ -410,10 +406,8 @@ public class CompilerTest {
 				         push r5
 				         push r6
 				         push r7
-				         ld r0, #%00
-				         ld r1, #%20
-				         ld r4, r0
-				         ld r5, r1
+				         ld r4, #%00
+				         ld r5, #%20
 				     main_while_1:
 				         ld r0, r4
 				         ld r1, r5
@@ -510,14 +504,10 @@ public class CompilerTest {
 				         push r7
 				         push r8
 				         push r9
-				         ld r0, #%00
-				         ld r1, #%00
-				         ld r6, r0
-				         ld r7, r1
-				         ld r0, #%00
-				         ld r1, #%00
-				         ld r4, r0
-				         ld r5, r1
+				         ld r6, #%00
+				         ld r7, #%00
+				         ld r4, #%00
+				         ld r5, #%00
 				     main_do_1:
 				         ld r0, #%00
 				         ld r1, #%57
