@@ -112,6 +112,30 @@ public final class CommandListOptimizationsTest {
 	}
 
 	@Test
+	public void testCp() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		// if a < 0
+		list.add(new ArithmeticLiteral(ArithmeticOp.cp, 0, 0));
+		list.add(new JumpCommand(JumpCondition.lt, "then"));
+		list.add(new JumpCommand(JumpCondition.nz, "next"));
+		// this is always true
+		list.add(new ArithmeticLiteral(ArithmeticOp.cp, 1, 0));
+		list.add(new JumpCommand(JumpCondition.uge, "next"));
+		list.add(new Label("then"));
+		list.add(new Ld(1, 2));
+		list.add(new Label("next"));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+		                            new ArithmeticLiteral(ArithmeticOp.cp, 0, 0),
+		                            new JumpCommand(JumpCondition.ge, "next"),
+		                            new Ld(1, 2),
+		                            new Label("next"),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
+
+	@Test
 	public void testTempLd() {
 		final CommandList list = new CommandList();
 		list.add(new Label("start"));

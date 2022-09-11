@@ -33,6 +33,20 @@ public final class CommandListOptimizations {
 		commands = filterTempLd(commands);
 		commands = replaceTempWithFinalCommands(commands);
 		commands = filterAndOrXor(commands);
+		commands = filterCpJump(commands);
+		commands = filterCondJumpJump(commands);
+
+		while (true) {
+			final List<Command> prevCommands = commands;
+			commands = filterCondJumpJumpLabel(commands);
+			commands = removeUselessJumpsToNextCommand(commands);
+			commands = replaceLabels(commands);
+			commands = removeUnusedLabels(commands);
+
+			if (commands.equals(prevCommands)) {
+				break;
+			}
+		}
 
 		final CommandList commandList = new CommandList();
 		commands.forEach(commandList::add);
@@ -274,6 +288,105 @@ public final class CommandListOptimizations {
 					msbOp = ArithmeticOp.sbc;
 				}
 				return msbOp;
+			}
+		});
+	}
+
+	private static List<Command> filterCpJump(List<Command> commands) {
+		return filterCommands(commands, new DualCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
+				if (command1 instanceof ArithmeticLiteral cp
+						&& cp.op() == ArithmeticOp.cp
+						&& command0 instanceof JumpCommand j) {
+					if (cp.literal() == 0) {
+						// all is >= 0
+						if (j.condition() == JumpCondition.uge) {
+							stack.drop();
+							stack.drop();
+							stack.add(new JumpCommand(j.label()));
+						}
+						// nothing is < 0
+						else if (j.condition() == JumpCondition.ult) {
+							stack.drop();
+							stack.drop();
+						}
+					}
+					if (cp.literal() == 0xFF) {
+						// nothing is > 255
+						if (j.condition() == JumpCondition.ugt) {
+							stack.drop();
+							stack.drop();
+						}
+						// all is <= 255
+						else if (j.condition() == JumpCondition.ule) {
+							stack.drop();
+							stack.drop();
+							stack.add(new JumpCommand(j.label()));
+						}
+					}
+				}
+			}
+		});
+	}
+
+	private static List<Command> filterCondJumpJump(List<Command> commands) {
+		return filterCommands(commands, new DualCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
+				// replace
+				//   jump nz, foo
+				//   jump foo
+				// with
+				//   jump foo
+				if (command1 instanceof JumpCommand j1
+						&& j1.condition() != null
+						&& command0 instanceof JumpCommand j0
+						&& j0.condition() == null
+						&& j1.label().equals(j0.label())) {
+					stack.drop();
+					stack.drop();
+					stack.add(j0);
+				}
+			}
+		});
+	}
+
+	private static List<Command> filterCondJumpJumpLabel(List<Command> commands) {
+		return filterCommands(commands, new TripleCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command2, @NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
+				// replace
+				//   jump nz, foo
+				//   jump bar
+				// foo:
+				// with
+				//   jump z, bar
+				// foo:
+				if (command2 instanceof JumpCommand j2
+						&& j2.condition() != null
+						&& command1 instanceof JumpCommand j1
+						&& j1.condition() == null
+						&& command0 instanceof Label label
+						&& j2.label().equals(label.name())) {
+					final var inverseOp = switch (j2.condition()) {
+						case lt -> JumpCondition.ge;
+						case le -> JumpCondition.gt;
+						case ge -> JumpCondition.lt;
+						case gt -> JumpCondition.le;
+						case ult -> JumpCondition.uge;
+						case ule -> JumpCondition.ugt;
+						case uge -> JumpCondition.ult;
+						case ugt -> JumpCondition.ule;
+						case z -> JumpCondition.nz;
+						case nz -> JumpCondition.z;
+					};
+					stack.drop();
+					stack.drop();
+					stack.drop();
+					stack.add(new JumpCommand(inverseOp, j1.label()));
+					stack.add(label);
+				}
 			}
 		});
 	}

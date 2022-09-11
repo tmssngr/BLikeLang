@@ -552,13 +552,7 @@ public class CompilerTest {
 				         ld r12, r0
 				         ld r13, r1
 				         cp r0, #%00
-				         .jp lt, main_then_2
-				         .jp nz, main_after_if_2
-				         cp r1, #%00
-				         .jp uge, main_after_if_2
-				     main_then_2:
-				         .jp main_exit
-				     main_after_if_2:
+				         .jp lt, main_exit
 				         incw r6
 				         ld r0, r10
 				         ld r1, r11
