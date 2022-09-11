@@ -82,7 +82,9 @@ public final class RegisterAllocation {
 		final int returnCount = varToRegister.containsKey(ControlFlowGraph.RESULT) ? 1 : 0;
 		final int localVarRegisterCount = maxUsedRegister + 1 - Math.max(parameterCount, returnCount);
 
-		return new Result(parameterCount, returnCount, localVarRegisterCount, varToRegister);
+		final Map<String, Integer> varToRegisterInOriginalOrder = new LinkedHashMap<>();
+		interferenceGraph.getObjects().forEach(var -> varToRegisterInOriginalOrder.put(var, varToRegister.get(var)));
+		return new Result(parameterCount, returnCount, localVarRegisterCount, varToRegisterInOriginalOrder);
 	}
 
 	private void setRegister(@NotNull String var, int register) {

@@ -11,7 +11,7 @@ public final class UndirectedGraph<O> {
 
 	// Fields =================================================================
 
-	private final Map<O, Vertex<O>> vertices = new HashMap<>();
+	private final Map<O, Vertex<O>> vertices = new LinkedHashMap<>();
 
 	// Setup ==================================================================
 
