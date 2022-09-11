@@ -187,12 +187,14 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 % 2 == 1
 				                 if ! goto test_else_2
 				             test_then_2:  // test_if_2
-				                 v0_1 := v0_0 + 1
+				                 v0_2 := v0_0 + 1
+				                 v0_3 := v0_2
 				                 goto test_after_if_2
 
 				             test_else_2:  // test_if_2
-				                 v0_1 := v0_0
+				                 v0_3 := v0_0
 				             test_after_if_2:  // test_then_2, test_else_2
+				                 v0_1 := v0_3
 				                 goto test_after_if_1
 
 				             test_else_1:  // test_if_1
@@ -470,11 +472,13 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 < 10
 				                 if ! goto printHex4_else_1
 				             printHex4_then_1:  // printHex4_if_1
-				                 v0_3 := p0_1 + 48
+				                 v0_1 := p0_1 + 48
+				                 v0_3 := v0_1
 				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:  // printHex4_if_1
-				                 v0_3 := p0_1 - 10 + 65
+				                 v0_2 := p0_1 - 10 + 65
+				                 v0_3 := v0_2
 				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 print(v0_3)
 				             printHex4_exit:  // printHex4_after_if_1
@@ -491,14 +495,16 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 < 10
 				                 if ! goto printHex4_else_1
 				             printHex4_then_1:  // printHex4_if_1
-				                 v0_3 := p0_1
-				                 v0_3 += 48
+				                 v0_1 := p0_1
+				                 v0_1 += 48
+				                 v0_3 := v0_1
 				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:  // printHex4_if_1
-				                 v0_3 := p0_1
-				                 v0_3 -= 10
-				                 v0_3 += 65
+				                 v0_2 := p0_1
+				                 v0_2 -= 10
+				                 v0_2 += 65
+				                 v0_3 := v0_2
 				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 print(v0_3)
 				             printHex4_exit:  // printHex4_after_if_1

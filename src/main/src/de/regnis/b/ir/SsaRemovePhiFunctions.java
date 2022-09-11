@@ -58,47 +58,9 @@ public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
 	// Utils ==================================================================
 
 	private void applyPhiFunctionToPrevBlock(StatementsBlock prevBlock, String prevVar, String newVar) {
-		final List<? extends SimpleStatement> prevBlockStatements = prevBlock.getStatements();
-		if (containsVarDeclarationFor(prevVar, prevBlockStatements)) {
-			final List<SimpleStatement> statements = new ArrayList<>();
-			for (SimpleStatement prevBlockStatement : prevBlockStatements) {
-				statements.add(prevBlockStatement.visit(new SimpleStatementVisitor<>() {
-					@Override
-					public SimpleStatement visitAssignment(Assignment node) {
-						return prevVar.equals(node.name())
-								? new Assignment(node.operation(), newVar, node.expression())
-								: node;
-					}
-
-					@Override
-					public SimpleStatement visitLocalVarDeclaration(VarDeclaration node) {
-						return prevVar.equals(node.name())
-								? new VarDeclaration(newVar, node.expression())
-								: node;
-					}
-
-					@Override
-					public SimpleStatement visitCall(CallStatement node) {
-						return node;
-					}
-				}));
-			}
-			prevBlock.set(statements);
-		}
-		else {
-			final List<SimpleStatement> statements = new ArrayList<>(prevBlockStatements);
-			statements.add(new VarDeclaration(newVar, new VarRead(prevVar)));
-			prevBlock.set(statements);
-		}
+		final List<SimpleStatement> statements = new ArrayList<>(prevBlock.getStatements());
+		statements.add(new VarDeclaration(newVar, new VarRead(prevVar)));
+		prevBlock.set(statements);
 	}
 
-	private boolean containsVarDeclarationFor(String var, List<? extends SimpleStatement> statements) {
-		for (SimpleStatement statement : statements) {
-			if (statement instanceof VarDeclaration declaration
-					&& declaration.name().equals(var)) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

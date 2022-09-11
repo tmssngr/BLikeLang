@@ -123,35 +123,35 @@ public class CompilerTest {
 				         push r9
 				         ld r0, #%40
 				         ld r1, #%00
-				         ld r4, r0
-				         ld r5, r1
-				         ld r0, #%00
-				         ld r1, #%40
 				         ld r6, r0
 				         ld r7, r1
+				         ld r0, #%00
+				         ld r1, #%40
+				         ld r4, r0
+				         ld r5, r1
 				     main_while_1:
-				         ld r0, r6
-				         ld r1, r7
+				         ld r0, r4
+				         ld r1, r5
 				         cp r0, #%00
 				         .jp gt, main_do_1
 				         .jp nz, main_exit
 				         cp r1, #%00
 				         .jp ule, main_exit
 				     main_do_1:
-				         ld r0, r4
-				         ld r1, r5
+				         ld r0, r6
+				         ld r1, r7
 				         lde r1, @rr0
 				         ld r0, #%00
 				         ld r8, r0
 				         ld r9, r1
 				         com r9
-				         ld r0, r4
-				         ld r1, r5
+				         ld r0, r6
+				         ld r1, r7
 				         ld r2, r8
 				         ld r3, r9
 				         lde @rr0, r3
-				         incw r4
-				         decw r6
+				         incw r6
+				         decw r4
 				         .jp main_while_1
 				     main_exit:
 				         pop r9
@@ -510,18 +510,14 @@ public class CompilerTest {
 				         push r7
 				         push r8
 				         push r9
-				         push r10
-				         push r11
-				         push r12
-				         push r13
 				         ld r0, #%00
 				         ld r1, #%00
 				         ld r6, r0
 				         ld r7, r1
 				         ld r0, #%00
 				         ld r1, #%00
-				         ld r10, r0
-				         ld r11, r1
+				         ld r4, r0
+				         ld r5, r1
 				     main_do_1:
 				         ld r0, #%00
 				         ld r1, #%57
@@ -549,19 +545,19 @@ public class CompilerTest {
 				         pop %FD
 				         ld r0, %12
 				         ld r1, %13
-				         ld r12, r0
-				         ld r13, r1
+				         ld r8, r0
+				         ld r9, r1
 				         cp r0, #%00
 				         .jp lt, main_exit
 				         incw r6
-				         ld r0, r10
-				         ld r1, r11
-				         ld r2, r12
-				         ld r3, r13
+				         ld r0, r4
+				         ld r1, r5
+				         ld r2, r8
+				         ld r3, r9
 				         add r1, r3
 				         adc r0, r2
-				         ld r10, r0
-				         ld r11, r1
+				         ld r4, r0
+				         ld r5, r1
 				         ld r0, #%00
 				         ld r1, #%53
 				         ld %15, r1
@@ -628,10 +624,10 @@ public class CompilerTest {
 				         call %0818
 				         ld r0, r4
 				         ld r1, r5
-				         ld r12, r0
-				         ld r13, r1
-				         ld r2, r8
-				         ld r3, r9
+				         ld r8, r0
+				         ld r9, r1
+				         ld r2, r6
+				         ld r3, r7
 				         ld %12, r0
 				         ld %13, r1
 				         ld %14, r2
@@ -642,8 +638,8 @@ public class CompilerTest {
 				         pop %FD
 				         ld r0, %12
 				         ld r1, %13
-				         ld r12, r0
-				         ld r13, r1
+				         ld r8, r0
+				         ld r9, r1
 				         ld %12, r0
 				         ld %13, r1
 				         push %FD
@@ -656,10 +652,6 @@ public class CompilerTest {
 				         call %0818
 				         .jp main_do_1
 				     main_exit:
-				         pop r13
-				         pop r12
-				         pop r11
-				         pop r10
 				         pop r9
 				         pop r8
 				         pop r7
