@@ -273,6 +273,35 @@ public final class DetermineTypesTransformationTest {
 	}
 
 	@Test
+	public void testConstants() {
+		assertSuccessfullyTransformed("""
+				                              void printChar(int p0) {
+				                              }
+				                              void main() {
+				                                printChar(13)
+				                              }
+				                              """,
+		                              Messages.warningUnusedParameter(2, 19, "c") + "\n",
+		                              """
+				                              const CR = 0x0D
+				                              void printChar(int c) {
+				                              }
+				                              void main() {
+				                                printChar(CR)
+				                              }""");
+		assertTransformationFailedException(Messages.errorUndeclaredVariable(1, 11, "CR"),
+		                                    "",
+		                                    """
+		    				                              const NL = CR + 1
+		    				                              const CR = 0x0D
+		    				                              void printChar(int c) {
+		    				                              }
+		    				                              void main() {
+		    				                                printChar(CR)
+		    				                              }""");
+	}
+
+	@Test
 	public void testValidDuplicateDeclarations() {
 		assertSuccessfullyTransformed("""
 				                              int twice(int p0, int p1) {
@@ -425,7 +454,9 @@ public final class DetermineTypesTransformationTest {
 	private void assertSuccessfullyTransformed(String expectedCode, String expectedWarnings, String code) {
 		final DeclarationList root = AstFactory.parseString(code);
 		final StringOutput out = new StringStringOutput();
+
 		final DeclarationList newRoot = DetermineTypesTransformation.transform(root, out);
+
 		assertEquals(expectedCode, CodePrinter.print(newRoot));
 		assertEquals(expectedWarnings, out.toString());
 	}

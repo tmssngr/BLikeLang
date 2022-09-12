@@ -22,18 +22,19 @@ public class BLikeLangParser extends Parser {
 		BitOr=17, BitXor=18, Assign=19, AndAssign=20, OrAssign=21, XorAssign=22, 
 		PlusAssign=23, MinusAssign=24, MultiplyAssign=25, DivideAssign=26, ModuloAssign=27, 
 		ShiftLAssign=28, ShiftRAssign=29, ParenOpen=30, ParenClose=31, CurlyOpen=32, 
-		CurlyClose=33, Break=34, Else=35, If=36, Return=37, Var=38, While=39, 
-		CharLiteral=40, BooleanLiteral=41, Number=42, Identifier=43, Whitespace=44, 
-		NL=45, LineComment=46, BlockComment=47;
+		CurlyClose=33, Break=34, Const=35, Else=36, If=37, Return=38, Var=39, 
+		While=40, CharLiteral=41, BooleanLiteral=42, Number=43, Identifier=44, 
+		Whitespace=45, NL=46, LineComment=47, BlockComment=48;
 	public static final int
 		RULE_root = 0, RULE_declarations = 1, RULE_declaration = 2, RULE_functionDeclaration = 3, 
-		RULE_parameterDeclarations = 4, RULE_parameterDeclaration = 5, RULE_statement = 6, 
-		RULE_varDeclaration = 7, RULE_subexpr = 8, RULE_expression = 9, RULE_functionCallParameters = 10;
+		RULE_parameterDeclarations = 4, RULE_parameterDeclaration = 5, RULE_constantDefinition = 6, 
+		RULE_statement = 7, RULE_varDeclaration = 8, RULE_subexpr = 9, RULE_expression = 10, 
+		RULE_functionCallParameters = 11;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"root", "declarations", "declaration", "functionDeclaration", "parameterDeclarations", 
-			"parameterDeclaration", "statement", "varDeclaration", "subexpr", "expression", 
-			"functionCallParameters"
+			"parameterDeclaration", "constantDefinition", "statement", "varDeclaration", 
+			"subexpr", "expression", "functionCallParameters"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -43,8 +44,8 @@ public class BLikeLangParser extends Parser {
 			null, "','", "';'", "'+'", "'-'", "'*'", "'/'", "'%'", "'<<'", "'>>'", 
 			"'<'", "'<='", "'=='", "'>='", "'>'", "'!='", "'&'", "'|'", "'^'", "'='", 
 			"'&='", "'|='", "'^='", "'+='", "'-='", "'*='", "'/='", "'%='", "'<<='", 
-			"'>>='", "'('", "')'", "'{'", "'}'", "'break'", "'else'", "'if'", "'return'", 
-			"'var'", "'while'"
+			"'>>='", "'('", "')'", "'{'", "'}'", "'break'", "'const'", "'else'", 
+			"'if'", "'return'", "'var'", "'while'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -55,8 +56,9 @@ public class BLikeLangParser extends Parser {
 			"BitXor", "Assign", "AndAssign", "OrAssign", "XorAssign", "PlusAssign", 
 			"MinusAssign", "MultiplyAssign", "DivideAssign", "ModuloAssign", "ShiftLAssign", 
 			"ShiftRAssign", "ParenOpen", "ParenClose", "CurlyOpen", "CurlyClose", 
-			"Break", "Else", "If", "Return", "Var", "While", "CharLiteral", "BooleanLiteral", 
-			"Number", "Identifier", "Whitespace", "NL", "LineComment", "BlockComment"
+			"Break", "Const", "Else", "If", "Return", "Var", "While", "CharLiteral", 
+			"BooleanLiteral", "Number", "Identifier", "Whitespace", "NL", "LineComment", 
+			"BlockComment"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -139,7 +141,7 @@ public class BLikeLangParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(22);
+			setState(24);
 			declarations();
 			}
 		}
@@ -187,17 +189,17 @@ public class BLikeLangParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(27);
+			setState(29);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==Identifier) {
+			while (_la==Const || _la==Identifier) {
 				{
 				{
-				setState(24);
+				setState(26);
 				declaration();
 				}
 				}
-				setState(29);
+				setState(31);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -217,6 +219,9 @@ public class BLikeLangParser extends Parser {
 	public static class DeclarationContext extends ParserRuleContext {
 		public FunctionDeclarationContext functionDeclaration() {
 			return getRuleContext(FunctionDeclarationContext.class,0);
+		}
+		public ConstantDefinitionContext constantDefinition() {
+			return getRuleContext(ConstantDefinitionContext.class,0);
 		}
 		public DeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -241,10 +246,25 @@ public class BLikeLangParser extends Parser {
 		DeclarationContext _localctx = new DeclarationContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_declaration);
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(30);
-			functionDeclaration();
+			setState(34);
+			_errHandler.sync(this);
+			switch (_input.LA(1)) {
+			case Identifier:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(32);
+				functionDeclaration();
+				}
+				break;
+			case Const:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(33);
+				constantDefinition();
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
 			}
 		}
 		catch (RecognitionException re) {
@@ -300,24 +320,24 @@ public class BLikeLangParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(32);
-			((FunctionDeclarationContext)_localctx).type = match(Identifier);
-			setState(33);
-			((FunctionDeclarationContext)_localctx).name = match(Identifier);
-			setState(34);
-			match(ParenOpen);
-			setState(35);
-			parameterDeclarations();
 			setState(36);
-			match(ParenClose);
+			((FunctionDeclarationContext)_localctx).type = match(Identifier);
 			setState(37);
-			statement();
+			((FunctionDeclarationContext)_localctx).name = match(Identifier);
+			setState(38);
+			match(ParenOpen);
 			setState(39);
+			parameterDeclarations();
+			setState(40);
+			match(ParenClose);
+			setState(41);
+			statement();
+			setState(43);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==Semicolon) {
 				{
-				setState(38);
+				setState(42);
 				match(Semicolon);
 				}
 			}
@@ -370,18 +390,18 @@ public class BLikeLangParser extends Parser {
 		enterRule(_localctx, 8, RULE_parameterDeclarations);
 		int _la;
 		try {
-			setState(51);
+			setState(55);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(42);
+				setState(46);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==Identifier) {
 					{
-					setState(41);
+					setState(45);
 					parameterDeclaration();
 					}
 				}
@@ -391,21 +411,21 @@ public class BLikeLangParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(44);
+				setState(48);
 				parameterDeclaration();
-				setState(47); 
+				setState(51); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				do {
 					{
 					{
-					setState(45);
+					setState(49);
 					match(Comma);
-					setState(46);
+					setState(50);
 					parameterDeclaration();
 					}
 					}
-					setState(49); 
+					setState(53); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				} while ( _la==Comma );
@@ -456,10 +476,76 @@ public class BLikeLangParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(53);
+			setState(57);
 			((ParameterDeclarationContext)_localctx).type = match(Identifier);
-			setState(54);
+			setState(58);
 			((ParameterDeclarationContext)_localctx).name = match(Identifier);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class ConstantDefinitionContext extends ParserRuleContext {
+		public Token name;
+		public TerminalNode Const() { return getToken(BLikeLangParser.Const, 0); }
+		public TerminalNode Assign() { return getToken(BLikeLangParser.Assign, 0); }
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public TerminalNode Identifier() { return getToken(BLikeLangParser.Identifier, 0); }
+		public TerminalNode Semicolon() { return getToken(BLikeLangParser.Semicolon, 0); }
+		public ConstantDefinitionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_constantDefinition; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterConstantDefinition(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitConstantDefinition(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitConstantDefinition(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final ConstantDefinitionContext constantDefinition() throws RecognitionException {
+		ConstantDefinitionContext _localctx = new ConstantDefinitionContext(_ctx, getState());
+		enterRule(_localctx, 12, RULE_constantDefinition);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(60);
+			match(Const);
+			setState(61);
+			((ConstantDefinitionContext)_localctx).name = match(Identifier);
+			setState(62);
+			match(Assign);
+			setState(63);
+			expression(0);
+			setState(65);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			if (_la==Semicolon) {
+				{
+				setState(64);
+				match(Semicolon);
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -692,17 +778,17 @@ public class BLikeLangParser extends Parser {
 
 	public final StatementContext statement() throws RecognitionException {
 		StatementContext _localctx = new StatementContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_statement);
+		enterRule(_localctx, 14, RULE_statement);
 		int _la;
 		try {
-			setState(90);
+			setState(101);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 			case 1:
 				_localctx = new LocalVarDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(56);
+				setState(67);
 				varDeclaration();
 				}
 				break;
@@ -710,9 +796,9 @@ public class BLikeLangParser extends Parser {
 				_localctx = new AssignStatementContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(57);
+				setState(68);
 				((AssignStatementContext)_localctx).var = match(Identifier);
-				setState(58);
+				setState(69);
 				((AssignStatementContext)_localctx).operator = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Assign) | (1L << AndAssign) | (1L << OrAssign) | (1L << XorAssign) | (1L << PlusAssign) | (1L << MinusAssign) | (1L << MultiplyAssign) | (1L << DivideAssign) | (1L << ModuloAssign) | (1L << ShiftLAssign) | (1L << ShiftRAssign))) != 0)) ) {
@@ -723,7 +809,7 @@ public class BLikeLangParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				setState(59);
+				setState(70);
 				expression(0);
 				}
 				break;
@@ -731,13 +817,13 @@ public class BLikeLangParser extends Parser {
 				_localctx = new CallStatementContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(60);
+				setState(71);
 				((CallStatementContext)_localctx).func = match(Identifier);
-				setState(61);
+				setState(72);
 				match(ParenOpen);
-				setState(62);
+				setState(73);
 				functionCallParameters();
-				setState(63);
+				setState(74);
 				match(ParenClose);
 				}
 				break;
@@ -745,23 +831,23 @@ public class BLikeLangParser extends Parser {
 				_localctx = new BlockStatementContext(_localctx);
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(65);
+				setState(76);
 				match(CurlyOpen);
-				setState(69);
+				setState(80);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Semicolon) | (1L << CurlyOpen) | (1L << Break) | (1L << If) | (1L << Return) | (1L << Var) | (1L << While) | (1L << Identifier))) != 0)) {
 					{
 					{
-					setState(66);
+					setState(77);
 					statement();
 					}
 					}
-					setState(71);
+					setState(82);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(72);
+				setState(83);
 				match(CurlyClose);
 				}
 				break;
@@ -769,14 +855,14 @@ public class BLikeLangParser extends Parser {
 				_localctx = new ReturnStatementContext(_localctx);
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(73);
+				setState(84);
 				match(Return);
-				setState(75);
+				setState(86);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
 				case 1:
 					{
-					setState(74);
+					setState(85);
 					expression(0);
 					}
 					break;
@@ -787,20 +873,20 @@ public class BLikeLangParser extends Parser {
 				_localctx = new IfStatementContext(_localctx);
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(77);
+				setState(88);
 				match(If);
-				setState(78);
+				setState(89);
 				expression(0);
-				setState(79);
+				setState(90);
 				((IfStatementContext)_localctx).trueStatement = statement();
-				setState(82);
+				setState(93);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
 				case 1:
 					{
-					setState(80);
+					setState(91);
 					match(Else);
-					setState(81);
+					setState(92);
 					((IfStatementContext)_localctx).falseStatement = statement();
 					}
 					break;
@@ -811,11 +897,11 @@ public class BLikeLangParser extends Parser {
 				_localctx = new WhileStatementContext(_localctx);
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(84);
+				setState(95);
 				match(While);
-				setState(85);
+				setState(96);
 				expression(0);
-				setState(86);
+				setState(97);
 				statement();
 				}
 				break;
@@ -823,7 +909,7 @@ public class BLikeLangParser extends Parser {
 				_localctx = new BreakStatementContext(_localctx);
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(88);
+				setState(99);
 				match(Break);
 				}
 				break;
@@ -831,7 +917,7 @@ public class BLikeLangParser extends Parser {
 				_localctx = new EmptyStatementContext(_localctx);
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(89);
+				setState(100);
 				match(Semicolon);
 				}
 				break;
@@ -911,22 +997,22 @@ public class BLikeLangParser extends Parser {
 
 	public final VarDeclarationContext varDeclaration() throws RecognitionException {
 		VarDeclarationContext _localctx = new VarDeclarationContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_varDeclaration);
+		enterRule(_localctx, 16, RULE_varDeclaration);
 		try {
-			setState(100);
+			setState(111);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Var:
 				_localctx = new InferVarDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(92);
+				setState(103);
 				match(Var);
-				setState(93);
+				setState(104);
 				((InferVarDeclarationContext)_localctx).var = match(Identifier);
-				setState(94);
+				setState(105);
 				match(Assign);
-				setState(95);
+				setState(106);
 				expression(0);
 				}
 				break;
@@ -934,13 +1020,13 @@ public class BLikeLangParser extends Parser {
 				_localctx = new TypeVarDeclarationContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(96);
+				setState(107);
 				((TypeVarDeclarationContext)_localctx).type = match(Identifier);
-				setState(97);
+				setState(108);
 				((TypeVarDeclarationContext)_localctx).var = match(Identifier);
-				setState(98);
+				setState(109);
 				match(Assign);
-				setState(99);
+				setState(110);
 				expression(0);
 				}
 				break;
@@ -1085,16 +1171,16 @@ public class BLikeLangParser extends Parser {
 
 	public final SubexprContext subexpr() throws RecognitionException {
 		SubexprContext _localctx = new SubexprContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_subexpr);
+		enterRule(_localctx, 18, RULE_subexpr);
 		try {
-			setState(115);
+			setState(126);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,12,_ctx) ) {
 			case 1:
 				_localctx = new NumberLiteralContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(102);
+				setState(113);
 				match(Number);
 				}
 				break;
@@ -1102,7 +1188,7 @@ public class BLikeLangParser extends Parser {
 				_localctx = new CharLiteralContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(103);
+				setState(114);
 				match(CharLiteral);
 				}
 				break;
@@ -1110,7 +1196,7 @@ public class BLikeLangParser extends Parser {
 				_localctx = new BooleanLiteralContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(104);
+				setState(115);
 				match(BooleanLiteral);
 				}
 				break;
@@ -1118,7 +1204,7 @@ public class BLikeLangParser extends Parser {
 				_localctx = new ReadVariableContext(_localctx);
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(105);
+				setState(116);
 				match(Identifier);
 				}
 				break;
@@ -1126,13 +1212,13 @@ public class BLikeLangParser extends Parser {
 				_localctx = new FunctionCallContext(_localctx);
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(106);
+				setState(117);
 				((FunctionCallContext)_localctx).func = match(Identifier);
-				setState(107);
+				setState(118);
 				match(ParenOpen);
-				setState(108);
+				setState(119);
 				functionCallParameters();
-				setState(109);
+				setState(120);
 				match(ParenClose);
 				}
 				break;
@@ -1140,11 +1226,11 @@ public class BLikeLangParser extends Parser {
 				_localctx = new ExpressionInParenthesisContext(_localctx);
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(111);
+				setState(122);
 				match(ParenOpen);
-				setState(112);
+				setState(123);
 				expression(0);
-				setState(113);
+				setState(124);
 				match(ParenClose);
 				}
 				break;
@@ -1317,8 +1403,8 @@ public class BLikeLangParser extends Parser {
 		int _parentState = getState();
 		ExpressionContext _localctx = new ExpressionContext(_ctx, _parentState);
 		ExpressionContext _prevctx = _localctx;
-		int _startState = 18;
-		enterRecursionRule(_localctx, 18, RULE_expression, _p);
+		int _startState = 20;
+		enterRecursionRule(_localctx, 20, RULE_expression, _p);
 		int _la;
 		try {
 			int _alt;
@@ -1329,29 +1415,29 @@ public class BLikeLangParser extends Parser {
 			_ctx = _localctx;
 			_prevctx = _localctx;
 
-			setState(118);
+			setState(129);
 			subexpr();
 			}
 			_ctx.stop = _input.LT(-1);
-			setState(134);
+			setState(145);
 			_errHandler.sync(this);
-			_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
+			_alt = getInterpreter().adaptivePredict(_input,14,_ctx);
 			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
 					{
-					setState(132);
+					setState(143);
 					_errHandler.sync(this);
-					switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
+					switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
 					case 1:
 						{
 						_localctx = new BinaryExpressionBitsContext(new ExpressionContext(_parentctx, _parentState));
 						((BinaryExpressionBitsContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
-						setState(120);
+						setState(131);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
-						setState(121);
+						setState(132);
 						((BinaryExpressionBitsContext)_localctx).operator = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BitAnd) | (1L << BitOr) | (1L << BitXor))) != 0)) ) {
@@ -1362,7 +1448,7 @@ public class BLikeLangParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(122);
+						setState(133);
 						((BinaryExpressionBitsContext)_localctx).right = expression(5);
 						}
 						break;
@@ -1371,9 +1457,9 @@ public class BLikeLangParser extends Parser {
 						_localctx = new BinaryExpressionPointContext(new ExpressionContext(_parentctx, _parentState));
 						((BinaryExpressionPointContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
-						setState(123);
+						setState(134);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
-						setState(124);
+						setState(135);
 						((BinaryExpressionPointContext)_localctx).operator = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Multiply) | (1L << Divide) | (1L << Modulo) | (1L << ShiftL) | (1L << ShiftR))) != 0)) ) {
@@ -1384,7 +1470,7 @@ public class BLikeLangParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(125);
+						setState(136);
 						((BinaryExpressionPointContext)_localctx).right = expression(4);
 						}
 						break;
@@ -1393,9 +1479,9 @@ public class BLikeLangParser extends Parser {
 						_localctx = new BinaryExpressionDashContext(new ExpressionContext(_parentctx, _parentState));
 						((BinaryExpressionDashContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
-						setState(126);
+						setState(137);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-						setState(127);
+						setState(138);
 						((BinaryExpressionDashContext)_localctx).operator = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==Plus || _la==Minus) ) {
@@ -1406,7 +1492,7 @@ public class BLikeLangParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(128);
+						setState(139);
 						((BinaryExpressionDashContext)_localctx).right = expression(3);
 						}
 						break;
@@ -1415,9 +1501,9 @@ public class BLikeLangParser extends Parser {
 						_localctx = new BinaryExpressionBoolContext(new ExpressionContext(_parentctx, _parentState));
 						((BinaryExpressionBoolContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
-						setState(129);
+						setState(140);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
-						setState(130);
+						setState(141);
 						((BinaryExpressionBoolContext)_localctx).operator = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Lt) | (1L << Le) | (1L << Eq) | (1L << Ge) | (1L << Gt) | (1L << Ne))) != 0)) ) {
@@ -1428,16 +1514,16 @@ public class BLikeLangParser extends Parser {
 							_errHandler.reportMatch(this);
 							consume();
 						}
-						setState(131);
+						setState(142);
 						((BinaryExpressionBoolContext)_localctx).right = expression(2);
 						}
 						break;
 					}
 					} 
 				}
-				setState(136);
+				setState(147);
 				_errHandler.sync(this);
-				_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
+				_alt = getInterpreter().adaptivePredict(_input,14,_ctx);
 			}
 			}
 		}
@@ -1484,21 +1570,21 @@ public class BLikeLangParser extends Parser {
 
 	public final FunctionCallParametersContext functionCallParameters() throws RecognitionException {
 		FunctionCallParametersContext _localctx = new FunctionCallParametersContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_functionCallParameters);
+		enterRule(_localctx, 22, RULE_functionCallParameters);
 		int _la;
 		try {
-			setState(147);
+			setState(158);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,15,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,17,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(138);
+				setState(149);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << ParenOpen) | (1L << CharLiteral) | (1L << BooleanLiteral) | (1L << Number) | (1L << Identifier))) != 0)) {
 					{
-					setState(137);
+					setState(148);
 					expression(0);
 					}
 				}
@@ -1508,21 +1594,21 @@ public class BLikeLangParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(140);
+				setState(151);
 				expression(0);
-				setState(143); 
+				setState(154); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				do {
 					{
 					{
-					setState(141);
+					setState(152);
 					match(Comma);
-					setState(142);
+					setState(153);
 					expression(0);
 					}
 					}
-					setState(145); 
+					setState(156); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				} while ( _la==Comma );
@@ -1543,7 +1629,7 @@ public class BLikeLangParser extends Parser {
 
 	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
-		case 9:
+		case 10:
 			return expression_sempred((ExpressionContext)_localctx, predIndex);
 		}
 		return true;
@@ -1563,50 +1649,54 @@ public class BLikeLangParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\61\u0098\4\2\t\2"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\62\u00a3\4\2\t\2"+
 		"\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13"+
-		"\t\13\4\f\t\f\3\2\3\2\3\3\7\3\34\n\3\f\3\16\3\37\13\3\3\4\3\4\3\5\3\5"+
-		"\3\5\3\5\3\5\3\5\3\5\5\5*\n\5\3\6\5\6-\n\6\3\6\3\6\3\6\6\6\62\n\6\r\6"+
-		"\16\6\63\5\6\66\n\6\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3"+
-		"\b\3\b\7\bF\n\b\f\b\16\bI\13\b\3\b\3\b\3\b\5\bN\n\b\3\b\3\b\3\b\3\b\3"+
-		"\b\5\bU\n\b\3\b\3\b\3\b\3\b\3\b\3\b\5\b]\n\b\3\t\3\t\3\t\3\t\3\t\3\t\3"+
-		"\t\3\t\5\tg\n\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\5"+
-		"\nv\n\n\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3"+
-		"\13\3\13\3\13\7\13\u0087\n\13\f\13\16\13\u008a\13\13\3\f\5\f\u008d\n\f"+
-		"\3\f\3\f\3\f\6\f\u0092\n\f\r\f\16\f\u0093\5\f\u0096\n\f\3\f\2\3\24\r\2"+
-		"\4\6\b\n\f\16\20\22\24\26\2\7\3\2\25\37\3\2\22\24\3\2\7\13\3\2\5\6\3\2"+
-		"\f\21\2\u00a9\2\30\3\2\2\2\4\35\3\2\2\2\6 \3\2\2\2\b\"\3\2\2\2\n\65\3"+
-		"\2\2\2\f\67\3\2\2\2\16\\\3\2\2\2\20f\3\2\2\2\22u\3\2\2\2\24w\3\2\2\2\26"+
-		"\u0095\3\2\2\2\30\31\5\4\3\2\31\3\3\2\2\2\32\34\5\6\4\2\33\32\3\2\2\2"+
-		"\34\37\3\2\2\2\35\33\3\2\2\2\35\36\3\2\2\2\36\5\3\2\2\2\37\35\3\2\2\2"+
-		" !\5\b\5\2!\7\3\2\2\2\"#\7-\2\2#$\7-\2\2$%\7 \2\2%&\5\n\6\2&\'\7!\2\2"+
-		"\')\5\16\b\2(*\7\4\2\2)(\3\2\2\2)*\3\2\2\2*\t\3\2\2\2+-\5\f\7\2,+\3\2"+
-		"\2\2,-\3\2\2\2-\66\3\2\2\2.\61\5\f\7\2/\60\7\3\2\2\60\62\5\f\7\2\61/\3"+
-		"\2\2\2\62\63\3\2\2\2\63\61\3\2\2\2\63\64\3\2\2\2\64\66\3\2\2\2\65,\3\2"+
-		"\2\2\65.\3\2\2\2\66\13\3\2\2\2\678\7-\2\289\7-\2\29\r\3\2\2\2:]\5\20\t"+
-		"\2;<\7-\2\2<=\t\2\2\2=]\5\24\13\2>?\7-\2\2?@\7 \2\2@A\5\26\f\2AB\7!\2"+
-		"\2B]\3\2\2\2CG\7\"\2\2DF\5\16\b\2ED\3\2\2\2FI\3\2\2\2GE\3\2\2\2GH\3\2"+
-		"\2\2HJ\3\2\2\2IG\3\2\2\2J]\7#\2\2KM\7\'\2\2LN\5\24\13\2ML\3\2\2\2MN\3"+
-		"\2\2\2N]\3\2\2\2OP\7&\2\2PQ\5\24\13\2QT\5\16\b\2RS\7%\2\2SU\5\16\b\2T"+
-		"R\3\2\2\2TU\3\2\2\2U]\3\2\2\2VW\7)\2\2WX\5\24\13\2XY\5\16\b\2Y]\3\2\2"+
-		"\2Z]\7$\2\2[]\7\4\2\2\\:\3\2\2\2\\;\3\2\2\2\\>\3\2\2\2\\C\3\2\2\2\\K\3"+
-		"\2\2\2\\O\3\2\2\2\\V\3\2\2\2\\Z\3\2\2\2\\[\3\2\2\2]\17\3\2\2\2^_\7(\2"+
-		"\2_`\7-\2\2`a\7\25\2\2ag\5\24\13\2bc\7-\2\2cd\7-\2\2de\7\25\2\2eg\5\24"+
-		"\13\2f^\3\2\2\2fb\3\2\2\2g\21\3\2\2\2hv\7,\2\2iv\7*\2\2jv\7+\2\2kv\7-"+
-		"\2\2lm\7-\2\2mn\7 \2\2no\5\26\f\2op\7!\2\2pv\3\2\2\2qr\7 \2\2rs\5\24\13"+
-		"\2st\7!\2\2tv\3\2\2\2uh\3\2\2\2ui\3\2\2\2uj\3\2\2\2uk\3\2\2\2ul\3\2\2"+
-		"\2uq\3\2\2\2v\23\3\2\2\2wx\b\13\1\2xy\5\22\n\2y\u0088\3\2\2\2z{\f\6\2"+
-		"\2{|\t\3\2\2|\u0087\5\24\13\7}~\f\5\2\2~\177\t\4\2\2\177\u0087\5\24\13"+
-		"\6\u0080\u0081\f\4\2\2\u0081\u0082\t\5\2\2\u0082\u0087\5\24\13\5\u0083"+
-		"\u0084\f\3\2\2\u0084\u0085\t\6\2\2\u0085\u0087\5\24\13\4\u0086z\3\2\2"+
-		"\2\u0086}\3\2\2\2\u0086\u0080\3\2\2\2\u0086\u0083\3\2\2\2\u0087\u008a"+
-		"\3\2\2\2\u0088\u0086\3\2\2\2\u0088\u0089\3\2\2\2\u0089\25\3\2\2\2\u008a"+
-		"\u0088\3\2\2\2\u008b\u008d\5\24\13\2\u008c\u008b\3\2\2\2\u008c\u008d\3"+
-		"\2\2\2\u008d\u0096\3\2\2\2\u008e\u0091\5\24\13\2\u008f\u0090\7\3\2\2\u0090"+
-		"\u0092\5\24\13\2\u0091\u008f\3\2\2\2\u0092\u0093\3\2\2\2\u0093\u0091\3"+
-		"\2\2\2\u0093\u0094\3\2\2\2\u0094\u0096\3\2\2\2\u0095\u008c\3\2\2\2\u0095"+
-		"\u008e\3\2\2\2\u0096\27\3\2\2\2\22\35),\63\65GMT\\fu\u0086\u0088\u008c"+
-		"\u0093\u0095";
+		"\t\13\4\f\t\f\4\r\t\r\3\2\3\2\3\3\7\3\36\n\3\f\3\16\3!\13\3\3\4\3\4\5"+
+		"\4%\n\4\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5.\n\5\3\6\5\6\61\n\6\3\6\3\6\3"+
+		"\6\6\6\66\n\6\r\6\16\6\67\5\6:\n\6\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\b\5\b"+
+		"D\n\b\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\7\tQ\n\t\f\t\16\tT\13"+
+		"\t\3\t\3\t\3\t\5\tY\n\t\3\t\3\t\3\t\3\t\3\t\5\t`\n\t\3\t\3\t\3\t\3\t\3"+
+		"\t\3\t\5\th\n\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\5\nr\n\n\3\13\3\13\3\13"+
+		"\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\13\5\13\u0081\n\13\3\f"+
+		"\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\7\f\u0092\n\f"+
+		"\f\f\16\f\u0095\13\f\3\r\5\r\u0098\n\r\3\r\3\r\3\r\6\r\u009d\n\r\r\r\16"+
+		"\r\u009e\5\r\u00a1\n\r\3\r\2\3\26\16\2\4\6\b\n\f\16\20\22\24\26\30\2\7"+
+		"\3\2\25\37\3\2\22\24\3\2\7\13\3\2\5\6\3\2\f\21\2\u00b5\2\32\3\2\2\2\4"+
+		"\37\3\2\2\2\6$\3\2\2\2\b&\3\2\2\2\n9\3\2\2\2\f;\3\2\2\2\16>\3\2\2\2\20"+
+		"g\3\2\2\2\22q\3\2\2\2\24\u0080\3\2\2\2\26\u0082\3\2\2\2\30\u00a0\3\2\2"+
+		"\2\32\33\5\4\3\2\33\3\3\2\2\2\34\36\5\6\4\2\35\34\3\2\2\2\36!\3\2\2\2"+
+		"\37\35\3\2\2\2\37 \3\2\2\2 \5\3\2\2\2!\37\3\2\2\2\"%\5\b\5\2#%\5\16\b"+
+		"\2$\"\3\2\2\2$#\3\2\2\2%\7\3\2\2\2&\'\7.\2\2\'(\7.\2\2()\7 \2\2)*\5\n"+
+		"\6\2*+\7!\2\2+-\5\20\t\2,.\7\4\2\2-,\3\2\2\2-.\3\2\2\2.\t\3\2\2\2/\61"+
+		"\5\f\7\2\60/\3\2\2\2\60\61\3\2\2\2\61:\3\2\2\2\62\65\5\f\7\2\63\64\7\3"+
+		"\2\2\64\66\5\f\7\2\65\63\3\2\2\2\66\67\3\2\2\2\67\65\3\2\2\2\678\3\2\2"+
+		"\28:\3\2\2\29\60\3\2\2\29\62\3\2\2\2:\13\3\2\2\2;<\7.\2\2<=\7.\2\2=\r"+
+		"\3\2\2\2>?\7%\2\2?@\7.\2\2@A\7\25\2\2AC\5\26\f\2BD\7\4\2\2CB\3\2\2\2C"+
+		"D\3\2\2\2D\17\3\2\2\2Eh\5\22\n\2FG\7.\2\2GH\t\2\2\2Hh\5\26\f\2IJ\7.\2"+
+		"\2JK\7 \2\2KL\5\30\r\2LM\7!\2\2Mh\3\2\2\2NR\7\"\2\2OQ\5\20\t\2PO\3\2\2"+
+		"\2QT\3\2\2\2RP\3\2\2\2RS\3\2\2\2SU\3\2\2\2TR\3\2\2\2Uh\7#\2\2VX\7(\2\2"+
+		"WY\5\26\f\2XW\3\2\2\2XY\3\2\2\2Yh\3\2\2\2Z[\7\'\2\2[\\\5\26\f\2\\_\5\20"+
+		"\t\2]^\7&\2\2^`\5\20\t\2_]\3\2\2\2_`\3\2\2\2`h\3\2\2\2ab\7*\2\2bc\5\26"+
+		"\f\2cd\5\20\t\2dh\3\2\2\2eh\7$\2\2fh\7\4\2\2gE\3\2\2\2gF\3\2\2\2gI\3\2"+
+		"\2\2gN\3\2\2\2gV\3\2\2\2gZ\3\2\2\2ga\3\2\2\2ge\3\2\2\2gf\3\2\2\2h\21\3"+
+		"\2\2\2ij\7)\2\2jk\7.\2\2kl\7\25\2\2lr\5\26\f\2mn\7.\2\2no\7.\2\2op\7\25"+
+		"\2\2pr\5\26\f\2qi\3\2\2\2qm\3\2\2\2r\23\3\2\2\2s\u0081\7-\2\2t\u0081\7"+
+		"+\2\2u\u0081\7,\2\2v\u0081\7.\2\2wx\7.\2\2xy\7 \2\2yz\5\30\r\2z{\7!\2"+
+		"\2{\u0081\3\2\2\2|}\7 \2\2}~\5\26\f\2~\177\7!\2\2\177\u0081\3\2\2\2\u0080"+
+		"s\3\2\2\2\u0080t\3\2\2\2\u0080u\3\2\2\2\u0080v\3\2\2\2\u0080w\3\2\2\2"+
+		"\u0080|\3\2\2\2\u0081\25\3\2\2\2\u0082\u0083\b\f\1\2\u0083\u0084\5\24"+
+		"\13\2\u0084\u0093\3\2\2\2\u0085\u0086\f\6\2\2\u0086\u0087\t\3\2\2\u0087"+
+		"\u0092\5\26\f\7\u0088\u0089\f\5\2\2\u0089\u008a\t\4\2\2\u008a\u0092\5"+
+		"\26\f\6\u008b\u008c\f\4\2\2\u008c\u008d\t\5\2\2\u008d\u0092\5\26\f\5\u008e"+
+		"\u008f\f\3\2\2\u008f\u0090\t\6\2\2\u0090\u0092\5\26\f\4\u0091\u0085\3"+
+		"\2\2\2\u0091\u0088\3\2\2\2\u0091\u008b\3\2\2\2\u0091\u008e\3\2\2\2\u0092"+
+		"\u0095\3\2\2\2\u0093\u0091\3\2\2\2\u0093\u0094\3\2\2\2\u0094\27\3\2\2"+
+		"\2\u0095\u0093\3\2\2\2\u0096\u0098\5\26\f\2\u0097\u0096\3\2\2\2\u0097"+
+		"\u0098\3\2\2\2\u0098\u00a1\3\2\2\2\u0099\u009c\5\26\f\2\u009a\u009b\7"+
+		"\3\2\2\u009b\u009d\5\26\f\2\u009c\u009a\3\2\2\2\u009d\u009e\3\2\2\2\u009e"+
+		"\u009c\3\2\2\2\u009e\u009f\3\2\2\2\u009f\u00a1\3\2\2\2\u00a0\u0097\3\2"+
+		"\2\2\u00a0\u0099\3\2\2\2\u00a1\31\3\2\2\2\24\37$-\60\679CRX_gq\u0080\u0091"+
+		"\u0093\u0097\u009e\u00a0";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

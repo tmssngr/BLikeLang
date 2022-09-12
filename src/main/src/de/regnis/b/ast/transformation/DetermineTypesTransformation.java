@@ -9,10 +9,7 @@ import de.regnis.utils.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Thomas Singer
@@ -28,17 +25,20 @@ public final class DetermineTypesTransformation {
 
 	@NotNull
 	public static DeclarationList transform(@NotNull DeclarationList root, @NotNull BuiltInFunctions builtInFunctions, @NotNull StringOutput warningOutput) {
-		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(builtInFunctions, warningOutput);
+		final Map<String, NumberLiteral> constants = DetermineConstantValues.determineConstants(root);
+
+		final DetermineTypesTransformation transformation = new DetermineTypesTransformation(builtInFunctions, constants, warningOutput);
 		transformation.determineFunctions(root);
 		transformation.reportIllegalBreakStatement(root);
 
-		return transformation.visitDeclarationList(root);
+		return transformation.transform(root);
 	}
 
 	// Fields =================================================================
 
 	private final Map<String, FunctionSignature> functions = new LinkedHashMap<>();
 	private final BuiltInFunctions builtInFunctions;
+	private final Map<String, NumberLiteral> constants;
 	private final StringOutput warningOutput;
 
 	private SymbolScope symbolMap = SymbolScope.createRootInstance();
@@ -48,8 +48,9 @@ public final class DetermineTypesTransformation {
 
 	// Setup ==================================================================
 
-	private DetermineTypesTransformation(@NotNull BuiltInFunctions builtInFunctions, @NotNull StringOutput warningOutput) {
+	private DetermineTypesTransformation(@NotNull BuiltInFunctions builtInFunctions, @NotNull Map<String, NumberLiteral> constants, @NotNull StringOutput warningOutput) {
 		this.builtInFunctions = builtInFunctions;
+		this.constants        = constants;
 		this.warningOutput    = warningOutput;
 	}
 
@@ -58,6 +59,11 @@ public final class DetermineTypesTransformation {
 	private void determineFunctions(DeclarationList root) {
 		for (Declaration declaration : root.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitConst(ConstDeclaration node) {
+					return node;
+				}
+
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
 					final int parameterCount = node.parameters().getParameters().size();
@@ -73,8 +79,20 @@ public final class DetermineTypesTransformation {
 		}
 	}
 
-	private DeclarationList visitDeclarationList(DeclarationList root) {
-		final DeclarationList newRoot = root.transform(declaration -> declaration.visit(this::visitFunctionDeclaration));
+	private DeclarationList transform(DeclarationList root) {
+		final DeclarationVisitor<Declaration> visitor = new DeclarationVisitor<>() {
+			@Nullable
+			@Override
+			public Declaration visitConst(ConstDeclaration node) {
+				return null;
+			}
+
+			@Override
+			public Declaration visitFunctionDeclaration(FuncDeclaration node) {
+				return DetermineTypesTransformation.this.visitFunctionDeclaration(node);
+			}
+		};
+		final DeclarationList newRoot = root.transform(declaration -> declaration.visit(visitor));
 
 		symbolMap.reportUnusedVariables(warningOutput);
 
@@ -400,7 +418,12 @@ public final class DetermineTypesTransformation {
 		return new WhileStatement(newExpression, visitStatementList(node.statements()));
 	}
 
-	private VarRead visitVarRead(VarRead node) {
+	private SimpleExpression visitVarRead(VarRead node) {
+		final NumberLiteral constantLiteral = constants.get(node.name());
+		if (constantLiteral != null) {
+			return constantLiteral;
+		}
+
 		final SymbolScope.Variable typeName = symbolMap.variableRead(node.name(), node.position());
 		return new VarRead(typeName.newName);
 	}

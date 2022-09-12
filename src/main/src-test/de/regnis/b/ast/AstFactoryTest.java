@@ -107,6 +107,26 @@ public class AstFactoryTest {
 						                                         var e = d ^ 1;
 						                                         """));
 		assertEquals("""
+				             +- const COLUMNS
+				             |  +- literal 40
+				             +- const ROWS
+				             |  +- literal 24
+				             +- const CHARS_PER_SCREEN
+				             |  +- operator *
+				             |     +- read var COLUMNS
+				             |     +- read var ROWS
+				             +- void main()
+				                +- statementList
+				                   +- call printInt
+				                      +- read var CHARS_PER_SCREEN
+				             """, TreePrinter.print(AstFactory.parseString("""
+						                                                           const COLUMNS = 40
+						                                                           const ROWS = 24
+						                                                           const CHARS_PER_SCREEN = COLUMNS * ROWS
+						                                                           void main() {
+						                                                             printInt(CHARS_PER_SCREEN)
+						                                                           }""")));
+		assertEquals("""
 				             +- void wom(int x)
 				             |  +- statementList
 				             |     +- b :=

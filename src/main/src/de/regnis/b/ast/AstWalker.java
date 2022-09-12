@@ -10,6 +10,12 @@ public abstract class AstWalker implements DeclarationVisitor<Object>, Statement
 	// Implemented ============================================================
 
 	@Override
+	public Object visitConst(ConstDeclaration node) {
+		visitExpression(node.expression());
+		return node;
+	}
+
+	@Override
 	public Object visitFunctionDeclaration(FuncDeclaration node) {
 		visitStatementList(node.statementList());
 		return node;

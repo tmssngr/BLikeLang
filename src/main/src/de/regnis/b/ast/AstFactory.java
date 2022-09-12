@@ -98,6 +98,15 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 		return new FuncDeclarationParameter(name, positionFromToken(ctx.name));
 	}
 
+	@Nullable
+	@Override
+	public Object visitConstantDefinition(BLikeLangParser.ConstantDefinitionContext ctx) {
+		final String name = ctx.name.getText();
+		final Expression expression = (Expression) visit(ctx.expression());
+		declarationList.add(new ConstDeclaration(name, expression, positionFromToken(ctx.name)));
+		return null;
+	}
+
 	@Override
 	public CallStatement visitCallStatement(BLikeLangParser.CallStatementContext ctx) {
 		final FuncCallParameters parameters = visitFunctionCallParameters(ctx.functionCallParameters());

@@ -4,12 +4,15 @@ root: declarations;
 
 declarations: declaration* ;
 declaration: functionDeclaration
+           | constantDefinition
            ;
 
 functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement Semicolon?;
 parameterDeclarations: parameterDeclaration?
                      | parameterDeclaration (Comma parameterDeclaration)+;
 parameterDeclaration: type=Identifier name=Identifier;
+
+constantDefinition: Const name=Identifier Assign expression Semicolon?;
 
 statement: varDeclaration                                                   #localVarDeclaration
          | var=Identifier operator=(Assign|AndAssign|OrAssign|XorAssign|PlusAssign|MinusAssign|MultiplyAssign|DivideAssign|ModuloAssign|ShiftLAssign|ShiftRAssign) expression  #assignStatement
@@ -85,6 +88,7 @@ CurlyOpen : '{';
 CurlyClose: '}';
 
 Break : 'break';
+Const : 'const';
 Else  : 'else';
 If    : 'if';
 Return: 'return';

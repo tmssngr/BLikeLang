@@ -131,6 +131,14 @@ public class TreePrinter {
 	private List<String> getStrings(Declaration declaration) {
 		return declaration.visit(new DeclarationVisitor<>() {
 			@Override
+			public List<String> visitConst(ConstDeclaration node) {
+				final List<String> strings = new ArrayList<>();
+				strings.add("const " + node.name());
+				append(getStrings(node.expression()), false, strings);
+				return strings;
+			}
+
+			@Override
 			public List<String> visitFunctionDeclaration(FuncDeclaration node) {
 				final StringBuilder buffer = new StringBuilder();
 				buffer.append(node.type());

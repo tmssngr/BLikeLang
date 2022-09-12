@@ -33,6 +33,11 @@ public final class Messages {
 	}
 
 	@NotNull
+	public static String errorFunctionCallsInConstantsNotAllowed(int line, int column) {
+		return line + ":" + column + ": function calls are not allowed in constant definitions";
+	}
+
+	@NotNull
 	public static String errorFunctionDoesNotReturnAValue(int line, int column, String name) {
 		return line + ":" + column + ": the call to function " + name + " does not return any value";
 	}

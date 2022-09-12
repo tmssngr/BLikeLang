@@ -60,6 +60,12 @@ public final class DeclarationList {
 			final FuncDeclaration found = declaration.visit(new DeclarationVisitor<>() {
 				@Nullable
 				@Override
+				public FuncDeclaration visitConst(ConstDeclaration node) {
+					return null;
+				}
+
+				@Nullable
+				@Override
 				public FuncDeclaration visitFunctionDeclaration(FuncDeclaration node) {
 					if (node.name().equals(name)) {
 						return node;

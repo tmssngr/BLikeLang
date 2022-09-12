@@ -1,5 +1,4 @@
 todo:
-- global constants
 - string constants
 - global variables
 - check if global var initialized from non-pure function
@@ -15,6 +14,7 @@ nice-to-have:
 - import
 
 done:
+- global constants
 - output ASM
 - support for stack and register variables
 - optimize:

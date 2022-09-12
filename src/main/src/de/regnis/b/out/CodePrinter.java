@@ -25,6 +25,16 @@ public class CodePrinter {
 	public void print(DeclarationList listNode, StringOutput output) {
 		for (Declaration declaration : listNode.getDeclarations()) {
 			declaration.visit(new DeclarationVisitor<>() {
+				@Override
+				public Object visitConst(ConstDeclaration node) {
+					output.print("const ");
+					output.print(node.name());
+					output.print(" = ");
+					print(node.expression(), output);
+					output.println();
+					return node;
+				}
+
 				@Nullable
 				@Override
 				public Object visitFunctionDeclaration(FuncDeclaration node) {
