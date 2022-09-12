@@ -215,32 +215,24 @@ public class BLikeLangParser extends Parser {
 	}
 
 	public static class DeclarationContext extends ParserRuleContext {
+		public FunctionDeclarationContext functionDeclaration() {
+			return getRuleContext(FunctionDeclarationContext.class,0);
+		}
 		public DeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaration; }
-	 
-		public DeclarationContext() { }
-		public void copyFrom(DeclarationContext ctx) {
-			super.copyFrom(ctx);
-		}
-	}
-	public static class FuncDeclarationContext extends DeclarationContext {
-		public FunctionDeclarationContext functionDeclaration() {
-			return getRuleContext(FunctionDeclarationContext.class,0);
-		}
-		public FuncDeclarationContext(DeclarationContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterFuncDeclaration(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).enterDeclaration(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitFuncDeclaration(this);
+			if ( listener instanceof BLikeLangListener ) ((BLikeLangListener)listener).exitDeclaration(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitFuncDeclaration(this);
+			if ( visitor instanceof BLikeLangVisitor ) return ((BLikeLangVisitor<? extends T>)visitor).visitDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -249,7 +241,6 @@ public class BLikeLangParser extends Parser {
 		DeclarationContext _localctx = new DeclarationContext(_ctx, getState());
 		enterRule(_localctx, 4, RULE_declaration);
 		try {
-			_localctx = new FuncDeclarationContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(30);

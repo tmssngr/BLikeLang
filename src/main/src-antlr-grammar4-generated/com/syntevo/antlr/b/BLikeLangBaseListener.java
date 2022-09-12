@@ -40,13 +40,13 @@ public class BLikeLangBaseListener implements BLikeLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) { }
+	@Override public void enterDeclaration(BLikeLangParser.DeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) { }
+	@Override public void exitDeclaration(BLikeLangParser.DeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

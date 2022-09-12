@@ -60,11 +60,6 @@ public final class AstFactory extends BLikeLangBaseVisitor<Object> {
 		return DeclarationList.of(declarationList);
 	}
 
-	@Override
-	public Object visitFuncDeclaration(BLikeLangParser.FuncDeclarationContext ctx) {
-		return visitFunctionDeclaration(ctx.functionDeclaration());
-	}
-
 	@Nullable
 	@Override
 	public Object visitFunctionDeclaration(BLikeLangParser.FunctionDeclarationContext ctx) {

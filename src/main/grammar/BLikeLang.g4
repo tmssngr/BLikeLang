@@ -3,7 +3,7 @@ grammar BLikeLang;
 root: declarations;
 
 declarations: declaration* ;
-declaration: functionDeclaration #funcDeclaration
+declaration: functionDeclaration
            ;
 
 functionDeclaration: type=Identifier name=Identifier ParenOpen parameterDeclarations ParenClose statement Semicolon?;
