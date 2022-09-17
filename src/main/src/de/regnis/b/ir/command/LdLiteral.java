@@ -11,7 +11,7 @@ public record LdLiteral(int register, int literal) implements Command {
 
 	@Override
 	public String toString() {
-		if (register == CommandFactory.SRP) {
+		if (register == CommandFactory.RP) {
 			return "srp #%" + Utils.toHex2(literal);
 		}
 		return "ld " + Command.register(register) + ", #%" + Utils.toHex2(literal);

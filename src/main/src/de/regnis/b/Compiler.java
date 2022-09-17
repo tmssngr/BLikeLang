@@ -120,10 +120,10 @@ public final class Compiler {
 				Utils.assertTrue(parameters.size() == 0);
 				Utils.assertTrue(assignReturnToVar != null);
 
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.SRP));
-				factory.addCommand(new LdLiteral(CommandFactory.SRP, 0x10));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.RP));
+				factory.addCommand(new LdLiteral(CommandFactory.RP, 0x10));
 				factory.addCommand(new CallCommand("%02E4"));
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.SRP));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.RP));
 				factory.addCommand(new TempLd(CommandFactory.workingRegister(0), 0x12));
 				factory.saveToVar(assignReturnToVar, 0);
 			}
@@ -136,10 +136,10 @@ public final class Compiler {
 
 				factory.loadToRegister(parameters.get(0), 0);
 				factory.addCommand(new TempLd(0x12, CommandFactory.workingRegister(0)));
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.SRP));
-				factory.addCommand(new LdLiteral(CommandFactory.SRP, 0x10));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.RP));
+				factory.addCommand(new LdLiteral(CommandFactory.RP, 0x10));
 				factory.addCommand(new CallCommand("%06e5"));
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.SRP));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.RP));
 			}
 		});
 	}

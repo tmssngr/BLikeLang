@@ -23,7 +23,7 @@ public final class CommandFactory {
 
 	// Constants ==============================================================
 
-	public static final int SRP = 0xFD;
+	public static final int RP = 0xFD;
 
 	static final int SP_H = 0xFE;
 	static final int VAR_ACCESS_REGISTER_H = 14;
@@ -488,10 +488,10 @@ public final class CommandFactory {
 			             loadB(var);
 			             addCommand(new TempLd(0x12, workingRegister(REG_A)));
 			             addCommand(new TempLd(0x14, workingRegister(REG_B)));
-			             addCommand(new RegisterCommand(RegisterCommand.Op.push, SRP));
-			             addCommand(new LdLiteral(SRP, 0x10));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.push, RP));
+			             addCommand(new LdLiteral(RP, 0x10));
 			             addCommand(new CallCommand("%00E0"));
-			             addCommand(new RegisterCommand(RegisterCommand.Op.pop, SRP));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.pop, RP));
 			             addCommand(new TempLd(workingRegister(REG_A), 0x12));
 			             storeA(node.name());
 		             });
