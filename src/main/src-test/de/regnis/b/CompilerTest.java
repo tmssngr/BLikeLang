@@ -578,7 +578,7 @@ public class CompilerTest {
 				         ld %13, r1
 				         push %FD
 				         srp #%10
-				         call %06e5
+				         call %0EE0
 				         pop %FD
 				         ld r0, #%00
 				         ld r1, #%0D
@@ -634,7 +634,7 @@ public class CompilerTest {
 				         ld %13, r1
 				         push %FD
 				         srp #%10
-				         call %06e5
+				         call %0EE0
 				         pop %FD
 				         ld r0, #%00
 				         ld r1, #%0D

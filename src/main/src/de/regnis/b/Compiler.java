@@ -91,6 +91,22 @@ public final class Compiler {
 				factory.addCommand(new CallCommand("%0818"));
 			}
 		});
+		builtInFunctions.add(BasicTypes.VOID, "printInt", 1, new BuiltInFunctions.FunctionCommandFactory() {
+			@Override
+			public void handleCall(@NotNull List<Expression> parameters, @Nullable String assignReturnToVar, @NotNull BuiltInFunctions.CommandFactory factory) {
+				Utils.assertTrue(parameters.size() == 1);
+				Utils.assertTrue(assignReturnToVar == null);
+
+				factory.loadToRegister(parameters.get(0), 0);
+				factory.addCommand(new TempLd(0x12, CommandFactory.workingRegister(0)));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.RP));
+				factory.addCommand(new LdLiteral(CommandFactory.RP, 0x10));
+				// %06e5 (in UB8830) with leading ' ' and '0'
+				// %0ee0 (in ES4.0) without leading ' ' and '0'
+				factory.addCommand(new CallCommand("%0EE0"));
+				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.RP));
+			}
+		});
 		builtInFunctions.add(BasicTypes.INT16, "getMem", 1, new BuiltInFunctions.FunctionCommandFactory() {
 			@Override
 			public void handleCall(@NotNull List<Expression> parameters, @Nullable String assignReturnToVar, @NotNull BuiltInFunctions.CommandFactory factory) {
@@ -126,20 +142,6 @@ public final class Compiler {
 				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.RP));
 				factory.addCommand(new TempLd(CommandFactory.workingRegister(0), 0x12));
 				factory.saveToVar(assignReturnToVar, 0);
-			}
-		});
-		builtInFunctions.add(BasicTypes.VOID, "printInt", 1, new BuiltInFunctions.FunctionCommandFactory() {
-			@Override
-			public void handleCall(@NotNull List<Expression> parameters, @Nullable String assignReturnToVar, @NotNull BuiltInFunctions.CommandFactory factory) {
-				Utils.assertTrue(parameters.size() == 1);
-				Utils.assertTrue(assignReturnToVar == null);
-
-				factory.loadToRegister(parameters.get(0), 0);
-				factory.addCommand(new TempLd(0x12, CommandFactory.workingRegister(0)));
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.push, CommandFactory.RP));
-				factory.addCommand(new LdLiteral(CommandFactory.RP, 0x10));
-				factory.addCommand(new CallCommand("%06e5"));
-				factory.addCommand(new RegisterCommand(RegisterCommand.Op.pop, CommandFactory.RP));
 			}
 		});
 	}
