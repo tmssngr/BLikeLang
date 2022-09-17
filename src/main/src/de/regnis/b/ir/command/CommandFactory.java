@@ -170,7 +170,9 @@ public final class CommandFactory {
 					case bitXor -> handleAssignment(ArithmeticOp.xor, node);
 					case shiftL -> handleShift(node, true);
 					case shiftR -> handleShift(node, false);
-					case divide -> handleDivide(node);
+					case multiply -> handlePointArithmetic(node, "%00BA");
+					case divide -> handlePointArithmetic(node, "%00E0");
+					case modulo -> handlePointArithmetic(node, "%011F");
 					default -> throw new UnsupportedOperationException(node.operation().toString());
 				}
 				return node;
@@ -478,10 +480,18 @@ public final class CommandFactory {
 		             });
 	}
 
-	private void handleDivide(Assignment node) {
+	private void handlePointArithmetic(Assignment node, String ub8830Address) {
 		literalOrVar(node.expression(),
 		             literal -> {
-			             throw new UnsupportedOperationException();
+			             loadA(node.name());
+			             addCommand(new TempLd(0x12, workingRegister(REG_A)));
+			             addCommand(new TempLdLiteral(0x14, literal));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.push, RP));
+			             addCommand(new LdLiteral(RP, 0x10));
+			             addCommand(new CallCommand(ub8830Address));
+			             addCommand(new RegisterCommand(RegisterCommand.Op.pop, RP));
+			             addCommand(new TempLd(workingRegister(REG_A), 0x12));
+			             storeA(node.name());
 		             },
 		             var -> {
 			             loadA(node.name());
@@ -490,7 +500,7 @@ public final class CommandFactory {
 			             addCommand(new TempLd(0x14, workingRegister(REG_B)));
 			             addCommand(new RegisterCommand(RegisterCommand.Op.push, RP));
 			             addCommand(new LdLiteral(RP, 0x10));
-			             addCommand(new CallCommand("%00E0"));
+			             addCommand(new CallCommand(ub8830Address));
 			             addCommand(new RegisterCommand(RegisterCommand.Op.pop, RP));
 			             addCommand(new TempLd(workingRegister(REG_A), 0x12));
 			             storeA(node.name());
