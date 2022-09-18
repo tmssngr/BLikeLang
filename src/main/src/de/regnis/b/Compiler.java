@@ -29,18 +29,20 @@ import static de.regnis.utils.Utils.notNull;
 /**
  * @author Thomas Singer
  */
-@SuppressWarnings("UseOfSystemOutOrSystemErr")
+@SuppressWarnings({"UseOfSystemOutOrSystemErr", "StaticVariableMayNotBeInitialized"})
 public final class Compiler {
 
 	// Static =================================================================
 
-	public static boolean DEBUG;
+	private static boolean debug;
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 1) {
 			System.out.println("Missing input file");
 			return;
 		}
+
+		debug = true;
 
 		final Path inputFile = Paths.get(args[0]);
 		final String input = Files.readString(inputFile);
@@ -184,37 +186,42 @@ public final class Compiler {
 
 		CfgSimplifyExpressions.transform(cfg);
 		CfgParameterToSimpleExpression.transform(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("before ssa");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
+
+			final ControlFlowGraphVarUsageDetector detector = ControlFlowGraphVarUsageDetector.detectVarUsages(cfg);
+			detector.createPrinter(StringOutput.out)
+					.setPrintPrevBlocks()
+					.print();
 		}
 
 		StaticSingleAssignmentFactory.transform(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("ssa");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
 
 		simplify(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("ssa optimized");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
 
 		SplitExpressionsTransformation.transform(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("ssa split expressions");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
 
 		SsaToModifyAssignments.transform(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("ssa modify");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
 
 		SsaRemovePhiFunctions.transform(cfg);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("removed phi functions");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 
@@ -227,7 +234,7 @@ public final class Compiler {
 		final RegisterAllocation.Result registers = RegisterAllocation.run(cfg);
 
 		CfgReuseVarsTransformation.transform(cfg, registers);
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("reuse vars");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
@@ -244,7 +251,7 @@ public final class Compiler {
 			commandFactory.add(block);
 		}
 
-		if (DEBUG) {
+		if (debug) {
 			System.out.println("command line");
 			commandList.print(StringOutput.out);
 		}
