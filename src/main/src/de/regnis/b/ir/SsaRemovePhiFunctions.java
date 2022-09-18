@@ -58,9 +58,12 @@ public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
 	// Utils ==================================================================
 
 	private void applyPhiFunctionToPrevBlock(StatementsBlock prevBlock, String prevVar, String newVar) {
+		if (prevVar.equals(newVar)) {
+			return;
+		}
+
 		final List<SimpleStatement> statements = new ArrayList<>(prevBlock.getStatements());
 		statements.add(new VarDeclaration(newVar, new VarRead(prevVar)));
 		prevBlock.set(statements);
 	}
-
 }
