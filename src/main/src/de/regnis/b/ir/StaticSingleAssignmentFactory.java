@@ -70,10 +70,7 @@ public final class StaticSingleAssignmentFactory {
 				final Set<String> incomingVars = usages.getVarsBefore(block);
 				if (prevBlocks.size() > 1) {
 					if (!(block instanceof ExitBlock)) {
-						for (String incomingVar : incomingVars) {
-							final String ssaName = info.getAssignmentName(incomingVar);
-							info.phiFunctions.add(new PhiFunction(incomingVar, ssaName));
-						}
+						info.initializePhiDeclarations(incomingVars);
 					}
 				}
 				else {
@@ -249,6 +246,13 @@ public final class StaticSingleAssignmentFactory {
 
 		public void initializeFrom(@NotNull BlockInfo prevInfo) {
 			varToCurrent.putAll(prevInfo.varToCurrent);
+		}
+
+		private void initializePhiDeclarations(@NotNull Set<String> incomingVars) {
+			for (String incomingVar : incomingVars) {
+				final String ssaName = getAssignmentName(incomingVar);
+				phiFunctions.add(new PhiFunction(incomingVar, ssaName));
+			}
 		}
 
 		@NotNull
