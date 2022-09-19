@@ -119,14 +119,19 @@ public final class StaticSingleAssignmentFactory {
 			final List<SimpleStatement> statements = new ArrayList<>();
 
 			for (PhiFunction phiFunction : info.phiFunctions) {
+				final List<Expression> phiParameters = new ArrayList<>();
+				final Set<String> ssaNames = new HashSet<>();
 				for (AbstractBlock prevBlock : prevBlocks) {
 					final BlockInfo prevInfo = blockToInfo.get(prevBlock);
 					final String ssaName = prevInfo.getUsageName(phiFunction.originalName);
-					phiFunction.ssaSources.add(ssaName);
+					ssaNames.add(ssaName);
+					phiParameters.add(new VarRead(ssaName));
 				}
 
-				final List<Expression> parameters = Utils.convert(phiFunction.ssaSources, new ArrayList<>(), VarRead::new);
-				statements.add(new VarDeclaration(phiFunction.ssaName, new FuncCall(PHI, FuncCallParameters.of(parameters))));
+				final Expression expression = ssaNames.size() > 1
+						? new FuncCall(PHI, FuncCallParameters.of(phiParameters))
+						: phiParameters.get(0);
+				statements.add(new VarDeclaration(phiFunction.ssaName, expression));
 			}
 
 			statements.addAll(statementsBlock.getStatements());
@@ -291,7 +296,6 @@ public final class StaticSingleAssignmentFactory {
 	private static final class PhiFunction {
 		public final String originalName;
 		public final String ssaName;
-		private final Set<String> ssaSources = new LinkedHashSet<>();
 
 		private PhiFunction(String originalName, String ssaName) {
 			this.originalName = originalName;
@@ -300,12 +304,7 @@ public final class StaticSingleAssignmentFactory {
 
 		@Override
 		public String toString() {
-			final StringBuilder buffer = new StringBuilder();
-			buffer.append(ssaName);
-			buffer.append(" = phi(");
-			Utils.appendCommaSeparated(ssaSources, buffer);
-			buffer.append(")");
-			return buffer.toString();
+			return ssaName + " = phi()";
 		}
 	}
 }
