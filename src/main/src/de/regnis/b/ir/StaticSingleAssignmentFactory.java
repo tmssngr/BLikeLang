@@ -58,7 +58,7 @@ public final class StaticSingleAssignmentFactory {
 
 		final Map<String, Integer> varToVariant = new HashMap<>();
 
-		graph.iterate(block -> {
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
 			final BlockInfo info = new BlockInfo(varToVariant);
 			blockToInfo.put(block, info);
 
@@ -104,18 +104,18 @@ public final class StaticSingleAssignmentFactory {
 				public void visitExit(ExitBlock block) {
 				}
 			});
-		});
+		}
 
-		graph.iterate(block -> {
+		for (AbstractBlock block : graph.getLinearizedBlocks()) {
 			final BlockInfo info = blockToInfo.get(block);
 
 			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
 			if (prevBlocks.size() < 2) {
-				return;
+				continue;
 			}
 
 			if (info.phiFunctions.isEmpty()) {
-				return;
+				continue;
 			}
 
 			final StatementsBlock statementsBlock = (StatementsBlock) block;
@@ -134,7 +134,7 @@ public final class StaticSingleAssignmentFactory {
 
 			statements.addAll(statementsBlock.getStatements());
 			statementsBlock.set(statements);
-		});
+		}
 	}
 
 	private void removeObsoletePhiFunctions() {

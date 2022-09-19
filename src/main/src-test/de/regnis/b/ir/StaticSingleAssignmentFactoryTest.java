@@ -126,24 +126,24 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        if p0_1 % 2 == 1
 				                                        if ! goto test_else_2
 				                                    test_then_2:  // test_if_2
-				                                        v0_2 := v0_0 + 1
+				                                        v0_1 := v0_0 + 1
 				                                        goto test_after_if_2
 
 				                                    test_else_2:  // test_if_2
 				                                    test_after_if_2:  // test_then_2, test_else_2
-				                                        v0_3 := phi (v0_2, v0_0)
+				                                        v0_2 := phi (v0_1, v0_0)
 				                                        goto test_after_if_1
 
 				                                    test_else_1:  // test_if_1
 				                                    test_after_if_1:  // test_after_if_2, test_else_1
-				                                        p0_2 := phi (p0_1, p0_0)
-				                                        v0_1 := phi (v0_3, v0_0)
-				                                        p0_3 := p0_2 + 2
-				                                        result := v0_1
+				                                        p0_3 := phi (p0_1, p0_0)
+				                                        v0_3 := phi (v0_2, v0_0)
+				                                        p0_4 := p0_3 + 2
+				                                        result := v0_3
 				                                    test_exit:  // test_after_if_1
 				                                        return
 				                                    """);
-		removeUnusedVars("p0_3 p0_2", graph);
+		removeUnusedVars("p0_4 p0_3", graph);
 
 		assertEquals("""
 				             test_start:
@@ -157,18 +157,18 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 % 2 == 1
 				                 if ! goto test_else_2
 				             test_then_2:  // test_if_2
-				                 v0_2 := v0_0 + 1
+				                 v0_1 := v0_0 + 1
 				                 goto test_after_if_2
 
 				             test_else_2:  // test_if_2
 				             test_after_if_2:  // test_then_2, test_else_2
-				                 v0_3 := phi (v0_2, v0_0)
+				                 v0_2 := phi (v0_1, v0_0)
 				                 goto test_after_if_1
 
 				             test_else_1:  // test_if_1
 				             test_after_if_1:  // test_after_if_2, test_else_1
-				                 v0_1 := phi (v0_3, v0_0)
-				                 result := v0_1
+				                 v0_3 := phi (v0_2, v0_0)
+				                 result := v0_3
 				             test_exit:  // test_after_if_1
 				                 return
 				             """, toString(graph));
@@ -187,20 +187,20 @@ public class StaticSingleAssignmentFactoryTest {
 				                 if p0_1 % 2 == 1
 				                 if ! goto test_else_2
 				             test_then_2:  // test_if_2
-				                 v0_2 := v0_0 + 1
-				                 v0_3 := v0_2
+				                 v0_1 := v0_0 + 1
+				                 v0_2 := v0_1
 				                 goto test_after_if_2
 
 				             test_else_2:  // test_if_2
-				                 v0_3 := v0_0
+				                 v0_2 := v0_0
 				             test_after_if_2:  // test_then_2, test_else_2
-				                 v0_1 := v0_3
+				                 v0_3 := v0_2
 				                 goto test_after_if_1
 
 				             test_else_1:  // test_if_1
-				                 v0_1 := v0_0
+				                 v0_3 := v0_0
 				             test_after_if_1:  // test_after_if_2, test_else_1
-				                 result := v0_1
+				                 result := v0_3
 				             test_exit:  // test_after_if_1
 				                 return
 				             """, toString(graph));
