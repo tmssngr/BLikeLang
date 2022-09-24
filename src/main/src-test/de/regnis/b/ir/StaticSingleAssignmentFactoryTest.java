@@ -98,7 +98,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    test_then_1:  // test_if_1
 				                                        p0 = 0 - p0
 				                                    test_if_2:  // test_then_1
-				                                        if p0 % 2 == 1
+				                                        if (p0 % 2) == 1
 				                                        if ! goto test_else_2
 				                                    test_then_2:  // test_if_2
 				                                        v0 = v0 + 1
@@ -124,7 +124,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    test_then_1:  // test_if_1
 				                                        p0_1 := 0 - p0_0
 				                                    test_if_2:  // test_then_1
-				                                        if p0_1 % 2 == 1
+				                                        if (p0_1 % 2) == 1
 				                                        if ! goto test_else_2
 				                                    test_then_2:  // test_if_2
 				                                        v0_1 := v0_0 + 1
@@ -157,7 +157,7 @@ public class StaticSingleAssignmentFactoryTest {
 				             test_then_1:  // test_if_1
 				                 p0_1 := 0 - p0_0
 				             test_if_2:  // test_then_1
-				                 if p0_1 % 2 == 1
+				                 if (p0_1 % 2) == 1
 				                 if ! goto test_else_2
 				             test_then_2:  // test_if_2
 				                 v0_1 := v0_0 + 1
@@ -187,7 +187,7 @@ public class StaticSingleAssignmentFactoryTest {
 				             test_then_1:  // test_if_1
 				                 p0_1 := 0 - p0_0
 				             test_if_2:  // test_then_1
-				                 if p0_1 % 2 == 1
+				                 if (p0_1 % 2) == 1
 				                 if ! goto test_else_2
 				             test_then_2:  // test_if_2
 				                 v0_1 := v0_0 + 1
@@ -422,7 +422,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        goto printHex4_after_if_1
 
 				                                    printHex4_else_1:  // printHex4_if_1
-				                                        v0 = p0 - 10 + 65
+				                                        v0 = (p0 - 10) + 65
 				                                    printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                                        print(v0)
 				                                    printHex4_exit:  // printHex4_after_if_1
@@ -440,7 +440,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                        goto printHex4_after_if_1
 
 				                                    printHex4_else_1:  // printHex4_if_1
-				                                        v0_2 := p0_1 - 10 + 65
+				                                        v0_2 := (p0_1 - 10) + 65
 				                                    printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                                        v0_3 := phi (v0_1, v0_2)
 				                                        print(v0_3)
@@ -461,7 +461,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:  // printHex4_if_1
-				                 v0_2 := p0_1 - 10 + 65
+				                 v0_2 := (p0_1 - 10) + 65
 				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 v0_3 := phi (v0_1, v0_2)
 				                 print(v0_3)
@@ -483,7 +483,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:  // printHex4_if_1
-				                 v0_2 := p0_1 - 10 + 65
+				                 v0_2 := (p0_1 - 10) + 65
 				                 v0_3 := v0_2
 				             printHex4_after_if_1:  // printHex4_then_1, printHex4_else_1
 				                 print(v0_3)

@@ -31,7 +31,7 @@ public class CfgSimplifyExpressionsTest {
 		     "printHex4",
 		     """
 				     printHex4_start:
-				         v0 := 65 + p0 - 10
+				         v0 := (65 + p0) - 10
 				         print(v0)
 				     printHex4_exit:
 				         return

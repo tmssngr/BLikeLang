@@ -1,6 +1,7 @@
 package de.regnis.b.out;
 
 import de.regnis.b.ast.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -32,12 +33,23 @@ public class CodePrinter {
 		expression.visit(new ExpressionVisitor<>() {
 			@Override
 			public Object visitBinary(BinaryExpression node) {
-				print(node.left(), output);
+				printBraced(node.left(), output);
 				output.print(" ");
 				output.print(node.operator().text);
 				output.print(" ");
-				print(node.right(), output);
+				printBraced(node.right(), output);
 				return node;
+			}
+
+			private void printBraced(@NotNull Expression expression, StringOutput output) {
+				if (expression instanceof BinaryExpression) {
+					output.print("(");
+					print(expression, output);
+					output.print(")");
+				}
+				else {
+					print(expression, output);
+				}
 			}
 
 			@Override

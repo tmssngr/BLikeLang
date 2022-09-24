@@ -28,14 +28,14 @@ public class CfgParameterToSimpleExpressionTest {
 		     "main",
 		     """
 				     main_start:
-				         v0 := 1 + 2 + 3
+				         v0 := (1 + 2) + 3
 				         print(v0)
 				     main_exit:
 				         return
 				     """,
 		     """
 				     main_start:
-				         v0 := 1 + 2 + 3
+				         v0 := (1 + 2) + 3
 				         print(v0)
 				     main_exit:
 				         return
@@ -59,7 +59,7 @@ public class CfgParameterToSimpleExpressionTest {
 		     "print2",
 		     """
 				     print2_start:
-				         print(p0 + p1 + get10())
+				         print((p0 + p1) + get10())
 				     print2_exit:
 				         return
 				     """,

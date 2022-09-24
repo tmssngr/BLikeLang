@@ -70,7 +70,7 @@ public class ControlFlowGraphTest {
 				                 goto printHex4_after_if_1
 
 				             printHex4_else_1:
-				                 v0 = p0 - 10 + 65
+				                 v0 = (p0 - 10) + 65
 				             printHex4_after_if_1:
 				                 print(v0)
 				             printHex4_exit:

@@ -222,7 +222,7 @@ public class RegisterAllocationTest {
 				             int calc(int p0, int p1) {
 				               v0 := p0 * p0
 				               v1 := p1 * p1
-				               return v0 + v1 + p0 - p1
+				               return ((v0 + v1) + p0) - p1
 				             }
 				             void main() {
 				               v0 := calc(1, 2)

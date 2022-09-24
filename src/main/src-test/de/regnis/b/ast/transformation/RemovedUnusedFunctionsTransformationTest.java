@@ -64,7 +64,7 @@ public final class RemovedUnusedFunctionsTransformationTest {
 				                                }
 				                                else
 				                                {
-				                                  chr = i - 10 + 65
+				                                  chr = (i - 10) + 65
 				                                }
 				                                print(chr)
 				                              }
