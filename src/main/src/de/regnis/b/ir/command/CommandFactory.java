@@ -26,7 +26,7 @@ public final class CommandFactory {
 	public static final int RP = 0xFD;
 
 	static final int SP_H = 0xFE;
-	static final int VAR_ACCESS_REGISTER_H = 14;
+	static final int VAR_ACCESS_REGISTER = 14;
 
 	static final int REG_A = 0;
 	static final int REG_B = 2;
@@ -532,9 +532,9 @@ public final class CommandFactory {
 		if (stackPosition >= 0) {
 			loadVarAddress(stackPosition);
 
-			addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER_H));
-			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-			addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER_H));
+			addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER));
 			return;
 		}
 
@@ -553,9 +553,9 @@ public final class CommandFactory {
 		if (stackPosition >= 0) {
 			loadVarAddress(stackPosition);
 
-			addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register));
-			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-			addCommand(new LdToMem(VAR_ACCESS_REGISTER_H, register + 1));
+			addCommand(new LdToMem(VAR_ACCESS_REGISTER, register));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			addCommand(new LdToMem(VAR_ACCESS_REGISTER, register + 1));
 			return;
 		}
 
@@ -568,9 +568,9 @@ public final class CommandFactory {
 	private void loadVarAddress(int stackPosition) {
 		Utils.assertTrue(stackPosition >= 0);
 
-		addCommand(new TempLd(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
+		addCommand(new TempLd(workingRegister(VAR_ACCESS_REGISTER), SP_H));
 		if (stackPosition != 0) {
-			addCommand(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_H), stackPosition));
+			addCommand(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER), stackPosition));
 		}
 	}
 

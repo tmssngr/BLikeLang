@@ -225,22 +225,22 @@ public class CommandFactoryTest {
 		}
 
 		public ExpectedCommands varAddress(int stackPost) {
-			add(new TempLd(workingRegister(VAR_ACCESS_REGISTER_H), SP_H));
-			add(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER_H), stackPost));
+			add(new TempLd(workingRegister(VAR_ACCESS_REGISTER), SP_H));
+			add(new TempArithmeticLiteral(ArithmeticOp.add, workingRegister(VAR_ACCESS_REGISTER), stackPost));
 			return this;
 		}
 
 		public ExpectedCommands load(int register) {
-			add(new LdFromMem(register, VAR_ACCESS_REGISTER_H));
-			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-			add(new LdFromMem(register + 1, VAR_ACCESS_REGISTER_H));
+			add(new LdFromMem(register, VAR_ACCESS_REGISTER));
+			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			add(new LdFromMem(register + 1, VAR_ACCESS_REGISTER));
 			return this;
 		}
 
 		public ExpectedCommands save(int register) {
-			add(new LdToMem(VAR_ACCESS_REGISTER_H, register));
-			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER_H)));
-			add(new LdToMem(VAR_ACCESS_REGISTER_H, register + 1));
+			add(new LdToMem(VAR_ACCESS_REGISTER, register));
+			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			add(new LdToMem(VAR_ACCESS_REGISTER, register + 1));
 			return this;
 		}
 	}
