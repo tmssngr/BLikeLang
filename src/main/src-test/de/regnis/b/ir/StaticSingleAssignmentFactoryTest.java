@@ -5,6 +5,7 @@ import de.regnis.b.ast.DeclarationList;
 import de.regnis.b.ast.FuncDeclaration;
 import de.regnis.b.ast.transformation.DetermineTypesTransformation;
 import de.regnis.b.ast.transformation.ReplaceModifyAssignmentWithBinaryExpressionTransformation;
+import de.regnis.b.out.CodePrinter;
 import de.regnis.b.out.StringStringOutput;
 import de.regnis.utils.Utils;
 import org.junit.Test;
@@ -144,6 +145,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    test_exit:  // test_after_if_1
 				                                        return
 				                                    """);
+		assertEquals("int p0_0", getGraphParametersString(graph));
 		removeUnusedVars("p0_4 p0_3 p0_2", graph);
 
 		assertEquals("""
@@ -209,58 +211,59 @@ public class StaticSingleAssignmentFactoryTest {
 
 	@Test
 	public void testIf2() {
-		test("""
-				     int test(int a) {
-				       int b = a;
-				       if (a > 10) {
-				         b = 0;
-				         a -= 1;
-				       }
-				       a += 2;
-				       return b;
-				     }
-				     void main() {
-				       int result = test(10);
-				     }""",
-		     "test",
-		     """
-				     test_start:
-				         v0 := p0
-				     test_if_1:  // test_start
-				         if p0 > 10
-				         if ! goto test_else_1
-				     test_then_1:  // test_if_1
-				         v0 = 0
-				         p0 = p0 - 1
-				         goto test_after_if_1
+		final var graph = test("""
+				                       int test(int a) {
+				                         int b = a;
+				                         if (a > 10) {
+				                           b = 0;
+				                           a -= 1;
+				                         }
+				                         a += 2;
+				                         return b;
+				                       }
+				                       void main() {
+				                         int result = test(10);
+				                       }""",
+		                       "test",
+		                       """
+				                       test_start:
+				                           v0 := p0
+				                       test_if_1:  // test_start
+				                           if p0 > 10
+				                           if ! goto test_else_1
+				                       test_then_1:  // test_if_1
+				                           v0 = 0
+				                           p0 = p0 - 1
+				                           goto test_after_if_1
 
-				     test_else_1:  // test_if_1
-				     test_after_if_1:  // test_then_1, test_else_1
-				         p0 = p0 + 2
-				         result = v0
-				     test_exit:  // test_after_if_1
-				         return
-				     """,
-		     """
-				     test_start:
-				         v0_0 := p0_0
-				     test_if_1:  // test_start
-				         if p0_0 > 10
-				         if ! goto test_else_1
-				     test_then_1:  // test_if_1
-				         v0_1 := 0
-				         p0_1 := p0_0 - 1
-				         goto test_after_if_1
+				                       test_else_1:  // test_if_1
+				                       test_after_if_1:  // test_then_1, test_else_1
+				                           p0 = p0 + 2
+				                           result = v0
+				                       test_exit:  // test_after_if_1
+				                           return
+				                       """,
+		                       """
+				                       test_start:
+				                           v0_0 := p0_0
+				                       test_if_1:  // test_start
+				                           if p0_0 > 10
+				                           if ! goto test_else_1
+				                       test_then_1:  // test_if_1
+				                           v0_1 := 0
+				                           p0_1 := p0_0 - 1
+				                           goto test_after_if_1
 
-				     test_else_1:  // test_if_1
-				     test_after_if_1:  // test_then_1, test_else_1
-				         p0_2 := phi (p0_1, p0_0)
-				         v0_2 := phi (v0_1, v0_0)
-				         p0_3 := p0_2 + 2
-				         result := v0_2
-				     test_exit:  // test_after_if_1
-				         return
-				     """);
+				                       test_else_1:  // test_if_1
+				                       test_after_if_1:  // test_then_1, test_else_1
+				                           p0_2 := phi (p0_1, p0_0)
+				                           v0_2 := phi (v0_1, v0_0)
+				                           p0_3 := p0_2 + 2
+				                           result := v0_2
+				                       test_exit:  // test_after_if_1
+				                           return
+				                       """);
+		assertEquals("int p0_0", getGraphParametersString(graph));
 	}
 
 	@Test
@@ -354,6 +357,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    main_exit:  // main_after_while_1
 				                                        return
 				                                    """);
+		assertEquals("", getGraphParametersString(graph));
 		// v0_0 must not be considered as inline-able constant
 		SsaConstantDetection.transform(graph);
 
@@ -443,6 +447,7 @@ public class StaticSingleAssignmentFactoryTest {
 				                                    printHex4_exit:  // printHex4_after_if_1
 				                                        return
 				                                    """);
+		assertEquals("int p0_0", getGraphParametersString(graph));
 		removeUnusedVars("v0_0", graph);
 
 		assertEquals("""
@@ -551,5 +556,9 @@ public class StaticSingleAssignmentFactoryTest {
 		final ControlFlowGraphPrinter printer = new ControlFlowGraphPrinter(graph, new StringStringOutput());
 		printer.setPrintPrevBlocks();
 		return printer.print().toString();
+	}
+
+	private String getGraphParametersString(ControlFlowGraph graph) {
+		return CodePrinter.print(graph.getParameters());
 	}
 }

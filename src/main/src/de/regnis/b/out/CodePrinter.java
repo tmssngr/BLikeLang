@@ -3,6 +3,8 @@ package de.regnis.b.out;
 import de.regnis.b.ast.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * @author Thomas Singer
  */
@@ -16,8 +18,46 @@ public class CodePrinter {
 		return output.toString();
 	}
 
+	public static String print(List<FuncDeclarationParameter> parameters) {
+		final StringStringOutput output = new StringStringOutput();
+		print(parameters, output);
+		return output.toString();
+	}
+
 	public static void print(Statement statement, StringOutput output) {
 		print(statement, 0, output);
+	}
+
+	public static void print(Expression expression, StringOutput output) {
+		expression.visit(new ExpressionVisitor<>() {
+			@Override
+			public Object visitBinary(BinaryExpression node) {
+				print(node.left(), output);
+				output.print(" ");
+				output.print(node.operator().text);
+				output.print(" ");
+				print(node.right(), output);
+				return node;
+			}
+
+			@Override
+			public Object visitFunctionCall(FuncCall node) {
+				handleCall(node.name(), node.parameters(), output);
+				return node;
+			}
+
+			@Override
+			public Object visitNumber(NumberLiteral node) {
+				output.print(String.valueOf(node.value()));
+				return node;
+			}
+
+			@Override
+			public Object visitVarRead(VarRead node) {
+				output.print(node.name());
+				return node;
+			}
+		});
 	}
 
 	// Accessing ==============================================================
@@ -52,8 +92,14 @@ public class CodePrinter {
 		output.print(" ");
 		output.print(declaration.name());
 		output.print("(");
+		print(declaration.parameters().getParameters(), output);
+		output.print(") ");
+		print(declaration.statementList(), 0, output);
+	}
+
+	private static void print(List<FuncDeclarationParameter> parameters, StringOutput output) {
 		boolean isFirst = true;
-		for (FuncDeclarationParameter parameter : declaration.parameters().getParameters()) {
+		for (FuncDeclarationParameter parameter : parameters) {
 			if (isFirst) {
 				isFirst = false;
 			}
@@ -65,8 +111,6 @@ public class CodePrinter {
 			output.print(" ");
 			output.print(parameter.name());
 		}
-		output.print(") ");
-		print(declaration.statementList(), 0, output);
 	}
 
 	private static void print(StatementList listNode, int indentation, StringOutput output) {
@@ -213,38 +257,6 @@ public class CodePrinter {
 		printIndentation(indentation, output);
 		output.print("break");
 		output.println();
-	}
-
-	public static void print(Expression expression, StringOutput output) {
-		expression.visit(new ExpressionVisitor<>() {
-			@Override
-			public Object visitBinary(BinaryExpression node) {
-				print(node.left(), output);
-				output.print(" ");
-				output.print(node.operator().text);
-				output.print(" ");
-				print(node.right(), output);
-				return node;
-			}
-
-			@Override
-			public Object visitFunctionCall(FuncCall node) {
-				handleCall(node.name(), node.parameters(), output);
-				return node;
-			}
-
-			@Override
-			public Object visitNumber(NumberLiteral node) {
-				output.print(String.valueOf(node.value()));
-				return node;
-			}
-
-			@Override
-			public Object visitVarRead(VarRead node) {
-				output.print(node.name());
-				return node;
-			}
-		});
 	}
 
 	private static void handleCall(String name, FuncCallParameters parameters, StringOutput output) {

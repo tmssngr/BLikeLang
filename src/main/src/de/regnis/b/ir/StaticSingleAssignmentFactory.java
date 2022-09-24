@@ -64,7 +64,9 @@ public final class StaticSingleAssignmentFactory {
 
 			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
 			if (prevBlocks.isEmpty()) {
-				info.initializeFromParameters(graph);
+				assertTrue(block == graph.getFirstBlock());
+
+				info.initializeFromParametersUpdateGraph(graph);
 			}
 			else {
 				final Set<String> incomingVars = usages.getVarsBefore(block);
@@ -243,10 +245,13 @@ public final class StaticSingleAssignmentFactory {
 			this.varToHighest = varToHighest;
 		}
 
-		public void initializeFromParameters(@NotNull ControlFlowGraph graph) {
+		public void initializeFromParametersUpdateGraph(@NotNull ControlFlowGraph graph) {
+			final List<FuncDeclarationParameter> newParameters = new ArrayList<>();
 			for (FuncDeclarationParameter parameter : graph.getParameters()) {
-				getDeclarationName(parameter.name());
+				final String newName = getDeclarationName(parameter.name());
+				newParameters.add(new FuncDeclarationParameter(newName, parameter.position()));
 			}
+			graph.setParameters(newParameters);
 		}
 
 		public void initializeFrom(@NotNull BlockInfo prevInfo) {

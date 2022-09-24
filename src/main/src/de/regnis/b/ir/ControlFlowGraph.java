@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static de.regnis.utils.Utils.assertTrue;
+
 /**
  * @author Thomas Singer
  */
@@ -22,7 +24,7 @@ public final class ControlFlowGraph {
 	// Fields =================================================================
 
 	private final List<AbstractBlock> linearizedBlocks = new ArrayList<>();
-	private final FuncDeclarationParameters parameters;
+	private final List<FuncDeclarationParameter> parameters;
 	private final ExitBlock exitBlock;
 	private final Type type;
 
@@ -31,7 +33,7 @@ public final class ControlFlowGraph {
 	// Setup ==================================================================
 
 	public ControlFlowGraph(@NotNull FuncDeclaration declaration) {
-		parameters = declaration.parameters();
+		parameters = new ArrayList<>(declaration.parameters().getParameters());
 		type       = declaration.type();
 
 		final String prefix = declaration.name() + "_";
@@ -64,8 +66,16 @@ public final class ControlFlowGraph {
 
 	// Accessing ==============================================================
 
+	@NotNull
 	public List<FuncDeclarationParameter> getParameters() {
-		return parameters.getParameters();
+		return Collections.unmodifiableList(parameters);
+	}
+
+	public void setParameters(@NotNull List<FuncDeclarationParameter> parameters) {
+		assertTrue(parameters.size() == this.parameters.size());
+
+		this.parameters.clear();
+		this.parameters.addAll(parameters);
 	}
 
 	public Type getType() {
