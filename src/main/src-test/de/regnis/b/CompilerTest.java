@@ -61,38 +61,40 @@ public class CompilerTest {
 				     max:
 				         ld r14, %FE
 				         ld r15, %FF
-				         add r15, #%02
-				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
-				         lde r1, @rr14
-				         ld r14, %FE
-				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde r2, @rr14
+				         lde r1, @rr14
 				         incw r14
+				         lde r0, @rr14
+				         ld r14, %FE
+				         ld r15, %FF
+				         add r15, #%02
+				         adc r14, #%00
 				         lde r3, @rr14
+				         incw r14
+				         lde r2, @rr14
 				         cp r0, r2
 				         .jp gt, max_then_1
-				         .jp nz, max_exit
+				         .jp nz, max_after_if_1
 				         cp r1, r3
-				         .jp ule, max_exit
+				         .jp ule, max_after_if_1
 				     max_then_1:
+				         .jp max_exit
+				     max_after_if_1:
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde @rr14, r0
-				         incw r14
 				         lde @rr14, r1
+				         incw r14
+				         lde @rr14, r0
 				     max_exit:
 				         ret
 				     """);
@@ -213,7 +215,7 @@ public class CompilerTest {
 				         pop r5
 				         pop r4
 				         ret
-
+				              
 				     getInput:
 				         ld r0, #%00
 				         ld r1, #%C0
@@ -221,35 +223,35 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde @rr14, r0
-				         incw r14
 				         lde @rr14, r1
+				         incw r14
+				         lde @rr14, r0
 				         ret
-
+				              
 				     printHex4:
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         and r1, #%0F
 				         ld r0, #%00
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde @rr14, r0
-				         incw r14
 				         lde @rr14, r1
+				         incw r14
+				         lde @rr14, r0
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         cp r0, #%00
 				         .jp lt, printHex4_then_1
 				         .jp nz, printHex4_else_1
@@ -260,48 +262,48 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         add r1, #%30
 				         adc r0, #%00
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde @rr14, r0
-				         incw r14
 				         lde @rr14, r1
+				         incw r14
+				         lde @rr14, r0
 				         .jp printHex4_after_if_1
 				     printHex4_else_1:
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         add r1, #%37
 				         adc r0, #%00
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde @rr14, r0
-				         incw r14
 				         lde @rr14, r1
+				         incw r14
+				         lde @rr14, r0
 				     printHex4_after_if_1:
 				         ld r14, %FE
 				         ld r15, %FF
 				         add r15, #%02
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         ld %15, r1
 				         call %0818
 				         ret
-
+				              
 				     printHex8:
 				         push r4
 				         push r5
@@ -309,9 +311,9 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         ld r4, r0
 				         ld r5, r1
 				         sra r0
@@ -333,9 +335,9 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         push r0
 				         push r1
 				         call printHex4
@@ -344,7 +346,7 @@ public class CompilerTest {
 				         pop r5
 				         pop r4
 				         ret
-
+				              
 				     printHex16:
 				         push r4
 				         push r5
@@ -352,9 +354,9 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         ld r4, r0
 				         ld r5, r1
 				         ld r1, r0
@@ -370,9 +372,9 @@ public class CompilerTest {
 				         ld r15, %FF
 				         add r15, #%04
 				         adc r14, #%00
-				         lde r0, @rr14
-				         incw r14
 				         lde r1, @rr14
+				         incw r14
+				         lde r0, @rr14
 				         push r0
 				         push r1
 				         call printHex8

@@ -231,16 +231,16 @@ public class CommandFactoryTest {
 		}
 
 		public ExpectedCommands load(int register) {
-			add(new LdFromMem(register, VAR_ACCESS_REGISTER));
-			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
 			add(new LdFromMem(register + 1, VAR_ACCESS_REGISTER));
+			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			add(new LdFromMem(register, VAR_ACCESS_REGISTER));
 			return this;
 		}
 
 		public ExpectedCommands save(int register) {
-			add(new LdToMem(VAR_ACCESS_REGISTER, register));
-			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
 			add(new LdToMem(VAR_ACCESS_REGISTER, register + 1));
+			add(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			add(new LdToMem(VAR_ACCESS_REGISTER, register));
 			return this;
 		}
 	}

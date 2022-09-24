@@ -532,9 +532,9 @@ public final class CommandFactory {
 		if (stackPosition >= 0) {
 			loadVarAddress(stackPosition);
 
-			addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER));
-			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
 			addCommand(new LdFromMem(register + 1, VAR_ACCESS_REGISTER));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			addCommand(new LdFromMem(register, VAR_ACCESS_REGISTER));
 			return;
 		}
 
@@ -553,9 +553,9 @@ public final class CommandFactory {
 		if (stackPosition >= 0) {
 			loadVarAddress(stackPosition);
 
-			addCommand(new LdToMem(VAR_ACCESS_REGISTER, register));
-			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
 			addCommand(new LdToMem(VAR_ACCESS_REGISTER, register + 1));
+			addCommand(new RegisterCommand(RegisterCommand.Op.incw, workingRegister(VAR_ACCESS_REGISTER)));
+			addCommand(new LdToMem(VAR_ACCESS_REGISTER, register));
 			return;
 		}
 
