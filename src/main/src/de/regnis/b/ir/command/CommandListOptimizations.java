@@ -21,9 +21,7 @@ public final class CommandListOptimizations {
 
 		while (true) {
 			final List<Command> prevCommands = commands;
-			commands = removeUselessJumpsToNextCommand(commands);
-			commands = replaceLabels(commands);
-			commands = removeUnusedLabels(commands);
+			commands = fixLabels(commands);
 
 			if (commands.equals(prevCommands)) {
 				break;
@@ -39,9 +37,7 @@ public final class CommandListOptimizations {
 		while (true) {
 			final List<Command> prevCommands = commands;
 			commands = filterCondJumpJumpLabel(commands);
-			commands = removeUselessJumpsToNextCommand(commands);
-			commands = replaceLabels(commands);
-			commands = removeUnusedLabels(commands);
+			commands = fixLabels(commands);
 
 			if (commands.equals(prevCommands)) {
 				break;
@@ -54,6 +50,16 @@ public final class CommandListOptimizations {
 	}
 
 	// Utils ==================================================================
+
+	@NotNull
+	private static List<Command> fixLabels(List<Command> commands) {
+		commands = removeUselessJumpsToNextCommand(commands);
+		commands = replaceLabels(commands);
+		commands = replaceLabelJump(commands);
+		commands = replaceJumpJump(commands);
+		commands = removeUnusedLabels(commands);
+		return commands;
+	}
 
 	private static List<Command> removeUselessJumpsToNextCommand(List<Command> commands) {
 		return filterCommands(commands, new DualCommandVisitor() {
@@ -72,25 +78,7 @@ public final class CommandListOptimizations {
 
 	private static List<Command> replaceLabels(List<Command> commands) {
 		final Map<String, String> labelToLabel = findLabelsPointingToSameLocation(commands);
-
-		return filterCommands(commands, new SingleCommandVisitor() {
-			@Override
-			public void visit(@NotNull Command command, @NotNull Stack stack) {
-				if (command instanceof JumpCommand jumpCommand) {
-					final String newLabel = labelToLabel.get(jumpCommand.label());
-					if (newLabel != null) {
-						stack.drop();
-						stack.add(new JumpCommand(jumpCommand.condition(), newLabel));
-					}
-					return;
-				}
-
-				if (command instanceof Label label
-						&& labelToLabel.containsKey(label.name())) {
-					stack.drop();
-				}
-			}
-		});
+		return replaceLabels(labelToLabel, commands);
 	}
 
 	@NotNull
@@ -117,6 +105,66 @@ public final class CommandListOptimizations {
 			consecutiveLabels.clear();
 		}
 		return labelToLabel;
+	}
+
+	private static List<Command> replaceLabelJump(List<Command> commands) {
+		final Map<String, String> labelToLabel = findLabelsFollowedByJump(commands);
+		return replaceLabels(labelToLabel, commands);
+	}
+
+	@NotNull
+	private static Map<String, String> findLabelsFollowedByJump(List<Command> commands) {
+		final Map<String, String> labelToLabel = new HashMap<>();
+		filterCommands(commands, new DualCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
+				if (command1 instanceof Label label
+						&& command0 instanceof JumpCommand jumpCommand
+						&& jumpCommand.condition() == null) {
+					labelToLabel.put(label.name(), jumpCommand.label());
+				}
+			}
+		});
+		return labelToLabel;
+	}
+
+	@NotNull
+	private static List<Command> replaceJumpJump(List<Command> commands) {
+		return filterCommands(commands, new DualCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command1, @NotNull Command command0, @NotNull Stack stack) {
+				if (command1 instanceof JumpCommand jump1
+						&& jump1.condition() == null
+						&& !(command0 instanceof Label)) {
+					stack.drop();
+				}
+			}
+		});
+	}
+
+	@NotNull
+	private static List<Command> replaceLabels(Map<String, String> labelToLabel, List<Command> commands) {
+		if (labelToLabel.isEmpty()) {
+			return commands;
+		}
+		return filterCommands(commands, new SingleCommandVisitor() {
+			@Override
+			public void visit(@NotNull Command command, @NotNull Stack stack) {
+				if (command instanceof JumpCommand jumpCommand) {
+					final String newLabel = labelToLabel.get(jumpCommand.label());
+					if (newLabel != null) {
+						stack.drop();
+						stack.add(new JumpCommand(jumpCommand.condition(), newLabel));
+					}
+					return;
+				}
+
+				if (command instanceof Label label
+						&& labelToLabel.containsKey(label.name())) {
+					stack.drop();
+				}
+			}
+		});
 	}
 
 	private static List<Command> removeUnusedLabels(List<Command> commands) {

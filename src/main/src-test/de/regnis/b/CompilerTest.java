@@ -74,12 +74,10 @@ public class CompilerTest {
 				         incw r14
 				         lde r2, @rr14
 				         cp r0, r2
-				         .jp gt, max_then_1
+				         .jp gt, max_exit
 				         .jp nz, max_after_if_1
 				         cp r1, r3
-				         .jp ule, max_after_if_1
-				     max_then_1:
-				         .jp max_exit
+				         .jp ugt, max_exit
 				     max_after_if_1:
 				         ld r14, %FE
 				         ld r15, %FF

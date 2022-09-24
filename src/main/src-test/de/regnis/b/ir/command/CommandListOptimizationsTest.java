@@ -56,6 +56,59 @@ public final class CommandListOptimizationsTest {
 	}
 
 	@Test
+	public void testReplaceLabelJump() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		list.add(new Arithmetic(ArithmeticOp.cp, 0, 2));
+		list.add(new JumpCommand(JumpCondition.gt, "then"));
+		list.add(new JumpCommand(JumpCondition.nz, "next"));
+		list.add(new Arithmetic(ArithmeticOp.cp, 1, 3));
+		list.add(new JumpCommand(JumpCondition.ule, "next"));
+		list.add(new Label("then"));
+		list.add(new JumpCommand("exit"));
+		list.add(new Label("next"));
+		list.add(new LdLiteral(CommandFactory.workingRegister(0), 2));
+		list.add(new Label("exit"));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+		                            new Arithmetic(ArithmeticOp.cp, 0, 2),
+		                            new JumpCommand(JumpCondition.gt, "exit"),
+		                            new JumpCommand(JumpCondition.nz, "next"),
+		                            new Arithmetic(ArithmeticOp.cp, 1, 3),
+		                            new JumpCommand(JumpCondition.ugt, "exit"),
+		                            new Label("next"),
+		                            new LdLiteral(CommandFactory.workingRegister(0), 2),
+		                            new Label("exit"),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
+
+	@Test
+	public void testReplaceJumpJump() {
+		final CommandList list = new CommandList();
+		list.add(new Label("start"));
+		list.add(new Arithmetic(ArithmeticOp.cp, 0, 2));
+		list.add(new JumpCommand(JumpCondition.gt, "then"));
+		list.add(new LdLiteral(CommandFactory.workingRegister(0), 2));
+		list.add(new JumpCommand("exit"));
+		list.add(new JumpCommand("exit"));
+		list.add(new Label("then"));
+		list.add(new LdLiteral(CommandFactory.workingRegister(0), 2));
+		list.add(new Label("exit"));
+		list.add(NoArgCommand.Ret);
+		final CommandList compact = CommandListOptimizations.optimize(list);
+		Assert.assertEquals(List.of(new Label("start"),
+		                            new Arithmetic(ArithmeticOp.cp, 0, 2),
+		                            new JumpCommand(JumpCondition.gt, "then"),
+		                            new LdLiteral(CommandFactory.workingRegister(0), 2),
+		                            new JumpCommand("exit"),
+		                            new Label("then"),
+		                            new LdLiteral(CommandFactory.workingRegister(0), 2),
+		                            new Label("exit"),
+		                            NoArgCommand.Ret), compact.getCommands());
+	}
+
+	@Test
 	public void testReplaceLabelIfElse() {
 		final CommandList list = new CommandList();
 		list.add(new Label("start"));
