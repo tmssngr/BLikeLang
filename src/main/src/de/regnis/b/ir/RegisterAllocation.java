@@ -44,9 +44,8 @@ public final class RegisterAllocation {
 		final ControlFlowGraphVarUsageDetector usages = ControlFlowGraphVarUsageDetector.detectVarUsages(flowGraph);
 		flowGraph.iterate(block -> {
 			interferenceGraph.addEdgesBetween(usages.getVarsBefore(block));
-			if (block instanceof BasicBlock) {
-				final BasicBlock basicBlock = (BasicBlock) block;
-				for (SimpleStatement statement : basicBlock.getStatements()) {
+			if (block instanceof StatementsBlock sblock) {
+				for (SimpleStatement statement : sblock.getStatements()) {
 					interferenceGraph.addEdgesBetween(usages.getVarsAfter(statement));
 				}
 			}
