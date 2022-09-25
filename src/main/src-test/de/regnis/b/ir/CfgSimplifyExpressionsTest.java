@@ -71,7 +71,7 @@ public class CfgSimplifyExpressionsTest {
 				     calculate_start:
 				         v0 := p2 / 100
 				         v1 := p2 / 400
-				         v2 := ((((p2 + (p2 / 4)) - v0) + v1) + 1) % 7
+				         v2 := (((((p2 / 4) + p2) - v0) + v1) + 1) % 7
 				         result = v2
 				     calculate_exit:
 				         return

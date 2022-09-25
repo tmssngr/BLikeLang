@@ -90,6 +90,12 @@ public class SimplifyExpression implements ExpressionVisitor<Expression> {
 		if (operator == BinaryExpression.Op.add && left instanceof NumberLiteral) {
 			return new BinaryExpression(right, operator, left);
 		}
+		// otherwise an intermediate result might be stored
+		if (operator == BinaryExpression.Op.add
+				&& !(left instanceof BinaryExpression)
+				&& right instanceof BinaryExpression) {
+			return new BinaryExpression(right, operator, left);
+		}
 		return new BinaryExpression(left, operator, right);
 	}
 }
