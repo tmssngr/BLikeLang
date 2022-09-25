@@ -64,6 +64,7 @@ public class SimplifyExpression implements ExpressionVisitor<Expression> {
 			}
 		}
 		if (left instanceof BinaryExpression leftBin
+				&& leftBin.right() instanceof NumberLiteral
 				&& right instanceof NumberLiteral) {
 			if (operator == BinaryExpression.Op.add) {
 				if (leftBin.operator() == BinaryExpression.Op.add) {
