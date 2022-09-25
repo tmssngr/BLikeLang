@@ -45,6 +45,39 @@ public class CfgSimplifyExpressionsTest {
 				     """);
 	}
 
+	@Test
+	public void test() {
+		test("""
+				     int calculate(int day, int month, int year) {
+				       var h = year / 100
+				       var v = year / 400
+				       var z = (year + year/4 - h + v + 1) % 7
+				       return z
+				     }
+				     void main() {
+				       var a = calculate(18, 9, 2022)
+				     }""",
+		     "calculate",
+		     """
+				     calculate_start:
+				         v0 := p2 / 100
+				         v1 := p2 / 400
+				         v2 := ((((p2 + (p2 / 4)) - v0) + v1) + 1) % 7
+				         result = v2
+				     calculate_exit:
+				         return
+				     """,
+		     """
+				     calculate_start:
+				         v0 := p2 / 100
+				         v1 := p2 / 400
+				         v2 := (((p2 + (p2 / 4)) - v0) + (v1 + 1)) % 7
+				         result = v2
+				     calculate_exit:
+				         return
+				     """);
+	}
+
 	// Utils ==================================================================
 
 	private void test(String input, String function, String expectedBefore, String expectedAfter) {
