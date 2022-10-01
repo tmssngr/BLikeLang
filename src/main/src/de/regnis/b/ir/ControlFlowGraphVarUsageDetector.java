@@ -24,7 +24,7 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	// Fields =================================================================
 
-	private final Map<AbstractBlock, Usages> usageMap = new HashMap<>();
+	private final Map<Block, Usages> usageMap = new HashMap<>();
 	private final Map<SimpleStatement, Set<String>> liveVars = new HashMap<>();
 	private final ControlFlowGraph graph;
 
@@ -39,7 +39,7 @@ public final class ControlFlowGraphVarUsageDetector {
 	public ControlFlowGraphPrinter createPrinter(StringOutput output) {
 		return new ControlFlowGraphPrinter(graph, output) {
 			@Override
-			protected void printBefore(String indentation, AbstractBlock block) {
+			protected void printBefore(String indentation, Block block) {
 				print(indentation, getUsages(block).lifeBefore);
 			}
 
@@ -65,12 +65,12 @@ public final class ControlFlowGraphVarUsageDetector {
 	}
 
 	@NotNull
-	public Set<String> getVarsBefore(@NotNull AbstractBlock block) {
+	public Set<String> getVarsBefore(@NotNull Block block) {
 		return Collections.unmodifiableSet(usageMap.get(block).lifeBefore);
 	}
 
 	@NotNull
-	public Set<String> getVarsAfter(@NotNull AbstractBlock block) {
+	public Set<String> getVarsAfter(@NotNull Block block) {
 		return Collections.unmodifiableSet(usageMap.get(block).lifeAfter);
 	}
 
@@ -81,22 +81,22 @@ public final class ControlFlowGraphVarUsageDetector {
 
 	// Utils ==================================================================
 
-	private Usages getUsages(AbstractBlock block) {
+	private Usages getUsages(Block block) {
 		return usageMap.computeIfAbsent(block, block1 -> new Usages());
 	}
 
 	private void propagateLiveToPrev() {
 		boolean repeat = true;
 		while (repeat) {
-			final List<AbstractBlock> blocks = new ArrayList<>();
+			final List<Block> blocks = new ArrayList<>();
 			blocks.add(graph.getExitBlock());
 
 			repeat = false;
 
-			final Set<AbstractBlock> processedBlocks = new HashSet<>();
+			final Set<Block> processedBlocks = new HashSet<>();
 
 			while (blocks.size() > 0) {
-				final AbstractBlock block = blocks.remove(0);
+				final Block block = blocks.remove(0);
 
 				if (!processedBlocks.add(block)) {
 					continue;
@@ -111,7 +111,7 @@ public final class ControlFlowGraphVarUsageDetector {
 		}
 	}
 
-	private boolean process(AbstractBlock block) {
+	private boolean process(Block block) {
 		final Set<String> live = getLifeFromAllNext(block);
 
 		final Usages usages = getUsages(block);
@@ -151,9 +151,9 @@ public final class ControlFlowGraphVarUsageDetector {
 	}
 
 	@NotNull
-	private Set<String> getLifeFromAllNext(AbstractBlock block) {
+	private Set<String> getLifeFromAllNext(Block block) {
 		final Set<String> lifeFromNext = new HashSet<>();
-		for (AbstractBlock nextBlock : block.getNextBlocks()) {
+		for (Block nextBlock : block.getNextBlocks()) {
 			final Usages nextUsages = getUsages(nextBlock);
 			lifeFromNext.addAll(nextUsages.lifeBefore);
 		}

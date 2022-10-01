@@ -15,11 +15,7 @@ public final class BasicBlock extends StatementsBlock {
 		super(prefix + "start", null);
 	}
 
-	public BasicBlock(@NotNull String label, @NotNull ControlFlowBlock prev) {
-		super(label, prev);
-	}
-
-	public BasicBlock(@NotNull String label, @NotNull BasicBlock prev) {
+	public BasicBlock(@NotNull String label, @NotNull Block prev) {
 		super(label, prev);
 	}
 
@@ -33,8 +29,8 @@ public final class BasicBlock extends StatementsBlock {
 	// Accessing ==============================================================
 
 	@NotNull
-	public AbstractBlock getSingleNext() {
-		final List<AbstractBlock> next = getNextBlocks();
+	public Block getSingleNext() {
+		final List<Block> next = getNextBlocks();
 		if (next.size() != 1) {
 			throw new IllegalStateException();
 		}

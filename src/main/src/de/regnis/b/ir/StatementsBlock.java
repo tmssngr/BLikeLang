@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public abstract class StatementsBlock extends AbstractBlock {
+public abstract class StatementsBlock extends Block {
 
 	// Fields =================================================================
 
@@ -23,7 +23,7 @@ public abstract class StatementsBlock extends AbstractBlock {
 
 	// Setup ==================================================================
 
-	protected StatementsBlock(@NotNull String label, @Nullable AbstractBlock prevBlock) {
+	protected StatementsBlock(@NotNull String label, @Nullable Block prevBlock) {
 		super(label, prevBlock);
 	}
 

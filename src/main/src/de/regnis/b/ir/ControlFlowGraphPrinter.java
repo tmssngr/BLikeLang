@@ -48,7 +48,7 @@ public class ControlFlowGraphPrinter {
 
 	@NotNull
 	public final StringOutput print() {
-		final List<AbstractBlock> blocks = graph.getLinearizedBlocks();
+		final List<Block> blocks = graph.getLinearizedBlocks();
 
 		final BlockVisitor visitor = new BlockVisitor() {
 			@Override
@@ -97,27 +97,27 @@ public class ControlFlowGraphPrinter {
 				printlnIndented("return");
 			}
 
-			private void printGoto(AbstractBlock block, AbstractBlock next) {
+			private void printGoto(Block block, Block next) {
 				if (blocks.indexOf(next) != blocks.indexOf(block) + 1) {
 					printlnIndented("goto " + next.label);
 					output.println();
 				}
 			}
 
-			private void printLabel(AbstractBlock block) {
+			private void printLabel(Block block) {
 				output.print(getLabelText(block));
 				output.println();
 			}
 		};
 
-		for (AbstractBlock block : blocks) {
+		for (Block block : blocks) {
 			block.visit(visitor);
 		}
 
 		return output;
 	}
 
-	protected void printBefore(String indentation, AbstractBlock block) {
+	protected void printBefore(String indentation, Block block) {
 	}
 
 	protected void print(String indentation, SimpleStatement statement) {
@@ -128,18 +128,18 @@ public class ControlFlowGraphPrinter {
 	// Utils ==================================================================
 
 	@NotNull
-	private String getLabelText(AbstractBlock block) {
+	private String getLabelText(Block block) {
 		final StringBuilder buffer = new StringBuilder();
 		buffer.append(block.label);
 		buffer.append(":");
 
 		if (printPrevBlocks) {
-			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
+			final List<Block> prevBlocks = block.getPrevBlocks();
 			if (prevBlocks.size() > 0) {
 				buffer.append("  // ");
 				Utils.appendCommaSeparated(Utils.convert(prevBlocks, new Function<>() {
 					@Override
-					public String apply(AbstractBlock block) {
+					public String apply(Block block) {
 						return block.label;
 					}
 				}), buffer);

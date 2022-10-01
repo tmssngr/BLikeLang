@@ -42,12 +42,12 @@ public final class IfBlock extends ControlFlowBlock {
 	// Accessing ==============================================================
 
 	@NotNull
-	public AbstractBlock getTrueBlock() {
+	public Block getTrueBlock() {
 		return getNextBlocks().get(0);
 	}
 
 	@NotNull
-	public AbstractBlock getFalseBlock() {
+	public Block getFalseBlock() {
 		return getNextBlocks().get(1);
 	}
 }

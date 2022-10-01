@@ -42,7 +42,7 @@ public final class StaticSingleAssignmentFactory {
 
 	// Fields =================================================================
 
-	private final Map<AbstractBlock, BlockInfo> blockToInfo = new HashMap<>();
+	private final Map<Block, BlockInfo> blockToInfo = new HashMap<>();
 	private final ControlFlowGraph graph;
 
 	// Setup ==================================================================
@@ -58,11 +58,11 @@ public final class StaticSingleAssignmentFactory {
 
 		final Map<String, Integer> varToVariant = new HashMap<>();
 
-		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+		for (Block block : graph.getLinearizedBlocks()) {
 			final BlockInfo info = new BlockInfo(varToVariant);
 			blockToInfo.put(block, info);
 
-			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
+			final List<Block> prevBlocks = block.getPrevBlocks();
 			if (prevBlocks.isEmpty()) {
 				assertTrue(block == graph.getFirstBlock());
 
@@ -105,10 +105,10 @@ public final class StaticSingleAssignmentFactory {
 			});
 		}
 
-		for (AbstractBlock block : graph.getLinearizedBlocks()) {
+		for (Block block : graph.getLinearizedBlocks()) {
 			final BlockInfo info = blockToInfo.get(block);
 
-			final List<AbstractBlock> prevBlocks = block.getPrevBlocks();
+			final List<Block> prevBlocks = block.getPrevBlocks();
 			if (prevBlocks.size() < 2) {
 				continue;
 			}
@@ -123,7 +123,7 @@ public final class StaticSingleAssignmentFactory {
 			for (PhiFunction phiFunction : info.phiFunctions) {
 				final List<Expression> phiParameters = new ArrayList<>();
 				final Set<String> ssaNames = new HashSet<>();
-				for (AbstractBlock prevBlock : prevBlocks) {
+				for (Block prevBlock : prevBlocks) {
 					final BlockInfo prevInfo = blockToInfo.get(prevBlock);
 					final String ssaName = prevInfo.getUsageName(phiFunction.originalName);
 					ssaNames.add(ssaName);

@@ -88,7 +88,7 @@ public final class CommandFactory {
 		labelPrefix = "_" + declaration.name();
 	}
 
-	public void add(@NotNull AbstractBlock block) {
+	public void add(@NotNull Block block) {
 		commandList.add(new Label(block.label));
 
 		block.visit(new BlockVisitor() {

@@ -246,8 +246,8 @@ public final class Compiler {
 		final CommandFactory commandFactory = new CommandFactory(stackPositionProvider, functionNameToReturnType, builtInFunctions, commandList);
 		commandFactory.addPrelude(declaration);
 
-		final List<AbstractBlock> blocks = cfg.getLinearizedBlocks();
-		for (AbstractBlock block : blocks) {
+		final List<Block> blocks = cfg.getLinearizedBlocks();
+		for (Block block : blocks) {
 			commandFactory.add(block);
 		}
 

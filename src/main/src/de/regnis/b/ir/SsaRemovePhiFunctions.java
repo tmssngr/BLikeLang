@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
+public final class SsaRemovePhiFunctions implements Consumer<Block> {
 
 	// Static =================================================================
 
@@ -28,12 +28,12 @@ public final class SsaRemovePhiFunctions implements Consumer<AbstractBlock> {
 	// Implemented ============================================================
 
 	@Override
-	public void accept(AbstractBlock block) {
+	public void accept(Block block) {
 		if (!(block instanceof StatementsBlock statementsBlock)) {
 			return;
 		}
 
-		final List<AbstractBlock> prevBlocks = statementsBlock.getPrevBlocks();
+		final List<Block> prevBlocks = statementsBlock.getPrevBlocks();
 
 		final List<SimpleStatement> newStatements = new ArrayList<>();
 		for (SimpleStatement statement : statementsBlock.getStatements()) {

@@ -23,12 +23,12 @@ public final class ControlFlowGraph {
 
 	// Fields =================================================================
 
-	private final List<AbstractBlock> linearizedBlocks = new ArrayList<>();
+	private final List<Block> linearizedBlocks = new ArrayList<>();
 	private final List<FuncDeclarationParameter> parameters;
 	private final ExitBlock exitBlock;
 	private final Type type;
 
-	private AbstractBlock firstBlock;
+	private Block firstBlock;
 
 	// Setup ==================================================================
 
@@ -82,7 +82,7 @@ public final class ControlFlowGraph {
 		return type;
 	}
 
-	public AbstractBlock getFirstBlock() {
+	public Block getFirstBlock() {
 		return firstBlock;
 	}
 
@@ -90,14 +90,14 @@ public final class ControlFlowGraph {
 		return exitBlock;
 	}
 
-	public void iterate(@NotNull Consumer<AbstractBlock> consumer) {
-		final List<AbstractBlock> blocks = new ArrayList<>();
+	public void iterate(@NotNull Consumer<Block> consumer) {
+		final List<Block> blocks = new ArrayList<>();
 		blocks.add(firstBlock);
 
-		final Set<AbstractBlock> processedBlocks = new HashSet<>();
+		final Set<Block> processedBlocks = new HashSet<>();
 
 		while (blocks.size() > 0) {
-			final AbstractBlock block = blocks.remove(0);
+			final Block block = blocks.remove(0);
 			if (!processedBlocks.add(block)) {
 				continue;
 			}
@@ -111,14 +111,14 @@ public final class ControlFlowGraph {
 		iterate(block -> block.visit(visitor));
 	}
 
-	public List<AbstractBlock> getLinearizedBlocks() {
+	public List<Block> getLinearizedBlocks() {
 		return Collections.unmodifiableList(linearizedBlocks);
 	}
 
 	// Utils ==================================================================
 
 	private void checkIntegrity() {
-		final Set<AbstractBlock> blocks = new HashSet<>();
+		final Set<Block> blocks = new HashSet<>();
 
 		iterate(block -> {
 			block.checkIntegrity();
@@ -133,7 +133,7 @@ public final class ControlFlowGraph {
 	}
 
 	@NotNull
-	private String blocksToString(Collection<AbstractBlock> blocks) {
+	private String blocksToString(Collection<Block> blocks) {
 		final List<String> blockLabels = Utils.convert(blocks, new ArrayList<>(), block -> block.label);
 		blockLabels.sort(Comparator.naturalOrder());
 		return Utils.appendCommaSeparated(blockLabels, new StringBuilder()).toString();
@@ -146,11 +146,11 @@ public final class ControlFlowGraph {
 		private final BasicBlock breakBlock;
 		private final String prefix;
 		private final Supplier<Integer> labelIndexSupplier;
-		private final List<AbstractBlock> orderedBlocks;
+		private final List<Block> orderedBlocks;
 
 		private BasicBlock basicBlock;
 
-		private Builder(@NotNull BasicBlock basicBlock, @NotNull ExitBlock exitBlock, @Nullable BasicBlock breakBlock, @NotNull String prefix, @NotNull Supplier<Integer> labelIndexSupplier, @NotNull List<AbstractBlock> orderedBlocks) {
+		private Builder(@NotNull BasicBlock basicBlock, @NotNull ExitBlock exitBlock, @Nullable BasicBlock breakBlock, @NotNull String prefix, @NotNull Supplier<Integer> labelIndexSupplier, @NotNull List<Block> orderedBlocks) {
 			this.basicBlock         = basicBlock;
 			this.exitBlock          = exitBlock;
 			this.breakBlock         = breakBlock;

@@ -41,12 +41,12 @@ public final class WhileBlock extends ControlFlowBlock {
 	// Accessing ==============================================================
 
 	@NotNull
-	public AbstractBlock getInnerBlock() {
+	public Block getInnerBlock() {
 		return getNextBlocks().get(0);
 	}
 
 	@NotNull
-	public AbstractBlock getLeaveBlock() {
+	public Block getLeaveBlock() {
 		return getNextBlocks().get(1);
 	}
 }

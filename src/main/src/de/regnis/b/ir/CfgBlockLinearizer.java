@@ -12,8 +12,8 @@ public final class CfgBlockLinearizer {
 
 	// Static =================================================================
 
-	public static List<AbstractBlock> linearize(@NotNull ControlFlowGraph graph) {
-		final List<AbstractBlock> blocks = new ArrayList<>();
+	public static List<Block> linearize(@NotNull ControlFlowGraph graph) {
+		final List<Block> blocks = new ArrayList<>();
 		linearizeBlocks(graph.getFirstBlock(), blocks);
 		blocks.add(graph.getExitBlock());
 		return blocks;
@@ -26,7 +26,7 @@ public final class CfgBlockLinearizer {
 
 	// Utils ==================================================================
 
-	private static void linearizeBlocks(AbstractBlock block, List<AbstractBlock> blocks) {
+	private static void linearizeBlocks(Block block, List<Block> blocks) {
 		if (blocks.contains(block)) {
 			return;
 		}

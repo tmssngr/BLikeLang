@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public final class ExitBlock extends AbstractBlock {
+public final class ExitBlock extends Block {
 
 	// Setup ==================================================================
 
