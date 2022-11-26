@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public record Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression, @NotNull Position position) implements SimpleStatement {
+public record Assignment(@NotNull Op operation, @NotNull String name, @NotNull Expression expression,
+                         @NotNull Position position) implements SimpleStatement {
 
 	// Setup ==================================================================
 

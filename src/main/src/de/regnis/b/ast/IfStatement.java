@@ -5,7 +5,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public record IfStatement(@NotNull Expression expression, @NotNull StatementList trueStatements, @NotNull StatementList falseStatements, @NotNull Position position) implements ControlFlowStatement {
+public record IfStatement(@NotNull Expression expression, @NotNull StatementList trueStatements,
+                          @NotNull StatementList falseStatements,
+                          @NotNull Position position) implements ControlFlowStatement {
 
 	// Setup ==================================================================
 

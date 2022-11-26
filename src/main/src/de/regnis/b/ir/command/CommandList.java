@@ -5,7 +5,9 @@ import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Thomas Singer

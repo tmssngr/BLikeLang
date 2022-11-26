@@ -117,8 +117,8 @@ public final class BasicTypes {
 		private final String name;
 
 		private NumericType(int min, int max, String name) {
-			this.min = min;
-			this.max = max;
+			this.min  = min;
+			this.max  = max;
 			this.name = name;
 		}
 

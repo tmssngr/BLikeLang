@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public record ConstDeclaration(@NotNull String name, @NotNull Expression expression, @NotNull Position position) implements Declaration {
+public record ConstDeclaration(@NotNull String name, @NotNull Expression expression,
+                               @NotNull Position position) implements Declaration {
 
 	// Implemented ============================================================
 

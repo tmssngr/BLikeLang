@@ -282,15 +282,15 @@ public final class Compiler {
 	// Inner Classes ==========================================================
 
 	private record FunctionNameToReturnType(DeclarationList root) implements Function<String, Type> {
-			private FunctionNameToReturnType(@NotNull DeclarationList root) {
-				this.root = root;
-			}
-
-			@Nullable
-			@Override
-			public Type apply(String functionName) {
-				final FuncDeclaration function = root.getFunction(functionName);
-				return function != null ? function.type() : null;
-			}
+		private FunctionNameToReturnType(@NotNull DeclarationList root) {
+			this.root = root;
 		}
+
+		@Nullable
+		@Override
+		public Type apply(String functionName) {
+			final FuncDeclaration function = root.getFunction(functionName);
+			return function != null ? function.type() : null;
+		}
+	}
 }

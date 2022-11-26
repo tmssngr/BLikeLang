@@ -34,7 +34,7 @@ public final class StaticSingleAssignmentFactory {
 				&& declaration.expression() instanceof FuncCall call
 				&& call.name().equals(PHI)) {
 			final List<String> variants = Utils.convert(call.parameters().getExpressions(), new ArrayList<>(),
-			                                           expression -> ((VarRead) expression).name());
+			                                            expression -> ((VarRead) expression).name());
 			return new Tuple<>(declaration.name(), variants);
 		}
 		return null;

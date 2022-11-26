@@ -118,6 +118,7 @@ public class TreePrinter {
 	private List<String> getStrings(StatementList node) {
 		return getStrings("statementList", node);
 	}
+
 	private List<String> getStrings(DeclarationList node) {
 		final List<String> strings = new ArrayList<>();
 		final List<Declaration> declarations = node.getDeclarations();

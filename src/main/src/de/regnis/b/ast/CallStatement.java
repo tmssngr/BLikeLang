@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Thomas Singer
  */
-public record CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters, @NotNull Position position) implements SimpleStatement {
+public record CallStatement(@NotNull String name, @NotNull FuncCallParameters parameters,
+                            @NotNull Position position) implements SimpleStatement {
 
 	// Setup ==================================================================
 

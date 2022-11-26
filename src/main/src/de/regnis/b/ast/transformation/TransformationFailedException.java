@@ -3,7 +3,7 @@ package de.regnis.b.ast.transformation;
 /**
  * @author Thomas Singer
  */
-public class TransformationFailedException extends RuntimeException{
+public class TransformationFailedException extends RuntimeException {
 
 	// Setup ==================================================================
 

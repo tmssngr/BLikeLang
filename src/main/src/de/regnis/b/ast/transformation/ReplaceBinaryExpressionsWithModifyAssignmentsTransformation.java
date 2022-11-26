@@ -18,7 +18,6 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	// Fields =================================================================
 
-
 	private int tempVarIndex;
 
 	// Setup ==================================================================
@@ -146,7 +145,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	private Statement handleCall(CallStatement node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = node.parameters().transform(expression ->
-				                                                                splitExpression(expression, true, tempVarFactory));
+				                                                                  splitExpression(expression, true, tempVarFactory));
 		return new CallStatement(node.name(), parameters);
 	}
 
@@ -226,7 +225,7 @@ public final class ReplaceBinaryExpressionsWithModifyAssignmentsTransformation {
 
 	private FuncCall handleFunctionCall(FuncCall node, TempVarFactory tempVarFactory) {
 		final FuncCallParameters parameters = node.parameters().transform(expression ->
-				                                                                splitExpression(expression, true, tempVarFactory));
+				                                                                  splitExpression(expression, true, tempVarFactory));
 		return new FuncCall(node.name(), parameters, node.position());
 	}
 

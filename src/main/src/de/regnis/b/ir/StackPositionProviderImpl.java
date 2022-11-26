@@ -4,7 +4,6 @@ import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,8 +12,8 @@ import java.util.Map;
  * call function
  * <p>
  * function:
- *   push local var1
- *   push local var2
+ * push local var1
+ * push local var2
  * <p>
  * results in
  * SP+0 -> local var 2

@@ -30,7 +30,7 @@ public final class SymbolScope {
 
 	private SymbolScope(@Nullable SymbolScope parentScope, ScopeKind scopeKind) {
 		this.parentScope = parentScope;
-		this.scopeKind = scopeKind;
+		this.scopeKind   = scopeKind;
 	}
 
 	// Accessing ==============================================================
@@ -38,8 +38,8 @@ public final class SymbolScope {
 	public void declareVariable(@NotNull String name, @NotNull String newName, @NotNull Position position) {
 		if (variables.containsKey(name)) {
 			throw new TransformationFailedException(scopeKind == ScopeKind.Parameter
-					                                  ? Messages.errorParameterAlreadyDeclared(position.line(), position.column(), name)
-					                                  : Messages.errorVarAlreadyDeclared(position.line(), position.column(), name));
+					                                        ? Messages.errorParameterAlreadyDeclared(position.line(), position.column(), name)
+					                                        : Messages.errorVarAlreadyDeclared(position.line(), position.column(), name));
 		}
 
 		if (scopeKind == ScopeKind.Local) {

@@ -1,6 +1,8 @@
 package de.regnis.b.ir;
 
-import de.regnis.b.ast.*;
+import de.regnis.b.ast.SimpleStatement;
+import de.regnis.b.ast.VarDeclaration;
+import de.regnis.b.ast.VarRead;
 import de.regnis.utils.Tuple;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
