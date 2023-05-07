@@ -1,0 +1,67 @@
+main:
+    push r4
+    push r5
+    ld r0, #%00
+    ld r1, #%01
+    push r0
+    push r1
+    ld r0, #%00
+    ld r1, #%02
+    push r0
+    push r1
+    call max
+    pop r1
+    pop r0
+    pop r1
+    pop r0
+    ld r4, r0
+    ld r5, r1
+    push r0
+    push r1
+    call print
+    pop r1
+    pop r0
+    pop r5
+    pop r4
+    ret
+
+print:
+    ret
+
+max:
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%02
+    adc r14, #%00
+    lde r3, @rr14
+    incw r14
+    lde r2, @rr14
+    cp r0, r2
+    .jp gt, max_exit
+    .jp nz, max_after_if_1
+    cp r1, r3
+    .jp ugt, max_exit
+max_after_if_1:
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%02
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde @rr14, r1
+    incw r14
+    lde @rr14, r0
+max_exit:
+    ret
