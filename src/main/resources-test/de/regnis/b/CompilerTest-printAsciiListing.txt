@@ -18,15 +18,11 @@ main_do_1:
     ld r1, r5
     ld %15, r1
     call %0818
-    ld r0, r4
-    ld r1, r5
-    ld r6, r0
-    ld r7, r1
+    ld r6, r4
+    ld r7, r5
     incw r6
-    ld r0, r6
-    ld r1, r7
-    ld r4, r0
-    ld r5, r1
+    ld r4, r6
+    ld r5, r7
     and r5, #%0F
     ld r4, #%00
     ld r0, r4
@@ -40,10 +36,8 @@ main_do_1:
     ld %15, r1
     call %0818
 main_after_if_2:
-    ld r0, r6
-    ld r1, r7
-    ld r4, r0
-    ld r5, r1
+    ld r4, r6
+    ld r5, r7
     .jp main_while_1
 main_exit:
     pop r7

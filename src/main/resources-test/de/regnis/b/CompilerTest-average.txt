@@ -113,10 +113,10 @@ main_do_1:
     ld r1, #%3D
     ld %15, r1
     call %0818
-    ld r0, r4
-    ld r1, r5
-    ld r8, r0
-    ld r9, r1
+    ld r8, r4
+    ld r9, r5
+    ld r0, r8
+    ld r1, r9
     ld r2, r6
     ld r3, r7
     ld %12, r0

@@ -329,8 +329,15 @@ public final class CommandFactory {
 
 			@Override
 			public Object visitVarRead(VarRead node) {
-				loadA(node.name());
-				storeA(name);
+				final int srcReg = stackPositionProvider.getRegister(node.name());
+				final int destReg = stackPositionProvider.getRegister(name);
+				if (srcReg >= 0 && destReg >= 0) {
+					addCommand(new TempLd(workingRegister(destReg), workingRegister(srcReg)));
+				}
+				else {
+					loadA(node.name());
+					storeA(name);
+				}
 				return node;
 			}
 		});

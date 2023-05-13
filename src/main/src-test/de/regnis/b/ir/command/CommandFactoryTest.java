@@ -52,8 +52,7 @@ public class CommandFactoryTest {
 		     REGISTER_POSITION_PROVIDER);
 
 		test(new ExpectedCommands()
-				     .add(new TempLd(workingRegister(REG_A), workingRegister(STACKPOS_B)))
-				     .add(new TempLd(workingRegister(STACKPOS_A), workingRegister(REG_A)))
+				     .add(new TempLd(workingRegister(STACKPOS_A), workingRegister(STACKPOS_B)))
 				     .commands, new Assignment(Assignment.Op.assign, "a", new VarRead("b")),
 		     REGISTER_POSITION_PROVIDER);
 	}
