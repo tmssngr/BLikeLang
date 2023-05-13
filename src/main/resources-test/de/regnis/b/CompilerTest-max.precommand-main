@@ -1,0 +1,5 @@
+main_start:
+    t0_0 = max(1, 2)
+    print(t0_0)
+main_exit:
+    return

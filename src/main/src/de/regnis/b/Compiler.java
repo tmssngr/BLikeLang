@@ -30,7 +30,7 @@ import static de.regnis.utils.Utils.notNull;
  * @author Thomas Singer
  */
 @SuppressWarnings({"UseOfSystemOutOrSystemErr", "StaticVariableMayNotBeInitialized"})
-public final class Compiler {
+public class Compiler {
 
 	// Static =================================================================
 
@@ -238,6 +238,7 @@ public final class Compiler {
 			System.out.println("reuse vars");
 			System.out.println(ControlFlowGraphPrinter.print(cfg, new StringStringOutput()));
 		}
+		preCommandFactory(cfg, declaration.name());
 
 		final StackPositionProvider stackPositionProvider = new StackPositionProviderImpl(registers, 5, 4);
 
@@ -258,6 +259,9 @@ public final class Compiler {
 
 		commandList = CommandListOptimizations.optimize(commandList);
 		commandList.print(output);
+	}
+
+	protected void preCommandFactory(ControlFlowGraph cfg, String methodName) {
 	}
 
 	private void simplify(ControlFlowGraph cfg) {

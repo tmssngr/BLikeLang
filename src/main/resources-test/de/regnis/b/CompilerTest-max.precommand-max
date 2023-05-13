@@ -1,0 +1,12 @@
+max_start:
+max_if_1:
+    if p0_0 > p1_0
+    if ! goto max_else_1
+max_then_1:
+    goto max_exit
+
+max_else_1:
+max_after_if_1:
+    p0_0 = p1_0
+max_exit:
+    return

@@ -1,5 +1,7 @@
 package de.regnis.b;
 
+import de.regnis.b.ir.ControlFlowGraph;
+import de.regnis.b.ir.ControlFlowGraphPrinter;
 import de.regnis.b.out.PathStringOutput;
 import de.regnis.b.out.StringOutput;
 import de.regnis.b.out.StringStringOutput;
@@ -166,7 +168,24 @@ public class CompilerTest {
 		final Path expectedPath = Paths.get(path + asmSuffix);
 
 		final StringOutput warnings = new StringStringOutput();
-		final Compiler compiler = new Compiler(warnings);
+		final Compiler compiler = new Compiler(warnings) {
+			@Override
+			protected void preCommandFactory(ControlFlowGraph cfg, String methodName) {
+				try {
+					final String precommandSuffix = ".precommand-" + methodName;
+					final var testPath = Paths.get(testOutDir, path + precommandSuffix);
+					final var expectedPath = Paths.get(path + precommandSuffix);
+					try(PathStringOutput precommandOutput = new PathStringOutput(testPath)) {
+						ControlFlowGraphPrinter.print(cfg, precommandOutput);
+					}
+
+					assertEquals(expectedPath, testPath);
+				}
+				catch (IOException e) {
+					throw new AssertionError(e);
+				}
+			}
+		};
 
 		try (PathStringOutput asmOutput = new PathStringOutput(testPath)) {
 			compiler.compile(input, asmOutput);

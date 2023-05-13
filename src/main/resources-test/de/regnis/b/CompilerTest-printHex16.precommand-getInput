@@ -1,0 +1,4 @@
+getInput_start:
+    result = 192
+getInput_exit:
+    return

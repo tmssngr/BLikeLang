@@ -1,0 +1,7 @@
+printHex16_start:
+    t0_0 = p0_0
+    t0_0 >>= 8
+    printHex8(t0_0)
+    printHex8(p0_0)
+printHex16_exit:
+    return

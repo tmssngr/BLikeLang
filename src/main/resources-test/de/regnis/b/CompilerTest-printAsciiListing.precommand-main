@@ -1,0 +1,25 @@
+main_start:
+    v0_0 = 32
+main_while_1:
+    while v0_0 < 128
+main_do_1:
+    printChar(v0_0)
+    v0_2 = v0_0
+    v0_2 += 1
+    v0_0 = v0_2
+    v0_0 &= 15
+main_if_2:
+    if v0_0 == 0
+    if ! goto main_else_2
+main_then_2:
+    printChar(13)
+    goto main_after_if_2
+
+main_else_2:
+main_after_if_2:
+    v0_0 = v0_2
+    goto main_while_1
+
+main_after_while_1:
+main_exit:
+    return

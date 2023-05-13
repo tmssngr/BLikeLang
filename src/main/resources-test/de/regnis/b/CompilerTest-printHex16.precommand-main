@@ -1,0 +1,5 @@
+main_start:
+    v0_0 = getInput()
+    printHex16(v0_0)
+main_exit:
+    return
