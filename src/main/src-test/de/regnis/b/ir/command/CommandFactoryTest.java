@@ -22,6 +22,8 @@ public class CommandFactoryTest {
 
 	private static final int STACKPOS_A = 10;
 	private static final int STACKPOS_B = 12;
+	private static final StackPositionProvider STACK_POSITION_PROVIDER = new TestStackPositionProvider();
+	private static final StackPositionProvider REGISTER_POSITION_PROVIDER = new TestRegisterPositionProvider();
 
 	// Accessing ==============================================================
 
@@ -32,7 +34,8 @@ public class CommandFactoryTest {
 
 				     .varAddress(STACKPOS_A)
 				     .save(REG_A)
-				     .commands, new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1)));
+				     .commands, new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1)),
+		     STACK_POSITION_PROVIDER);
 
 		test(new ExpectedCommands()
 				     .varAddress(STACKPOS_B)
@@ -40,7 +43,19 @@ public class CommandFactoryTest {
 
 				     .varAddress(STACKPOS_A)
 				     .save(REG_A)
-				     .commands, new Assignment(Assignment.Op.assign, "a", new VarRead("b")));
+				     .commands, new Assignment(Assignment.Op.assign, "a", new VarRead("b")),
+		     STACK_POSITION_PROVIDER);
+
+		test(new ExpectedCommands()
+				     .add(new TempLdLiteral(workingRegister(STACKPOS_A), 1))
+				     .commands, new Assignment(Assignment.Op.assign, "a", new NumberLiteral(1)),
+		     REGISTER_POSITION_PROVIDER);
+
+		test(new ExpectedCommands()
+				     .add(new TempLd(workingRegister(REG_A), workingRegister(STACKPOS_B)))
+				     .add(new TempLd(workingRegister(STACKPOS_A), workingRegister(REG_A)))
+				     .commands, new Assignment(Assignment.Op.assign, "a", new VarRead("b")),
+		     REGISTER_POSITION_PROVIDER);
 	}
 
 	@Test
@@ -55,7 +70,7 @@ public class CommandFactoryTest {
 	@Test
 	public void testIf() {
 		final CommandList commandList = new CommandList();
-		final CommandFactory factory = createCommandFactory(commandList);
+		final CommandFactory factory = createCommandFactory(commandList, STACK_POSITION_PROVIDER);
 		factory.addIf(new VarRead("a"), "trueLabel", "falseLabel");
 		Assert.assertEquals(new ExpectedCommands()
 				                    .varAddress(STACKPOS_A)
@@ -82,7 +97,7 @@ public class CommandFactoryTest {
 
 	private void testIf(BinaryExpression.Op operator, List<Command> msbJumps, JumpCondition lsbFalseCondition) {
 		CommandList commandList = new CommandList();
-		CommandFactory factory = createCommandFactory(commandList);
+		CommandFactory factory = createCommandFactory(commandList, STACK_POSITION_PROVIDER);
 		factory.addIf(new BinaryExpression(new VarRead("a"),
 		                                   operator,
 		                                   new VarRead("b")), "trueLabel", "falseLabel");
@@ -102,7 +117,7 @@ public class CommandFactoryTest {
 				                    .commands, commandList.getCommands());
 
 		commandList = new CommandList();
-		factory     = createCommandFactory(commandList);
+		factory     = createCommandFactory(commandList, STACK_POSITION_PROVIDER);
 		factory.addIf(new BinaryExpression(new VarRead("a"),
 		                                   operator,
 		                                   new NumberLiteral(100)), "trueLabel", "falseLabel");
@@ -194,15 +209,19 @@ public class CommandFactoryTest {
 	}
 
 	private void test(List<Command> expected, SimpleStatement statement) {
+		test(expected, statement, STACK_POSITION_PROVIDER);
+	}
+
+	private void test(List<Command> expected, SimpleStatement statement, StackPositionProvider stackPositionProvider) {
 		final CommandList commandList = new CommandList();
-		final CommandFactory factory = createCommandFactory(commandList);
+		final CommandFactory factory = createCommandFactory(commandList, stackPositionProvider);
 		factory.add(statement);
 		Assert.assertEquals(expected, commandList.getCommands());
 	}
 
 	@NotNull
-	private CommandFactory createCommandFactory(@NotNull CommandList commandList) {
-		return new CommandFactory(new TestStackPositionProvider(), funcName -> BasicTypes.INT16, new BuiltInFunctions(), commandList);
+	private CommandFactory createCommandFactory(@NotNull CommandList commandList, StackPositionProvider stackPositionProvider) {
+		return new CommandFactory(stackPositionProvider, funcName -> BasicTypes.INT16, new BuiltInFunctions(), commandList);
 	}
 
 	// Inner Classes ==========================================================
@@ -264,6 +283,28 @@ public class CommandFactoryTest {
 				case "b" -> STACKPOS_B;
 				default -> throw new IllegalArgumentException(varName);
 			};
+		}
+	}
+
+	private static class TestRegisterPositionProvider implements StackPositionProvider {
+
+		@Override
+		public RegistersToPush getRegistersToPush() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getRegister(@NotNull String varName) {
+			return switch (varName) {
+				case "a" -> STACKPOS_A;
+				case "b" -> STACKPOS_B;
+				default -> throw new IllegalArgumentException(varName);
+			};
+		}
+
+		@Override
+		public int getStackPosition(@NotNull String varName) {
+			return -1;
 		}
 	}
 }
