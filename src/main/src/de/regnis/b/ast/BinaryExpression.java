@@ -23,14 +23,16 @@ public record BinaryExpression(@NotNull Expression left, @NotNull Op operator,
 	// Inner Classes ==========================================================
 
 	public enum Op {
-		add("+"), sub("-"), multiply("*"), divide("/"), modulo("%"), shiftL("<<"), shiftR(">>"),
-		lessThan("<"), lessEqual("<="), equal("=="), greaterEqual(">="), greaterThan(">"), notEqual("!="),
-		bitAnd("&"), bitOr("|"), bitXor("^");
+		add("+", true), sub("-", false), multiply("*", true), divide("/", false), modulo("%", false), shiftL("<<", false), shiftR(">>", false),
+		lessThan("<", false), lessEqual("<=", false), equal("==", true), greaterEqual(">=", false), greaterThan(">", false), notEqual("!=", true),
+		bitAnd("&", true), bitOr("|", true), bitXor("^", true);
 
 		public final String text;
+		public final boolean commutative;
 
-		Op(String text) {
+		Op(String text, boolean commutative) {
 			this.text = text;
+			this.commutative = commutative;
 		}
 	}
 }
