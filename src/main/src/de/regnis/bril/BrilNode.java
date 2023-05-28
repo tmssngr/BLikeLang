@@ -1,9 +1,9 @@
 package de.regnis.bril;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import de.regnis.utils.Utils;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -17,6 +17,32 @@ public final class BrilNode {
 	// Setup ==================================================================
 
 	public BrilNode() {
+	}
+
+	// Implemented ============================================================
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		final BrilNode brilNode = (BrilNode) o;
+		return Objects.equals(children, brilNode.children);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(children);
+	}
+
+	@Override
+	public String toString() {
+		final List<String> keys = new ArrayList<>(children.keySet());
+		keys.sort(Comparator.naturalOrder());
+		return Utils.appendCommaSeparated(keys, key -> key + ": " + children.get(key), new StringBuilder()).toString();
 	}
 
 	// Accessing ==============================================================
