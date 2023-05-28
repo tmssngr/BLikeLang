@@ -4,8 +4,6 @@ import de.regnis.utils.Utils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -16,9 +14,16 @@ public class BrilCfg {
 
 	private static final Set<String> TERMINATER_OPS = Set.of(BrilFactory.JMP);
 
+	public static final String KEY_INSTRUCTIONS = "instructions";
+	public static final String KEY_SUCCESSORS = "successors";
+	public static final String KEY_PREDECESSORS = "predecessors";
+	public static final String KEY_NAME = "name";
+
 	// Static =================================================================
 
-	public static void formBlocks(List<BrilNode> instructions, Consumer<List<BrilNode>> consumer) {
+	public static List<List<BrilNode>> splitIntoBlocks(List<BrilNode> instructions) {
+		final List<List<BrilNode>> blocks = new ArrayList<>();
+
 		List<BrilNode> currentBlock = new ArrayList<>();
 
 		for (BrilNode instruction : instructions) {
@@ -26,14 +31,14 @@ public class BrilCfg {
 			if (op != null) {
 				currentBlock.add(instruction);
 				if (TERMINATER_OPS.contains(op)) {
-					consumer.accept(currentBlock);
+					blocks.add(currentBlock);
 					currentBlock = new ArrayList<>();
 				}
 			}
 			else {
 				// label
 				if (!currentBlock.isEmpty()) {
-					consumer.accept(currentBlock);
+					blocks.add(currentBlock);
 				}
 				currentBlock = new ArrayList<>();
 				currentBlock.add(instruction);
@@ -41,88 +46,90 @@ public class BrilCfg {
 		}
 
 		if (!currentBlock.isEmpty()) {
-			consumer.accept(currentBlock);
+			blocks.add(currentBlock);
 		}
+		return blocks;
 	}
 
-	public static List<Block> formBlocks(List<BrilNode> instructions) {
-		final List<Block> blocks = new ArrayList<>();
-		final Map<String, Block> labelToBlock = new HashMap<>();
+	public static List<BrilNode> getNameToBlock(List<BrilNode> instructions) throws DuplicateLabelException, InvalidTargetLabelException {
+		final Map<String, BrilNode> nameToBlock = new LinkedHashMap<>();
 
-		formBlocks(instructions, blockInstructions -> {
+		final List<List<BrilNode>> splitIntoBlocks = splitIntoBlocks(instructions);
+		for (int i = 0; i < splitIntoBlocks.size(); i++) {
+			final List<BrilNode> blockInstructions = splitIntoBlocks.get(i);
 			final BrilNode brilNode = blockInstructions.get(0);
 			String name = BrilFactory.getLabel(brilNode);
 			if (name != null) {
 				blockInstructions.remove(0);
 			}
 			else {
-				name = "block " + labelToBlock.size();
+				name = "block " + i;
 			}
 
-			final Block block = new Block(name, blockInstructions);
-			blocks.add(block);
-			labelToBlock.put(block.name, block);
-		});
+			final BrilNode blockNode = new BrilNode();
+			blockNode.set(KEY_NAME, name);
+			blockNode.getOrCreateNodeList(KEY_INSTRUCTIONS).addAll(blockInstructions);
+			if (nameToBlock.put(name, blockNode) != null) {
+				throw new DuplicateLabelException(name);
+			}
+		}
 
-		for (int i = 0; i < blocks.size(); i++) {
-			final Block block = blocks.get(i);
-			final Block nextBlock = i < blocks.size() - 1 ? blocks.get(i + 1) : null;
-			connect(block, nextBlock, labelToBlock);
+		final List<BrilNode> blocks = new ArrayList<>();
+
+		@Nullable BrilNode fallThroughFromBlock = null;
+		for (Map.Entry<String, BrilNode> entry : nameToBlock.entrySet()) {
+			final String name = entry.getKey();
+			final BrilNode blockNode = entry.getValue();
+
+			if (fallThroughFromBlock != null) {
+				fallThroughFromBlock.getOrCreateStringList(KEY_SUCCESSORS).add(name);
+				blockNode.getOrCreateStringList(KEY_PREDECESSORS).add(fallThroughFromBlock.getString(KEY_NAME));
+				fallThroughFromBlock = null;
+			}
+
+			blocks.add(blockNode);
+			final List<BrilNode> blockInstructions = blockNode.getOrCreateNodeList(KEY_INSTRUCTIONS);
+
+			final List<String> successors = blockNode.getOrCreateStringList(KEY_SUCCESSORS);
+
+			final BrilNode lastInstruction = Utils.getLast(blockInstructions);
+			final String op = BrilFactory.getOp(lastInstruction);
+			if (BrilFactory.RET.equals(op)) {
+				blockInstructions.remove(lastInstruction);
+				continue;
+			}
+
+			final List<String> targets = BrilFactory.getJmpTargets(lastInstruction);
+			if (targets.isEmpty()) {
+				fallThroughFromBlock = blockNode;
+				continue;
+			}
+
+			for (String target : targets) {
+				final BrilNode targetBlock = nameToBlock.get(target);
+				if (targetBlock == null) {
+					throw new InvalidTargetLabelException(target);
+				}
+
+				successors.add(target);
+				targetBlock.getOrCreateStringList(KEY_PREDECESSORS).add(name);
+			}
 		}
 
 		return blocks;
 	}
 
-	private static void connect(Block block, @Nullable Block nextBlock, Map<String, Block> labelToBlock) {
-		final BrilNode lastInstruction = Utils.getLast(block.instructions);
-		final String op = BrilFactory.getOp(lastInstruction);
-		if (BrilFactory.RET.equals(op)) {
-			return;
-		}
+	// Inner Classes ==========================================================
 
-		final List<String> targets = BrilFactory.getJmpTargets(lastInstruction);
-		if (targets.isEmpty() && nextBlock != null) {
-			targets.add(nextBlock.name);
-		}
-		for (String target : targets) {
-			final Block targetBlock = labelToBlock.get(target);
-			block.successors.add(targetBlock);
-			targetBlock.predecessors.add(block);
+	public static class DuplicateLabelException extends Exception {
+		public DuplicateLabelException(String label) {
+			super(label);
 		}
 	}
 
-	// Inner Classes ==========================================================
-
-	public static final class Block {
-		private final List<Block> predecessors = new ArrayList<>();
-		private final List<Block> successors = new ArrayList<>();
-		public final List<BrilNode> instructions;
-		public final String name;
-
-		public Block(String name, List<BrilNode> instructions) {
-			this.name         = name;
-			this.instructions = Collections.unmodifiableList(new ArrayList<>(instructions));
-		}
-
-		@Override
-		public String toString() {
-			final StringBuilder buffer = new StringBuilder();
-			buffer.append(name);
-			buffer.append(": pred[");
-			final Function<Block, String> blockStringFunction = block -> String.valueOf(block.name);
-			Utils.appendCommaSeparated(predecessors, blockStringFunction, buffer);
-			buffer.append("], succ[");
-			Utils.appendCommaSeparated(successors, blockStringFunction, buffer);
-			buffer.append("]");
-			return name;
-		}
-
-		public List<Block> getPredecessors() {
-			return Collections.unmodifiableList(predecessors);
-		}
-
-		public List<Block> getSuccessors() {
-			return Collections.unmodifiableList(successors);
+	public static class InvalidTargetLabelException extends Exception {
+		public InvalidTargetLabelException(String target) {
+			super(target);
 		}
 	}
 }
