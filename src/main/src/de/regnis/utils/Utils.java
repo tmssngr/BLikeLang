@@ -24,6 +24,11 @@ public final class Utils {
 		return value != null ? value : defaultValue;
 	}
 
+	@NotNull
+	public static <O> O getLast(List<O> list) {
+		return list.get(list.size() - 1);
+	}
+
 	@Nullable
 	public static String parseString(@NotNull String text, char surroundingChar) {
 		final int length = text.length();
