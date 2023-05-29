@@ -55,7 +55,7 @@ public class BrilCfgTest {
 	                          List<String> expectedSuccessors, BrilNode blockNode) {
 		Assert.assertEquals(expectedName, blockNode.getString(BrilCfg.KEY_NAME));
 		Assert.assertEquals(expectedInstructions, blockNode.getOrCreateNodeList(BrilCfg.KEY_INSTRUCTIONS));
-		Assert.assertEquals(expectedPredecessors, blockNode.getOrCreateNodeList(BrilCfg.KEY_PREDECESSORS));
+		Assert.assertEquals(expectedPredecessors, blockNode.getOrCreateStringList(BrilCfg.KEY_PREDECESSORS));
 		Assert.assertEquals(expectedSuccessors, blockNode.getOrCreateStringList(BrilCfg.KEY_SUCCESSORS));
 	}
 }
