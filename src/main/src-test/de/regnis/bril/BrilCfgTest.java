@@ -28,23 +28,26 @@ public class BrilCfgTest {
 	}
 
 	@Test
-	public void testFormBlocks2() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.getNameToBlock(List.of(BrilFactory.constant("v", 4),
-		                                                             BrilFactory.jump(".somewhere"),
-		                                                             BrilFactory.constant("v", 2),
-		                                                             BrilFactory.label(".somewhere"),
-		                                                             BrilFactory.print("v")));
-		Assert.assertEquals(3, blocks.size());
+	public void testBuildBlocks() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(BrilFactory.constant("v", 4),
+		                                                          BrilFactory.jump(".somewhere"),
+		                                                          BrilFactory.constant("v", 2),
+		                                                          BrilFactory.label(".somewhere"),
+		                                                          BrilFactory.print("v")));
+		Assert.assertEquals(4, blocks.size());
 		assertEquals("block 0", List.of(BrilFactory.constant("v", 4),
 		                                BrilFactory.jump(".somewhere")),
-					 List.of(),
+		             List.of(),
 		             List.of(".somewhere"), blocks.get(0));
 		assertEquals("block 1", List.of(BrilFactory.constant("v", 2)),
-					 List.of(),
+		             List.of(),
 		             List.of(".somewhere"), blocks.get(1));
 		assertEquals(".somewhere", List.of(BrilFactory.print("v")),
-					 List.of("block 0", "block 1"),
-		             List.of(), blocks.get(2));
+		             List.of("block 0", "block 1"),
+		             List.of("exit 3"), blocks.get(2));
+		assertEquals("exit 3", List.of(),
+		             List.of(".somewhere"),
+		             List.of(), blocks.get(3));
 	}
 
 	// Utils ==================================================================

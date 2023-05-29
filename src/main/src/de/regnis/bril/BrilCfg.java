@@ -1,6 +1,7 @@
 package de.regnis.bril;
 
 import de.regnis.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -51,7 +52,7 @@ public class BrilCfg {
 		return blocks;
 	}
 
-	public static List<BrilNode> getNameToBlock(List<BrilNode> instructions) throws DuplicateLabelException, InvalidTargetLabelException {
+	public static List<BrilNode> buildBlocks(List<BrilNode> instructions) throws DuplicateLabelException, InvalidTargetLabelException, NoExitBlockException {
 		final Map<String, BrilNode> nameToBlock = new LinkedHashMap<>();
 
 		final List<List<BrilNode>> splitIntoBlocks = splitIntoBlocks(instructions);
@@ -76,14 +77,16 @@ public class BrilCfg {
 
 		final List<BrilNode> blocks = new ArrayList<>();
 
+		final BrilNode exitBlock = new BrilNode();
+		exitBlock.set(KEY_NAME, "exit " + splitIntoBlocks.size());
+
 		@Nullable BrilNode fallThroughFromBlock = null;
 		for (Map.Entry<String, BrilNode> entry : nameToBlock.entrySet()) {
 			final String name = entry.getKey();
 			final BrilNode blockNode = entry.getValue();
 
 			if (fallThroughFromBlock != null) {
-				fallThroughFromBlock.getOrCreateStringList(KEY_SUCCESSORS).add(name);
-				blockNode.getOrCreateStringList(KEY_PREDECESSORS).add(fallThroughFromBlock.getString(KEY_NAME));
+				connectBlocks(fallThroughFromBlock, blockNode);
 				fallThroughFromBlock = null;
 			}
 
@@ -96,6 +99,7 @@ public class BrilCfg {
 			final String op = BrilFactory.getOp(lastInstruction);
 			if (BrilFactory.RET.equals(op)) {
 				blockInstructions.remove(lastInstruction);
+				connectBlocks(blockNode, exitBlock);
 				continue;
 			}
 
@@ -116,7 +120,24 @@ public class BrilCfg {
 			}
 		}
 
+		if (fallThroughFromBlock != null) {
+			connectBlocks(fallThroughFromBlock, exitBlock);
+		}
+
+		if (exitBlock.getOrCreateStringList(KEY_PREDECESSORS).isEmpty()) {
+			throw new NoExitBlockException();
+		}
+
+		blocks.add(exitBlock);
+
 		return blocks;
+	}
+
+	// Utils ==================================================================
+
+	private static void connectBlocks(@NotNull BrilNode prevBlock, @NotNull BrilNode nextBlock) {
+		prevBlock.getOrCreateStringList(KEY_SUCCESSORS).add(nextBlock.getString(KEY_NAME));
+		nextBlock.getOrCreateStringList(KEY_PREDECESSORS).add(prevBlock.getString(KEY_NAME));
 	}
 
 	// Inner Classes ==========================================================
@@ -130,6 +151,11 @@ public class BrilCfg {
 	public static class InvalidTargetLabelException extends Exception {
 		public InvalidTargetLabelException(String target) {
 			super(target);
+		}
+	}
+
+	public static class NoExitBlockException extends Exception {
+		public NoExitBlockException() {
 		}
 	}
 }
