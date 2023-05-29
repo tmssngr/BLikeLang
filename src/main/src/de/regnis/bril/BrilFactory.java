@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * according to https://capra.cs.cornell.edu/bril/lang/
@@ -24,15 +26,22 @@ public class BrilFactory {
 
 	public static final String RET = "ret";
 	public static final String JMP = "jmp";
+	private static final String KEY_DEST = "dest";
+	private static final String KEY_COND = "cond";
+	private static final String CALL = "call";
+	private static final String KEY_ARGS = "args";
+	private static final String KEY_VAR1 = "var1";
+	private static final String KEY_VAR2 = "var2";
+	private static final String KEY_VAR = "var";
 
 	// Static =================================================================
 
 	@NotNull
 	public static BrilNode call(String name, List<String> args) {
 		return new BrilNode()
-				.set(KEY_OP, "call")
+				.set(KEY_OP, CALL)
 				.set("name", name)
-				.set("args", args);
+				.set(KEY_ARGS, args);
 	}
 
 	@NotNull
@@ -52,7 +61,7 @@ public class BrilFactory {
 	public static BrilNode branch(String var, String thenLabel, String elseLabel) {
 		return new BrilNode()
 				.set(KEY_OP, BR)
-				.set("cond", var)
+				.set(KEY_COND, var)
 				.set(KEY_IF_TARGET, thenLabel)
 				.set(KEY_ELSE_TARGET, elseLabel);
 	}
@@ -61,24 +70,24 @@ public class BrilFactory {
 	public static BrilNode lessThan(String dest, String var1, String var2) {
 		return new BrilNode()
 				.set(KEY_OP, "lt")
-				.set("dest", dest)
-				.set("var1", var1)
-				.set("var2", var2);
+				.set(KEY_DEST, dest)
+				.set(KEY_VAR1, var1)
+				.set(KEY_VAR2, var2);
 	}
 
 	@NotNull
 	public static BrilNode add(String dest, String var1, String var2) {
 		return new BrilNode()
 				.set(KEY_OP, "add")
-				.set("dest", dest)
-				.set("var1", var1)
-				.set("var2", var2);
+				.set(KEY_DEST, dest)
+				.set(KEY_VAR1, var1)
+				.set(KEY_VAR2, var2);
 	}
 
 	@NotNull
 	public static BrilNode constant(String dest, int value) {
 		return new BrilNode()
-				.set("dest", dest)
+				.set(KEY_DEST, dest)
 				.set(KEY_OP, "const")
 				.set("value", value);
 	}
@@ -86,9 +95,9 @@ public class BrilFactory {
 	@NotNull
 	public static BrilNode id(String dest, String src) {
 		return new BrilNode()
-				.set("dest", dest)
+				.set(KEY_DEST, dest)
 				.set(KEY_OP, "id")
-				.set("var", src);
+				.set(KEY_VAR, src);
 	}
 
 	@NotNull
@@ -100,7 +109,7 @@ public class BrilFactory {
 	public static BrilNode print(String var) {
 		return new BrilNode()
 				.set(KEY_OP, "print")
-				.set("var", var);
+				.set(KEY_VAR, var);
 	}
 
 	@Nullable
@@ -125,6 +134,22 @@ public class BrilFactory {
 			labels.add(node.getString(KEY_ELSE_TARGET));
 		}
 		return labels;
+	}
+
+	@Nullable
+	public static String getDest(BrilNode node) {
+		return node.getString(KEY_DEST);
+	}
+
+	public static Set<String> getRequiredVars(BrilNode node) {
+		final Set<String> requiredVars = new HashSet<>();
+		requiredVars.add(node.getString(KEY_COND));
+		requiredVars.add(node.getString(KEY_VAR));
+		requiredVars.add(node.getString(KEY_VAR1));
+		requiredVars.add(node.getString(KEY_VAR2));
+		requiredVars.addAll(node.getStringList(KEY_ARGS));
+		requiredVars.remove(null);
+		return requiredVars;
 	}
 
 	// Fields =================================================================
@@ -169,7 +194,7 @@ public class BrilFactory {
 
 			node.set("name", name);
 			node.set("type", type);
-			args = node.getOrCreateNodeList("args");
+			args = node.getOrCreateNodeList(KEY_ARGS);
 		}
 
 		public FunctionFactory addArgument(String name, String type) {

@@ -87,4 +87,14 @@ public final class BrilNode {
 	public String getString(String key) {
 		return (String) children.get(key);
 	}
+
+	public List<String> getStringList(String key) {
+		//noinspection unchecked
+		List<String> list = (List<String>) children.get(key);
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+
+		return list;
+	}
 }

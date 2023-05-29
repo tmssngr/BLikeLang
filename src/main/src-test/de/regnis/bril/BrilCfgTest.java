@@ -3,7 +3,9 @@ package de.regnis.bril;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Thomas Singer
@@ -34,31 +36,45 @@ public class BrilCfgTest {
 		                                                          BrilFactory.constant("v", 2),
 		                                                          BrilFactory.label(".somewhere"),
 		                                                          BrilFactory.print("v")));
+		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+
 		Assert.assertEquals(4, blocks.size());
-		assertEquals("block 0", List.of(BrilFactory.constant("v", 4),
-		                                BrilFactory.jump(".somewhere")),
-		             List.of(),
-		             List.of(".somewhere"), blocks.get(0));
-		assertEquals("block 1", List.of(BrilFactory.constant("v", 2)),
-		             List.of(),
-		             List.of(".somewhere"), blocks.get(1));
-		assertEquals(".somewhere", List.of(BrilFactory.print("v")),
-		             List.of("block 0", "block 1"),
-		             List.of("exit 3"), blocks.get(2));
-		assertEquals("exit 3", List.of(),
-		             List.of(".somewhere"),
-		             List.of(), blocks.get(3));
+		assertEqualsCfg("block 0", List.of(BrilFactory.constant("v", 4),
+		                                   BrilFactory.jump(".somewhere")),
+		                List.of(),
+		                List.of(".somewhere"),
+		                Set.of(), Set.of("v"),
+		                blocks.get(0));
+		assertEqualsCfg("block 1", List.of(BrilFactory.constant("v", 2)),
+		                List.of(),
+		                List.of(".somewhere"),
+		                Set.of(), Set.of("v"),
+		                blocks.get(1));
+		assertEqualsCfg(".somewhere", List.of(BrilFactory.print("v")),
+		                List.of("block 0", "block 1"),
+		                List.of("exit 3"),
+		                Set.of("v"), Set.of(),
+		                blocks.get(2));
+		assertEqualsCfg("exit 3", List.of(),
+		                List.of(".somewhere"),
+		                List.of(),
+		                Set.of(), Set.of(),
+		                blocks.get(3));
 	}
 
 	// Utils ==================================================================
 
-	private void assertEquals(String expectedName,
-	                          List<BrilNode> expectedInstructions,
-	                          List<String> expectedPredecessors,
-	                          List<String> expectedSuccessors, BrilNode blockNode) {
+	private void assertEqualsCfg(String expectedName,
+	                             List<BrilNode> expectedInstructions,
+	                             List<String> expectedPredecessors,
+	                             List<String> expectedSuccessors,
+	                             Set<String> expectedLiveBefore,
+	                             Set<String> expectedLiveAfter, BrilNode blockNode) {
 		Assert.assertEquals(expectedName, blockNode.getString(BrilCfg.KEY_NAME));
 		Assert.assertEquals(expectedInstructions, blockNode.getOrCreateNodeList(BrilCfg.KEY_INSTRUCTIONS));
 		Assert.assertEquals(expectedPredecessors, blockNode.getOrCreateStringList(BrilCfg.KEY_PREDECESSORS));
 		Assert.assertEquals(expectedSuccessors, blockNode.getOrCreateStringList(BrilCfg.KEY_SUCCESSORS));
+		Assert.assertEquals(expectedLiveBefore, new HashSet<>(blockNode.getOrCreateStringList(BrilCfgDetectVarUsages.KEY_VARS_LIFE_BEFORE)));
+		Assert.assertEquals(expectedLiveAfter, new HashSet<>(blockNode.getOrCreateStringList(BrilCfgDetectVarUsages.KEY_VARS_LIFE_AFTER)));
 	}
 }
