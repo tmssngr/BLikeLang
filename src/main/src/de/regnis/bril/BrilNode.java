@@ -3,12 +3,19 @@ package de.regnis.bril;
 import de.regnis.utils.Utils;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * @author Thomas Singer
  */
 public final class BrilNode {
+
+	// Static =================================================================
+
+	public static BrilNode argument(String name, String type) {
+		return new BrilNode()
+				.set("name", name)
+				.set("type", type);
+	}
 
 	// Fields =================================================================
 

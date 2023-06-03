@@ -12,29 +12,30 @@ public class BrilFactoryTest {
 	@Test
 	public void test() {
 		final BrilFactory factory = new BrilFactory();
-		factory.addFunction("max", "int")
-				.addArgument("a", "int")
-				.addArgument("b", "int")
-				.addInstructions(instructions -> {
-					instructions.id("result", "a");
-					instructions.lt("cond", "a", "b");
-					instructions.br("cond", "then", "else");
+		factory.addFunction("max", "int",
+		                    List.of(BrilNode.argument("a", "int"),
+		                            BrilNode.argument("b", "int")),
+		                    List.of(
+				                    BrilInstructions.id("result", "a"),
+				                    BrilInstructions.lessThan("cond", "a", "b"),
+				                    BrilInstructions.branch("cond", "then", "else"),
 
-					instructions.label("then");
-					instructions.id("result", "b");
-					instructions.jmp("next");
+				                    BrilInstructions.label("then"),
+				                    BrilInstructions.id("result", "b"),
+				                    BrilInstructions.jump("next"),
 
-					instructions.label("else");
+				                    BrilInstructions.label("else"),
 
-					instructions.label("next");
-					instructions.ret();
-				});
-		factory.addFunction("main", "void")
-				.addInstructions(instructions -> {
-					instructions.constant("a", 1);
-					instructions.constant("b", 2);
-					instructions.call("max", List.of("a", "b"));
-					instructions.ret();
-				});
+				                    BrilInstructions.label("next"),
+				                    BrilInstructions.ret()
+		                    ));
+		factory.addFunction("main", "void",
+		                    List.of(),
+		                    List.of(
+				                    BrilInstructions.constant("a", 1),
+				                    BrilInstructions.constant("b", 2),
+				                    BrilInstructions.call("max", List.of("a", "b")),
+				                    BrilInstructions.ret()
+		                    ));
 	}
 }

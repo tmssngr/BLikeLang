@@ -13,7 +13,7 @@ public class BrilCfg {
 
 	// Constants ==============================================================
 
-	private static final Set<String> TERMINATER_OPS = Set.of(BrilFactory.JMP);
+	private static final Set<String> TERMINATER_OPS = Set.of(BrilInstructions.JMP);
 
 	public static final String KEY_INSTRUCTIONS = "instructions";
 	public static final String KEY_SUCCESSORS = "successors";
@@ -28,7 +28,7 @@ public class BrilCfg {
 		List<BrilNode> currentBlock = new ArrayList<>();
 
 		for (BrilNode instruction : instructions) {
-			final String op = BrilFactory.getOp(instruction);
+			final String op = BrilInstructions.getOp(instruction);
 			if (op != null) {
 				currentBlock.add(instruction);
 				if (TERMINATER_OPS.contains(op)) {
@@ -59,7 +59,7 @@ public class BrilCfg {
 		for (int i = 0; i < splitIntoBlocks.size(); i++) {
 			final List<BrilNode> blockInstructions = splitIntoBlocks.get(i);
 			final BrilNode brilNode = blockInstructions.get(0);
-			String name = BrilFactory.getLabel(brilNode);
+			String name = BrilInstructions.getLabel(brilNode);
 			if (name != null) {
 				blockInstructions.remove(0);
 			}
@@ -96,14 +96,14 @@ public class BrilCfg {
 			final List<String> successors = blockNode.getOrCreateStringList(KEY_SUCCESSORS);
 
 			final BrilNode lastInstruction = Utils.getLast(blockInstructions);
-			final String op = BrilFactory.getOp(lastInstruction);
-			if (BrilFactory.RET.equals(op)) {
+			final String op = BrilInstructions.getOp(lastInstruction);
+			if (BrilInstructions.RET.equals(op)) {
 				blockInstructions.remove(lastInstruction);
 				connectBlocks(blockNode, exitBlock);
 				continue;
 			}
 
-			final List<String> targets = BrilFactory.getJmpTargets(lastInstruction);
+			final List<String> targets = BrilInstructions.getJmpTargets(lastInstruction);
 			if (targets.isEmpty()) {
 				fallThroughFromBlock = blockNode;
 				continue;

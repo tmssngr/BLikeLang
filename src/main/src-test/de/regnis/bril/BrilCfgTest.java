@@ -17,40 +17,40 @@ public class BrilCfgTest {
 	@Test
 	public void testFormBlocks() {
 		Assert.assertEquals(List.of(
-				List.of(BrilFactory.constant("v", 4),
-				        BrilFactory.jump(".somewhere")),
-				List.of(BrilFactory.constant("v", 2)),
-				List.of(BrilFactory.label(".somewhere"),
-				        BrilFactory.print("v"))
-		), BrilCfg.splitIntoBlocks(List.of(BrilFactory.constant("v", 4),
-		                                   BrilFactory.jump(".somewhere"),
-		                                   BrilFactory.constant("v", 2),
-		                                   BrilFactory.label(".somewhere"),
-		                                   BrilFactory.print("v"))));
+				List.of(BrilInstructions.constant("v", 4),
+				        BrilInstructions.jump(".somewhere")),
+				List.of(BrilInstructions.constant("v", 2)),
+				List.of(BrilInstructions.label(".somewhere"),
+				        BrilInstructions.print("v"))
+		), BrilCfg.splitIntoBlocks(List.of(BrilInstructions.constant("v", 4),
+		                                   BrilInstructions.jump(".somewhere"),
+		                                   BrilInstructions.constant("v", 2),
+		                                   BrilInstructions.label(".somewhere"),
+		                                   BrilInstructions.print("v"))));
 	}
 
 	@Test
 	public void testBuildBlocks() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(BrilFactory.constant("v", 4),
-		                                                          BrilFactory.jump(".somewhere"),
-		                                                          BrilFactory.constant("v", 2),
-		                                                          BrilFactory.label(".somewhere"),
-		                                                          BrilFactory.print("v")));
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(BrilInstructions.constant("v", 4),
+		                                                          BrilInstructions.jump(".somewhere"),
+		                                                          BrilInstructions.constant("v", 2),
+		                                                          BrilInstructions.label(".somewhere"),
+		                                                          BrilInstructions.print("v")));
 		BrilCfgDetectVarUsages.detectVarUsages(blocks);
 
 		Assert.assertEquals(4, blocks.size());
-		assertEqualsCfg("block 0", List.of(BrilFactory.constant("v", 4),
-		                                   BrilFactory.jump(".somewhere")),
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
+		                                   BrilInstructions.jump(".somewhere")),
 		                List.of(),
 		                List.of(".somewhere"),
 		                Set.of(), Set.of("v"),
 		                blocks.get(0));
-		assertEqualsCfg("block 1", List.of(BrilFactory.constant("v", 2)),
+		assertEqualsCfg("block 1", List.of(BrilInstructions.constant("v", 2)),
 		                List.of(),
 		                List.of(".somewhere"),
 		                Set.of(), Set.of("v"),
 		                blocks.get(1));
-		assertEqualsCfg(".somewhere", List.of(BrilFactory.print("v")),
+		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
 		                List.of("block 0", "block 1"),
 		                List.of("exit 3"),
 		                Set.of("v"), Set.of(),

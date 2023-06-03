@@ -73,12 +73,12 @@ public final class BrilCfgDetectVarUsages {
 		final List<BrilNode> instructions = new ArrayList<>(block.getOrCreateNodeList(BrilCfg.KEY_INSTRUCTIONS));
 		Collections.reverse(instructions);
 		for (BrilNode instruction : instructions) {
-			final String destVar = BrilFactory.getDest(instruction);
+			final String destVar = BrilInstructions.getDest(instruction);
 			if (destVar != null) {
 				live.remove(destVar);
 			}
 
-			final Set<String> requiredVars = BrilFactory.getRequiredVars(instruction);
+			final Set<String> requiredVars = BrilInstructions.getRequiredVars(instruction);
 			live.addAll(requiredVars);
 		}
 
