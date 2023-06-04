@@ -18,12 +18,12 @@ public class BrilCfgSsaTest {
 		assertSsa(List.of(
 				          BrilCfg.createBlock("start",
 				                              List.of(
-						                              BrilInstructions.constant("a_1", 1),
-						                              BrilInstructions.constant("b_1", 2),
-						                              BrilInstructions.add("c_1", "a_1", "b_1"),
-						                              BrilInstructions.constant("a_2", 3),
-						                              BrilInstructions.add("c_2", "a_2", "b_1"),
-						                              BrilInstructions.print("c_2")
+						                              BrilInstructions.constant("a", 1),
+						                              BrilInstructions.constant("b", 2),
+						                              BrilInstructions.add("c", "a", "b"),
+						                              BrilInstructions.constant("a.1", 3),
+						                              BrilInstructions.add("c.1", "a.1", "b"),
+						                              BrilInstructions.print("c.1")
 				                              ))
 		          ),
 		          BrilCfg.createFunction("main", "void", List.of(),
@@ -39,6 +39,54 @@ public class BrilCfgSsaTest {
 		                                         )
 		                                 )
 		          )
+		);
+	}
+
+	@Test
+	public void testReassignedVar() {
+		assertSsa(List.of(
+				          BrilCfg.createBlock("start",
+				                              List.of(
+						                              BrilInstructions.constant("a", 1),
+						                              BrilInstructions.constant("a.1", 2),
+						                              BrilInstructions.print("a.1")
+				                              ))
+		          ),
+		          BrilCfg.createFunction("main", "void", List.of(),
+		                                 List.of(BrilCfg.createBlock("start",
+		                                                             List.of(
+				                                                             BrilInstructions.constant("a", 1),
+				                                                             BrilInstructions.constant("a", 2),
+				                                                             BrilInstructions.print("a")
+		                                                             )
+		                                         )
+		                                 )
+		          )
+		);
+	}
+
+	@Test
+	public void testParameters() {
+		assertSsa(List.of(BrilCfg.createBlock("start",
+		                                      List.of(
+				                                      BrilInstructions.id("result", "a"),
+				                                      BrilInstructions.lessThan("lt", "a", "b"),
+				                                      BrilInstructions.branch("lt", "b>a", "exit")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("b>a",
+		                                      List.of(
+				                                      BrilInstructions.id("result.1", "b")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("exit",
+		                                      List.of(
+				                                      BrilCfgSsa.phiFunction("result.2", List.of("result", "result.1")),
+				                                      BrilInstructions.print("result.2")
+		                                      )
+		                  )
+		          ),
+		          BrilCfgDetectVarUsagesTest.createPrintMaxCfg()
 		);
 	}
 
