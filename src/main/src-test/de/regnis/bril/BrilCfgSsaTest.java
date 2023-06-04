@@ -11,6 +11,25 @@ import java.util.List;
  */
 public class BrilCfgSsaTest {
 
+	// Static =================================================================
+
+	public static void assertEqualsFunctionBlocks(List<BrilNode> expectedBlocks, BrilNode function) {
+		final Iterator<BrilNode> expectedIt = expectedBlocks.iterator();
+		final Iterator<BrilNode> currentIt = BrilCfg.getBlocks(function).iterator();
+		while (true) {
+			final boolean expectedHasNext = expectedIt.hasNext();
+			final boolean currentHasNext = currentIt.hasNext();
+			Assert.assertEquals(expectedHasNext, currentHasNext);
+			if (!expectedHasNext) {
+				break;
+			}
+
+			final BrilNode expectedBlock = expectedIt.next();
+			final BrilNode currentBlock = currentIt.next();
+			assertBlock(expectedBlock, currentBlock);
+		}
+	}
+
 	// Accessing ==============================================================
 
 	@Test
@@ -92,25 +111,12 @@ public class BrilCfgSsaTest {
 
 	// Utils ==================================================================
 
-	private void assertSsa(List<BrilNode> expectedBlocks, BrilNode function) {
+	private static void assertSsa(List<BrilNode> expectedBlocks, BrilNode function) {
 		BrilCfgSsa.transform(function);
-		final Iterator<BrilNode> expectedIt = expectedBlocks.iterator();
-		final Iterator<BrilNode> currentIt = BrilCfg.getBlocks(function).iterator();
-		while (true) {
-			final boolean expectedHasNext = expectedIt.hasNext();
-			final boolean currentHasNext = currentIt.hasNext();
-			Assert.assertEquals(expectedHasNext, currentHasNext);
-			if (!expectedHasNext) {
-				break;
-			}
-
-			final BrilNode expectedBlock = expectedIt.next();
-			final BrilNode currentBlock = currentIt.next();
-			assertBlock(expectedBlock, currentBlock);
-		}
+		assertEqualsFunctionBlocks(expectedBlocks, function);
 	}
 
-	private void assertBlock(BrilNode expectedBlock, BrilNode block) {
+	private static void assertBlock(BrilNode expectedBlock, BrilNode block) {
 		Assert.assertEquals(BrilCfg.getName(expectedBlock), BrilCfg.getName(block));
 		Assert.assertEquals(BrilCfg.getInstructions(expectedBlock), BrilCfg.getInstructions(block));
 	}

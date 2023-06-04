@@ -13,7 +13,11 @@ public final class BrilDeadCodeElimination {
 	// Static =================================================================
 
 	public static void simpleDce(BrilNode cfg) {
-
+		for (BrilNode block : BrilCfg.getBlocks(cfg)) {
+			final List<BrilNode> instructions = BrilCfg.getInstructions(block);
+			final List<BrilNode> newInstructions = simpleDce(instructions);
+			BrilCfg.setInstructions(newInstructions, block);
+		}
 	}
 
 	public static List<BrilNode> simpleDce(List<BrilNode> blockInstructions) {
