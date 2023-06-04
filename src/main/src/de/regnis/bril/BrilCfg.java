@@ -9,16 +9,16 @@ import java.util.*;
 /**
  * @author Thomas Singer
  */
-public class BrilCfg {
+public final class BrilCfg {
 
 	// Constants ==============================================================
 
 	private static final Set<String> TERMINATER_OPS = Set.of(BrilInstructions.JMP);
 
-	public static final String KEY_INSTRUCTIONS = "instructions";
-	public static final String KEY_SUCCESSORS = "successors";
-	public static final String KEY_PREDECESSORS = "predecessors";
-	public static final String KEY_NAME = "name";
+	private static final String KEY_INSTRUCTIONS = "instructions";
+	private static final String KEY_SUCCESSORS = "successors";
+	private static final String KEY_PREDECESSORS = "predecessors";
+	private static final String KEY_NAME = "name";
 
 	// Static =================================================================
 
@@ -67,9 +67,7 @@ public class BrilCfg {
 				name = "block " + i;
 			}
 
-			final BrilNode blockNode = new BrilNode();
-			blockNode.set(KEY_NAME, name);
-			blockNode.getOrCreateNodeList(KEY_INSTRUCTIONS).addAll(blockInstructions);
+			final BrilNode blockNode = createBlock(name, blockInstructions);
 			if (nameToBlock.put(name, blockNode) != null) {
 				throw new DuplicateLabelException(name);
 			}
@@ -77,8 +75,7 @@ public class BrilCfg {
 
 		final List<BrilNode> blocks = new ArrayList<>();
 
-		final BrilNode exitBlock = new BrilNode();
-		exitBlock.set(KEY_NAME, "exit " + splitIntoBlocks.size());
+		final BrilNode exitBlock = createBlock("exit " + splitIntoBlocks.size(), List.of());
 
 		@Nullable BrilNode fallThroughFromBlock = null;
 		for (Map.Entry<String, BrilNode> entry : nameToBlock.entrySet()) {
@@ -133,11 +130,52 @@ public class BrilCfg {
 		return blocks;
 	}
 
+	@NotNull
+	public static Map<String, BrilNode> getNameToBlock(List<BrilNode> blocks) {
+		final Map<String, BrilNode> nameToBlock = new HashMap<>();
+		for (BrilNode block : blocks) {
+			nameToBlock.put(getName(block), block);
+		}
+		return nameToBlock;
+	}
+
+	@NotNull
+	public static String getName(BrilNode block) {
+		return block.getString(KEY_NAME);
+	}
+
+	@NotNull
+	public static List<String> getPredecessors(BrilNode block) {
+		return Collections.unmodifiableList(block.getStringList(KEY_PREDECESSORS));
+	}
+
+	@NotNull
+	public static List<String> getSuccessors(BrilNode block) {
+		return Collections.unmodifiableList(block.getStringList(KEY_SUCCESSORS));
+	}
+
+	@NotNull
+	public static List<BrilNode> getInstructions(BrilNode block) {
+		return Collections.unmodifiableList(block.getOrCreateNodeList(KEY_INSTRUCTIONS));
+	}
+
+	public static void setInstructions(List<BrilNode> blockInstructions, BrilNode block) {
+		block.getOrCreateNodeList(KEY_INSTRUCTIONS).addAll(blockInstructions);
+	}
+
+	@NotNull
+	public static BrilNode createBlock(String name, List<BrilNode> blockInstructions) {
+		final BrilNode block = new BrilNode();
+		block.set(KEY_NAME, name);
+		setInstructions(blockInstructions, block);
+		return block;
+	}
+
 	// Utils ==================================================================
 
 	private static void connectBlocks(@NotNull BrilNode prevBlock, @NotNull BrilNode nextBlock) {
-		prevBlock.getOrCreateStringList(KEY_SUCCESSORS).add(nextBlock.getString(KEY_NAME));
-		nextBlock.getOrCreateStringList(KEY_PREDECESSORS).add(prevBlock.getString(KEY_NAME));
+		prevBlock.getOrCreateStringList(KEY_SUCCESSORS).add(getName(nextBlock));
+		nextBlock.getOrCreateStringList(KEY_PREDECESSORS).add(getName(prevBlock));
 	}
 
 	// Inner Classes ==========================================================

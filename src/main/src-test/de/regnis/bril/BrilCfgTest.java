@@ -70,11 +70,11 @@ public class BrilCfgTest {
 	                             List<String> expectedSuccessors,
 	                             Set<String> expectedLiveBefore,
 	                             Set<String> expectedLiveAfter, BrilNode blockNode) {
-		Assert.assertEquals(expectedName, blockNode.getString(BrilCfg.KEY_NAME));
-		Assert.assertEquals(expectedInstructions, blockNode.getOrCreateNodeList(BrilCfg.KEY_INSTRUCTIONS));
-		Assert.assertEquals(expectedPredecessors, blockNode.getOrCreateStringList(BrilCfg.KEY_PREDECESSORS));
-		Assert.assertEquals(expectedSuccessors, blockNode.getOrCreateStringList(BrilCfg.KEY_SUCCESSORS));
-		Assert.assertEquals(expectedLiveBefore, new HashSet<>(blockNode.getOrCreateStringList(BrilCfgDetectVarUsages.KEY_VARS_LIFE_BEFORE)));
-		Assert.assertEquals(expectedLiveAfter, new HashSet<>(blockNode.getOrCreateStringList(BrilCfgDetectVarUsages.KEY_VARS_LIFE_AFTER)));
+		Assert.assertEquals(expectedName, BrilCfg.getName(blockNode));
+		Assert.assertEquals(expectedInstructions, BrilCfg.getInstructions(blockNode));
+		Assert.assertEquals(expectedPredecessors, BrilCfg.getPredecessors(blockNode));
+		Assert.assertEquals(expectedSuccessors, BrilCfg.getSuccessors(blockNode));
+		Assert.assertEquals(expectedLiveBefore, BrilCfgDetectVarUsages.getVarsBeforeBlock(blockNode));
+		Assert.assertEquals(expectedLiveAfter, BrilCfgDetectVarUsages.getVarsAfterBlock(blockNode));
 	}
 }

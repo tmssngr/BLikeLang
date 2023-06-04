@@ -12,8 +12,8 @@ public final class BrilCfgDetectVarUsages {
 
 	// Constants ==============================================================
 
-	public static final String KEY_VARS_LIFE_BEFORE = "varsLifeBefore";
-	public static final String KEY_VARS_LIFE_AFTER = "varsLifeAfter";
+	private static final String KEY_VARS_LIFE_BEFORE = "varsLifeBefore";
+	private static final String KEY_VARS_LIFE_AFTER = "varsLifeAfter";
 
 	// Static =================================================================
 
@@ -24,6 +24,16 @@ public final class BrilCfgDetectVarUsages {
 		}
 	}
 
+	@NotNull
+	public static Set<String> getVarsBeforeBlock(BrilNode block) {
+		return new HashSet<>(block.getStringList(KEY_VARS_LIFE_BEFORE));
+	}
+
+	@NotNull
+	public static Set<String> getVarsAfterBlock(BrilNode block) {
+		return new HashSet<>(block.getStringList(KEY_VARS_LIFE_AFTER));
+	}
+
 	// Fields =================================================================
 
 	private final Map<String, BrilNode> nameToBlock;
@@ -32,7 +42,7 @@ public final class BrilCfgDetectVarUsages {
 	// Setup ==================================================================
 
 	private BrilCfgDetectVarUsages(List<BrilNode> blocks) {
-		nameToBlock = getNameToBlock(blocks);
+		nameToBlock = BrilCfg.getNameToBlock(blocks);
 		this.blocks = blocks;
 	}
 
@@ -40,7 +50,7 @@ public final class BrilCfgDetectVarUsages {
 
 	private boolean detect() {
 		final List<String> pendingBlocks = new ArrayList<>();
-		pendingBlocks.add(Utils.getLast(blocks).getString(BrilCfg.KEY_NAME));
+		pendingBlocks.add(BrilCfg.getName(Utils.getLast(blocks)));
 
 		boolean changed = false;
 
@@ -58,7 +68,7 @@ public final class BrilCfgDetectVarUsages {
 				changed = true;
 			}
 
-			pendingBlocks.addAll(block.getOrCreateStringList(BrilCfg.KEY_PREDECESSORS));
+			pendingBlocks.addAll(BrilCfg.getPredecessors(block));
 		}
 		return changed;
 	}
@@ -70,7 +80,7 @@ public final class BrilCfgDetectVarUsages {
 		boolean changed = lifeAfter.addAll(live);
 		block.set(KEY_VARS_LIFE_AFTER, new ArrayList<>(lifeAfter));
 
-		final List<BrilNode> instructions = new ArrayList<>(block.getOrCreateNodeList(BrilCfg.KEY_INSTRUCTIONS));
+		final List<BrilNode> instructions = new ArrayList<>(BrilCfg.getInstructions(block));
 		Collections.reverse(instructions);
 		for (BrilNode instruction : instructions) {
 			final String destVar = BrilInstructions.getDest(instruction);
@@ -93,19 +103,10 @@ public final class BrilCfgDetectVarUsages {
 
 	private Set<String> getLifeFromAllNext(BrilNode block) {
 		final Set<String> lifeFromNext = new HashSet<>();
-		for (String next : block.getOrCreateStringList(BrilCfg.KEY_SUCCESSORS)) {
+		for (String next : BrilCfg.getSuccessors(block)) {
 			final BrilNode nextBlock = nameToBlock.get(next);
 			lifeFromNext.addAll(nextBlock.getOrCreateStringList(KEY_VARS_LIFE_BEFORE));
 		}
 		return lifeFromNext;
-	}
-
-	@NotNull
-	private static Map<String, BrilNode> getNameToBlock(List<BrilNode> blocks) {
-		final Map<String, BrilNode> nameToBlock = new HashMap<>();
-		for (BrilNode block : blocks) {
-			nameToBlock.put(block.getString(BrilCfg.KEY_NAME), block);
-		}
-		return nameToBlock;
 	}
 }
