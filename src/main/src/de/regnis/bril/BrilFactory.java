@@ -44,6 +44,14 @@ public class BrilFactory {
 	}
 
 	@NotNull
+	public static BrilNode createFunction(String name, String type, List<BrilNode> arguments, List<BrilNode> instructions) {
+		final BrilNode node = createFunction(name, type, arguments);
+		node.getOrCreateNodeList(KEY_INSTRS)
+				.addAll(instructions);
+		return node;
+	}
+
+	@NotNull
 	public static List<BrilNode> getArguments(BrilNode function) {
 		return function.getOrCreateNodeList(KEY_ARGS);
 	}
@@ -58,6 +66,12 @@ public class BrilFactory {
 		return argument.getString(KEY_ARG_NAME);
 	}
 
+	public static BrilNode argument(String name, String type) {
+		return new BrilNode()
+				.set("name", name)
+				.set("type", type);
+	}
+
 	// Fields =================================================================
 
 	private final BrilNode root = new BrilNode();
@@ -65,12 +79,6 @@ public class BrilFactory {
 	// Setup ==================================================================
 
 	public BrilFactory() {
-	}
-
-	public static BrilNode argument(String name, String type) {
-		return new BrilNode()
-				.set("name", name)
-				.set("type", type);
 	}
 
 	// Accessing ==============================================================
@@ -93,9 +101,7 @@ public class BrilFactory {
 			}
 		}
 
-		final BrilNode node = createFunction(name, type, arguments);
-		node.getOrCreateNodeList(KEY_INSTRS)
-				.addAll(instructions);
+		final BrilNode node = createFunction(name, type, arguments, instructions);
 		functions.add(node);
 	}
 }
