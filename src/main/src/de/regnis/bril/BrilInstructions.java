@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -137,6 +138,10 @@ public final class BrilInstructions {
 		return node.getString(KEY_DEST);
 	}
 
+	public static void setDest(String dest, BrilNode node) {
+		node.set(KEY_DEST, dest);
+	}
+
 	public static Set<String> getRequiredVars(BrilNode node) {
 		final Set<String> requiredVars = new HashSet<>();
 		requiredVars.add(node.getString(KEY_COND));
@@ -146,5 +151,30 @@ public final class BrilInstructions {
 		requiredVars.addAll(node.getStringList(KEY_ARGS));
 		requiredVars.remove(null);
 		return requiredVars;
+	}
+
+	public static void replaceVars(Function<String, String> varReplace, BrilNode node) {
+		replace(KEY_COND, varReplace, node);
+		replace(KEY_VAR, varReplace, node);
+		replace(KEY_VAR1, varReplace, node);
+		replace(KEY_VAR2, varReplace, node);
+
+		final List<String> args = node.getStringList(KEY_ARGS);
+		if (args.size() > 0) {
+			final List<String> newArgs = new ArrayList<>(args.size());
+			for (String arg : args) {
+				newArgs.add(varReplace.apply(arg));
+			}
+			node.set(KEY_ARGS, newArgs);
+		}
+	}
+
+	// Utils ==================================================================
+
+	private static void replace(String key, Function<String, String> varReplace, BrilNode node) {
+		final String var = node.getString(key);
+		if (var != null) {
+			node.set(key, varReplace.apply(var));
+		}
 	}
 }
