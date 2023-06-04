@@ -9,14 +9,6 @@ import java.util.*;
  */
 public final class BrilNode {
 
-	// Static =================================================================
-
-	public static BrilNode argument(String name, String type) {
-		return new BrilNode()
-				.set("name", name)
-				.set("type", type);
-	}
-
 	// Fields =================================================================
 
 	private final Map<String, Object> children = new HashMap<>();

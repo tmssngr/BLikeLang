@@ -13,8 +13,8 @@ public class BrilFactoryTest {
 	public void test() {
 		final BrilFactory factory = new BrilFactory();
 		factory.addFunction("max", "int",
-		                    List.of(BrilNode.argument("a", "int"),
-		                            BrilNode.argument("b", "int")),
+		                    List.of(BrilFactory.argument("a", "int"),
+		                            BrilFactory.argument("b", "int")),
 		                    List.of(
 				                    BrilInstructions.id("result", "a"),
 				                    BrilInstructions.lessThan("cond", "a", "b"),

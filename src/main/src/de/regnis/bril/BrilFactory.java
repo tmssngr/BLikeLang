@@ -19,6 +19,7 @@ public class BrilFactory {
 	private static final String KEY_TYPE = "type";
 	private static final String KEY_ARGS = "args";
 	private static final String KEY_INSTRS = "instrs";
+	private static final String KEY_ARG_NAME = "name";
 
 	// Static =================================================================
 
@@ -52,6 +53,11 @@ public class BrilFactory {
 		return function.getOrCreateNodeList(KEY_INSTRS);
 	}
 
+	@NotNull
+	public static String getArgName(BrilNode argument) {
+		return argument.getString(KEY_ARG_NAME);
+	}
+
 	// Fields =================================================================
 
 	private final BrilNode root = new BrilNode();
@@ -59,6 +65,12 @@ public class BrilFactory {
 	// Setup ==================================================================
 
 	public BrilFactory() {
+	}
+
+	public static BrilNode argument(String name, String type) {
+		return new BrilNode()
+				.set("name", name)
+				.set("type", type);
 	}
 
 	// Accessing ==============================================================
@@ -75,7 +87,7 @@ public class BrilFactory {
 
 		final Set<String> argumentNames = new HashSet<>();
 		for (BrilNode argument : arguments) {
-			final String argName = argument.getString("name");
+			final String argName = argument.getString(KEY_ARG_NAME);
 			if (!argumentNames.add(argName)) {
 				throw new IllegalArgumentException("an argument with name " + argName + " already exists");
 			}
