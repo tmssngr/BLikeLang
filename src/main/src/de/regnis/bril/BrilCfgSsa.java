@@ -15,7 +15,10 @@ public final class BrilCfgSsa {
 
 	// Static =================================================================
 
-	public static void transform(List<BrilNode> blocks) {
+	public static void transform(BrilNode cfgFunction) {
+		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+
 		BrilCfgDetectVarUsages.detectVarUsages(blocks);
 
 		final BrilCfgSsa ssa = new BrilCfgSsa(blocks);

@@ -3,7 +3,6 @@ package de.regnis.bril;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,24 +26,28 @@ public class BrilCfgSsaTest {
 						                              BrilInstructions.print("c_2")
 				                              ))
 		          ),
-		          List.of(BrilCfg.createBlock("start",
-		                                      List.of(
-				                                      BrilInstructions.constant("a", 1),
-				                                      BrilInstructions.constant("b", 2),
-				                                      BrilInstructions.add("c", "a", "b"),
-				                                      BrilInstructions.constant("a", 3),
-				                                      BrilInstructions.add("c", "a", "b"),
-				                                      BrilInstructions.print("c")
-		                                      ))));
+		          BrilCfg.createFunction("main", "void", List.of(),
+		                                 List.of(BrilCfg.createBlock("start",
+		                                                             List.of(
+				                                                             BrilInstructions.constant("a", 1),
+				                                                             BrilInstructions.constant("b", 2),
+				                                                             BrilInstructions.add("c", "a", "b"),
+				                                                             BrilInstructions.constant("a", 3),
+				                                                             BrilInstructions.add("c", "a", "b"),
+				                                                             BrilInstructions.print("c")
+		                                                             )
+		                                         )
+		                                 )
+		          )
+		);
 	}
 
 	// Utils ==================================================================
 
-	private void assertSsa(List<BrilNode> expectedBlocks, List<BrilNode> cfgInput) {
-		final List<BrilNode> cfgSsa = new ArrayList<>(cfgInput);
-		BrilCfgSsa.transform(cfgSsa);
+	private void assertSsa(List<BrilNode> expectedBlocks, BrilNode function) {
+		BrilCfgSsa.transform(function);
 		final Iterator<BrilNode> expectedIt = expectedBlocks.iterator();
-		final Iterator<BrilNode> currentIt = cfgSsa.iterator();
+		final Iterator<BrilNode> currentIt = BrilCfg.getBlocks(function).iterator();
 		while (true) {
 			final boolean expectedHasNext = expectedIt.hasNext();
 			final boolean currentHasNext = currentIt.hasNext();

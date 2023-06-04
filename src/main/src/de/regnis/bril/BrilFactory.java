@@ -1,5 +1,7 @@
 package de.regnis.bril;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +12,45 @@ import java.util.Set;
  * @author Thomas Singer
  */
 public class BrilFactory {
+
+	// Constants ==============================================================
+
+	private static final String KEY_NAME = "name";
+	private static final String KEY_TYPE = "type";
+	private static final String KEY_ARGS = "args";
+	private static final String KEY_INSTRS = "instrs";
+
+	// Static =================================================================
+
+	@NotNull
+	public static String getName(BrilNode function) {
+		return function.getString(KEY_NAME);
+	}
+
+	@NotNull
+	public static String getType(BrilNode function) {
+		return function.getString(KEY_TYPE);
+	}
+
+	@NotNull
+	public static BrilNode createFunction(String name, String type, List<BrilNode> arguments) {
+		final BrilNode node = new BrilNode();
+		node.set(KEY_NAME, name);
+		node.set(KEY_TYPE, type);
+		node.getOrCreateNodeList(KEY_ARGS)
+				.addAll(arguments);
+		return node;
+	}
+
+	@NotNull
+	public static List<BrilNode> getArguments(BrilNode function) {
+		return function.getOrCreateNodeList(KEY_ARGS);
+	}
+
+	@NotNull
+	public static List<BrilNode> getInstructions(BrilNode function) {
+		return function.getOrCreateNodeList(KEY_INSTRS);
+	}
 
 	// Fields =================================================================
 
@@ -27,7 +68,7 @@ public class BrilFactory {
 	                        List<BrilNode> instructions) {
 		final List<BrilNode> functions = root.getOrCreateNodeList("functions");
 		for (BrilNode function : functions) {
-			if (function.getString("name").equals(name)) {
+			if (getName(function).equals(name)) {
 				throw new IllegalArgumentException("a function with name " + name + " already exists");
 			}
 		}
@@ -40,14 +81,9 @@ public class BrilFactory {
 			}
 		}
 
-		final BrilNode node = new BrilNode();
-		node.set("name", name);
-		node.set("type", type);
-		node.getOrCreateNodeList(BrilInstructions.KEY_ARGS)
-				.addAll(arguments);
-		node.getOrCreateNodeList("instrs")
+		final BrilNode node = createFunction(name, type, arguments);
+		node.getOrCreateNodeList(KEY_INSTRS)
 				.addAll(instructions);
-
 		functions.add(node);
 	}
 }

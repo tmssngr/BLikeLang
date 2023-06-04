@@ -16,9 +16,10 @@ public final class BrilCfg {
 	private static final Set<String> TERMINATER_OPS = Set.of(BrilInstructions.JMP);
 
 	private static final String KEY_INSTRUCTIONS = "instructions";
+	private static final String KEY_NAME = "name";
 	private static final String KEY_SUCCESSORS = "successors";
 	private static final String KEY_PREDECESSORS = "predecessors";
-	private static final String KEY_NAME = "name";
+	private static final String KEY_BLOCKS = "blocks";
 
 	// Static =================================================================
 
@@ -50,6 +51,29 @@ public final class BrilCfg {
 			blocks.add(currentBlock);
 		}
 		return blocks;
+	}
+
+	@NotNull
+	public static List<BrilNode> getBlocks(BrilNode function) {
+		return function.getOrCreateNodeList(KEY_BLOCKS);
+	}
+
+	@NotNull
+	public static BrilNode createFunction(String name, String type, List<BrilNode> arguments, List<BrilNode> blocks) {
+		final BrilNode node = BrilFactory.createFunction(name, type, arguments);
+		node.getOrCreateNodeList(KEY_BLOCKS)
+				.addAll(blocks);
+		return node;
+	}
+
+	public static BrilNode buildBlocks(BrilNode function) throws DuplicateLabelException, NoExitBlockException, InvalidTargetLabelException {
+		final String name = BrilFactory.getName(function);
+		final String type = BrilFactory.getType(function);
+		final List<BrilNode> arguments = BrilFactory.getArguments(function);
+
+		final List<BrilNode> blocks = buildBlocks(BrilFactory.getInstructions(function));
+
+		return createFunction(name, type, arguments, blocks);
 	}
 
 	public static List<BrilNode> buildBlocks(List<BrilNode> instructions) throws DuplicateLabelException, InvalidTargetLabelException, NoExitBlockException {
@@ -168,6 +192,14 @@ public final class BrilCfg {
 		final BrilNode block = new BrilNode();
 		block.set(KEY_NAME, name);
 		setInstructions(blockInstructions, block);
+		return block;
+	}
+
+	@NotNull
+	public static BrilNode createBlock(String name, List<BrilNode> blockInstructions, List<String> predecessors, List<String> successors) {
+		final BrilNode block = createBlock(name, blockInstructions);
+		block.set(KEY_PREDECESSORS, predecessors);
+		block.set(KEY_SUCCESSORS, successors);
 		return block;
 	}
 
