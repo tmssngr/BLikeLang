@@ -16,21 +16,25 @@ public final class BrilInstructions {
 
 	// Constants ==============================================================
 
-	public static final String RET = "ret";
-	public static final String JMP = "jmp";
-	private static final String KEY_OP = "op";
-	private static final String LABEL = "label";
+	public static final String ADD = "add";
 	private static final String BR = "br";
+	private static final String CALL = "call";
+	public static final String CONST = "const";
+	public static final String ID = "id";
+	public static final String JMP = "jmp";
+	private static final String LABEL = "label";
+	public static final String RET = "ret";
+	private static final String KEY_OP = "op";
 	private static final String KEY_JMP_TARGET = "target";
 	private static final String KEY_IF_TARGET = "ifTarget";
 	private static final String KEY_ELSE_TARGET = "elseTarget";
 	private static final String KEY_DEST = "dest";
 	private static final String KEY_COND = "cond";
-	private static final String CALL = "call";
-	public static final String KEY_ARGS = "args";
+	private static final String KEY_ARGS = "args";
 	private static final String KEY_VAR1 = "var1";
 	private static final String KEY_VAR2 = "var2";
 	private static final String KEY_VAR = "var";
+	public static final String KEY_VALUE = "value";
 
 	// Static =================================================================
 
@@ -76,7 +80,7 @@ public final class BrilInstructions {
 	@NotNull
 	public static BrilNode add(String dest, String var1, String var2) {
 		return new BrilNode()
-				.set(KEY_OP, "add")
+				.set(KEY_OP, ADD)
 				.set(KEY_DEST, dest)
 				.set(KEY_VAR1, var1)
 				.set(KEY_VAR2, var2);
@@ -86,15 +90,15 @@ public final class BrilInstructions {
 	public static BrilNode constant(String dest, int value) {
 		return new BrilNode()
 				.set(KEY_DEST, dest)
-				.set(KEY_OP, "const")
-				.set("value", value);
+				.set(KEY_OP, CONST)
+				.set(KEY_VALUE, value);
 	}
 
 	@NotNull
 	public static BrilNode id(String dest, String src) {
 		return new BrilNode()
 				.set(KEY_DEST, dest)
-				.set(KEY_OP, "id")
+				.set(KEY_OP, ID)
 				.set(KEY_VAR, src);
 	}
 
@@ -140,6 +144,25 @@ public final class BrilInstructions {
 
 	public static void setDest(String dest, BrilNode node) {
 		node.set(KEY_DEST, dest);
+	}
+
+	@NotNull
+	public static String getVarNotNull(BrilNode node) {
+		return node.getString(KEY_VAR);
+	}
+
+	@NotNull
+	public static String getVar1NotNull(BrilNode node) {
+		return node.getString(KEY_VAR1);
+	}
+
+	@NotNull
+	public static String getVar2NotNull(BrilNode node) {
+		return node.getString(KEY_VAR2);
+	}
+
+	public static int getIntValue(BrilNode node) {
+		return node.getInt(KEY_VALUE);
 	}
 
 	public static Set<String> getRequiredVars(BrilNode node) {
