@@ -62,7 +62,7 @@ public class CommonSubexpressionEliminationTransformationTest {
 	}
 
 	@Test
-	public void testReassignment() {
+	public void testReassignment1() {
 		assertTransform(List.of(
 				assignment("a", new NumberLiteral(1)),
 				assignment("b", new VarRead("a")),
@@ -75,6 +75,25 @@ public class CommonSubexpressionEliminationTransformationTest {
 				assignmentAdd("anext", new VarRead("a"), new NumberLiteral(1)),
 				assignment("a", new NumberLiteral(3)),
 				assignmentAdd("anext", new VarRead("a"), new NumberLiteral(1))
+		));
+	}
+
+	@Test
+	public void testReassignment2() {
+		assertTransform(List.of(
+				assignment("a", new NumberLiteral(1)),
+				assignment("b", new VarRead("a")),
+				assignment("one", new VarRead("a")),
+				assignmentAdd("anext", new VarRead("a"), new VarRead("a")),
+				assignment("a", new NumberLiteral(3)),
+				assignmentAdd("anext", new VarRead("a"), new VarRead("b"))
+		), List.of(
+				assignment("a", new NumberLiteral(1)),
+				assignment("b", new VarRead("a")),
+				assignment("one", new NumberLiteral(1)),
+				assignmentAdd("anext", new VarRead("a"), new VarRead("one")),
+				assignment("a", new NumberLiteral(3)),
+				assignmentAdd("anext", new VarRead("a"), new VarRead("one"))
 		));
 	}
 
