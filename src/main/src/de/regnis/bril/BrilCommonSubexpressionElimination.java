@@ -34,9 +34,9 @@ public class BrilCommonSubexpressionElimination {
 	// Utils ==================================================================
 
 	private BrilNode handleInstruction(BrilNode instruction) {
+		final String op = BrilInstructions.getOp(instruction);
 		final String dest = BrilInstructions.getDest(instruction);
 		if (dest != null) {
-			final String op = BrilInstructions.getOp(instruction);
 			if (BrilInstructions.CONST.equals(op)) {
 				return handle(dest, instruction);
 			}
@@ -56,6 +56,11 @@ public class BrilCommonSubexpressionElimination {
 
 				return handle(dest, newInstruction);
 			}
+		}
+		if (BrilInstructions.PRINT.equals(op)) {
+			final String var = BrilInstructions.getVarNotNull(instruction);
+			final String newVar = getCanonicalVar(var);
+			return handle(dest, BrilInstructions.print(newVar));
 		}
 		return instruction;
 	}
@@ -134,9 +139,9 @@ public class BrilCommonSubexpressionElimination {
 	}
 
 	private CanonicalExpression getCanonicalExpression(BrilNode instruction) {
+		final String op = BrilInstructions.getOp(instruction);
 		final String dest = BrilInstructions.getDest(instruction);
 		if (dest != null) {
-			final String op = BrilInstructions.getOp(instruction);
 			if (BrilInstructions.CONST.equals(op)) {
 				return new LiteralCanonicalExpression(BrilInstructions.getIntValue(instruction));
 			}
@@ -156,6 +161,11 @@ public class BrilCommonSubexpressionElimination {
 				}
 				return new BinaryCanonicalExpression(canonical1, op, canonical2);
 			}
+		}
+
+		if (BrilInstructions.PRINT.equals(op)) {
+			final String var = BrilInstructions.getVarNotNull(instruction);
+			return getCanonicalExpression(var);
 		}
 
 		throw new UnsupportedOperationException();

@@ -28,6 +28,21 @@ public class BrilCommonSubexpressionEliminationTest {
 	}
 
 	@Test
+	public void testCopyPropagation() {
+		assertTransform(List.of(
+				BrilInstructions.constant("a", 1),
+				BrilInstructions.id("b", "a"),
+				BrilInstructions.id("c", "a"),
+				BrilInstructions.print("a")
+		), List.of(
+				BrilInstructions.constant("a", 1),
+				BrilInstructions.id("b", "a"),
+				BrilInstructions.id("c", "b"),
+				BrilInstructions.print("c")
+		));
+	}
+
+	@Test
 	public void testSwappedBinReplacement() {
 		assertTransform(List.of(
 				BrilInstructions.constant("a", 1),

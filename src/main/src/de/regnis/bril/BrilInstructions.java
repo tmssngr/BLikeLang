@@ -23,6 +23,7 @@ public final class BrilInstructions {
 	public static final String ID = "id";
 	public static final String JMP = "jmp";
 	private static final String LABEL = "label";
+	public static final String PRINT = "print";
 	public static final String RET = "ret";
 	private static final String KEY_OP = "op";
 	private static final String KEY_JMP_TARGET = "target";
@@ -110,7 +111,7 @@ public final class BrilInstructions {
 
 	public static BrilNode print(String var) {
 		return new BrilNode()
-				.set(KEY_OP, "print")
+				.set(KEY_OP, PRINT)
 				.set(KEY_VAR, var);
 	}
 
