@@ -2,7 +2,10 @@ package de.regnis.bril;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Thomas Singer
@@ -35,98 +38,101 @@ public class BrilCommonSubexpressionElimination {
 
 	private BrilNode handleInstruction(BrilNode instruction) {
 		final String op = BrilInstructions.getOp(instruction);
+
 		final String dest = BrilInstructions.getDest(instruction);
 		if (dest != null) {
 			if (BrilInstructions.CONST.equals(op)) {
-				return handle(dest, instruction);
+				final CanonicalExpression canonicalExpression = new Literal(BrilInstructions.getIntValue(instruction));
+				final int canonicalIndex = findCanonicalExpression(canonicalExpression);
+				if (canonicalIndex < 0) {
+					addValue(dest, canonicalExpression);
+				}
+				return instruction;
 			}
 
 			if (BrilInstructions.ID.equals(op)) {
 				final String var = BrilInstructions.getVarNotNull(instruction);
-				final String newVar = getCanonicalVar(var);
-				return handle(dest, BrilInstructions.id(dest, newVar));
+				final int varIndex = getVarIndex(var);
+				final Value value = getValueAtIndex(varIndex);
+				varToIndex.put(dest, varIndex);
+				if (value.canonicalExpression instanceof Literal literal) {
+					return BrilInstructions.constant(dest, literal.value);
+				}
+
+				return id(dest, value);
 			}
 
 			if (BrilInstructions.ADD.equals(op)) {
 				final String var1 = BrilInstructions.getVar1NotNull(instruction);
 				final String var2 = BrilInstructions.getVar2NotNull(instruction);
-				final String newVar1 = getCanonicalVar(var1);
-				final String newVar2 = getCanonicalVar(var2);
-				final BrilNode newInstruction = BrilInstructions.add(dest, newVar1, newVar2);
+				final int varIndex1 = getVarIndex(var1);
+				final int varIndex2 = getVarIndex(var2);
+				final Value value1 = getValueAtIndex(varIndex1);
+				final Value value2 = getValueAtIndex(varIndex2);
+				if (value1.canonicalExpression instanceof Literal literal1
+						&& value2.canonicalExpression instanceof Literal literal2) {
+					return BrilInstructions.constant(dest, literal1.value + literal2.value);
+				}
 
-				return handle(dest, newInstruction);
+				final CanonicalExpression canonicalExpression = new Binary(op, varIndex1, varIndex2);
+				final int expressionIndex = findCanonicalExpression(canonicalExpression);
+				if (expressionIndex < 0) {
+					addValue(dest, canonicalExpression);
+					return BrilInstructions.binary(dest, op, value1.getCanonicalVar(), value2.getCanonicalVar());
+				}
+
+				final Value value = getValueAtIndex(expressionIndex);
+				return id(dest, value);
 			}
 		}
+
 		if (BrilInstructions.PRINT.equals(op)) {
 			final String var = BrilInstructions.getVarNotNull(instruction);
-			final String newVar = getCanonicalVar(var);
-			return handle(dest, BrilInstructions.print(newVar));
+			final Value value = getValueForVar(var);
+			final String canonicalVar = value.getCanonicalVar();
+			return BrilInstructions.print(canonicalVar);
+		}
+
+		if (BrilInstructions.getRequiredVars(instruction).size() > 0) {
+			throw new UnsupportedOperationException();
 		}
 		return instruction;
 	}
 
-	private BrilNode handle(String dest, BrilNode newInstruction) {
-		final CanonicalExpression canonicalExpression = getCanonicalExpression(newInstruction);
+	@NotNull
+	private static BrilNode id(String dest, Value value) {
+		final String canonicalVar = value.getCanonicalVar();
+		value.addVar(dest);
+		return BrilInstructions.id(dest, canonicalVar);
+	}
+
+	private int addValue(String dest, CanonicalExpression canonicalExpression) {
+		final int index = getNextIndex();
+		final Integer prevIndex = varToIndex.put(dest, index);
+		if (prevIndex != null) {
+			final Value oldValueInDest = getValueAtIndex(prevIndex);
+			oldValueInDest.canonicalVars.remove(dest);
+			if (oldValueInDest.canonicalVars.isEmpty()) {
+				availableValues.remove(oldValueInDest);
+			}
+		}
+		availableValues.add(new Value(index, canonicalExpression, dest));
+		return index;
+	}
+
+	@NotNull
+	private Value getValueForVar(String var) {
+		final int varIndex = getVarIndex(var);
+		return getValueAtIndex(varIndex);
+	}
+
+	private int findCanonicalExpression(CanonicalExpression canonicalExpression) {
 		for (Value value : availableValues) {
-			if (value.canonicalExpression.equals(canonicalExpression)) {
-				varToIndex.put(dest, value.index);
-				return BrilInstructions.id(dest, value.canonicalVar);
+			if (canonicalExpression.equals(value.canonicalExpression)) {
+				return value.index;
 			}
 		}
-
-		handleReassign(dest);
-
-		if (canonicalExpression instanceof VarReadCanonicalExpression varRead) {
-			varToIndex.put(dest, varRead.index);
-		}
-		else {
-			final int index = getNextIndex();
-			availableValues.add(new Value(index, canonicalExpression, dest));
-			varToIndex.put(dest, index);
-		}
-		return newInstruction;
-	}
-
-	private String getCanonicalVar(String var) {
-		final int index = varToIndex.get(var);
-		return getValueAtIndex(index).canonicalVar;
-	}
-
-	private void handleReassign(String name) {
-		final int reassignedIndex = getIndexNullable(name);
-		if (reassignedIndex < 0) {
-			return;
-		}
-
-		varToIndex.remove(name);
-
-		String otherVarWithSameValueIndex = null;
-		for (Map.Entry<String, Integer> entry : varToIndex.entrySet()) {
-			if (entry.getValue() == reassignedIndex) {
-				otherVarWithSameValueIndex = entry.getKey();
-				break;
-			}
-		}
-
-		for (final Iterator<Value> it = availableValues.iterator(); it.hasNext(); ) {
-			final Value value = it.next();
-			if (value.canonicalVar.equals(name)) {
-				it.remove();
-				if (otherVarWithSameValueIndex != null) {
-					availableValues.add(new Value(value.index, value.canonicalExpression, otherVarWithSameValueIndex));
-				}
-				break;
-			}
-		}
-	}
-
-	private int getIndex(String var) {
-		return varToIndex.get(var);
-	}
-
-	private int getIndexNullable(String name) {
-		final Integer index = varToIndex.get(name);
-		return index != null ? index : -1;
+		return -1;
 	}
 
 	private Value getValueAtIndex(int index) {
@@ -135,69 +141,18 @@ public class BrilCommonSubexpressionElimination {
 				return value;
 			}
 		}
-		throw new IllegalArgumentException("index " + index + " not found");
+		throw new IllegalArgumentException("Unexpected index " + index);
 	}
 
-	private CanonicalExpression getCanonicalExpression(BrilNode instruction) {
-		final String op = BrilInstructions.getOp(instruction);
-		final String dest = BrilInstructions.getDest(instruction);
-		if (dest != null) {
-			if (BrilInstructions.CONST.equals(op)) {
-				return new LiteralCanonicalExpression(BrilInstructions.getIntValue(instruction));
-			}
-
-			if (BrilInstructions.ID.equals(op)) {
-				final String var = BrilInstructions.getVarNotNull(instruction);
-				return getCanonicalExpression(var);
-			}
-
-			if (BrilInstructions.ADD.equals(op)) {
-				CanonicalExpression canonical1 = getCanonicalExpression(BrilInstructions.getVar1NotNull(instruction));
-				CanonicalExpression canonical2 = getCanonicalExpression(BrilInstructions.getVar2NotNull(instruction));
-				if (isSwap(canonical1, op, canonical2)) {
-					final var temp = canonical1;
-					canonical1 = canonical2;
-					canonical2 = temp;
-				}
-				return new BinaryCanonicalExpression(canonical1, op, canonical2);
-			}
-		}
-
-		if (BrilInstructions.PRINT.equals(op)) {
-			final String var = BrilInstructions.getVarNotNull(instruction);
-			return getCanonicalExpression(var);
-		}
-
-		throw new UnsupportedOperationException();
-	}
-
-	@NotNull
-	private VarReadCanonicalExpression getCanonicalExpression(String var) {
-		final int varIndex = getIndex(var);
-		return new VarReadCanonicalExpression(varIndex);
+	private int getVarIndex(String var) {
+		final Integer index = varToIndex.get(var);
+		return index != null
+				? index
+				: addValue(var, new Parameter(var));
 	}
 
 	private int getNextIndex() {
 		return nextIndex++;
-	}
-
-	@SuppressWarnings("RedundantIfStatement")
-	private static boolean isSwap(CanonicalExpression left, String op, CanonicalExpression right) {
-		if (!BrilInstructions.ADD.equals(op)) {
-			return false;
-		}
-
-		if (left instanceof VarReadCanonicalExpression leftVar
-				&& right instanceof VarReadCanonicalExpression rightVar
-				&& leftVar.index > rightVar.index) {
-			return true;
-		}
-
-		if (left instanceof LiteralCanonicalExpression
-				&& !(right instanceof LiteralCanonicalExpression)) {
-			return true;
-		}
-		return false;
 	}
 
 	// Inner Classes ==========================================================
@@ -205,25 +160,18 @@ public class BrilCommonSubexpressionElimination {
 	private interface CanonicalExpression {
 	}
 
-	private record LiteralCanonicalExpression(int value) implements CanonicalExpression {
-		@Override
-		public String toString() {
-			return String.valueOf(value);
-		}
+	private record Literal(int value) implements CanonicalExpression {
 	}
 
-	private record VarReadCanonicalExpression(int index) implements CanonicalExpression {
-		@Override
-		public String toString() {
-			return "#" + index;
-		}
+	private record Parameter(String name) implements CanonicalExpression {
 	}
 
-	private record BinaryCanonicalExpression(CanonicalExpression left, String op,
-	                                         CanonicalExpression right) implements CanonicalExpression {
-		@Override
-		public String toString() {
-			return op + ", " + left + ", " + right;
+	private record Binary(String op, int index1, int index2) implements CanonicalExpression {
+		private Binary(String op, int index1, int index2) {
+			this.op     = op;
+			final boolean commutative = BrilInstructions.ADD.equals(op);
+			this.index1 = commutative ? Math.min(index1, index2) : index1;
+			this.index2 = commutative ? Math.max(index1, index2) : index2;
 		}
 	}
 
@@ -231,17 +179,31 @@ public class BrilCommonSubexpressionElimination {
 
 		private final int index;
 		private final CanonicalExpression canonicalExpression;
-		private final String canonicalVar;
+		private final List<String> canonicalVars;
 
 		public Value(int index, CanonicalExpression canonicalExpression, String canonicalVar) {
 			this.index               = index;
 			this.canonicalExpression = canonicalExpression;
-			this.canonicalVar        = canonicalVar;
+
+			canonicalVars = new ArrayList<>();
+			canonicalVars.add(canonicalVar);
 		}
 
 		@Override
 		public String toString() {
-			return "#" + index + " (" + canonicalVar + "): " + canonicalExpression;
+			return "#" + index + " (" + canonicalVars + "): " + canonicalExpression;
+		}
+
+		public String getCanonicalVar() {
+			return canonicalVars.get(0);
+		}
+
+		public void addVar(String dest) {
+			if (canonicalVars.contains(dest)) {
+				throw new UnsupportedOperationException();
+			}
+
+			canonicalVars.add(dest);
 		}
 	}
 }

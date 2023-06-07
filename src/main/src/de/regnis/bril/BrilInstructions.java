@@ -71,17 +71,18 @@ public final class BrilInstructions {
 
 	@NotNull
 	public static BrilNode lessThan(String dest, String var1, String var2) {
-		return new BrilNode()
-				.set(KEY_OP, "lt")
-				.set(KEY_DEST, dest)
-				.set(KEY_VAR1, var1)
-				.set(KEY_VAR2, var2);
+		return binary(dest, "lt", var1, var2);
 	}
 
 	@NotNull
 	public static BrilNode add(String dest, String var1, String var2) {
+		return binary(dest, ADD, var1, var2);
+	}
+
+	@NotNull
+	public static BrilNode binary(String dest, String op, String var1, String var2) {
 		return new BrilNode()
-				.set(KEY_OP, ADD)
+				.set(KEY_OP, op)
 				.set(KEY_DEST, dest)
 				.set(KEY_VAR1, var1)
 				.set(KEY_VAR2, var2);
