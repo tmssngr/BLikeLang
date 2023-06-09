@@ -158,7 +158,10 @@ public final class BrilCfg {
 	public static Map<String, BrilNode> getNameToBlock(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = new HashMap<>();
 		for (BrilNode block : blocks) {
-			nameToBlock.put(getName(block), block);
+			final String name = getName(block);
+			if (nameToBlock.put(name, block) != null) {
+				throw new IllegalStateException("Duplicate block name " + name);
+			}
 		}
 		return nameToBlock;
 	}
