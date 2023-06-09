@@ -20,15 +20,12 @@ public final class BrilCfgDetectDomination {
 	public static void detectDomination(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = BrilCfg.getNameToBlock(blocks);
 
-		final BrilNode firstBlock = blocks.get(0);
+		initialize(blocks);
+
 		final Set<String> pending = new LinkedHashSet<>();
-		pending.add(BrilCfg.getName(firstBlock));
+		blocks.forEach(block -> pending.add(BrilCfg.getName(block)));
 
-		while (!pending.isEmpty()) {
-			final Iterator<String> iterator = pending.iterator();
-			final String name = iterator.next();
-			iterator.remove();
-
+		for (String name : pending) {
 			final BrilNode block = nameToBlock.get(name);
 
 			final Set<String> dominations = getDominations(block);
@@ -39,31 +36,26 @@ public final class BrilCfgDetectDomination {
 			for (String predecessor : predecessors) {
 				final BrilNode prevBlock = nameToBlock.get(predecessor);
 				final Set<String> prevDominations = getDominations(prevBlock);
-				// skip unprocessed previous blocks
-				if (prevDominations.isEmpty()) {
-					continue;
-				}
-
 				prevDominations.add(name);
-				if (dominations.isEmpty()) {
-					changed |= dominations.addAll(prevDominations);
-				}
-				else {
-					changed |= dominations.retainAll(prevDominations);
-				}
+				changed |= dominations.retainAll(prevDominations);
 			}
 
-			changed |= dominations.add(name);
-			setDominations(dominations, block);
-
 			if (changed) {
-				final List<String> successors = BrilCfg.getSuccessors(block);
-				pending.addAll(successors);
+				setDominations(dominations, block);
+				pending.addAll(BrilCfg.getSuccessors(block));
 			}
 		}
 	}
 
 	// Utils ==================================================================
+
+	private static void initialize(List<BrilNode> blocks) {
+		final Set<String> dominations = new HashSet<>();
+		for (BrilNode block : blocks) {
+			dominations.add(BrilCfg.getName(block));
+			setDominations(dominations, block);
+		}
+	}
 
 	private static void setDominations(Set<String> dominations, BrilNode block) {
 		final List<String> values = new ArrayList<>(dominations);
