@@ -54,6 +54,109 @@ public class BrilCfgTest {
 		                blocks.get(3));
 	}
 
+	@Test
+	public void testValidSuccessorsAndPredecessors() {
+		BrilCfg.testValidSuccessorsAndPredecessors(
+				List.of(BrilCfg.createBlock("entry", List.of(),
+				                            List.of(), List.of("loop")
+				        ),
+				        BrilCfg.createBlock("loop", List.of(),
+				                            List.of("entry", "body"), List.of("body", "exit")
+				        ),
+				        BrilCfg.createBlock("body", List.of(),
+				                            List.of("loop"), List.of("loop")
+				        ),
+				        BrilCfg.createBlock("exit", List.of(),
+				                            List.of("loop"), List.of()
+				        )
+				)
+		);
+
+		try {
+			BrilCfg.testValidSuccessorsAndPredecessors(
+					List.of(BrilCfg.createBlock("entry", List.of(),
+					                            List.of("prohibited"), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("loop", List.of(),
+					                            List.of("entry", "body"), List.of("body", "exit")
+					        ),
+					        BrilCfg.createBlock("body", List.of(),
+					                            List.of("loop"), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("exit", List.of(),
+					                            List.of("loop"), List.of()
+					        )
+					)
+			);
+			Assert.fail("expected an exception");
+		}
+		catch (IllegalStateException ignored) {
+		}
+
+		try {
+			BrilCfg.testValidSuccessorsAndPredecessors(
+					List.of(BrilCfg.createBlock("entry", List.of(),
+					                            List.of(), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("loop", List.of(),
+					                            List.of("entry", "body"), List.of("body", "exit")
+					        ),
+					        BrilCfg.createBlock("body", List.of(),
+					                            List.of("loop"), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("exit", List.of(),
+					                            List.of("loop"), List.of("prohibited")
+					        )
+					)
+			);
+			Assert.fail("expected an exception");
+		}
+		catch (IllegalStateException ignored) {
+		}
+
+		try {
+			BrilCfg.testValidSuccessorsAndPredecessors(
+					List.of(BrilCfg.createBlock("entry", List.of(),
+					                            List.of(), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("loop", List.of(),
+					                            List.of("entry"/*, "body"*/), List.of("body", "exit")
+					        ),
+					        BrilCfg.createBlock("body", List.of(),
+					                            List.of("loop"), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("exit", List.of(),
+					                            List.of("loop"), List.of()
+					        )
+					)
+			);
+			Assert.fail("expected an exception");
+		}
+		catch (IllegalStateException ignored) {
+		}
+
+		try {
+			BrilCfg.testValidSuccessorsAndPredecessors(
+					List.of(BrilCfg.createBlock("entry", List.of(),
+					                            List.of(), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("loop", List.of(),
+					                            List.of("entry", "body"), List.of(/*"body", */"exit")
+					        ),
+					        BrilCfg.createBlock("body", List.of(),
+					                            List.of("loop"), List.of("loop")
+					        ),
+					        BrilCfg.createBlock("exit", List.of(),
+					                            List.of("loop"), List.of()
+					        )
+					)
+			);
+			Assert.fail("expected an exception");
+		}
+		catch (IllegalStateException ignored) {
+		}
+	}
+
 	// Utils ==================================================================
 
 	private void assertEqualsCfg(String expectedName,

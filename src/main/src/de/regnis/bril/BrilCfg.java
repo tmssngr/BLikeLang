@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import com.sun.jdi.request.InvalidRequestStateException;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -206,6 +207,35 @@ public final class BrilCfg {
 		block.set(KEY_PREDECESSORS, predecessors);
 		block.set(KEY_SUCCESSORS, successors);
 		return block;
+	}
+
+	public static void testValidSuccessorsAndPredecessors(List<BrilNode> blocks) throws IllegalStateException {
+		final Map<String, BrilNode> nameToBlock = getNameToBlock(blocks);
+
+		if (getPredecessors(blocks.get(0)).size() > 0) {
+			throw new IllegalStateException("expecting the first block to have no predecessors");
+		}
+
+		if (getSuccessors(Utils.getLast(blocks)).size() > 0) {
+			throw new IllegalStateException("expecting the last block to have no successors");
+		}
+
+		for (BrilNode block : blocks) {
+			final String name = getName(block);
+			for (String predecessor : getPredecessors(block)) {
+				final List<String> successors = getSuccessors(nameToBlock.get(predecessor));
+				if (!successors.contains(name)) {
+					throw new IllegalStateException("expecting " + predecessor + " to have successor " + name);
+				}
+			}
+
+			for (String successor : getSuccessors(block)) {
+				final List<String> predecessors = getPredecessors(nameToBlock.get(successor));
+				if (!predecessors.contains(name)) {
+					throw new IllegalStateException("expecting " + successor + " to have predecessor " + name);
+				}
+			}
+		}
 	}
 
 	// Utils ==================================================================
