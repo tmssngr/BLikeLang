@@ -39,6 +39,7 @@ public final class BrilCfgSsa {
 		this.cfgFunction = cfgFunction;
 
 		blocks = BrilCfg.getBlocks(cfgFunction);
+		BrilCfg.testValidSuccessorsAndPredecessors(blocks);
 
 		BrilCfgDetectVarUsages.detectVarUsages(blocks);
 	}

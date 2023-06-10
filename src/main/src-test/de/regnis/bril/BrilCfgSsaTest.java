@@ -109,6 +109,132 @@ public class BrilCfgSsaTest {
 		);
 	}
 
+	@Test
+	public void testIf() {
+		assertSsa(List.of(BrilCfg.createBlock("entry",
+		                                      List.of(
+				                                      BrilInstructions.constant("a", 47),
+				                                      BrilInstructions.branch("cond", "left", "right")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("left",
+		                                      List.of(
+				                                      BrilInstructions.add("a.1", "a", "a"),
+				                                      BrilInstructions.jump("exit")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("right",
+		                                      List.of(
+				                                      BrilInstructions.mul("a.2", "a", "a"),
+				                                      BrilInstructions.jump("exit")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("exit",
+		                                      List.of(
+				                                      BrilCfgSsa.phiFunction("a.3", List.of("a.1", "a.2")),
+				                                      BrilInstructions.print("a.3"),
+				                                      BrilInstructions.ret()
+		                                      )
+		                  )
+		          ),
+		          BrilCfg.createFunction("test", "void", List.of(BrilFactory.argument("cond", "bool")),
+		                                 List.of(BrilCfg.createBlock("entry",
+		                                                             List.of(
+				                                                             BrilInstructions.constant("a", 47),
+				                                                             BrilInstructions.branch("cond", "left", "right")
+		                                                             ),
+		                                                             List.of(), List.of("left", "right")
+		                                         ),
+		                                         BrilCfg.createBlock("left",
+		                                                             List.of(
+				                                                             BrilInstructions.add("a", "a", "a"),
+				                                                             BrilInstructions.jump("exit")
+		                                                             ),
+		                                                             List.of("entry"), List.of("exit")
+		                                         ),
+		                                         BrilCfg.createBlock("right",
+		                                                             List.of(
+				                                                             BrilInstructions.mul("a", "a", "a"),
+				                                                             BrilInstructions.jump("exit")
+		                                                             ),
+		                                                             List.of("entry"), List.of("exit")
+		                                         ),
+		                                         BrilCfg.createBlock("exit",
+		                                                             List.of(
+				                                                             BrilInstructions.print("a"),
+				                                                             BrilInstructions.ret()
+		                                                             ),
+		                                                             List.of("left", "right"), List.of()
+		                                         )
+		                                 )
+		          )
+		);
+	}
+
+	@Test
+	public void testLoop() {
+		assertSsa(List.of(BrilCfg.createBlock("entry",
+		                                      List.of(
+				                                      BrilInstructions.constant("i", 1),
+				                                      BrilInstructions.jump("loop")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("loop",
+		                                      List.of(
+				                                      BrilCfgSsa.phiFunction("i.1", List.of("i", "i.2")),
+				                                      BrilInstructions.constant("max", 10),
+				                                      BrilInstructions.lessThan("cond", "i.1", "max"),
+				                                      BrilInstructions.branch("cond", "body", "exit")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("body",
+		                                      List.of(
+				                                      BrilInstructions.add("i.2", "i.1", "i.1"),
+				                                      BrilInstructions.jump("loop")
+		                                      )
+		                  ),
+		                  BrilCfg.createBlock("exit",
+		                                      List.of(
+				                                      BrilInstructions.print("i.1"),
+				                                      BrilInstructions.ret()
+		                                      )
+		                  )
+		          ),
+		          BrilCfg.createFunction("test", "void", List.of(),
+		                                 List.of(BrilCfg.createBlock("entry",
+		                                                             List.of(
+				                                                             BrilInstructions.constant("i", 1),
+				                                                             BrilInstructions.jump("loop")
+		                                                             ),
+		                                                             List.of(), List.of("loop")
+		                                         ),
+		                                         BrilCfg.createBlock("loop",
+		                                                             List.of(
+				                                                             BrilInstructions.constant("max", 10),
+				                                                             BrilInstructions.lessThan("cond", "i", "max"),
+				                                                             BrilInstructions.branch("cond", "body", "exit")
+		                                                             ),
+		                                                             List.of("entry", "body"), List.of("body", "exit")
+		                                         ),
+		                                         BrilCfg.createBlock("body",
+		                                                             List.of(
+				                                                             BrilInstructions.add("i", "i", "i"),
+				                                                             BrilInstructions.jump("loop")
+		                                                             ),
+		                                                             List.of("loop"), List.of("loop")
+		                                         ),
+		                                         BrilCfg.createBlock("exit",
+		                                                             List.of(
+				                                                             BrilInstructions.print("i"),
+				                                                             BrilInstructions.ret()
+		                                                             ),
+		                                                             List.of("loop"), List.of()
+		                                         )
+		                                 )
+		          )
+		);
+	}
+
 	// Utils ==================================================================
 
 	private static void assertSsa(List<BrilNode> expectedBlocks, BrilNode function) {
