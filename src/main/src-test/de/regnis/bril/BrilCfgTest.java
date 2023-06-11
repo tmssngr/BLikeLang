@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -69,7 +70,7 @@ public class BrilCfgTest {
 	}
 
 	@Test
-	public void testBuildBlocksExit() throws Exception {
+	public void testBuildBlocksExit1() throws Exception {
 		final List<BrilNode> blocks = BrilCfg.buildBlocks(
 				List.of(
 						BrilInstructions.constant("i", 1),
@@ -88,6 +89,18 @@ public class BrilCfgTest {
 		                List.of(),
 		                iterator.next());
 		Assert.assertFalse(iterator.hasNext());
+	}
+
+	@Test
+	public void testBuildBlocksExit2() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(createLoopInstructions());
+		assertLoopInstructions(blocks.iterator());
+
+		final BrilNode function = BrilCfg.buildBlocks(BrilFactory.createFunction(
+				"test", "void", List.of(),
+				createLoopInstructions()
+		));
+		assertLoopInstructions(BrilCfg.getBlocks(function).iterator());
 	}
 
 	@Test
@@ -269,6 +282,37 @@ public class BrilCfgTest {
 
 	// Utils ==================================================================
 
+	private void assertLoopInstructions(Iterator<BrilNode> iterator) {
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("i", 0x20),
+		                                   BrilInstructions.jump("loop")),
+		                List.of(), List.of("loop"),
+		                iterator.next());
+		assertEqualsCfg("loop", List.of(BrilInstructions.constant("max", 0x80),
+		                                BrilInstructions.lessThan("cond", "i", "max"),
+		                                BrilInstructions.branch("cond", "body", "exit")),
+		                List.of("block 0", "endif"), List.of("body", "exit"),
+		                iterator.next());
+		assertEqualsCfg("body", List.of(BrilInstructions.constant("mask", 0x0f),
+		                                BrilInstructions.and("value", "i", "mask"),
+		                                BrilInstructions.constant("zero", 0),
+		                                BrilInstructions.lessThan("cond", "value", "zero"),
+		                                BrilInstructions.branch("cond", "print_i", "endif")),
+		                List.of("loop"), List.of("print_i", "endif"),
+		                iterator.next());
+		assertEqualsCfg("print_i", List.of(BrilInstructions.print("i"),
+		                                   BrilInstructions.jump("endif")),
+		                List.of("body"), List.of("endif"),
+		                iterator.next());
+		assertEqualsCfg("endif", List.of(BrilInstructions.call("printAscii", List.of("i")),
+		                                 BrilInstructions.jump("loop")),
+		                List.of("body", "print_i"), List.of("loop"),
+		                iterator.next());
+		assertEqualsCfg("exit", List.of(),
+		                List.of("loop"), List.of(),
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
+	}
+
 	private void assertEqualsCfg(String expectedName,
 	                             List<BrilNode> expectedInstructions,
 	                             List<String> expectedPredecessors,
@@ -278,5 +322,33 @@ public class BrilCfgTest {
 		Assert.assertEquals(expectedInstructions, BrilCfg.getInstructions(blockNode));
 		Assert.assertEquals(expectedPredecessors, BrilCfg.getPredecessors(blockNode));
 		Assert.assertEquals(expectedSuccessors, BrilCfg.getSuccessors(blockNode));
+	}
+
+	@NotNull
+	private static List<BrilNode> createLoopInstructions() {
+		return List.of(
+				BrilInstructions.constant("i", 0x20),
+
+				BrilInstructions.label("loop"),
+				BrilInstructions.constant("max", 0x80),
+				BrilInstructions.lessThan("cond", "i", "max"),
+				BrilInstructions.branch("cond", "body", "exit"),
+
+				BrilInstructions.label("body"),
+				BrilInstructions.constant("mask", 0x0f),
+				BrilInstructions.and("value", "i", "mask"),
+				BrilInstructions.constant("zero", 0),
+				BrilInstructions.lessThan("cond", "value", "zero"),
+				BrilInstructions.branch("cond", "print_i", "endif"),
+
+				BrilInstructions.label("print_i"),
+				BrilInstructions.print("i"),
+
+				BrilInstructions.label("endif"),
+				BrilInstructions.call("printAscii", List.of("i")),
+				BrilInstructions.jump("loop"),
+
+				BrilInstructions.label("exit")
+		);
 	}
 }
