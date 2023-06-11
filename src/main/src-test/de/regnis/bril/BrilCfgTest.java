@@ -3,6 +3,7 @@ package de.regnis.bril;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,12 +43,12 @@ public class BrilCfgTest {
 				BrilInstructions.label(".end"),
 				BrilInstructions.ret()
 		));
-		Assert.assertEquals(4, blocks.size());
+		final Iterator<BrilNode> iterator = blocks.iterator();
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
 		                                   BrilInstructions.jump(".loop")),
 		                List.of(),
 		                List.of(".loop"),
-		                blocks.get(0));
+		                iterator.next());
 		assertEqualsCfg(".loop", List.of(BrilInstructions.print("v"),
 		                                 BrilInstructions.constant("one", 1),
 		                                 BrilInstructions.sub("v", "v", "one"),
@@ -55,15 +56,16 @@ public class BrilCfgTest {
 		                                 BrilInstructions.branch("cond", ".end", ".loop")),
 		                List.of("block 0", ".loop"),
 		                List.of(".end", ".loop"),
-		                blocks.get(1));
+		                iterator.next());
 		assertEqualsCfg(".end", List.of(),
 		                List.of(".loop"),
 		                List.of("exit 3"),
-		                blocks.get(2));
+		                iterator.next());
 		assertEqualsCfg("exit 3", List.of(),
 		                List.of(".end"),
 		                List.of(),
-		                blocks.get(3));
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
 	}
 
 	@Test
@@ -77,22 +79,23 @@ public class BrilCfgTest {
 				BrilInstructions.label("endif"),
 				BrilInstructions.print("input")
 		));
-		Assert.assertEquals(3, blocks.size());
+		final Iterator<BrilNode> iterator = blocks.iterator();
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("zero", 0),
 		                                   BrilInstructions.lessThan("cond", "input", "zero"),
 		                                   BrilInstructions.branch("cond", "then", "endif")),
 		                List.of(),
 		                List.of("then", "endif"),
-		                blocks.get(0));
+		                iterator.next());
 		assertEqualsCfg("then", List.of(BrilInstructions.id("input", "zero"),
 		                                BrilInstructions.jump("endif")),
 		                List.of("block 0"),
 		                List.of("endif"),
-		                blocks.get(1));
+		                iterator.next());
 		assertEqualsCfg("endif", List.of(BrilInstructions.print("input")),
 		                List.of("block 0", "then"),
 		                List.of(),
-		                blocks.get(2));
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
 	}
 
 	@Test
@@ -106,35 +109,37 @@ public class BrilCfgTest {
 				BrilInstructions.label(".somewhere"),
 				BrilInstructions.print("v"))
 		);
-		Assert.assertEquals(3, blocks.size());
+		Iterator<BrilNode> iterator = blocks.iterator();
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
 		                                   BrilInstructions.jump(".somewhere")),
 		                List.of(),
 		                List.of(".somewhere"),
-		                blocks.get(0));
+		                iterator.next());
 		assertEqualsCfg("block 1", List.of(BrilInstructions.constant("v", 2),
 		                                   BrilInstructions.jump(".somewhere")),
 		                List.of(),
 		                List.of(".somewhere"),
-		                blocks.get(1));
+		                iterator.next());
 		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
 		                List.of("block 0", "block 1"),
 		                List.of(),
-		                blocks.get(2));
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
 
 		BrilCfg.removeUnusedBlocks(blocks);
 
-		Assert.assertEquals(2, blocks.size());
+		iterator = blocks.iterator();
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
 		                                   BrilInstructions.jump(".somewhere")),
 		                List.of(),
 		                List.of(".somewhere"),
-		                blocks.get(0));
+		                iterator.next());
 
 		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
 		                List.of("block 0"),
 		                List.of(),
-		                blocks.get(1));
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
 	}
 
 	@Test
