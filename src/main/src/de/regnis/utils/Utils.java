@@ -24,6 +24,14 @@ public final class Utils {
 		return value != null ? value : defaultValue;
 	}
 
+	@Nullable
+	public static <O> O getLastOrNull(List<O> list) {
+		if (list.isEmpty()) {
+			return null;
+		}
+		return getLast(list);
+	}
+
 	@NotNull
 	public static <O> O getLast(List<O> list) {
 		return list.get(list.size() - 1);

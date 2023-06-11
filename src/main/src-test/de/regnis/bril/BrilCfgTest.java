@@ -69,6 +69,28 @@ public class BrilCfgTest {
 	}
 
 	@Test
+	public void testBuildBlocksExit() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(
+				List.of(
+						BrilInstructions.constant("i", 1),
+
+						BrilInstructions.label("exit")
+				)
+		);
+		final Iterator<BrilNode> iterator = blocks.iterator();
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("i", 1),
+		                                   BrilInstructions.jump("exit")),
+		                List.of(),
+		                List.of("exit"),
+		                iterator.next());
+		assertEqualsCfg("exit", List.of(),
+		                List.of("block 0"),
+		                List.of(),
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
+	}
+
+	@Test
 	public void testBuildBlocksAddJumpFromFallThroughBlock() throws Exception {
 		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
 				BrilInstructions.constant("zero", 0),

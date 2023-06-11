@@ -116,7 +116,12 @@ public final class BrilCfg {
 
 			final List<String> successors = block.getOrCreateStringList(KEY_SUCCESSORS);
 
-			final BrilNode lastInstruction = Utils.getLast(blockInstructions);
+			final BrilNode lastInstruction = Utils.getLastOrNull(blockInstructions);
+			if (lastInstruction == null) {
+				fallThroughFromBlock = block;
+				continue;
+			}
+
 			final String op = BrilInstructions.getOp(lastInstruction);
 			if (BrilInstructions.RET.equals(op)) {
 				blockInstructions.remove(lastInstruction);
