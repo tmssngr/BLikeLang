@@ -204,7 +204,7 @@ public class BrilCfgSsaTest {
 	}
 
 	@Test
-	public void testLoop() {
+	public void testLoop1() {
 		final BrilNode function = BrilCfg.createFunction(
 				"test", "void", List.of(),
 				List.of(BrilCfg.createBlock("entry",
@@ -297,6 +297,124 @@ public class BrilCfgSsaTest {
 						                    BrilInstructions.ret()
 				                    )
 				)
+		), function);
+	}
+
+	@Test
+	public void testLoop2() {
+		final BrilNode function = BrilCfg.createFunction(
+				"test", "void", List.of(),
+				List.of(BrilCfg.createBlock("block 0",
+				                            List.of(BrilInstructions.constant("i", 0x20),
+				                                    BrilInstructions.jump("loop")
+				                            ),
+				                            List.of(), List.of("loop")),
+				        BrilCfg.createBlock("loop",
+				                            List.of(BrilInstructions.constant("max", 0x80),
+				                                    BrilInstructions.lessThan("cond", "i", "max"),
+				                                    BrilInstructions.branch("cond", "body", "exit")
+				                            ),
+				                            List.of("block 0", "endif"), List.of("body", "exit")),
+				        BrilCfg.createBlock("body",
+				                            List.of(BrilInstructions.constant("mask", 0x0f),
+				                                    BrilInstructions.and("value", "i", "mask"),
+				                                    BrilInstructions.constant("zero", 0),
+				                                    BrilInstructions.lessThan("cond", "value", "zero"),
+				                                    BrilInstructions.branch("cond", "print_i", "endif")
+				                            ),
+				                            List.of("loop"), List.of("print_i", "endif")),
+				        BrilCfg.createBlock("print_i",
+				                            List.of(BrilInstructions.print("i"),
+				                                    BrilInstructions.jump("endif")
+				                            ),
+				                            List.of("body"), List.of("endif")),
+				        BrilCfg.createBlock("endif",
+				                            List.of(BrilInstructions.call("printAscii", List.of("i")),
+				                                    BrilInstructions.constant("one", 1),
+				                                    BrilInstructions.add("i", "i", "one"),
+				                                    BrilInstructions.jump("loop")
+				                            ),
+				                            List.of("body", "print_i"), List.of("loop")),
+				        BrilCfg.createBlock("exit", List.of(),
+				                            List.of("loop"), List.of()
+				        )
+				)
+		);
+		BrilCfgSsa.transformToSsaWithPhiFunctions(function);
+		assertEqualsFunctionBlocks(List.of(
+				BrilCfg.createBlock("block 0",
+				                    List.of(BrilInstructions.constant("i", 0x20),
+				                            BrilInstructions.jump("loop")
+				                    )
+				),
+				BrilCfg.createBlock("loop",
+				                    List.of(BrilCfgSsa.phi("i.1", List.of("i", "i.3")),
+				                            BrilInstructions.constant("max", 0x80),
+				                            BrilInstructions.lessThan("cond", "i.1", "max"),
+				                            BrilInstructions.branch("cond", "body", "exit")
+				                    )
+				),
+				BrilCfg.createBlock("body",
+				                    List.of(BrilInstructions.constant("mask", 0x0f),
+				                            BrilInstructions.and("value", "i.1", "mask"),
+				                            BrilInstructions.constant("zero", 0),
+				                            BrilInstructions.lessThan("cond.1", "value", "zero"),
+				                            BrilInstructions.branch("cond.1", "print_i", "endif")
+				                    )
+				),
+				BrilCfg.createBlock("print_i",
+				                    List.of(BrilInstructions.print("i.1"),
+				                            BrilInstructions.jump("endif")
+				                    )
+				),
+				BrilCfg.createBlock("endif",
+				                    List.of(BrilInstructions.id("i.2", "i.1"),
+				                            BrilInstructions.call("printAscii", List.of("i.2")),
+				                            BrilInstructions.constant("one", 1),
+				                            BrilInstructions.add("i.3", "i.2", "one"),
+				                            BrilInstructions.jump("loop")
+				                    )
+				),
+				BrilCfg.createBlock("exit", List.of())
+		), function);
+
+		BrilCfgSsa.inlinePhiFunctions(function);
+		assertEqualsFunctionBlocks(List.of(
+				BrilCfg.createBlock("block 0",
+				                    List.of(BrilInstructions.constant("i", 0x20),
+				                            BrilInstructions.id("i.1", "i"),
+				                            BrilInstructions.jump("loop")
+				                    )
+				),
+				BrilCfg.createBlock("loop",
+				                    List.of(BrilInstructions.constant("max", 0x80),
+				                            BrilInstructions.lessThan("cond", "i.1", "max"),
+				                            BrilInstructions.branch("cond", "body", "exit")
+				                    )
+				),
+				BrilCfg.createBlock("body",
+				                    List.of(BrilInstructions.constant("mask", 0x0f),
+				                            BrilInstructions.and("value", "i.1", "mask"),
+				                            BrilInstructions.constant("zero", 0),
+				                            BrilInstructions.lessThan("cond.1", "value", "zero"),
+				                            BrilInstructions.branch("cond.1", "print_i", "endif")
+				                    )
+				),
+				BrilCfg.createBlock("print_i",
+				                    List.of(BrilInstructions.print("i.1"),
+				                            BrilInstructions.jump("endif")
+				                    )
+				),
+				BrilCfg.createBlock("endif",
+				                    List.of(BrilInstructions.id("i.2", "i.1"),
+				                            BrilInstructions.call("printAscii", List.of("i.2")),
+				                            BrilInstructions.constant("one", 1),
+				                            BrilInstructions.add("i.3", "i.2", "one"),
+				                            BrilInstructions.id("i.1", "i.3"),
+				                            BrilInstructions.jump("loop")
+				                    )
+				),
+				BrilCfg.createBlock("exit", List.of())
 		), function);
 	}
 

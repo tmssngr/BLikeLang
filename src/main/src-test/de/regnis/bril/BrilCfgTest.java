@@ -37,6 +37,8 @@ public class BrilCfgTest {
 
 				BrilInstructions.label("endif"),
 				BrilInstructions.call("printAscii", List.of("i")),
+				BrilInstructions.constant("one", 1),
+				BrilInstructions.add("i", "i", "one"),
 				BrilInstructions.jump("loop"),
 
 				BrilInstructions.label("exit")
@@ -356,6 +358,8 @@ public class BrilCfgTest {
 		                List.of("body"), List.of("endif"),
 		                iterator.next());
 		assertEqualsCfg("endif", List.of(BrilInstructions.call("printAscii", List.of("i")),
+		                                 BrilInstructions.constant("one", 1),
+										 BrilInstructions.add("i", "i", "one"),
 		                                 BrilInstructions.jump("loop")),
 		                List.of("body", "print_i"), List.of("loop"),
 		                iterator.next());
