@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,6 +44,27 @@ public class BrilCfgTest {
 	}
 
 	// Accessing ==============================================================
+
+	@Test
+	public void testGetSetInstructions() {
+		final BrilNode block = BrilCfg.createBlock("name", List.of(
+				BrilInstructions.add("a", "b", "c")
+		));
+
+		List<BrilNode> instructions = BrilCfg.getInstructions(block);
+		BrilCfg.setInstructions(instructions, block);
+		Assert.assertEquals(List.of(
+				BrilInstructions.add("a", "b", "c")
+		), BrilCfg.getInstructions(block));
+
+		instructions = new ArrayList<>(instructions);
+		instructions.add(BrilInstructions.print("a"));
+		BrilCfg.setInstructions(instructions, block);
+		Assert.assertEquals(List.of(
+				BrilInstructions.add("a", "b", "c"),
+				BrilInstructions.print("a")
+		), BrilCfg.getInstructions(block));
+	}
 
 	@Test
 	public void testFormBlocks() {

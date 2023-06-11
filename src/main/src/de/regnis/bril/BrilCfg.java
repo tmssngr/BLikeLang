@@ -227,8 +227,10 @@ public final class BrilCfg {
 
 	public static void setInstructions(List<BrilNode> blockInstructions, BrilNode block) {
 		final List<BrilNode> instructions = block.getOrCreateNodeList(KEY_INSTRUCTIONS);
-		instructions.clear();
-		instructions.addAll(blockInstructions);
+		if (!instructions.equals(blockInstructions)) {
+			instructions.clear();
+			instructions.addAll(blockInstructions);
+		}
 	}
 
 	@NotNull
