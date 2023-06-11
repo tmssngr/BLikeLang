@@ -12,6 +12,36 @@ import java.util.List;
  */
 public class BrilCfgTest {
 
+	// Static =================================================================
+
+	@NotNull
+	public static List<BrilNode> createLoopInstructions() {
+		return List.of(
+				BrilInstructions.constant("i", 0x20),
+
+				BrilInstructions.label("loop"),
+				BrilInstructions.constant("max", 0x80),
+				BrilInstructions.lessThan("cond", "i", "max"),
+				BrilInstructions.branch("cond", "body", "exit"),
+
+				BrilInstructions.label("body"),
+				BrilInstructions.constant("mask", 0x0f),
+				BrilInstructions.and("value", "i", "mask"),
+				BrilInstructions.constant("zero", 0),
+				BrilInstructions.lessThan("cond", "value", "zero"),
+				BrilInstructions.branch("cond", "print_i", "endif"),
+
+				BrilInstructions.label("print_i"),
+				BrilInstructions.print("i"),
+
+				BrilInstructions.label("endif"),
+				BrilInstructions.call("printAscii", List.of("i")),
+				BrilInstructions.jump("loop"),
+
+				BrilInstructions.label("exit")
+		);
+	}
+
 	// Accessing ==============================================================
 
 	@Test
@@ -322,33 +352,5 @@ public class BrilCfgTest {
 		Assert.assertEquals(expectedInstructions, BrilCfg.getInstructions(blockNode));
 		Assert.assertEquals(expectedPredecessors, BrilCfg.getPredecessors(blockNode));
 		Assert.assertEquals(expectedSuccessors, BrilCfg.getSuccessors(blockNode));
-	}
-
-	@NotNull
-	private static List<BrilNode> createLoopInstructions() {
-		return List.of(
-				BrilInstructions.constant("i", 0x20),
-
-				BrilInstructions.label("loop"),
-				BrilInstructions.constant("max", 0x80),
-				BrilInstructions.lessThan("cond", "i", "max"),
-				BrilInstructions.branch("cond", "body", "exit"),
-
-				BrilInstructions.label("body"),
-				BrilInstructions.constant("mask", 0x0f),
-				BrilInstructions.and("value", "i", "mask"),
-				BrilInstructions.constant("zero", 0),
-				BrilInstructions.lessThan("cond", "value", "zero"),
-				BrilInstructions.branch("cond", "print_i", "endif"),
-
-				BrilInstructions.label("print_i"),
-				BrilInstructions.print("i"),
-
-				BrilInstructions.label("endif"),
-				BrilInstructions.call("printAscii", List.of("i")),
-				BrilInstructions.jump("loop"),
-
-				BrilInstructions.label("exit")
-		);
 	}
 }
