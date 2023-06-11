@@ -252,6 +252,13 @@ public final class BrilCfg {
 	/**
 	 * @throws IllegalStateException
 	 */
+	public static void testValidSuccessorsAndPredecessors(BrilNode cfgFunction) {
+		testValidSuccessorsAndPredecessors(getBlocks(cfgFunction));
+	}
+
+	/**
+	 * @throws IllegalStateException
+	 */
 	public static void testValidSuccessorsAndPredecessors(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = getNameToBlock(blocks);
 

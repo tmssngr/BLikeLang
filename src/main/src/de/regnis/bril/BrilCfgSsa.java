@@ -20,11 +20,13 @@ public final class BrilCfgSsa {
 	// Static =================================================================
 
 	public static void transformToSsaWithPhiFunctions(BrilNode cfgFunction) {
+		BrilCfg.testValidSuccessorsAndPredecessors(cfgFunction);
 		final BrilCfgSsa ssa = new BrilCfgSsa(cfgFunction);
 		ssa.transform();
 	}
 
 	public static void inlinePhiFunctions(BrilNode cfgFunction) {
+		BrilCfg.testValidSuccessorsAndPredecessors(cfgFunction);
 		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
 		final Map<String, BrilNode> nameToBlock = BrilCfg.getNameToBlock(blocks);
 		for (BrilNode block : blocks) {
