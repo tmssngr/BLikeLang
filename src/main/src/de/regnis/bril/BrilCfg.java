@@ -157,6 +157,37 @@ public final class BrilCfg {
 		return blocks;
 	}
 
+	public static void removeUnusedBlocks(List<BrilNode> blocks) {
+		boolean changed;
+		do {
+			final Map<String, BrilNode> nameToBlock = getNameToBlock(blocks);
+
+			final Set<String> usedLabels = getUsedLabels(blocks, nameToBlock);
+
+			changed = false;
+
+			for (final Iterator<BrilNode> it = blocks.iterator(); it.hasNext(); ) {
+				final BrilNode block = it.next();
+				final String name = getName(block);
+				if (usedLabels.contains(name)) {
+					continue;
+				}
+
+				it.remove();
+				changed = true;
+
+				final List<String> successors = getSuccessors(block);
+				for (String successor : successors) {
+					final BrilNode successorBlock = nameToBlock.get(successor);
+					successorBlock
+							.getOrCreateStringList(KEY_PREDECESSORS)
+							.remove(name);
+				}
+			}
+		}
+		while (changed);
+	}
+
 	@NotNull
 	public static Map<String, BrilNode> getNameToBlock(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = new HashMap<>();
@@ -211,7 +242,10 @@ public final class BrilCfg {
 		return block;
 	}
 
-	public static void testValidSuccessorsAndPredecessors(List<BrilNode> blocks) throws IllegalStateException {
+	/**
+	 * @throws IllegalStateException
+	 */
+	public static void testValidSuccessorsAndPredecessors(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = getNameToBlock(blocks);
 
 		if (getPredecessors(blocks.get(0)).size() > 0) {
@@ -241,6 +275,27 @@ public final class BrilCfg {
 	}
 
 	// Utils ==================================================================
+
+	private static Set<String> getUsedLabels(List<BrilNode> blocks, Map<String, BrilNode> nameToBlock) {
+		final Set<String> usedLabels = new HashSet<>();
+
+		final List<String> pending = new ArrayList<>();
+		pending.add(getName(blocks.get(0)));
+		while (!pending.isEmpty()) {
+			final Iterator<String> it = pending.iterator();
+			final String name = it.next();
+			it.remove();
+
+			if (!usedLabels.add(name)) {
+				continue;
+			}
+
+			final BrilNode block = nameToBlock.get(name);
+			final List<String> successors = getSuccessors(block);
+			pending.addAll(successors);
+		}
+		return usedLabels;
+	}
 
 	private static void connectBlocksAndAppendJump(@NotNull BrilNode prevBlock, BrilNode nextBlock) {
 		connectBlocks(prevBlock, nextBlock);

@@ -96,6 +96,48 @@ public class BrilCfgTest {
 	}
 
 	@Test
+	public void testBuildBlocksRemoveUnused() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
+				BrilInstructions.constant("v", 4),
+				BrilInstructions.jump(".somewhere"),
+
+				BrilInstructions.constant("v", 2),
+
+				BrilInstructions.label(".somewhere"),
+				BrilInstructions.print("v"))
+		);
+		Assert.assertEquals(3, blocks.size());
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
+		                                   BrilInstructions.jump(".somewhere")),
+		                List.of(),
+		                List.of(".somewhere"),
+		                blocks.get(0));
+		assertEqualsCfg("block 1", List.of(BrilInstructions.constant("v", 2),
+		                                   BrilInstructions.jump(".somewhere")),
+		                List.of(),
+		                List.of(".somewhere"),
+		                blocks.get(1));
+		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
+		                List.of("block 0", "block 1"),
+		                List.of(),
+		                blocks.get(2));
+
+		BrilCfg.removeUnusedBlocks(blocks);
+
+		Assert.assertEquals(2, blocks.size());
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
+		                                   BrilInstructions.jump(".somewhere")),
+		                List.of(),
+		                List.of(".somewhere"),
+		                blocks.get(0));
+
+		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
+		                List.of("block 0"),
+		                List.of(),
+		                blocks.get(1));
+	}
+
+	@Test
 	public void testValidSuccessorsAndPredecessors() {
 		BrilCfg.testValidSuccessorsAndPredecessors(
 				List.of(BrilCfg.createBlock("entry", List.of(),
