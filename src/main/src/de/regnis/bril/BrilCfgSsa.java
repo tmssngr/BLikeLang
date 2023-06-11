@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -12,18 +13,54 @@ import static de.regnis.utils.Utils.notNull;
  */
 public final class BrilCfgSsa {
 
+	// Constants ==============================================================
+
+	private static final String PHI = "phi";
+
 	// Static =================================================================
 
-	public static void transform(BrilNode cfgFunction) {
+	public static void transformToSsaWithPhiFunctions(BrilNode cfgFunction) {
 		final BrilCfgSsa ssa = new BrilCfgSsa(cfgFunction);
 		ssa.transform();
 	}
 
+	public static void inlinePhiFunctions(BrilNode cfgFunction) {
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+		final Map<String, BrilNode> nameToBlock = BrilCfg.getNameToBlock(blocks);
+		for (BrilNode block : blocks) {
+			final List<BrilNode> instructions = new ArrayList<>(BrilCfg.getInstructions(block));
+			for (final Iterator<BrilNode> it = instructions.iterator(); it.hasNext(); ) {
+				final BrilNode instruction = it.next();
+				if (!instruction.getString(BrilInstructions.KEY_OP).equals(PHI)) {
+					BrilCfg.setInstructions(instructions, block);
+					break;
+				}
+
+				it.remove();
+
+				final String dest = instruction.getString(BrilInstructions.KEY_DEST);
+				final List<String> parameters = instruction.getStringList("parameters");
+				final List<String> predecessors = BrilCfg.getPredecessors(block);
+				Utils.assertTrue(parameters.size() == predecessors.size());
+
+				for (int i = 0; i < predecessors.size(); i++) {
+					final String predecessor = predecessors.get(i);
+					final String parameter = parameters.get(i);
+					final BrilNode predecessorBlock = nameToBlock.get(predecessor);
+					final List<BrilNode> predecessorInstructions = new ArrayList<>(BrilCfg.getInstructions(predecessorBlock));
+					assertTrue(BrilInstructions.getJmpTargets(Utils.getLast(predecessorInstructions)).size() == 1);
+					predecessorInstructions.add(predecessorInstructions.size() - 1, BrilInstructions.id(dest, parameter));
+					BrilCfg.setInstructions(predecessorInstructions, predecessorBlock);
+				}
+			}
+		}
+	}
+
 	@NotNull
-	static BrilNode phiFunction(String dest, List<String> sources) {
+	static BrilNode phi(String dest, List<String> sources) {
 		return new BrilNode()
-				.set("op", "phi")
-				.set("dest", dest)
+				.set(BrilInstructions.KEY_OP, PHI)
+				.set(BrilInstructions.KEY_DEST, dest)
 				.set("parameters", sources);
 	}
 
@@ -96,7 +133,7 @@ public final class BrilCfgSsa {
 				}
 
 				if (ssaNames.size() > 1) {
-					instructions.add(phiFunction(phiFunction.ssaName, phiParameters));
+					instructions.add(phi(phiFunction.ssaName, phiParameters));
 				}
 				else {
 					instructions.add(BrilInstructions.id(phiFunction.ssaName, phiParameters.get(0)));

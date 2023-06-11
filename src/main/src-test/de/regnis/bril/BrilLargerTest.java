@@ -34,7 +34,7 @@ public class BrilLargerTest {
 
 	private void assertCompiler(List<BrilNode> expectedBlocks, BrilNode function) throws BrilCfg.DuplicateLabelException, BrilCfg.NoExitBlockException, BrilCfg.InvalidTargetLabelException {
 		final BrilNode cfg = BrilCfg.buildBlocks(function);
-		BrilCfgSsa.transform(cfg);
+		BrilCfgSsa.transformToSsaWithPhiFunctions(cfg);
 		BrilDeadCodeElimination.simpleDce(cfg);
 		BrilCfgSsaTest.assertEqualsFunctionBlocks(expectedBlocks, cfg);
 	}

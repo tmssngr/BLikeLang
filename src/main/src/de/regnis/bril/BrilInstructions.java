@@ -27,11 +27,11 @@ public final class BrilInstructions {
 	private static final String LABEL = "label";
 	public static final String PRINT = "print";
 	public static final String RET = "ret";
-	private static final String KEY_OP = "op";
+	public static final String KEY_OP = "op";
 	private static final String KEY_JMP_TARGET = "target";
 	private static final String KEY_IF_TARGET = "ifTarget";
 	private static final String KEY_ELSE_TARGET = "elseTarget";
-	private static final String KEY_DEST = "dest";
+	public static final String KEY_DEST = "dest";
 	private static final String KEY_COND = "cond";
 	private static final String KEY_ARGS = "args";
 	private static final String KEY_VAR1 = "var1";
