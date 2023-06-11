@@ -12,18 +12,21 @@ public final class BrilDeadCodeElimination {
 
 	// Static =================================================================
 
-	public static void simpleDce(BrilNode cfg) {
-		for (BrilNode block : BrilCfg.getBlocks(cfg)) {
+	public static void simpleDce(BrilNode cfgFunction) {
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+		for (BrilNode block : blocks) {
 			final List<BrilNode> instructions = BrilCfg.getInstructions(block);
-			final List<BrilNode> newInstructions = simpleDce(instructions);
+			final Set<String> varsAfterBlock = BrilCfgDetectVarUsages.getVarsAfterBlock(block);
+			final List<BrilNode> newInstructions = simpleDce(instructions, varsAfterBlock);
 			BrilCfg.setInstructions(newInstructions, block);
 		}
 	}
 
-	public static List<BrilNode> simpleDce(List<BrilNode> blockInstructions) {
+	public static List<BrilNode> simpleDce(List<BrilNode> blockInstructions, Set<String> requiredVarsAfter) {
 		while (true) {
 			final Set<String> providedVars = new HashSet<>();
-			final Set<String> requiredVars = new HashSet<>();
+			final Set<String> requiredVars = new HashSet<>(requiredVarsAfter);
 			for (BrilNode instruction : blockInstructions) {
 				final String dest = BrilInstructions.getDest(instruction);
 				if (dest != null) {
