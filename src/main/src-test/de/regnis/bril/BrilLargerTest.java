@@ -17,10 +17,8 @@ public class BrilLargerTest {
 				               BrilCfg.createBlock("block 0",
 				                                   List.of(
 						                                   BrilInstructions.constant("a.1", 2),
-						                                   BrilInstructions.print("a.1"),
-						                                   BrilInstructions.jump("exit 1")
-				                                   )),
-				               BrilCfg.createBlock("exit 1", List.of())
+						                                   BrilInstructions.print("a.1")
+				                                   ))
 		               ),
 		               BrilFactory.createFunction("main", "void", List.of(),
 		                                          List.of(

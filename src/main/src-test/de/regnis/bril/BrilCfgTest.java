@@ -77,7 +77,7 @@ public class BrilCfgTest {
 				BrilInstructions.label("endif"),
 				BrilInstructions.print("input")
 		));
-		Assert.assertEquals(4, blocks.size());
+		Assert.assertEquals(3, blocks.size());
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("zero", 0),
 		                                   BrilInstructions.lessThan("cond", "input", "zero"),
 		                                   BrilInstructions.branch("cond", "then", "endif")),
@@ -89,15 +89,10 @@ public class BrilCfgTest {
 		                List.of("block 0"),
 		                List.of("endif"),
 		                blocks.get(1));
-		assertEqualsCfg("endif", List.of(BrilInstructions.print("input"),
-		                                 BrilInstructions.jump("exit 3")),
+		assertEqualsCfg("endif", List.of(BrilInstructions.print("input")),
 		                List.of("block 0", "then"),
-		                List.of("exit 3"),
-		                blocks.get(2));
-		assertEqualsCfg("exit 3", List.of(),
-		                List.of("endif"),
 		                List.of(),
-		                blocks.get(3));
+		                blocks.get(2));
 	}
 
 	@Test

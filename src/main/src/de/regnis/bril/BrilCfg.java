@@ -141,15 +141,18 @@ public final class BrilCfg {
 			}
 		}
 
-		if (fallThroughFromBlock != null) {
-			connectBlocksAndAppendJump(fallThroughFromBlock, exitBlock);
-		}
-
+		// append the exit block only if it already has some predecessors
 		if (exitBlock.getOrCreateStringList(KEY_PREDECESSORS).isEmpty()) {
-			throw new NoExitBlockException();
+			if (fallThroughFromBlock == null) {
+				throw new NoExitBlockException();
+			}
 		}
-
-		blocks.add(exitBlock);
+		else {
+			if (fallThroughFromBlock != null) {
+				connectBlocksAndAppendJump(fallThroughFromBlock, exitBlock);
+			}
+			blocks.add(exitBlock);
+		}
 
 		return blocks;
 	}
