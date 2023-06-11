@@ -1,6 +1,5 @@
 package de.regnis.bril;
 
-import com.sun.jdi.request.InvalidRequestStateException;
 import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -105,29 +104,29 @@ public final class BrilCfg {
 		@Nullable BrilNode fallThroughFromBlock = null;
 		for (Map.Entry<String, BrilNode> entry : nameToBlock.entrySet()) {
 			final String name = entry.getKey();
-			final BrilNode blockNode = entry.getValue();
+			final BrilNode block = entry.getValue();
 
 			if (fallThroughFromBlock != null) {
-				connectBlocks(fallThroughFromBlock, blockNode);
+				connectBlocksAndAppendJump(fallThroughFromBlock, block);
 				fallThroughFromBlock = null;
 			}
 
-			blocks.add(blockNode);
-			final List<BrilNode> blockInstructions = blockNode.getOrCreateNodeList(KEY_INSTRUCTIONS);
+			blocks.add(block);
+			final List<BrilNode> blockInstructions = block.getOrCreateNodeList(KEY_INSTRUCTIONS);
 
-			final List<String> successors = blockNode.getOrCreateStringList(KEY_SUCCESSORS);
+			final List<String> successors = block.getOrCreateStringList(KEY_SUCCESSORS);
 
 			final BrilNode lastInstruction = Utils.getLast(blockInstructions);
 			final String op = BrilInstructions.getOp(lastInstruction);
 			if (BrilInstructions.RET.equals(op)) {
 				blockInstructions.remove(lastInstruction);
-				connectBlocks(blockNode, exitBlock);
+				connectBlocks(block, exitBlock);
 				continue;
 			}
 
 			final List<String> targets = BrilInstructions.getJmpTargets(lastInstruction);
 			if (targets.isEmpty()) {
-				fallThroughFromBlock = blockNode;
+				fallThroughFromBlock = block;
 				continue;
 			}
 
@@ -143,7 +142,7 @@ public final class BrilCfg {
 		}
 
 		if (fallThroughFromBlock != null) {
-			connectBlocks(fallThroughFromBlock, exitBlock);
+			connectBlocksAndAppendJump(fallThroughFromBlock, exitBlock);
 		}
 
 		if (exitBlock.getOrCreateStringList(KEY_PREDECESSORS).isEmpty()) {
@@ -239,6 +238,12 @@ public final class BrilCfg {
 	}
 
 	// Utils ==================================================================
+
+	private static void connectBlocksAndAppendJump(@NotNull BrilNode prevBlock, BrilNode nextBlock) {
+		connectBlocks(prevBlock, nextBlock);
+		prevBlock.getOrCreateNodeList(KEY_INSTRUCTIONS)
+				.add(BrilInstructions.jump(getName(nextBlock)));
+	}
 
 	private static void connectBlocks(@NotNull BrilNode prevBlock, @NotNull BrilNode nextBlock) {
 		prevBlock.getOrCreateStringList(KEY_SUCCESSORS).add(getName(nextBlock));

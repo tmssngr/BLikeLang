@@ -17,13 +17,14 @@ public final class BrilInstructions {
 	// Constants ==============================================================
 
 	public static final String ADD = "add";
+	public static final String SUB = "sub";
+	public static final String MUL = "mul";
 	private static final String BR = "br";
 	private static final String CALL = "call";
 	public static final String CONST = "const";
 	public static final String ID = "id";
 	public static final String JMP = "jmp";
 	private static final String LABEL = "label";
-	public static final String MUL = "mul";
 	public static final String PRINT = "print";
 	public static final String RET = "ret";
 	private static final String KEY_OP = "op";
@@ -78,6 +79,11 @@ public final class BrilInstructions {
 	@NotNull
 	public static BrilNode add(String dest, String var1, String var2) {
 		return binary(dest, ADD, var1, var2);
+	}
+
+	@NotNull
+	public static BrilNode sub(String dest, String var1, String var2) {
+		return binary(dest, SUB, var1, var2);
 	}
 
 	@NotNull

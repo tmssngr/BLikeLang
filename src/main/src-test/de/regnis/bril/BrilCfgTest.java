@@ -29,27 +29,73 @@ public class BrilCfgTest {
 
 	@Test
 	public void testBuildBlocks() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(BrilInstructions.constant("v", 4),
-		                                                          BrilInstructions.jump(".somewhere"),
-		                                                          BrilInstructions.constant("v", 2),
-		                                                          BrilInstructions.label(".somewhere"),
-		                                                          BrilInstructions.print("v")));
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
+				BrilInstructions.constant("v", 4),
+
+				BrilInstructions.label(".loop"),
+				BrilInstructions.print("v"),
+				BrilInstructions.constant("one", 1),
+				BrilInstructions.sub("v", "v", "one"),
+				BrilInstructions.lessThan("cond", "v", "one"),
+				BrilInstructions.branch("cond", ".end", ".loop"),
+
+				BrilInstructions.label(".end"),
+				BrilInstructions.ret()
+		));
 		Assert.assertEquals(4, blocks.size());
 		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
-		                                   BrilInstructions.jump(".somewhere")),
+		                                   BrilInstructions.jump(".loop")),
 		                List.of(),
-		                List.of(".somewhere"),
+		                List.of(".loop"),
 		                blocks.get(0));
-		assertEqualsCfg("block 1", List.of(BrilInstructions.constant("v", 2)),
-		                List.of(),
-		                List.of(".somewhere"),
+		assertEqualsCfg(".loop", List.of(BrilInstructions.print("v"),
+		                                 BrilInstructions.constant("one", 1),
+		                                 BrilInstructions.sub("v", "v", "one"),
+		                                 BrilInstructions.lessThan("cond", "v", "one"),
+		                                 BrilInstructions.branch("cond", ".end", ".loop")),
+		                List.of("block 0", ".loop"),
+		                List.of(".end", ".loop"),
 		                blocks.get(1));
-		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
-		                List.of("block 0", "block 1"),
+		assertEqualsCfg(".end", List.of(),
+		                List.of(".loop"),
 		                List.of("exit 3"),
 		                blocks.get(2));
 		assertEqualsCfg("exit 3", List.of(),
-		                List.of(".somewhere"),
+		                List.of(".end"),
+		                List.of(),
+		                blocks.get(3));
+	}
+
+	@Test
+	public void testBuildBlocksAddJumpFromFallThroughBlock() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
+				BrilInstructions.constant("zero", 0),
+				BrilInstructions.lessThan("cond", "input", "zero"),
+				BrilInstructions.branch("cond", "then", "endif"),
+				BrilInstructions.label("then"),
+				BrilInstructions.id("input", "zero"),
+				BrilInstructions.label("endif"),
+				BrilInstructions.print("input")
+		));
+		Assert.assertEquals(4, blocks.size());
+		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("zero", 0),
+		                                   BrilInstructions.lessThan("cond", "input", "zero"),
+		                                   BrilInstructions.branch("cond", "then", "endif")),
+		                List.of(),
+		                List.of("then", "endif"),
+		                blocks.get(0));
+		assertEqualsCfg("then", List.of(BrilInstructions.id("input", "zero"),
+		                                BrilInstructions.jump("endif")),
+		                List.of("block 0"),
+		                List.of("endif"),
+		                blocks.get(1));
+		assertEqualsCfg("endif", List.of(BrilInstructions.print("input"),
+		                                 BrilInstructions.jump("exit 3")),
+		                List.of("block 0", "then"),
+		                List.of("exit 3"),
+		                blocks.get(2));
+		assertEqualsCfg("exit 3", List.of(),
+		                List.of("endif"),
 		                List.of(),
 		                blocks.get(3));
 	}
