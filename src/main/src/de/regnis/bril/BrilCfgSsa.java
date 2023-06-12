@@ -51,7 +51,7 @@ public final class BrilCfgSsa {
 					final BrilNode predecessorBlock = nameToBlock.get(predecessor);
 					final List<BrilNode> predecessorInstructions = new ArrayList<>(BrilCfg.getInstructions(predecessorBlock));
 					assertTrue(BrilInstructions.getJmpTargets(Utils.getLast(predecessorInstructions)).size() == 1);
-					predecessorInstructions.add(predecessorInstructions.size() - 1, BrilInstructions.id(dest, parameter));
+					predecessorInstructions.add(predecessorInstructions.size() - 1, BrilInstructions._id(dest, parameter));
 					BrilCfg.setInstructions(predecessorInstructions, predecessorBlock);
 				}
 			}
@@ -59,7 +59,7 @@ public final class BrilCfgSsa {
 	}
 
 	@NotNull
-	static BrilNode phi(String dest, List<String> sources) {
+	static BrilNode _phi(String dest, List<String> sources) {
 		return new BrilNode()
 				.set(BrilInstructions.KEY_OP, PHI)
 				.set(BrilInstructions.KEY_DEST, dest)
@@ -135,10 +135,10 @@ public final class BrilCfgSsa {
 				}
 
 				if (ssaNames.size() > 1) {
-					instructions.add(phi(phiFunction.ssaName, phiParameters));
+					instructions.add(_phi(phiFunction.ssaName, phiParameters));
 				}
 				else {
-					instructions.add(BrilInstructions.id(phiFunction.ssaName, phiParameters.get(0)));
+					instructions.add(BrilInstructions._id(phiFunction.ssaName, phiParameters.get(0)));
 				}
 			}
 
@@ -234,6 +234,13 @@ public final class BrilCfgSsa {
 		@Override
 		public String toString() {
 			return ssaName + " = phi()";
+		}
+	}
+
+	public static class Instructions extends BrilInstructions {
+		@NotNull
+		public Instructions phi(String dest, List<String> sources) {
+			return (Instructions) add(_phi(dest, sources));
 		}
 	}
 }

@@ -27,16 +27,16 @@ public class BrilCommonSubexpressionElimination {
 	// Accessing ==============================================================
 
 	public List<BrilNode> transform(List<BrilNode> instructions) {
-		final List<BrilNode> newInstructions = new ArrayList<>();
+		final BrilInstructions factory = new BrilInstructions();
 		for (BrilNode instruction : instructions) {
-			newInstructions.add(handleInstruction(instruction));
+			handleInstruction(instruction, factory);
 		}
-		return newInstructions;
+		return factory.get();
 	}
 
 	// Utils ==================================================================
 
-	private BrilNode handleInstruction(BrilNode instruction) {
+	private BrilInstructions handleInstruction(BrilNode instruction, BrilInstructions factory) {
 		final String op = BrilInstructions.getOp(instruction);
 
 		final String dest = BrilInstructions.getDest(instruction);
@@ -47,7 +47,7 @@ public class BrilCommonSubexpressionElimination {
 				if (canonicalIndex < 0) {
 					addValue(dest, canonicalExpression);
 				}
-				return instruction;
+				return factory.add(instruction);
 			}
 
 			if (BrilInstructions.ID.equals(op)) {
@@ -56,10 +56,10 @@ public class BrilCommonSubexpressionElimination {
 				final Value value = getValueAtIndex(varIndex);
 				varToIndex.put(dest, varIndex);
 				if (value.canonicalExpression instanceof Literal literal) {
-					return BrilInstructions.constant(dest, literal.value);
+					return factory.constant(dest, literal.value);
 				}
 
-				return id(dest, value);
+				return id(dest, value, factory);
 			}
 
 			if (BrilInstructions.ADD.equals(op)) {
@@ -71,18 +71,18 @@ public class BrilCommonSubexpressionElimination {
 				final Value value2 = getValueAtIndex(varIndex2);
 				if (value1.canonicalExpression instanceof Literal literal1
 						&& value2.canonicalExpression instanceof Literal literal2) {
-					return BrilInstructions.constant(dest, literal1.value + literal2.value);
+					return factory.constant(dest, literal1.value + literal2.value);
 				}
 
 				final CanonicalExpression canonicalExpression = new Binary(op, varIndex1, varIndex2);
 				final int expressionIndex = findCanonicalExpression(canonicalExpression);
 				if (expressionIndex < 0) {
 					addValue(dest, canonicalExpression);
-					return BrilInstructions.binary(dest, op, value1.getCanonicalVar(), value2.getCanonicalVar());
+					return factory.binary(dest, op, value1.getCanonicalVar(), value2.getCanonicalVar());
 				}
 
 				final Value value = getValueAtIndex(expressionIndex);
-				return id(dest, value);
+				return id(dest, value, factory);
 			}
 		}
 
@@ -90,20 +90,21 @@ public class BrilCommonSubexpressionElimination {
 			final String var = BrilInstructions.getVarNotNull(instruction);
 			final Value value = getValueForVar(var);
 			final String canonicalVar = value.getCanonicalVar();
-			return BrilInstructions.print(canonicalVar);
+			return factory.print(canonicalVar);
 		}
 
 		if (BrilInstructions.getRequiredVars(instruction).size() > 0) {
 			throw new UnsupportedOperationException();
 		}
-		return instruction;
+
+		return factory.add(instruction);
 	}
 
 	@NotNull
-	private static BrilNode id(String dest, Value value) {
+	private static BrilInstructions id(String dest, Value value, BrilInstructions factory) {
 		final String canonicalVar = value.getCanonicalVar();
 		value.addVar(dest);
-		return BrilInstructions.id(dest, canonicalVar);
+		return factory.id(dest, canonicalVar);
 	}
 
 	private int addValue(String dest, CanonicalExpression canonicalExpression) {

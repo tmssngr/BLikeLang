@@ -313,8 +313,8 @@ public final class BrilCfg {
 
 	private static void connectBlocksAndAppendJump(@NotNull BrilNode prevBlock, BrilNode nextBlock) {
 		connectBlocks(prevBlock, nextBlock);
-		prevBlock.getOrCreateNodeList(KEY_INSTRUCTIONS)
-				.add(BrilInstructions.jump(getName(nextBlock)));
+		new BrilInstructions(prevBlock.getOrCreateNodeList(KEY_INSTRUCTIONS))
+				.jump(getName(nextBlock));
 	}
 
 	private static void connectBlocks(@NotNull BrilNode prevBlock, @NotNull BrilNode nextBlock) {

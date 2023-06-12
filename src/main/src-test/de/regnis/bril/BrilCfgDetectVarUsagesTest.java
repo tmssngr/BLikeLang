@@ -18,23 +18,23 @@ public class BrilCfgDetectVarUsagesTest {
 	public static BrilNode createPrintMaxCfg() {
 		return BrilCfg.createFunction("printMax", "int", List.of(BrilFactory.argument("a", "int"), BrilFactory.argument("b", "int")),
 		                              List.of(BrilCfg.createBlock("start",
-		                                                          List.of(
-				                                                          BrilInstructions.id("result", "a"),
-				                                                          BrilInstructions.lessThan("lt", "a", "b"),
-				                                                          BrilInstructions.branch("lt", "b>a", "exit")
-		                                                          ),
+		                                                          new BrilInstructions()
+				                                                          .id("result", "a")
+				                                                          .lessThan("lt", "a", "b")
+				                                                          .branch("lt", "b>a", "exit")
+				                                                          .get(),
 		                                                          List.of(), List.of("b>a", "exit")
 		                                      ),
 		                                      BrilCfg.createBlock("b>a",
-		                                                          List.of(
-				                                                          BrilInstructions.id("result", "b")
-		                                                          ),
+		                                                          new BrilInstructions()
+				                                                          .id("result", "b")
+				                                                          .get(),
 		                                                          List.of("start"), List.of("exit")
 		                                      ),
 		                                      BrilCfg.createBlock("exit",
-		                                                          List.of(
-				                                                          BrilInstructions.print("result")
-		                                                          ),
+		                                                          new BrilInstructions()
+				                                                          .print("result")
+				                                                          .get(),
 		                                                          List.of("start", "b>a"), List.of()
 		                                      )
 		                              )
@@ -46,18 +46,18 @@ public class BrilCfgDetectVarUsagesTest {
 	@Test
 	public void testSimple() {
 		final List<BrilNode> blocks = List.of(
-				BrilCfg.createBlock("start", List.of(
-						BrilInstructions.constant("v", 4),
-						BrilInstructions.jump("print")
-				), List.of(), List.of("print")),
+				BrilCfg.createBlock("start", new BrilInstructions()
+						.constant("v", 4)
+						.jump("print")
+						.get(), List.of(), List.of("print")),
 
-				BrilCfg.createBlock("unused", List.of(
-						BrilInstructions.constant("v", 2)
-				), List.of(), List.of("print")),
+				BrilCfg.createBlock("unused", new BrilInstructions()
+						.constant("v", 2)
+						.get(), List.of(), List.of("print")),
 
-				BrilCfg.createBlock("print", List.of(
-						BrilInstructions.print("v")
-				), List.of("start", "unused"), List.of("exit")),
+				BrilCfg.createBlock("print", new BrilInstructions()
+						.print("v")
+						.get(), List.of("start", "unused"), List.of("exit")),
 
 				BrilCfg.createBlock("exit", List.of(),
 				                    List.of("print"), List.of())

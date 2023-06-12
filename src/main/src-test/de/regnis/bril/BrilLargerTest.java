@@ -15,17 +15,17 @@ public class BrilLargerTest {
 	public void testSimple() throws Exception {
 		assertCompiler(List.of(
 				               BrilCfg.createBlock("block 0",
-				                                   List.of(
-						                                   BrilInstructions.constant("a.1", 2),
-						                                   BrilInstructions.print("a.1")
-				                                   ))
+				                                   new BrilInstructions()
+						                                   .constant("a.1", 2)
+						                                   .print("a.1")
+						                                   .get())
 		               ),
 		               BrilFactory.createFunction("main", "void", List.of(),
-		                                          List.of(
-				                                          BrilInstructions.constant("a", 1),
-				                                          BrilInstructions.constant("a", 2),
-				                                          BrilInstructions.print("a")
-		                                          )
+		                                          new BrilInstructions()
+				                                          .constant("a", 1)
+				                                          .constant("a", 2)
+				                                          .print("a")
+				                                          .get()
 		               )
 		);
 	}
@@ -34,38 +34,43 @@ public class BrilLargerTest {
 	public void testLoop() throws Exception {
 		assertCompiler(List.of(
 				               BrilCfg.createBlock("block 0",
-				                                   List.of(BrilInstructions.constant("i", 0x20),
-				                                           BrilInstructions.id("i.1", "i"),
-				                                           BrilInstructions.jump("loop")
-				                                   )
+				                                   new BrilInstructions()
+						                                   .constant("i", 0x20)
+						                                   .id("i.1", "i")
+						                                   .jump("loop")
+						                                   .get()
 				               ),
 				               BrilCfg.createBlock("loop",
-				                                   List.of(BrilInstructions.constant("max", 0x80),
-				                                           BrilInstructions.lessThan("cond", "i.1", "max"),
-				                                           BrilInstructions.branch("cond", "body", "exit")
-				                                   )
+				                                   new BrilInstructions()
+						                                   .constant("max", 0x80)
+						                                   .lessThan("cond", "i.1", "max")
+						                                   .branch("cond", "body", "exit")
+						                                   .get()
 				               ),
 				               BrilCfg.createBlock("body",
-				                                   List.of(BrilInstructions.constant("mask", 0x0f),
-				                                           BrilInstructions.and("value", "i.1", "mask"),
-				                                           BrilInstructions.constant("zero", 0),
-				                                           BrilInstructions.lessThan("cond.1", "value", "zero"),
-				                                           BrilInstructions.branch("cond.1", "print_i", "endif")
-				                                   )
+				                                   new BrilInstructions()
+						                                   .constant("mask", 0x0f)
+						                                   .and("value", "i.1", "mask")
+						                                   .constant("zero", 0)
+						                                   .lessThan("cond.1", "value", "zero")
+						                                   .branch("cond.1", "print_i", "endif")
+						                                   .get()
 				               ),
 				               BrilCfg.createBlock("print_i",
-				                                   List.of(BrilInstructions.print("i.1"),
-				                                           BrilInstructions.jump("endif")
-				                                   )
+				                                   new BrilInstructions()
+						                                   .print("i.1")
+						                                   .jump("endif")
+						                                   .get()
 				               ),
 				               BrilCfg.createBlock("endif",
-				                                   List.of(BrilInstructions.id("i.2", "i.1"),
-				                                           BrilInstructions.call("printAscii", List.of("i.2")),
-				                                           BrilInstructions.constant("one", 1),
-				                                           BrilInstructions.add("i.3", "i.2", "one"),
-				                                           BrilInstructions.id("i.1", "i.3"),
-				                                           BrilInstructions.jump("loop")
-				                                   )
+				                                   new BrilInstructions()
+						                                   .id("i.2", "i.1")
+						                                   .call("printAscii", List.of("i.2"))
+						                                   .constant("one", 1)
+						                                   .add("i.3", "i.2", "one")
+						                                   .id("i.1", "i.3")
+						                                   .jump("loop")
+						                                   .get()
 				               ),
 				               BrilCfg.createBlock("exit", List.of())
 		               ), BrilFactory.createFunction("test", "void", List.of(),

@@ -13,79 +13,79 @@ public class BrilDeadCodeEliminationTest {
 
 	@Test
 	public void testSimple1() {
-		Assert.assertEquals(List.of(
-				                    BrilInstructions.constant("a", 4),
-				                    BrilInstructions.constant("b", 2),
-				                    BrilInstructions.add("d", "a", "b"),
-				                    BrilInstructions.print("d")
-		                    ),
+		Assert.assertEquals(new BrilInstructions()
+				                    .constant("a", 4)
+				                    .constant("b", 2)
+				                    .add("d", "a", "b")
+				                    .print("d")
+				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
-				                    List.of(
-						                    BrilInstructions.constant("a", 4),
-						                    BrilInstructions.constant("b", 2),
-						                    BrilInstructions.constant("c", 1),
-						                    BrilInstructions.add("d", "a", "b"),
-						                    BrilInstructions.print("d")
-				                    ), Set.of()));
+				                    new BrilInstructions()
+						                    .constant("a", 4)
+						                    .constant("b", 2)
+						                    .constant("c", 1)
+						                    .add("d", "a", "b")
+						                    .print("d")
+						                    .get(), Set.of()));
 	}
 
 	@Test
 	public void testSimpleKeep1() {
-		Assert.assertEquals(List.of(
-				                    BrilInstructions.constant("a", 4),
-				                    BrilInstructions.constant("b", 2),
-				                    BrilInstructions.constant("c", 1),
-				                    BrilInstructions.add("d", "a", "b"),
-				                    BrilInstructions.print("d")
-		                    ),
+		Assert.assertEquals(new BrilInstructions()
+				                    .constant("a", 4)
+				                    .constant("b", 2)
+				                    .constant("c", 1)
+				                    .add("d", "a", "b")
+				                    .print("d")
+				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
-				                    List.of(
-						                    BrilInstructions.constant("a", 4),
-						                    BrilInstructions.constant("b", 2),
-						                    BrilInstructions.constant("c", 1),
-						                    BrilInstructions.add("d", "a", "b"),
-						                    BrilInstructions.print("d")
-				                    ), Set.of("c")));
+				                    new BrilInstructions()
+						                    .constant("a", 4)
+						                    .constant("b", 2)
+						                    .constant("c", 1)
+						                    .add("d", "a", "b")
+						                    .print("d")
+						                    .get(), Set.of("c")));
 	}
 
 	@Test
 	public void testSimple2() {
-		Assert.assertEquals(List.of(
-				                    BrilInstructions.constant("a", 4),
-				                    BrilInstructions.constant("b", 2),
-				                    BrilInstructions.add("d", "a", "b"),
-				                    BrilInstructions.print("d")
-		                    ),
+		Assert.assertEquals(new BrilInstructions()
+				                    .constant("a", 4)
+				                    .constant("b", 2)
+				                    .add("d", "a", "b")
+				                    .print("d")
+				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
-				                    List.of(
-						                    BrilInstructions.constant("a", 4),
-						                    BrilInstructions.constant("b", 2),
-						                    BrilInstructions.constant("c", 1),
-						                    BrilInstructions.add("d", "a", "b"),
-						                    BrilInstructions.add("e", "c", "d"),
-						                    BrilInstructions.print("d")
-				                    ), Set.of()));
+				                    new BrilInstructions()
+						                    .constant("a", 4)
+						                    .constant("b", 2)
+						                    .constant("c", 1)
+						                    .add("d", "a", "b")
+						                    .add("e", "c", "d")
+						                    .print("d")
+						                    .get(), Set.of()));
 	}
 
 	@Test
 	public void testSimpleKeep2() {
-		Assert.assertEquals(List.of(
-				                    BrilInstructions.constant("a", 4),
-				                    BrilInstructions.constant("b", 2),
-				                    BrilInstructions.constant("c", 1),
-				                    BrilInstructions.add("d", "a", "b"),
-				                    BrilInstructions.add("e", "c", "d"),
-				                    BrilInstructions.print("d")
-		                    ),
+		Assert.assertEquals(new BrilInstructions()
+				                    .constant("a", 4)
+				                    .constant("b", 2)
+				                    .constant("c", 1)
+				                    .add("d", "a", "b")
+				                    .add("e", "c", "d")
+				                    .print("d")
+				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
-				                    List.of(
-						                    BrilInstructions.constant("a", 4),
-						                    BrilInstructions.constant("b", 2),
-						                    BrilInstructions.constant("c", 1),
-						                    BrilInstructions.add("d", "a", "b"),
-						                    BrilInstructions.add("e", "c", "d"),
-						                    BrilInstructions.print("d")
-				                    ), Set.of("a", "e")));
+				                    new BrilInstructions()
+						                    .constant("a", 4)
+						                    .constant("b", 2)
+						                    .constant("c", 1)
+						                    .add("d", "a", "b")
+						                    .add("e", "c", "d")
+						                    .print("d")
+						                    .get(), Set.of("a", "e")));
 	}
 
 	@Test
@@ -93,32 +93,32 @@ public class BrilDeadCodeEliminationTest {
 		final BrilNode cfgFunction = BrilCfg.createFunction(
 				"test", "void", List.of(),
 				List.of(
-						BrilCfg.createBlock("entry", List.of(
-								                    BrilInstructions.constant("a", 4),
-								                    BrilInstructions.constant("b", 2),
-								                    BrilInstructions.jump("next")
-						                    ),
+						BrilCfg.createBlock("entry", new BrilInstructions()
+								                    .constant("a", 4)
+								                    .constant("b", 2)
+								                    .jump("next")
+								                    .get(),
 						                    List.of(), List.of("next")
 						),
-						BrilCfg.createBlock("next", List.of(
-								                    BrilInstructions.print("b")
-						                    ),
+						BrilCfg.createBlock("next", new BrilInstructions()
+								                    .print("b")
+								                    .get(),
 						                    List.of("entry"), List.of()
 						)
 				)
 		);
 		BrilDeadCodeElimination.simpleDce(cfgFunction);
 		BrilCfgSsaTest.assertEqualsFunctionBlocks(List.of(
-				                    BrilCfg.createBlock("entry", List.of(
-						                                        // BrilInstructions.constant("a", 4),
-						                                        BrilInstructions.constant("b", 2),
-						                                        BrilInstructions.jump("next")
-				                                        ),
+				                    BrilCfg.createBlock("entry", new BrilInstructions()
+						                                        // .constant("a", 4)
+						                                        .constant("b", 2)
+						                                        .jump("next")
+						                                        .get(),
 				                                        List.of(), List.of("next")
 				                    ),
-				                    BrilCfg.createBlock("next", List.of(
-						                                        BrilInstructions.print("b")
-				                                        ),
+				                    BrilCfg.createBlock("next", new BrilInstructions()
+						                                        .print("b")
+						                                        .get(),
 				                                        List.of("entry"), List.of()
 				                    )
 		                    ),

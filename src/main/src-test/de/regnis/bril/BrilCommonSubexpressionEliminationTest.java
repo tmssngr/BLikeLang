@@ -14,84 +14,90 @@ public class BrilCommonSubexpressionEliminationTest {
 
 	@Test
 	public void testCopyPropagation() {
-		assertTransform(List.of(
-				BrilInstructions.constant("a", 1),
-				BrilInstructions.constant("b", 1),
-				BrilInstructions.constant("c", 1),
-				BrilInstructions.print("a")
-		), List.of(
-				BrilInstructions.constant("a", 1),
-				BrilInstructions.id("b", "a"),
-				BrilInstructions.id("c", "b"),
-				BrilInstructions.print("c")
-		));
+		assertTransform(new BrilInstructions()
+				                .constant("a", 1)
+				                .constant("b", 1)
+				                .constant("c", 1)
+				                .print("a")
+				                .get(),
+		                new BrilInstructions()
+				                .constant("a", 1)
+				                .id("b", "a")
+				                .id("c", "b")
+				                .print("c")
+				                .get());
 	}
 
 	@Test
 	public void testConstantFolding() {
-		assertTransform(List.of(
-				BrilInstructions.constant("a", 1),
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.constant("sum1", 3)
-		), List.of(
-				BrilInstructions.constant("a", 1),
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.add("sum1", "a", "b")
-		));
+		assertTransform(new BrilInstructions()
+				                .constant("a", 1)
+				                .constant("b", 2)
+				                .constant("sum1", 3)
+				                .get(),
+		                new BrilInstructions()
+				                .constant("a", 1)
+				                .constant("b", 2)
+				                .add("sum1", "a", "b")
+				                .get());
 	}
 
 	@Test
 	public void testBinReplacement() {
-		assertTransform(List.of(
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.id("sum2", "sum1")
-		), List.of(
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.add("sum2", "a", "b")
-		));
+		assertTransform(new BrilInstructions()
+				                .constant("b", 2)
+				                .add("sum1", "a", "b")
+				                .id("sum2", "sum1")
+				                .get(),
+		                new BrilInstructions()
+				                .constant("b", 2)
+				                .add("sum1", "a", "b")
+				                .add("sum2", "a", "b")
+				                .get());
 	}
 
 	@Test
 	public void testSwappedBinReplacement() {
-		assertTransform(List.of(
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.id("sum2", "sum1")
-		), List.of(
-				BrilInstructions.constant("b", 2),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.add("sum2", "b", "a")
-		));
+		assertTransform(new BrilInstructions()
+				                .constant("b", 2)
+				                .add("sum1", "a", "b")
+				                .id("sum2", "sum1")
+				                .get(),
+		                new BrilInstructions()
+				                .constant("b", 2)
+				                .add("sum1", "a", "b")
+				                .add("sum2", "b", "a")
+				                .get());
 	}
 
 	@Test
 	public void testIndirectBinReplacement() {
-		assertTransform(List.of(
-				BrilInstructions.id("c", "b"),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.id("sum2", "sum1")
-		), List.of(
-				BrilInstructions.id("c", "b"),
-				BrilInstructions.add("sum1", "a", "b"),
-				BrilInstructions.add("sum2", "a", "c")
-		));
+		assertTransform(new BrilInstructions()
+				                .id("c", "b")
+				                .add("sum1", "a", "b")
+				                .id("sum2", "sum1")
+				                .get(),
+		                new BrilInstructions()
+				                .id("c", "b")
+				                .add("sum1", "a", "b")
+				                .add("sum2", "a", "c")
+				                .get());
 	}
 
 	@Test
 	public void testReassignment() {
-		assertTransform(List.of(
-				BrilInstructions.constant("one", 1),
-				BrilInstructions.add("anext", "a", "one"),
-				BrilInstructions.id("a", "b"),
-				BrilInstructions.add("anext", "b", "one")
-		), List.of(
-				BrilInstructions.constant("one", 1),
-				BrilInstructions.add("anext", "a", "one"),
-				BrilInstructions.id("a", "b"),
-				BrilInstructions.add("anext", "a", "one")
-		));
+		assertTransform(new BrilInstructions()
+				                .constant("one", 1)
+				                .add("anext", "a", "one")
+				                .id("a", "b")
+				                .add("anext", "b", "one")
+				                .get(),
+		                new BrilInstructions()
+				                .constant("one", 1)
+				                .add("anext", "a", "one")
+				                .id("a", "b")
+				                .add("anext", "a", "one")
+				                .get());
 	}
 
 	// Utils ==================================================================

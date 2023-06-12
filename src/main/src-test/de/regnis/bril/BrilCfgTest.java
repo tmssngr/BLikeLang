@@ -17,98 +17,112 @@ public class BrilCfgTest {
 
 	@NotNull
 	public static List<BrilNode> createLoopInstructions() {
-		return List.of(
-				BrilInstructions.constant("i", 0x20),
+		return new BrilInstructions()
+				.constant("i", 0x20)
 
-				BrilInstructions.label("loop"),
-				BrilInstructions.constant("max", 0x80),
-				BrilInstructions.lessThan("cond", "i", "max"),
-				BrilInstructions.branch("cond", "body", "exit"),
+				.label("loop")
+				.constant("max", 0x80)
+				.lessThan("cond", "i", "max")
+				.branch("cond", "body", "exit")
 
-				BrilInstructions.label("body"),
-				BrilInstructions.constant("mask", 0x0f),
-				BrilInstructions.and("value", "i", "mask"),
-				BrilInstructions.constant("zero", 0),
-				BrilInstructions.lessThan("cond", "value", "zero"),
-				BrilInstructions.branch("cond", "print_i", "endif"),
+				.label("body")
+				.constant("mask", 0x0f)
+				.and("value", "i", "mask")
+				.constant("zero", 0)
+				.lessThan("cond", "value", "zero")
+				.branch("cond", "print_i", "endif")
 
-				BrilInstructions.label("print_i"),
-				BrilInstructions.print("i"),
+				.label("print_i")
+				.print("i")
 
-				BrilInstructions.label("endif"),
-				BrilInstructions.call("printAscii", List.of("i")),
-				BrilInstructions.constant("one", 1),
-				BrilInstructions.add("i", "i", "one"),
-				BrilInstructions.jump("loop"),
+				.label("endif")
+				.call("printAscii", List.of("i"))
+				.constant("one", 1)
+				.add("i", "i", "one")
+				.jump("loop")
 
-				BrilInstructions.label("exit")
-		);
+				.label("exit")
+				.get();
 	}
 
 	// Accessing ==============================================================
 
 	@Test
 	public void testGetSetInstructions() {
-		final BrilNode block = BrilCfg.createBlock("name", List.of(
-				BrilInstructions.add("a", "b", "c")
-		));
+		final BrilNode block = BrilCfg.createBlock("name", new BrilInstructions()
+				.add("a", "b", "c")
+				.get());
 
 		List<BrilNode> instructions = BrilCfg.getInstructions(block);
 		BrilCfg.setInstructions(instructions, block);
-		Assert.assertEquals(List.of(
-				BrilInstructions.add("a", "b", "c")
-		), BrilCfg.getInstructions(block));
+		Assert.assertEquals(new BrilInstructions()
+				                    .add("a", "b", "c")
+				                    .get(), BrilCfg.getInstructions(block));
 
 		instructions = new ArrayList<>(instructions);
-		instructions.add(BrilInstructions.print("a"));
+		instructions.addAll(new BrilInstructions()
+				                    .print("a")
+				                    .get());
 		BrilCfg.setInstructions(instructions, block);
-		Assert.assertEquals(List.of(
-				BrilInstructions.add("a", "b", "c"),
-				BrilInstructions.print("a")
-		), BrilCfg.getInstructions(block));
+		Assert.assertEquals(new BrilInstructions()
+				                    .add("a", "b", "c")
+				                    .print("a")
+				                    .get(), BrilCfg.getInstructions(block));
 	}
 
 	@Test
 	public void testFormBlocks() {
 		Assert.assertEquals(List.of(
-				List.of(BrilInstructions.constant("v", 4),
-				        BrilInstructions.jump(".somewhere")),
-				List.of(BrilInstructions.constant("v", 2)),
-				List.of(BrilInstructions.label(".somewhere"),
-				        BrilInstructions.print("v"))
-		), BrilCfg.splitIntoBlocks(List.of(BrilInstructions.constant("v", 4),
-		                                   BrilInstructions.jump(".somewhere"),
-		                                   BrilInstructions.constant("v", 2),
-		                                   BrilInstructions.label(".somewhere"),
-		                                   BrilInstructions.print("v"))));
+				new BrilInstructions()
+						.constant("v", 4)
+						.jump(".somewhere")
+						.get(),
+				new BrilInstructions()
+						.constant("v", 2)
+						.get(),
+				new BrilInstructions()
+						.label(".somewhere")
+						.print("v")
+						.get()
+		), BrilCfg.splitIntoBlocks(new BrilInstructions()
+				                           .constant("v", 4)
+				                           .jump(".somewhere")
+				                           .constant("v", 2)
+				                           .label(".somewhere")
+				                           .print("v")
+				                           .get()));
 	}
 
 	@Test
 	public void testBuildBlocks() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
-				BrilInstructions.constant("v", 4),
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(new BrilInstructions()
+				                                                  .constant("v", 4)
 
-				BrilInstructions.label(".loop"),
-				BrilInstructions.print("v"),
-				BrilInstructions.constant("one", 1),
-				BrilInstructions.sub("v", "v", "one"),
-				BrilInstructions.lessThan("cond", "v", "one"),
-				BrilInstructions.branch("cond", ".end", ".loop"),
+				                                                  .label(".loop")
+				                                                  .print("v")
+				                                                  .constant("one", 1)
+				                                                  .sub("v", "v", "one")
+				                                                  .lessThan("cond", "v", "one")
+				                                                  .branch("cond", ".end", ".loop")
 
-				BrilInstructions.label(".end"),
-				BrilInstructions.ret()
-		));
+				                                                  .label(".end")
+				                                                  .ret()
+				                                                  .get());
 		final Iterator<BrilNode> iterator = blocks.iterator();
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
-		                                   BrilInstructions.jump(".loop")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("v", 4)
+				                .jump(".loop")
+				                .get(),
 		                List.of(),
 		                List.of(".loop"),
 		                iterator.next());
-		assertEqualsCfg(".loop", List.of(BrilInstructions.print("v"),
-		                                 BrilInstructions.constant("one", 1),
-		                                 BrilInstructions.sub("v", "v", "one"),
-		                                 BrilInstructions.lessThan("cond", "v", "one"),
-		                                 BrilInstructions.branch("cond", ".end", ".loop")),
+		assertEqualsCfg(".loop", new BrilInstructions()
+				                .print("v")
+				                .constant("one", 1)
+				                .sub("v", "v", "one")
+				                .lessThan("cond", "v", "one")
+				                .branch("cond", ".end", ".loop")
+				                .get(),
 		                List.of("block 0", ".loop"),
 		                List.of(".end", ".loop"),
 		                iterator.next());
@@ -126,15 +140,17 @@ public class BrilCfgTest {
 	@Test
 	public void testBuildBlocksExit1() throws Exception {
 		final List<BrilNode> blocks = BrilCfg.buildBlocks(
-				List.of(
-						BrilInstructions.constant("i", 1),
+				new BrilInstructions()
+						.constant("i", 1)
 
-						BrilInstructions.label("exit")
-				)
+						.label("exit")
+						.get()
 		);
 		final Iterator<BrilNode> iterator = blocks.iterator();
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("i", 1),
-		                                   BrilInstructions.jump("exit")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("i", 1)
+				                .jump("exit")
+				                .get(),
 		                List.of(),
 		                List.of("exit"),
 		                iterator.next());
@@ -159,28 +175,34 @@ public class BrilCfgTest {
 
 	@Test
 	public void testBuildBlocksAddJumpFromFallThroughBlock() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
-				BrilInstructions.constant("zero", 0),
-				BrilInstructions.lessThan("cond", "input", "zero"),
-				BrilInstructions.branch("cond", "then", "endif"),
-				BrilInstructions.label("then"),
-				BrilInstructions.id("input", "zero"),
-				BrilInstructions.label("endif"),
-				BrilInstructions.print("input")
-		));
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(new BrilInstructions()
+				                                                  .constant("zero", 0)
+				                                                  .lessThan("cond", "input", "zero")
+				                                                  .branch("cond", "then", "endif")
+				                                                  .label("then")
+				                                                  .id("input", "zero")
+				                                                  .label("endif")
+				                                                  .print("input")
+				                                                  .get());
 		final Iterator<BrilNode> iterator = blocks.iterator();
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("zero", 0),
-		                                   BrilInstructions.lessThan("cond", "input", "zero"),
-		                                   BrilInstructions.branch("cond", "then", "endif")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("zero", 0)
+				                .lessThan("cond", "input", "zero")
+				                .branch("cond", "then", "endif")
+				                .get(),
 		                List.of(),
 		                List.of("then", "endif"),
 		                iterator.next());
-		assertEqualsCfg("then", List.of(BrilInstructions.id("input", "zero"),
-		                                BrilInstructions.jump("endif")),
+		assertEqualsCfg("then", new BrilInstructions()
+				                .id("input", "zero")
+				                .jump("endif")
+				                .get(),
 		                List.of("block 0"),
 		                List.of("endif"),
 		                iterator.next());
-		assertEqualsCfg("endif", List.of(BrilInstructions.print("input")),
+		assertEqualsCfg("endif", new BrilInstructions()
+				                .print("input")
+				                .get(),
 		                List.of("block 0", "then"),
 		                List.of(),
 		                iterator.next());
@@ -189,27 +211,34 @@ public class BrilCfgTest {
 
 	@Test
 	public void testBuildBlocksRemoveUnused() throws Exception {
-		final List<BrilNode> blocks = BrilCfg.buildBlocks(List.of(
-				BrilInstructions.constant("v", 4),
-				BrilInstructions.jump(".somewhere"),
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(new BrilInstructions()
+				                                                  .constant("v", 4)
+				                                                  .jump(".somewhere")
 
-				BrilInstructions.constant("v", 2),
+				                                                  .constant("v", 2)
 
-				BrilInstructions.label(".somewhere"),
-				BrilInstructions.print("v"))
+				                                                  .label(".somewhere")
+				                                                  .print("v")
+				                                                  .get()
 		);
 		Iterator<BrilNode> iterator = blocks.iterator();
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
-		                                   BrilInstructions.jump(".somewhere")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("v", 4)
+				                .jump(".somewhere")
+				                .get(),
 		                List.of(),
 		                List.of(".somewhere"),
 		                iterator.next());
-		assertEqualsCfg("block 1", List.of(BrilInstructions.constant("v", 2),
-		                                   BrilInstructions.jump(".somewhere")),
+		assertEqualsCfg("block 1", new BrilInstructions()
+				                .constant("v", 2)
+				                .jump(".somewhere")
+				                .get(),
 		                List.of(),
 		                List.of(".somewhere"),
 		                iterator.next());
-		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
+		assertEqualsCfg(".somewhere", new BrilInstructions()
+				                .print("v")
+				                .get(),
 		                List.of("block 0", "block 1"),
 		                List.of(),
 		                iterator.next());
@@ -218,13 +247,17 @@ public class BrilCfgTest {
 		BrilCfg.removeUnusedBlocks(blocks);
 
 		iterator = blocks.iterator();
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("v", 4),
-		                                   BrilInstructions.jump(".somewhere")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("v", 4)
+				                .jump(".somewhere")
+				                .get(),
 		                List.of(),
 		                List.of(".somewhere"),
 		                iterator.next());
 
-		assertEqualsCfg(".somewhere", List.of(BrilInstructions.print("v")),
+		assertEqualsCfg(".somewhere", new BrilInstructions()
+				                .print("v")
+				                .get(),
 		                List.of("block 0"),
 		                List.of(),
 		                iterator.next());
@@ -337,30 +370,40 @@ public class BrilCfgTest {
 	// Utils ==================================================================
 
 	private void assertLoopInstructions(Iterator<BrilNode> iterator) {
-		assertEqualsCfg("block 0", List.of(BrilInstructions.constant("i", 0x20),
-		                                   BrilInstructions.jump("loop")),
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("i", 0x20)
+				                .jump("loop")
+				                .get(),
 		                List.of(), List.of("loop"),
 		                iterator.next());
-		assertEqualsCfg("loop", List.of(BrilInstructions.constant("max", 0x80),
-		                                BrilInstructions.lessThan("cond", "i", "max"),
-		                                BrilInstructions.branch("cond", "body", "exit")),
+		assertEqualsCfg("loop", new BrilInstructions()
+				                .constant("max", 0x80)
+				                .lessThan("cond", "i", "max")
+				                .branch("cond", "body", "exit")
+				                .get(),
 		                List.of("block 0", "endif"), List.of("body", "exit"),
 		                iterator.next());
-		assertEqualsCfg("body", List.of(BrilInstructions.constant("mask", 0x0f),
-		                                BrilInstructions.and("value", "i", "mask"),
-		                                BrilInstructions.constant("zero", 0),
-		                                BrilInstructions.lessThan("cond", "value", "zero"),
-		                                BrilInstructions.branch("cond", "print_i", "endif")),
+		assertEqualsCfg("body", new BrilInstructions()
+				                .constant("mask", 0x0f)
+				                .and("value", "i", "mask")
+				                .constant("zero", 0)
+				                .lessThan("cond", "value", "zero")
+				                .branch("cond", "print_i", "endif")
+				                .get(),
 		                List.of("loop"), List.of("print_i", "endif"),
 		                iterator.next());
-		assertEqualsCfg("print_i", List.of(BrilInstructions.print("i"),
-		                                   BrilInstructions.jump("endif")),
+		assertEqualsCfg("print_i", new BrilInstructions()
+				                .print("i")
+				                .jump("endif")
+				                .get(),
 		                List.of("body"), List.of("endif"),
 		                iterator.next());
-		assertEqualsCfg("endif", List.of(BrilInstructions.call("printAscii", List.of("i")),
-		                                 BrilInstructions.constant("one", 1),
-										 BrilInstructions.add("i", "i", "one"),
-		                                 BrilInstructions.jump("loop")),
+		assertEqualsCfg("endif", new BrilInstructions()
+				                .call("printAscii", List.of("i"))
+				                .constant("one", 1)
+				                .add("i", "i", "one")
+				                .jump("loop")
+				                .get(),
 		                List.of("body", "print_i"), List.of("loop"),
 		                iterator.next());
 		assertEqualsCfg("exit", List.of(),

@@ -36,26 +36,25 @@ public class BrilCfgSsaTest {
 	public void testSimple() {
 		assertSsa(List.of(
 				          BrilCfg.createBlock("start",
-				                              List.of(
-						                              BrilInstructions.constant("a", 1),
-						                              BrilInstructions.constant("b", 2),
-						                              BrilInstructions.add("c", "a", "b"),
-						                              BrilInstructions.constant("a.1", 3),
-						                              BrilInstructions.add("c.1", "a.1", "b"),
-						                              BrilInstructions.print("c.1")
-				                              ))
-		          ),
+				                              new BrilInstructions()
+						                              .constant("a", 1)
+						                              .constant("b", 2)
+						                              .add("c", "a", "b")
+						                              .constant("a.1", 3)
+						                              .add("c.1", "a.1", "b")
+						                              .print("c.1")
+						                              .get()
+				          )),
 		          BrilCfg.createFunction("main", "void", List.of(),
 		                                 List.of(BrilCfg.createBlock("start",
-		                                                             List.of(
-				                                                             BrilInstructions.constant("a", 1),
-				                                                             BrilInstructions.constant("b", 2),
-				                                                             BrilInstructions.add("c", "a", "b"),
-				                                                             BrilInstructions.constant("a", 3),
-				                                                             BrilInstructions.add("c", "a", "b"),
-				                                                             BrilInstructions.print("c")
-		                                                             )
-		                                         )
+		                                                             new BrilInstructions()
+				                                                             .constant("a", 1)
+				                                                             .constant("b", 2)
+				                                                             .add("c", "a", "b")
+				                                                             .constant("a", 3)
+				                                                             .add("c", "a", "b")
+				                                                             .print("c")
+				                                                             .get())
 		                                 )
 		          )
 		);
@@ -65,19 +64,20 @@ public class BrilCfgSsaTest {
 	public void testReassignedVar() {
 		assertSsa(List.of(
 				          BrilCfg.createBlock("start",
-				                              List.of(
-						                              BrilInstructions.constant("a", 1),
-						                              BrilInstructions.constant("a.1", 2),
-						                              BrilInstructions.print("a.1")
-				                              ))
+				                              new BrilInstructions()
+						                              .constant("a", 1)
+						                              .constant("a.1", 2)
+						                              .print("a.1")
+						                              .get()
+				          )
 		          ),
 		          BrilCfg.createFunction("main", "void", List.of(),
 		                                 List.of(BrilCfg.createBlock("start",
-		                                                             List.of(
-				                                                             BrilInstructions.constant("a", 1),
-				                                                             BrilInstructions.constant("a", 2),
-				                                                             BrilInstructions.print("a")
-		                                                             )
+		                                                             new BrilInstructions()
+				                                                             .constant("a", 1)
+				                                                             .constant("a", 2)
+				                                                             .print("a")
+				                                                             .get()
 		                                         )
 		                                 )
 		          )
@@ -87,22 +87,22 @@ public class BrilCfgSsaTest {
 	@Test
 	public void testParameters() {
 		assertSsa(List.of(BrilCfg.createBlock("start",
-		                                      List.of(
-				                                      BrilInstructions.id("result", "a"),
-				                                      BrilInstructions.lessThan("lt", "a", "b"),
-				                                      BrilInstructions.branch("lt", "b>a", "exit")
-		                                      )
+		                                      new BrilInstructions()
+				                                      .id("result", "a")
+				                                      .lessThan("lt", "a", "b")
+				                                      .branch("lt", "b>a", "exit")
+				                                      .get()
 		                  ),
 		                  BrilCfg.createBlock("b>a",
-		                                      List.of(
-				                                      BrilInstructions.id("result.1", "b")
-		                                      )
+		                                      new BrilInstructions()
+				                                      .id("result.1", "b")
+				                                      .get()
 		                  ),
 		                  BrilCfg.createBlock("exit",
-		                                      List.of(
-				                                      BrilCfgSsa.phi("result.2", List.of("result", "result.1")),
-				                                      BrilInstructions.print("result.2")
-		                                      )
+		                                      new BrilCfgSsa.Instructions()
+				                                      .phi("result.2", List.of("result", "result.1"))
+				                                      .print("result.2")
+				                                      .get()
 		                  )
 		          ),
 		          BrilCfgDetectVarUsagesTest.createPrintMaxCfg()
@@ -114,31 +114,31 @@ public class BrilCfgSsaTest {
 		final BrilNode function = BrilCfg.createFunction(
 				"test", "void", List.of(BrilFactory.argument("cond", "bool")),
 				List.of(BrilCfg.createBlock("entry",
-				                            List.of(
-						                            BrilInstructions.constant("a", 47),
-						                            BrilInstructions.branch("cond", "left", "right")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("a", 47)
+						                            .branch("cond", "left", "right")
+						                            .get(),
 				                            List.of(), List.of("left", "right")
 				        ),
 				        BrilCfg.createBlock("left",
-				                            List.of(
-						                            BrilInstructions.add("a", "a", "a"),
-						                            BrilInstructions.jump("exit")
-				                            ),
+				                            new BrilInstructions()
+						                            .add("a", "a", "a")
+						                            .jump("exit")
+						                            .get(),
 				                            List.of("entry"), List.of("exit")
 				        ),
 				        BrilCfg.createBlock("right",
-				                            List.of(
-						                            BrilInstructions.mul("a", "a", "a"),
-						                            BrilInstructions.jump("exit")
-				                            ),
+				                            new BrilInstructions()
+						                            .mul("a", "a", "a")
+						                            .jump("exit")
+						                            .get(),
 				                            List.of("entry"), List.of("exit")
 				        ),
 				        BrilCfg.createBlock("exit",
-				                            List.of(
-						                            BrilInstructions.print("a"),
-						                            BrilInstructions.ret()
-				                            ),
+				                            new BrilInstructions()
+						                            .print("a")
+						                            .ret()
+						                            .get(),
 				                            List.of("left", "right"), List.of()
 				        )
 				)
@@ -146,59 +146,59 @@ public class BrilCfgSsaTest {
 		BrilCfgSsa.transformToSsaWithPhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("entry",
-				                    List.of(
-						                    BrilInstructions.constant("a", 47),
-						                    BrilInstructions.branch("cond", "left", "right")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("a", 47)
+						                    .branch("cond", "left", "right")
+						                    .get()
 				),
 				BrilCfg.createBlock("left",
-				                    List.of(
-						                    BrilInstructions.add("a.1", "a", "a"),
-						                    BrilInstructions.jump("exit")
-				                    )
+				                    new BrilInstructions()
+						                    .add("a.1", "a", "a")
+						                    .jump("exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("right",
-				                    List.of(
-						                    BrilInstructions.mul("a.2", "a", "a"),
-						                    BrilInstructions.jump("exit")
-				                    )
+				                    new BrilInstructions()
+						                    .mul("a.2", "a", "a")
+						                    .jump("exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit",
-				                    List.of(
-						                    BrilCfgSsa.phi("a.3", List.of("a.1", "a.2")),
-						                    BrilInstructions.print("a.3"),
-						                    BrilInstructions.ret()
-				                    )
+				                    new BrilCfgSsa.Instructions()
+						                    .phi("a.3", List.of("a.1", "a.2"))
+						                    .print("a.3")
+						                    .ret()
+						                    .get()
 				)
 		), function);
 
 		BrilCfgSsa.inlinePhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("entry",
-				                    List.of(
-						                    BrilInstructions.constant("a", 47),
-						                    BrilInstructions.branch("cond", "left", "right")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("a", 47)
+						                    .branch("cond", "left", "right")
+						                    .get()
 				),
 				BrilCfg.createBlock("left",
-				                    List.of(
-						                    BrilInstructions.add("a.1", "a", "a"),
-						                    BrilInstructions.id("a.3", "a.1"),
-						                    BrilInstructions.jump("exit")
-				                    )
+				                    new BrilInstructions()
+						                    .add("a.1", "a", "a")
+						                    .id("a.3", "a.1")
+						                    .jump("exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("right",
-				                    List.of(
-						                    BrilInstructions.mul("a.2", "a", "a"),
-						                    BrilInstructions.id("a.3", "a.2"),
-						                    BrilInstructions.jump("exit")
-				                    )
+				                    new BrilInstructions()
+						                    .mul("a.2", "a", "a")
+						                    .id("a.3", "a.2")
+						                    .jump("exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit",
-				                    List.of(
-						                    BrilInstructions.print("a.3"),
-						                    BrilInstructions.ret()
-				                    )
+				                    new BrilInstructions()
+						                    .print("a.3")
+						                    .ret()
+						                    .get()
 				)
 		), function);
 	}
@@ -208,32 +208,32 @@ public class BrilCfgSsaTest {
 		final BrilNode function = BrilCfg.createFunction(
 				"test", "void", List.of(),
 				List.of(BrilCfg.createBlock("entry",
-				                            List.of(
-						                            BrilInstructions.constant("i", 1),
-						                            BrilInstructions.jump("loop")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("i", 1)
+						                            .jump("loop")
+						                            .get(),
 				                            List.of(), List.of("loop")
 				        ),
 				        BrilCfg.createBlock("loop",
-				                            List.of(
-						                            BrilInstructions.constant("max", 10),
-						                            BrilInstructions.lessThan("cond", "i", "max"),
-						                            BrilInstructions.branch("cond", "body", "exit")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("max", 10)
+						                            .lessThan("cond", "i", "max")
+						                            .branch("cond", "body", "exit")
+						                            .get(),
 				                            List.of("entry", "body"), List.of("body", "exit")
 				        ),
 				        BrilCfg.createBlock("body",
-				                            List.of(
-						                            BrilInstructions.add("i", "i", "i"),
-						                            BrilInstructions.jump("loop")
-				                            ),
+				                            new BrilInstructions()
+						                            .add("i", "i", "i")
+						                            .jump("loop")
+						                            .get(),
 				                            List.of("loop"), List.of("loop")
 				        ),
 				        BrilCfg.createBlock("exit",
-				                            List.of(
-						                            BrilInstructions.print("i"),
-						                            BrilInstructions.ret()
-				                            ),
+				                            new BrilInstructions()
+						                            .print("i")
+						                            .ret()
+						                            .get(),
 				                            List.of("loop"), List.of()
 				        )
 				)
@@ -241,61 +241,61 @@ public class BrilCfgSsaTest {
 		BrilCfgSsa.transformToSsaWithPhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("entry",
-				                    List.of(
-						                    BrilInstructions.constant("i", 1),
-						                    BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("i", 1)
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("loop",
-				                    List.of(
-						                    BrilCfgSsa.phi("i.1", List.of("i", "i.2")),
-						                    BrilInstructions.constant("max", 10),
-						                    BrilInstructions.lessThan("cond", "i.1", "max"),
-						                    BrilInstructions.branch("cond", "body", "exit")
-				                    )
+				                    new BrilCfgSsa.Instructions()
+						                    .phi("i.1", List.of("i", "i.2"))
+						                    .constant("max", 10)
+						                    .lessThan("cond", "i.1", "max")
+						                    .branch("cond", "body", "exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("body",
-				                    List.of(
-						                    BrilInstructions.add("i.2", "i.1", "i.1"),
-						                    BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .add("i.2", "i.1", "i.1")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit",
-				                    List.of(
-						                    BrilInstructions.print("i.1"),
-						                    BrilInstructions.ret()
-				                    )
+				                    new BrilInstructions()
+						                    .print("i.1")
+						                    .ret()
+						                    .get()
 				)
 		), function);
 
 		BrilCfgSsa.inlinePhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("entry",
-				                    List.of(
-						                    BrilInstructions.constant("i", 1),
-						                    BrilInstructions.id("i.1", "i"),
-						                    BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("i", 1)
+						                    .id("i.1", "i")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("loop",
-				                    List.of(
-						                    BrilInstructions.constant("max", 10),
-						                    BrilInstructions.lessThan("cond", "i.1", "max"),
-						                    BrilInstructions.branch("cond", "body", "exit")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("max", 10)
+						                    .lessThan("cond", "i.1", "max")
+						                    .branch("cond", "body", "exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("body",
-				                    List.of(
-						                    BrilInstructions.add("i.2", "i.1", "i.1"),
-						                    BrilInstructions.id("i.1", "i.2"),
-						                    BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .add("i.2", "i.1", "i.1")
+						                    .id("i.1", "i.2")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit",
-				                    List.of(
-						                    BrilInstructions.print("i.1"),
-						                    BrilInstructions.ret()
-				                    )
+				                    new BrilInstructions()
+						                    .print("i.1")
+						                    .ret()
+						                    .get()
 				)
 		), function);
 	}
@@ -305,35 +305,40 @@ public class BrilCfgSsaTest {
 		final BrilNode function = BrilCfg.createFunction(
 				"test", "void", List.of(),
 				List.of(BrilCfg.createBlock("block 0",
-				                            List.of(BrilInstructions.constant("i", 0x20),
-				                                    BrilInstructions.jump("loop")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("i", 0x20)
+						                            .jump("loop")
+						                            .get(),
 				                            List.of(), List.of("loop")),
 				        BrilCfg.createBlock("loop",
-				                            List.of(BrilInstructions.constant("max", 0x80),
-				                                    BrilInstructions.lessThan("cond", "i", "max"),
-				                                    BrilInstructions.branch("cond", "body", "exit")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("max", 0x80)
+						                            .lessThan("cond", "i", "max")
+						                            .branch("cond", "body", "exit")
+						                            .get(),
 				                            List.of("block 0", "endif"), List.of("body", "exit")),
 				        BrilCfg.createBlock("body",
-				                            List.of(BrilInstructions.constant("mask", 0x0f),
-				                                    BrilInstructions.and("value", "i", "mask"),
-				                                    BrilInstructions.constant("zero", 0),
-				                                    BrilInstructions.lessThan("cond", "value", "zero"),
-				                                    BrilInstructions.branch("cond", "print_i", "endif")
-				                            ),
+				                            new BrilInstructions()
+						                            .constant("mask", 0x0f)
+						                            .and("value", "i", "mask")
+						                            .constant("zero", 0)
+						                            .lessThan("cond", "value", "zero")
+						                            .branch("cond", "print_i", "endif")
+						                            .get(),
 				                            List.of("loop"), List.of("print_i", "endif")),
 				        BrilCfg.createBlock("print_i",
-				                            List.of(BrilInstructions.print("i"),
-				                                    BrilInstructions.jump("endif")
-				                            ),
+				                            new BrilInstructions()
+						                            .print("i")
+						                            .jump("endif")
+						                            .get(),
 				                            List.of("body"), List.of("endif")),
 				        BrilCfg.createBlock("endif",
-				                            List.of(BrilInstructions.call("printAscii", List.of("i")),
-				                                    BrilInstructions.constant("one", 1),
-				                                    BrilInstructions.add("i", "i", "one"),
-				                                    BrilInstructions.jump("loop")
-				                            ),
+				                            new BrilInstructions()
+						                            .call("printAscii", List.of("i"))
+						                            .constant("one", 1)
+						                            .add("i", "i", "one")
+						                            .jump("loop")
+						                            .get(),
 				                            List.of("body", "print_i"), List.of("loop")),
 				        BrilCfg.createBlock("exit", List.of(),
 				                            List.of("loop"), List.of()
@@ -343,37 +348,42 @@ public class BrilCfgSsaTest {
 		BrilCfgSsa.transformToSsaWithPhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("block 0",
-				                    List.of(BrilInstructions.constant("i", 0x20),
-				                            BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("i", 0x20)
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("loop",
-				                    List.of(BrilCfgSsa.phi("i.1", List.of("i", "i.3")),
-				                            BrilInstructions.constant("max", 0x80),
-				                            BrilInstructions.lessThan("cond", "i.1", "max"),
-				                            BrilInstructions.branch("cond", "body", "exit")
-				                    )
+				                    new BrilCfgSsa.Instructions()
+						                    .phi("i.1", List.of("i", "i.3"))
+						                    .constant("max", 0x80)
+						                    .lessThan("cond", "i.1", "max")
+						                    .branch("cond", "body", "exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("body",
-				                    List.of(BrilInstructions.constant("mask", 0x0f),
-				                            BrilInstructions.and("value", "i.1", "mask"),
-				                            BrilInstructions.constant("zero", 0),
-				                            BrilInstructions.lessThan("cond.1", "value", "zero"),
-				                            BrilInstructions.branch("cond.1", "print_i", "endif")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("mask", 0x0f)
+						                    .and("value", "i.1", "mask")
+						                    .constant("zero", 0)
+						                    .lessThan("cond.1", "value", "zero")
+						                    .branch("cond.1", "print_i", "endif")
+						                    .get()
 				),
 				BrilCfg.createBlock("print_i",
-				                    List.of(BrilInstructions.print("i.1"),
-				                            BrilInstructions.jump("endif")
-				                    )
+				                    new BrilInstructions()
+						                    .print("i.1")
+						                    .jump("endif")
+						                    .get()
 				),
 				BrilCfg.createBlock("endif",
-				                    List.of(BrilInstructions.id("i.2", "i.1"),
-				                            BrilInstructions.call("printAscii", List.of("i.2")),
-				                            BrilInstructions.constant("one", 1),
-				                            BrilInstructions.add("i.3", "i.2", "one"),
-				                            BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .id("i.2", "i.1")
+						                    .call("printAscii", List.of("i.2"))
+						                    .constant("one", 1)
+						                    .add("i.3", "i.2", "one")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit", List.of())
 		), function);
@@ -381,38 +391,43 @@ public class BrilCfgSsaTest {
 		BrilCfgSsa.inlinePhiFunctions(function);
 		assertEqualsFunctionBlocks(List.of(
 				BrilCfg.createBlock("block 0",
-				                    List.of(BrilInstructions.constant("i", 0x20),
-				                            BrilInstructions.id("i.1", "i"),
-				                            BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("i", 0x20)
+						                    .id("i.1", "i")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("loop",
-				                    List.of(BrilInstructions.constant("max", 0x80),
-				                            BrilInstructions.lessThan("cond", "i.1", "max"),
-				                            BrilInstructions.branch("cond", "body", "exit")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("max", 0x80)
+						                    .lessThan("cond", "i.1", "max")
+						                    .branch("cond", "body", "exit")
+						                    .get()
 				),
 				BrilCfg.createBlock("body",
-				                    List.of(BrilInstructions.constant("mask", 0x0f),
-				                            BrilInstructions.and("value", "i.1", "mask"),
-				                            BrilInstructions.constant("zero", 0),
-				                            BrilInstructions.lessThan("cond.1", "value", "zero"),
-				                            BrilInstructions.branch("cond.1", "print_i", "endif")
-				                    )
+				                    new BrilInstructions()
+						                    .constant("mask", 0x0f)
+						                    .and("value", "i.1", "mask")
+						                    .constant("zero", 0)
+						                    .lessThan("cond.1", "value", "zero")
+						                    .branch("cond.1", "print_i", "endif")
+						                    .get()
 				),
 				BrilCfg.createBlock("print_i",
-				                    List.of(BrilInstructions.print("i.1"),
-				                            BrilInstructions.jump("endif")
-				                    )
+				                    new BrilInstructions()
+						                    .print("i.1")
+						                    .jump("endif")
+						                    .get()
 				),
 				BrilCfg.createBlock("endif",
-				                    List.of(BrilInstructions.id("i.2", "i.1"),
-				                            BrilInstructions.call("printAscii", List.of("i.2")),
-				                            BrilInstructions.constant("one", 1),
-				                            BrilInstructions.add("i.3", "i.2", "one"),
-				                            BrilInstructions.id("i.1", "i.3"),
-				                            BrilInstructions.jump("loop")
-				                    )
+				                    new BrilInstructions()
+						                    .id("i.2", "i.1")
+						                    .call("printAscii", List.of("i.2"))
+						                    .constant("one", 1)
+						                    .add("i.3", "i.2", "one")
+						                    .id("i.1", "i.3")
+						                    .jump("loop")
+						                    .get()
 				),
 				BrilCfg.createBlock("exit", List.of())
 		), function);

@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * @author Thomas Singer
  */
-public final class BrilInstructions {
+public class BrilInstructions {
 
 	// Constants ==============================================================
 
@@ -41,98 +41,6 @@ public final class BrilInstructions {
 	public static final String KEY_VALUE = "value";
 
 	// Static =================================================================
-
-	@NotNull
-	public static BrilNode call(String name, List<String> args) {
-		return new BrilNode()
-				.set(KEY_OP, CALL)
-				.set("name", name)
-				.set(KEY_ARGS, args);
-	}
-
-	@NotNull
-	public static BrilNode ret() {
-		return new BrilNode()
-				.set(KEY_OP, RET);
-	}
-
-	@NotNull
-	public static BrilNode jump(String label) {
-		return new BrilNode()
-				.set(KEY_OP, JMP)
-				.set(KEY_JMP_TARGET, label);
-	}
-
-	@NotNull
-	public static BrilNode branch(String var, String thenLabel, String elseLabel) {
-		return new BrilNode()
-				.set(KEY_OP, BR)
-				.set(KEY_COND, var)
-				.set(KEY_IF_TARGET, thenLabel)
-				.set(KEY_ELSE_TARGET, elseLabel);
-	}
-
-	@NotNull
-	public static BrilNode lessThan(String dest, String var1, String var2) {
-		return binary(dest, "lt", var1, var2);
-	}
-
-	@NotNull
-	public static BrilNode add(String dest, String var1, String var2) {
-		return binary(dest, ADD, var1, var2);
-	}
-
-	@NotNull
-	public static BrilNode sub(String dest, String var1, String var2) {
-		return binary(dest, SUB, var1, var2);
-	}
-
-	@NotNull
-	public static BrilNode mul(String dest, String var1, String var2) {
-		return binary(dest, MUL, var1, var2);
-	}
-
-	@NotNull
-	public static BrilNode and(String dest, String var1, String var2) {
-		return binary(dest, AND, var1, var2);
-	}
-
-	@NotNull
-	public static BrilNode binary(String dest, String op, String var1, String var2) {
-		return new BrilNode()
-				.set(KEY_OP, op)
-				.set(KEY_DEST, dest)
-				.set(KEY_VAR1, var1)
-				.set(KEY_VAR2, var2);
-	}
-
-	@NotNull
-	public static BrilNode constant(String dest, int value) {
-		return new BrilNode()
-				.set(KEY_DEST, dest)
-				.set(KEY_OP, CONST)
-				.set(KEY_VALUE, value);
-	}
-
-	@NotNull
-	public static BrilNode id(String dest, String src) {
-		return new BrilNode()
-				.set(KEY_DEST, dest)
-				.set(KEY_OP, ID)
-				.set(KEY_VAR, src);
-	}
-
-	@NotNull
-	public static BrilNode label(String name) {
-		return new BrilNode()
-				.set(LABEL, name);
-	}
-
-	public static BrilNode print(String var) {
-		return new BrilNode()
-				.set(KEY_OP, PRINT)
-				.set(KEY_VAR, var);
-	}
 
 	@Nullable
 	public static String getOp(BrilNode node) {
@@ -210,6 +118,146 @@ public final class BrilInstructions {
 			}
 			node.set(KEY_ARGS, newArgs);
 		}
+	}
+
+	@NotNull
+	public static BrilNode _id(String dest, String src) {
+		return new BrilNode()
+				.set(KEY_DEST, dest)
+				.set(KEY_OP, ID)
+				.set(KEY_VAR, src);
+	}
+
+	// Fields =================================================================
+
+	private final List<BrilNode> instructions;
+
+	// Setup ==================================================================
+
+	public BrilInstructions() {
+		this(new ArrayList<>());
+	}
+
+	public BrilInstructions(List<BrilNode> instructions) {
+		this.instructions = instructions;
+	}
+
+	// Accessing ==============================================================
+
+	public List<BrilNode> get() {
+		return instructions;
+	}
+
+	@NotNull
+	public BrilInstructions call(String name, List<String> args) {
+		return add(new BrilNode()
+				         .set(KEY_OP, CALL)
+				         .set("name", name)
+				         .set(KEY_ARGS, args));
+	}
+
+	@NotNull
+	public BrilInstructions call(String dest, String name, List<String> args) {
+		return add(new BrilNode()
+				         .set(KEY_OP, CALL)
+				         .set(KEY_DEST, dest)
+				         .set("name", name)
+				         .set(KEY_ARGS, args));
+	}
+
+	@NotNull
+	public BrilInstructions ret() {
+		return add(new BrilNode()
+				         .set(KEY_OP, RET));
+	}
+
+	@NotNull
+	public BrilInstructions ret(String var) {
+		return add(new BrilNode()
+				         .set(KEY_OP, RET)
+				         .set(KEY_VAR, var));
+	}
+
+	@NotNull
+	public BrilInstructions jump(String label) {
+		return add(new BrilNode()
+				         .set(KEY_OP, JMP)
+				         .set(KEY_JMP_TARGET, label));
+	}
+
+	@NotNull
+	public BrilInstructions branch(String var, String thenLabel, String elseLabel) {
+		return add(new BrilNode()
+				         .set(KEY_OP, BR)
+				         .set(KEY_COND, var)
+				         .set(KEY_IF_TARGET, thenLabel)
+				         .set(KEY_ELSE_TARGET, elseLabel));
+	}
+
+	@NotNull
+	public BrilInstructions lessThan(String dest, String var1, String var2) {
+		return binary(dest, "lt", var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions add(String dest, String var1, String var2) {
+		return binary(dest, ADD, var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions sub(String dest, String var1, String var2) {
+		return binary(dest, SUB, var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions mul(String dest, String var1, String var2) {
+		return binary(dest, MUL, var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions and(String dest, String var1, String var2) {
+		return binary(dest, AND, var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions binary(String dest, String op, String var1, String var2) {
+		return add(new BrilNode()
+				           .set(KEY_OP, op)
+				           .set(KEY_DEST, dest)
+				           .set(KEY_VAR1, var1)
+				           .set(KEY_VAR2, var2));
+	}
+
+	@NotNull
+	public BrilInstructions constant(String dest, int value) {
+		return add(new BrilNode()
+				           .set(KEY_DEST, dest)
+				           .set(KEY_OP, CONST)
+				           .set(KEY_VALUE, value));
+	}
+
+	@NotNull
+	public BrilInstructions id(String dest, String src) {
+		return add(_id(dest, src));
+	}
+
+	@NotNull
+	public BrilInstructions label(String name) {
+		return add(new BrilNode()
+				         .set(LABEL, name));
+	}
+
+	@NotNull
+	public BrilInstructions print(String var) {
+		return add(new BrilNode()
+				         .set(KEY_OP, PRINT)
+				         .set(KEY_VAR, var));
+	}
+
+	@NotNull
+	public BrilInstructions add(BrilNode brilNode) {
+		instructions.add(brilNode);
+		return this;
 	}
 
 	// Utils ==================================================================

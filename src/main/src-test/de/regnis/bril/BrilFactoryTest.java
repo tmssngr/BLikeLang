@@ -15,27 +15,27 @@ public class BrilFactoryTest {
 		factory.addFunction("max", "int",
 		                    List.of(BrilFactory.argument("a", "int"),
 		                            BrilFactory.argument("b", "int")),
-		                    List.of(
-				                    BrilInstructions.id("result", "a"),
-				                    BrilInstructions.lessThan("cond", "a", "b"),
-				                    BrilInstructions.branch("cond", "then", "else"),
+		                    new BrilInstructions()
+				                    .id("result", "a")
+				                    .lessThan("cond", "a", "b")
+				                    .branch("cond", "then", "else")
 
-				                    BrilInstructions.label("then"),
-				                    BrilInstructions.id("result", "b"),
-				                    BrilInstructions.jump("next"),
+				                    .label("then")
+				                    .id("result", "b")
+				                    .jump("next")
 
-				                    BrilInstructions.label("else"),
+				                    .label("else")
 
-				                    BrilInstructions.label("next"),
-				                    BrilInstructions.ret()
-		                    ));
+				                    .label("next")
+				                    .ret()
+				                    .get());
 		factory.addFunction("main", "void",
 		                    List.of(),
-		                    List.of(
-				                    BrilInstructions.constant("a", 1),
-				                    BrilInstructions.constant("b", 2),
-				                    BrilInstructions.call("max", List.of("a", "b")),
-				                    BrilInstructions.ret()
-		                    ));
+		                    new BrilInstructions()
+				                    .constant("a", 1)
+				                    .constant("b", 2)
+				                    .call("max", List.of("a", "b"))
+				                    .ret()
+				                    .get());
 	}
 }
