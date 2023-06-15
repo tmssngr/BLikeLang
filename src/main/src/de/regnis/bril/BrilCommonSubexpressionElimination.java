@@ -78,7 +78,7 @@ public class BrilCommonSubexpressionElimination {
 				final int expressionIndex = findCanonicalExpression(canonicalExpression);
 				if (expressionIndex < 0) {
 					addValue(dest, canonicalExpression);
-					return factory.binary(dest, op, value1.getCanonicalVar(), value2.getCanonicalVar());
+					return factory.binary(dest, BrilInstructions.getType(instruction), op, value1.getCanonicalVar(), value2.getCanonicalVar());
 				}
 
 				final Value value = getValueAtIndex(expressionIndex);

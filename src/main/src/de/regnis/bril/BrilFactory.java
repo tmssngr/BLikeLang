@@ -20,6 +20,7 @@ public class BrilFactory {
 	private static final String KEY_ARGS = "args";
 	private static final String KEY_INSTRS = "instrs";
 	private static final String KEY_ARG_NAME = "name";
+	private static final String KEY_ARG_TYPE = "type";
 
 	// Static =================================================================
 
@@ -66,10 +67,15 @@ public class BrilFactory {
 		return argument.getString(KEY_ARG_NAME);
 	}
 
+	@NotNull
+	public static String getArgType(BrilNode argument) {
+		return argument.getString(KEY_ARG_TYPE);
+	}
+
 	public static BrilNode argument(String name, String type) {
 		return new BrilNode()
-				.set("name", name)
-				.set("type", type);
+				.set(KEY_ARG_NAME, name)
+				.set(KEY_ARG_TYPE, type);
 	}
 
 	// Fields =================================================================

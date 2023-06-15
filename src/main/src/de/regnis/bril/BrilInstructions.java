@@ -21,7 +21,7 @@ public class BrilInstructions {
 	public static final String MUL = "mul";
 	public static final String AND = "and";
 	private static final String BR = "br";
-	private static final String CALL = "call";
+	public static final String CALL = "call";
 	public static final String CONST = "const";
 	public static final String ID = "id";
 	public static final String JMP = "jmp";
@@ -33,12 +33,16 @@ public class BrilInstructions {
 	private static final String KEY_IF_TARGET = "ifTarget";
 	private static final String KEY_ELSE_TARGET = "elseTarget";
 	public static final String KEY_DEST = "dest";
+	public static final String KEY_TYPE = "type";
 	private static final String KEY_COND = "cond";
 	private static final String KEY_ARGS = "args";
 	private static final String KEY_VAR1 = "var1";
 	private static final String KEY_VAR2 = "var2";
 	private static final String KEY_VAR = "var";
 	public static final String KEY_VALUE = "value";
+	public static final String INT = "int";
+	public static final String BOOL = "bool";
+	public static final String KEY_NAME = "name";
 
 	// Static =================================================================
 
@@ -70,6 +74,11 @@ public class BrilInstructions {
 		return node.getString(KEY_DEST);
 	}
 
+	@Nullable
+	public static String getType(BrilNode node) {
+		return node.getString(KEY_TYPE);
+	}
+
 	public static void setDest(String dest, BrilNode node) {
 		node.set(KEY_DEST, dest);
 	}
@@ -93,15 +102,25 @@ public class BrilInstructions {
 		return node.getInt(KEY_VALUE);
 	}
 
+	@NotNull
+	public static String getName(BrilNode node) {
+		return node.getString(KEY_NAME);
+	}
+
 	public static Set<String> getRequiredVars(BrilNode node) {
 		final Set<String> requiredVars = new HashSet<>();
 		requiredVars.add(node.getString(KEY_COND));
 		requiredVars.add(node.getString(KEY_VAR));
 		requiredVars.add(node.getString(KEY_VAR1));
 		requiredVars.add(node.getString(KEY_VAR2));
-		requiredVars.addAll(node.getStringList(KEY_ARGS));
+		requiredVars.addAll(getArgs(node));
 		requiredVars.remove(null);
 		return requiredVars;
+	}
+
+	@NotNull
+	public static List<String> getArgs(BrilNode node) {
+		return node.getStringList(KEY_ARGS);
 	}
 
 	public static void replaceVars(Function<String, String> varReplace, BrilNode node) {
@@ -110,7 +129,7 @@ public class BrilInstructions {
 		replace(KEY_VAR1, varReplace, node);
 		replace(KEY_VAR2, varReplace, node);
 
-		final List<String> args = node.getStringList(KEY_ARGS);
+		final List<String> args = getArgs(node);
 		if (args.size() > 0) {
 			final List<String> newArgs = new ArrayList<>(args.size());
 			for (String arg : args) {
@@ -152,7 +171,7 @@ public class BrilInstructions {
 	public BrilInstructions call(String name, List<String> args) {
 		return add(new BrilNode()
 				         .set(KEY_OP, CALL)
-				         .set("name", name)
+				         .set(KEY_NAME, name)
 				         .set(KEY_ARGS, args));
 	}
 
@@ -161,7 +180,8 @@ public class BrilInstructions {
 		return add(new BrilNode()
 				         .set(KEY_OP, CALL)
 				         .set(KEY_DEST, dest)
-				         .set("name", name)
+				         .set(KEY_TYPE, INT)
+				         .set(KEY_NAME, name)
 				         .set(KEY_ARGS, args));
 	}
 
@@ -196,34 +216,35 @@ public class BrilInstructions {
 
 	@NotNull
 	public BrilInstructions lessThan(String dest, String var1, String var2) {
-		return binary(dest, "lt", var1, var2);
+		return binary(dest, BOOL, "lt", var1, var2);
 	}
 
 	@NotNull
 	public BrilInstructions add(String dest, String var1, String var2) {
-		return binary(dest, ADD, var1, var2);
+		return binary(dest, INT, ADD, var1, var2);
 	}
 
 	@NotNull
 	public BrilInstructions sub(String dest, String var1, String var2) {
-		return binary(dest, SUB, var1, var2);
+		return binary(dest, INT, SUB, var1, var2);
 	}
 
 	@NotNull
 	public BrilInstructions mul(String dest, String var1, String var2) {
-		return binary(dest, MUL, var1, var2);
+		return binary(dest, INT, MUL, var1, var2);
 	}
 
 	@NotNull
 	public BrilInstructions and(String dest, String var1, String var2) {
-		return binary(dest, AND, var1, var2);
+		return binary(dest, INT, AND, var1, var2);
 	}
 
 	@NotNull
-	public BrilInstructions binary(String dest, String op, String var1, String var2) {
+	public BrilInstructions binary(String dest, String type, String op, String var1, String var2) {
 		return add(new BrilNode()
 				           .set(KEY_OP, op)
 				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, type)
 				           .set(KEY_VAR1, var1)
 				           .set(KEY_VAR2, var2));
 	}
@@ -232,6 +253,7 @@ public class BrilInstructions {
 	public BrilInstructions constant(String dest, int value) {
 		return add(new BrilNode()
 				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, INT)
 				           .set(KEY_OP, CONST)
 				           .set(KEY_VALUE, value));
 	}
