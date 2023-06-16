@@ -48,7 +48,7 @@ public class BrilToAsmTest {
 				                    .iloadX(0)
 				                    .freeSpace(2)
 				                    .ret()
-				                    .getOutput(),
+				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
 				                                           BrilFactory.createFunction("main", "void", List.of(),
 				                                                                      new BrilInstructions()

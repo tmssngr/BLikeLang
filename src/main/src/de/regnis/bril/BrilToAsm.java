@@ -18,7 +18,7 @@ public final class BrilToAsm {
 		for (BrilNode function : functions) {
 			convertToAsm(function, asm);
 		}
-		return asm.getOutput();
+		return asm.toLines();
 	}
 
 	// Utils ==================================================================
@@ -149,6 +149,20 @@ public final class BrilToAsm {
 		}
 	}
 
+	/**
+	 * When calling a subroutine, we push the parameters to the stack, e.g.
+	 *   push rr0
+	 *   push rr2
+	 *   call foo
+	 * For local variables in the subroutine, we might reserve some space at the beginning and clear it up at the end:
+	 *   foo:
+	 *     push rr0 (the used register is irrelevant, it is just for modifying the stack pointer)
+	 *     push rr0
+	 *     ...
+	 *     pop  rr0
+	 *     pop  rr0
+	 *     ret
+	 */
 	private static VarMapping createVarMapping(BrilNode function) {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
@@ -214,8 +228,8 @@ public final class BrilToAsm {
 		public final int localBytes;
 
 		public VarMapping(Map<String, VarInfo> varToInfo, int localBytes) {
-			this.varToInfo = varToInfo;
-			this.localBytes  = localBytes;
+			this.varToInfo  = varToInfo;
+			this.localBytes = localBytes;
 		}
 
 		public int getOffset(String var) {
