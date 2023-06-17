@@ -14,10 +14,10 @@ public final class BrilDeadCodeElimination {
 
 	public static void simpleDce(BrilNode cfgFunction) {
 		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
-		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks);
 		for (BrilNode block : blocks) {
 			final List<BrilNode> instructions = BrilCfg.getInstructions(block);
-			final Set<String> varsAfterBlock = BrilCfgDetectVarUsages.getVarsAfterBlock(block);
+			final Set<String> varsAfterBlock = BrilCfgDetectVarLiveness.getLiveOut(block);
 			final List<BrilNode> newInstructions = simpleDce(instructions, varsAfterBlock);
 			BrilCfg.setInstructions(newInstructions, block);
 		}

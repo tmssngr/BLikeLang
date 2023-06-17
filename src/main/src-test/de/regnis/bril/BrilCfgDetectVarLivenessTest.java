@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * @author Thomas Singer
  */
-public class BrilCfgDetectVarUsagesTest {
+public class BrilCfgDetectVarLivenessTest {
 
 	// Static =================================================================
 
@@ -63,7 +63,7 @@ public class BrilCfgDetectVarUsagesTest {
 				                    List.of("print"), List.of())
 		);
 
-		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks);
 
 		Assert.assertEquals(4, blocks.size());
 		assertEqualsCfg(Set.of(), Set.of("v"),
@@ -80,7 +80,7 @@ public class BrilCfgDetectVarUsagesTest {
 	public void testPrintMax() {
 		final List<BrilNode> blocks = BrilCfg.getBlocks(createPrintMaxCfg());
 
-		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks);
 
 		Assert.assertEquals(3, blocks.size());
 		assertEqualsCfg(Set.of("a", "b"), Set.of("result", "b"),
@@ -95,7 +95,7 @@ public class BrilCfgDetectVarUsagesTest {
 
 	private void assertEqualsCfg(Set<String> expectedLiveBefore,
 	                             Set<String> expectedLiveAfter, BrilNode blockNode) {
-		Assert.assertEquals(expectedLiveBefore, BrilCfgDetectVarUsages.getVarsBeforeBlock(blockNode));
-		Assert.assertEquals(expectedLiveAfter, BrilCfgDetectVarUsages.getVarsAfterBlock(blockNode));
+		Assert.assertEquals(expectedLiveBefore, BrilCfgDetectVarLiveness.getLiveIn(blockNode));
+		Assert.assertEquals(expectedLiveAfter, BrilCfgDetectVarLiveness.getLiveOut(blockNode));
 	}
 }

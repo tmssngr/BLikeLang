@@ -80,7 +80,7 @@ public final class BrilCfgSsa {
 		blocks = BrilCfg.getBlocks(cfgFunction);
 		BrilCfg.testValidSuccessorsAndPredecessors(blocks);
 
-		BrilCfgDetectVarUsages.detectVarUsages(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks);
 	}
 
 	// Utils ==================================================================
@@ -100,7 +100,7 @@ public final class BrilCfgSsa {
 				info.initializeFromArgumentsUpdateGraph(arguments);
 			}
 			else {
-				final Set<String> incomingVars = BrilCfgDetectVarUsages.getVarsBeforeBlock(block);
+				final Set<String> incomingVars = BrilCfgDetectVarLiveness.getLiveIn(block);
 				if (predecessors.size() > 1) {
 					info.initializePhiDeclarations(incomingVars);
 				}
