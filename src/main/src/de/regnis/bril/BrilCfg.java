@@ -262,10 +262,6 @@ public final class BrilCfg {
 	public static void testValidSuccessorsAndPredecessors(List<BrilNode> blocks) {
 		final Map<String, BrilNode> nameToBlock = getNameToBlock(blocks);
 
-		if (getPredecessors(blocks.get(0)).size() > 0) {
-			throw new IllegalStateException("expecting the first block to have no predecessors");
-		}
-
 		if (getSuccessors(Utils.getLast(blocks)).size() > 0) {
 			throw new IllegalStateException("expecting the last block to have no successors");
 		}
@@ -273,14 +269,22 @@ public final class BrilCfg {
 		for (BrilNode block : blocks) {
 			final String name = getName(block);
 			for (String predecessor : getPredecessors(block)) {
-				final List<String> successors = getSuccessors(nameToBlock.get(predecessor));
+				final BrilNode successorBlock = nameToBlock.get(predecessor);
+				if (successorBlock == null) {
+					throw new IllegalStateException("unknown predecessor " + predecessor);
+				}
+				final List<String> successors = getSuccessors(successorBlock);
 				if (!successors.contains(name)) {
 					throw new IllegalStateException("expecting " + predecessor + " to have successor " + name);
 				}
 			}
 
 			for (String successor : getSuccessors(block)) {
-				final List<String> predecessors = getPredecessors(nameToBlock.get(successor));
+				final BrilNode predecessorBlock = nameToBlock.get(successor);
+				if (predecessorBlock == null) {
+					throw new IllegalStateException("unknown successor " + successor);
+				}
+				final List<String> predecessors = getPredecessors(predecessorBlock);
 				if (!predecessors.contains(name)) {
 					throw new IllegalStateException("expecting " + successor + " to have predecessor " + name);
 				}
