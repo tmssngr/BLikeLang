@@ -34,7 +34,6 @@ public class BrilInstructions {
 	private static final String KEY_ELSE_TARGET = "elseTarget";
 	public static final String KEY_DEST = "dest";
 	public static final String KEY_TYPE = "type";
-	private static final String KEY_COND = "cond";
 	private static final String KEY_ARGS = "args";
 	private static final String KEY_VAR1 = "var1";
 	private static final String KEY_VAR2 = "var2";
@@ -109,7 +108,6 @@ public class BrilInstructions {
 
 	public static Set<String> getRequiredVars(BrilNode node) {
 		final Set<String> requiredVars = new HashSet<>();
-		requiredVars.add(node.getString(KEY_COND));
 		requiredVars.add(node.getString(KEY_VAR));
 		requiredVars.add(node.getString(KEY_VAR1));
 		requiredVars.add(node.getString(KEY_VAR2));
@@ -124,7 +122,6 @@ public class BrilInstructions {
 	}
 
 	public static void replaceVars(Function<String, String> varReplace, BrilNode node) {
-		replace(KEY_COND, varReplace, node);
 		replace(KEY_VAR, varReplace, node);
 		replace(KEY_VAR1, varReplace, node);
 		replace(KEY_VAR2, varReplace, node);
@@ -209,7 +206,7 @@ public class BrilInstructions {
 	public BrilInstructions branch(String var, String thenLabel, String elseLabel) {
 		return add(new BrilNode()
 				         .set(KEY_OP, BR)
-				         .set(KEY_COND, var)
+				         .set(KEY_VAR, var)
 				         .set(KEY_IF_TARGET, thenLabel)
 				         .set(KEY_ELSE_TARGET, elseLabel));
 	}
