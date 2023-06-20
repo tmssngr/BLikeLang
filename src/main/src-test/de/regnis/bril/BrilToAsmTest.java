@@ -11,7 +11,7 @@ import java.util.List;
 public class BrilToAsmTest {
 
 	@Test
-	public void test() {
+	public void testSimple() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("main")
 				                    //.constant("value1", 2)
@@ -28,6 +28,7 @@ public class BrilToAsmTest {
 				                    //.print("result")
 				                    .iload(10, 8)
 				                    .call("print")
+				                    .label("main exit")
 				                    .ret()
 				                    //==========
 				                    .label("sum")
@@ -37,6 +38,7 @@ public class BrilToAsmTest {
 				                    .iload(4, 0)
 				                    //.ret("sum")
 				                    .iload(10, 4)
+				                    .label("sum exit")
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
@@ -52,6 +54,40 @@ public class BrilToAsmTest {
 				                                                                      new BrilInstructions()
 						                                                                      .add("sum", "a", "b")
 						                                                                      .ret("sum")
+						                                                                      .get()
+				                                           )
+		                                           )
+		                    )
+		);
+	}
+
+	@Test
+	public void testIfBoolean() {
+		Assert.assertEquals(new BrilAsm()
+				                    .label("getLeftOrRight")
+				                    .br(10, "takeLeft", "takeRight")
+				                    .label("takeLeft")
+				                    //.ret("left")
+				                    .iload(10, 12)
+				                    .jump("getLeftOrRight exit")
+				                    .label("takeRight")
+				                    //.ret("right")
+				                    .iloadFromStack(10, 14, 2)
+				                    .label("getLeftOrRight exit")
+				                    .ret()
+				                    .toLines(),
+		                    BrilToAsm.convertToAsm(List.of(
+				                                           BrilFactory.createFunction("getLeftOrRight", BrilInstructions.INT, List.of(
+						                                                                      BrilFactory.argument("leftOrRight", BrilInstructions.BOOL),
+						                                                                      BrilFactory.argument("left", BrilInstructions.INT),
+						                                                                      BrilFactory.argument("right", BrilInstructions.INT)
+				                                                                      ),
+				                                                                      new BrilInstructions()
+						                                                                      .branch("leftOrRight", "takeLeft", "takeRight")
+						                                                                      .label("takeLeft")
+						                                                                      .ret("left")
+						                                                                      .label("takeRight")
+						                                                                      .ret("right")
 						                                                                      .get()
 				                                           )
 		                                           )

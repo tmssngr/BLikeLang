@@ -45,13 +45,15 @@ public final class BrilAsm {
 	}
 
 	public BrilAsm iload(int dest, int src) {
-		commands.add(new Command() {
-			@Override
-			protected void appendTo(Consumer<String> output) {
-				output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("ld r" + dest + ", r" + src);
-			}
-		});
+		if (dest != src) {
+			commands.add(new Command() {
+				@Override
+				protected void appendTo(Consumer<String> output) {
+					output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
+					output.accept("ld r" + dest + ", r" + src);
+				}
+			});
+		}
 		return this;
 	}
 
@@ -63,6 +65,17 @@ public final class BrilAsm {
 				output.accept("ldc r" + destRegister + ", rr" + spRegister);
 				output.accept("incw r" + spRegister);
 				output.accept("ldc r" + (destRegister + 1) + ", rr" + spRegister);
+			}
+		});
+		return this;
+	}
+
+	public BrilAsm bloadFromStack(int destRegister, int spRegister, int offset) {
+		commands.add(new Command() {
+			@Override
+			protected void appendTo(Consumer<String> output) {
+				ldFramePointer(offset, output);
+				output.accept("ldc r" + destRegister + ", rr" + spRegister);
 			}
 		});
 		return this;
@@ -173,6 +186,28 @@ public final class BrilAsm {
 			@Override
 			protected void appendTo(Consumer<String> output) {
 				output.accept("ret");
+			}
+		});
+		return this;
+	}
+
+	public BrilAsm br(int register, String thenTarget, String elseTarget) {
+		commands.add(new Command() {
+			@Override
+			protected void appendTo(Consumer<String> output) {
+				output.accept("or r" + register + ", r" + register);
+				output.accept("jp z, " + elseTarget);
+				output.accept("jp " + thenTarget);
+			}
+		});
+		return this;
+	}
+
+	public BrilAsm jump(String targetLabel) {
+		commands.add(new Command() {
+			@Override
+			protected void appendTo(Consumer<String> output) {
+				output.accept("jp " + targetLabel);
 			}
 		});
 		return this;

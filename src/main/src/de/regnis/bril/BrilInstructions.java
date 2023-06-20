@@ -20,7 +20,7 @@ public class BrilInstructions {
 	public static final String SUB = "sub";
 	public static final String MUL = "mul";
 	public static final String AND = "and";
-	private static final String BR = "br";
+	public static final String BR = "br";
 	public static final String CALL = "call";
 	public static final String CONST = "const";
 	public static final String ID = "id";
@@ -62,10 +62,18 @@ public class BrilInstructions {
 			labels.add(node.getString(KEY_JMP_TARGET));
 		}
 		else if (BR.equals(op)) {
-			labels.add(node.getString(KEY_IF_TARGET));
-			labels.add(node.getString(KEY_ELSE_TARGET));
+			labels.add(getThenTarget(node));
+			labels.add(getElseTarget(node));
 		}
 		return labels;
+	}
+
+	public static String getThenTarget(BrilNode node) {
+		return node.getString(KEY_IF_TARGET);
+	}
+
+	public static String getElseTarget(BrilNode node) {
+		return node.getString(KEY_ELSE_TARGET);
 	}
 
 	@Nullable

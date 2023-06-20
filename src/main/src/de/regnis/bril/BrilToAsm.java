@@ -1,6 +1,7 @@
 package de.regnis.bril;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -31,20 +32,24 @@ public final class BrilToAsm {
 	// Utils ==================================================================
 
 	private static void convertToAsm(BrilNode function, BrilAsm asm) {
-		asm.label(BrilFactory.getName(function));
+		final String name = BrilFactory.getName(function);
+		asm.label(name);
 
 		final VarMapping varMapping = createVarMapping(function);
 		varMapping.allocLocalVarSpace(asm);
 
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
-		convertToAsm(instructions, varMapping, asm);
+		final String exitLabel = name + " exit";
+		convertToAsm(instructions, exitLabel, varMapping, asm);
 
+		asm.label(exitLabel);
 		varMapping.freeLocalVarSpace(asm);
 		asm.ret();
 	}
 
-	private static void convertToAsm(List<BrilNode> instructions, VarMapping varMapping, BrilAsm asm) {
-		for (BrilNode instruction : instructions) {
+	private static void convertToAsm(List<BrilNode> instructions, String exitLabel, VarMapping varMapping, BrilAsm asm) {
+		for (final Iterator<BrilNode> it = instructions.iterator(); it.hasNext(); ) {
+			final BrilNode instruction = it.next();
 			final String op = BrilInstructions.getOp(instruction);
 			final String dest = BrilInstructions.getDest(instruction);
 			final String type = BrilInstructions.getType(instruction);
@@ -64,12 +69,23 @@ public final class BrilToAsm {
 			}
 
 			if (BrilInstructions.RET.equals(op)) {
-				ret(instruction, varMapping, asm);
+				ret(instruction, it.hasNext() ? exitLabel : null, varMapping, asm);
 				continue;
 			}
 
 			if (BrilInstructions.PRINT.equals(op)) {
 				print(instruction, varMapping, asm);
+				continue;
+			}
+
+			if (BrilInstructions.BR.equals(op)) {
+				branch(instruction, varMapping, asm);
+				continue;
+			}
+
+			final String label = BrilInstructions.getLabel(instruction);
+			if (label != null) {
+				asm.label(label);
 				continue;
 			}
 
@@ -83,10 +99,10 @@ public final class BrilToAsm {
 	}
 
 	private static void add(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
-		varMapping.loadTo(BrilInstructions.getVar1NotNull(instruction), 0, asm);
-		final int register2 = varMapping.load(BrilInstructions.getVar2NotNull(instruction), 2, asm);
+		varMapping.iloadTo(BrilInstructions.getVar1NotNull(instruction), 0, asm);
+		final int register2 = varMapping.iload(BrilInstructions.getVar2NotNull(instruction), 2, asm);
 		asm.iadd(0, register2);
-		varMapping.store(dest, 0, asm);
+		varMapping.istore(dest, 0, asm);
 	}
 
 	private static void call(BrilNode instruction, String dest, String type, VarMapping varMapping, BrilAsm asm) {
@@ -140,15 +156,30 @@ public final class BrilToAsm {
 		asm.call("print");
 	}
 
-	private static void ret(BrilNode instruction, VarMapping varMapping, BrilAsm asm) {
+	private static void ret(BrilNode instruction, @Nullable String exitLabel, VarMapping varMapping, BrilAsm asm) {
 		final String var = BrilInstructions.getVarNotNull(instruction);
 		final String varType = varMapping.getType(var);
 		if (BrilInstructions.INT.equals(varType)) {
-			varMapping.returnValueFromVar(var, asm);
+			varMapping.ireturnValueFromVar(var, asm);
 		}
 		else {
 			throw new UnsupportedOperationException(varType);
 		}
+
+		if (exitLabel != null) {
+			asm.jump(exitLabel);
+		}
+	}
+
+	private static void branch(BrilNode instruction, VarMapping varMapping, BrilAsm asm) {
+		final String var = BrilInstructions.getVarNotNull(instruction);
+		final String varType = varMapping.getType(var);
+		if (!BrilInstructions.BOOL.equals(varType)) {
+			throw new IllegalArgumentException("Expected a bool variable for the br command");
+		}
+
+		final int register = varMapping.bload(var, 0, asm);
+		asm.br(register, BrilInstructions.getThenTarget(instruction), BrilInstructions.getElseTarget(instruction));
 	}
 
 	private static VarMapping createVarMapping(BrilNode function) {
@@ -273,7 +304,7 @@ public final class BrilToAsm {
 			asm.freeSpace(localBytes);
 		}
 
-		public int load(String var, int registerForSpilledVar, BrilAsm asm) {
+		public int iload(String var, int registerForSpilledVar, BrilAsm asm) {
 			final int offsetOrRegister = getOffset(var);
 			if (offsetOrRegister < 0) {
 				return -offsetOrRegister;
@@ -283,14 +314,14 @@ public final class BrilToAsm {
 			return registerForSpilledVar;
 		}
 
-		public void loadTo(String var, int target, BrilAsm asm) {
-			final int register = load(var, target, asm);
+		public void iloadTo(String var, int target, BrilAsm asm) {
+			final int register = iload(var, target, asm);
 			if (register != target) {
 				asm.iload(target, register);
 			}
 		}
 
-		public void store(String var, int register, BrilAsm asm) {
+		public void istore(String var, int register, BrilAsm asm) {
 			final int offsetOrRegister = getOffset(var);
 			if (offsetOrRegister < 0) {
 				if (register != -offsetOrRegister) {
@@ -302,29 +333,39 @@ public final class BrilToAsm {
 			asm.istoreToStack(register, getSpRegister(), offsetOrRegister);
 		}
 
+		public int bload(String var, int registerForSpilledVar, BrilAsm asm) {
+			final int offsetOrRegister = getOffset(var);
+			if (offsetOrRegister < 0) {
+				return -offsetOrRegister;
+			}
+
+			asm.bloadFromStack(registerForSpilledVar, 14, offsetOrRegister);
+			return registerForSpilledVar;
+		}
+
 		public int getSpRegister() {
 			return 14;
 		}
 
 		public void callArgument(String arg, int argIndex, BrilAsm asm) {
 			if (argIndex == 0) {
-				loadTo(arg, 10, asm);
+				iloadTo(arg, 10, asm);
 			}
 			else if (argIndex == 1) {
-				loadTo(arg, 12, asm);
+				iloadTo(arg, 12, asm);
 			}
 			else {
-				final int register = load(arg, 0, asm);
+				final int register = iload(arg, 0, asm);
 				asm.ipush(register);
 			}
 		}
 
-		public void returnValueFromVar(String var, BrilAsm asm) {
-			loadTo(var, 10, asm);
+		public void ireturnValueFromVar(String var, BrilAsm asm) {
+			iloadTo(var, 10, asm);
 		}
 
 		public void storeReturnValueInVar(String dest, BrilAsm asm) {
-			store(dest, 10, asm);
+			istore(dest, 10, asm);
 		}
 
 		public void loadConstant(String dest, int value, BrilAsm asm) {
