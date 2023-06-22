@@ -179,7 +179,7 @@ public final class BrilToAsm {
 		}
 
 		final int register = varMapping.bload(var, 0, asm);
-		asm.br(register, BrilInstructions.getThenTarget(instruction), BrilInstructions.getElseTarget(instruction));
+		asm.brIfElse(register, BrilInstructions.getThenTarget(instruction), BrilInstructions.getElseTarget(instruction));
 	}
 
 	private static VarMapping createVarMapping(BrilNode function) {
