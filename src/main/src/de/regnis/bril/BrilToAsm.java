@@ -26,6 +26,7 @@ public final class BrilToAsm {
 		for (BrilNode function : functions) {
 			convertToAsm(function, asm);
 		}
+		asm.transform(BrilAsmTransformations.transform());
 		return asm.toLines();
 	}
 

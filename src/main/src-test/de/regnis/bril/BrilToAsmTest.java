@@ -28,7 +28,6 @@ public class BrilToAsmTest {
 				                    //.print("result")
 				                    .iload(10, 8)
 				                    .call("print")
-				                    .label("main exit")
 				                    .ret()
 				                    //==========
 				                    .label("sum")
@@ -38,7 +37,6 @@ public class BrilToAsmTest {
 				                    .iload(4, 0)
 				                    //.ret("sum")
 				                    .iload(10, 4)
-				                    .label("sum exit")
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
@@ -65,8 +63,7 @@ public class BrilToAsmTest {
 	public void testIfBoolean() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("getLeftOrRight")
-				                    .br(10, "takeLeft", "takeRight")
-				                    .label("takeLeft")
+				                    .brElse(10, "takeRight")
 				                    //.ret("left")
 				                    .iload(10, 12)
 				                    .jump("getLeftOrRight exit")
