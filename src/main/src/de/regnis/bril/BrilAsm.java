@@ -37,9 +37,14 @@ public class BrilAsm {
 	}
 
 	public BrilAsm transform(Function<List<BrilCommand>, List<BrilCommand>> transformation) {
-		final List<BrilCommand> newCommands = transformation.apply(Collections.unmodifiableList(commands));
-		commands.clear();
-		commands.addAll(newCommands);
+		boolean changed;
+		do {
+			final List<BrilCommand> newCommands = transformation.apply(Collections.unmodifiableList(commands));
+			changed = !commands.equals(newCommands);
+			commands.clear();
+			commands.addAll(newCommands);
+		}
+		while (changed);
 		return this;
 	}
 
