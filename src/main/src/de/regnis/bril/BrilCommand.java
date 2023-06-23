@@ -7,6 +7,15 @@ import java.util.function.Consumer;
  */
 public interface BrilCommand {
 
+	// Constants ==============================================================
+
+	BrilCommand RET = new BrilCommand() {
+		@Override
+		public void appendTo(Consumer<String> output) {
+			output.accept("ret");
+		}
+	};
+
 	// Accessing ==============================================================
 
 	void appendTo(Consumer<String> output);
@@ -42,6 +51,15 @@ public interface BrilCommand {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("call " + target);
+		}
+	}
+
+	@SuppressWarnings("InnerClassOfInterface")
+	record ILoad(int dest, int src) implements BrilCommand {
+		@Override
+		public void appendTo(Consumer<String> output) {
+			output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
+			output.accept("ld r" + dest + ", r" + src);
 		}
 	}
 }

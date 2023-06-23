@@ -50,13 +50,7 @@ public class BrilAsm {
 
 	public BrilAsm iload(int dest, int src) {
 		if (dest != src) {
-			addCommand(new BrilCommand() {
-				@Override
-				public void appendTo(Consumer<String> output) {
-					output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
-					output.accept("ld r" + dest + ", r" + src);
-				}
-			});
+			addCommand(new BrilCommand.ILoad(dest, src));
 		}
 		return this;
 	}
@@ -181,12 +175,7 @@ public class BrilAsm {
 	}
 
 	public BrilAsm ret() {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("ret");
-			}
-		});
+		addCommand(BrilCommand.RET);
 		return this;
 	}
 

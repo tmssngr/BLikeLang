@@ -20,6 +20,8 @@ public final class BrilAsmTransformations {
 				final List<BrilCommand> commands = new ArrayList<>(prevCommands);
 				fixJumpToNextLabel(commands);
 				fixObsoleteLabels(commands);
+				fixCallRet(commands);
+				fixBiDiLoad(commands);
 				return commands;
 			}
 		};
@@ -40,6 +42,33 @@ public final class BrilAsmTransformations {
 						&& command2 instanceof BrilCommand.Label label
 						&& branch.target().equals(label.label())) {
 					remove();
+				}
+			}
+		}.iterator();
+	}
+
+	private static void fixCallRet(List<BrilCommand> commands) {
+		new DualIterator(commands) {
+			@Override
+			protected void handle(BrilCommand command1, BrilCommand command2) {
+				if (command1 instanceof BrilCommand.Call call
+						&& command2 == BrilCommand.RET) {
+					remove();
+					replace(new BrilCommand.Jump(call.target()));
+				}
+			}
+		}.iterator();
+	}
+
+	private static void fixBiDiLoad(List<BrilCommand> commands) {
+		new DualIterator(commands) {
+			@Override
+			protected void handle(BrilCommand command1, BrilCommand command2) {
+				if (command1 instanceof BrilCommand.ILoad load1
+						&& command2 instanceof BrilCommand.ILoad load2
+						&& load1.src() == load2.dest()
+						&& load1.dest() == load2.src()) {
+					removeNext();
 				}
 			}
 		}.iterator();
@@ -156,6 +185,7 @@ public final class BrilAsmTransformations {
 			commands.add(i, command);
 		}
 	}
+
 	private abstract static class DualIterator {
 		private int i;
 
@@ -178,6 +208,15 @@ public final class BrilAsmTransformations {
 
 		protected void remove() {
 			commands.remove(i);
+		}
+
+		protected void removeNext() {
+			commands.remove(i + 1);
+		}
+
+		protected void replace(BrilCommand command) {
+			remove();
+			commands.add(i, command);
 		}
 	}
 }
