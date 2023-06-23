@@ -64,8 +64,8 @@ public final class BrilAsmTransformations {
 		new DualIterator(commands) {
 			@Override
 			protected void handle(BrilCommand command1, BrilCommand command2) {
-				if (command1 instanceof BrilCommand.ILoad load1
-						&& command2 instanceof BrilCommand.ILoad load2
+				if (command1 instanceof BrilCommand.Load16 load1
+						&& command2 instanceof BrilCommand.Load16 load2
 						&& load1.src() == load2.dest()
 						&& load1.dest() == load2.src()) {
 					removeNext();

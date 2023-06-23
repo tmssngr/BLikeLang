@@ -20,6 +20,7 @@ public class BrilInstructions {
 	public static final String SUB = "sub";
 	public static final String MUL = "mul";
 	public static final String AND = "and";
+	public static final String LT = "lt";
 	public static final String BR = "br";
 	public static final String CALL = "call";
 	public static final String CONST = "const";
@@ -221,7 +222,7 @@ public class BrilInstructions {
 
 	@NotNull
 	public BrilInstructions lessThan(String dest, String var1, String var2) {
-		return binary(dest, BOOL, "lt", var1, var2);
+		return binary(dest, BOOL, LT, var1, var2);
 	}
 
 	@NotNull

@@ -19,6 +19,8 @@ public class BrilAsm {
 
 	// Setup ==================================================================
 
+	private int labelCounter;
+
 	protected BrilAsm() {
 	}
 
@@ -55,7 +57,7 @@ public class BrilAsm {
 
 	public BrilAsm iload(int dest, int src) {
 		if (dest != src) {
-			addCommand(new BrilCommand.ILoad(dest, src));
+			addCommand(new BrilCommand.Load16(dest, src));
 		}
 		return this;
 	}
@@ -70,6 +72,13 @@ public class BrilAsm {
 				output.accept("ldc r" + (destRegister + 1) + ", rr" + spRegister);
 			}
 		});
+		return this;
+	}
+
+	public BrilAsm bload(int dest, int src) {
+		if (dest != src) {
+			addCommand(new BrilCommand.Load8(dest, src));
+		}
 		return this;
 	}
 
@@ -99,6 +108,18 @@ public class BrilAsm {
 	}
 
 	@NotNull
+	public BrilAsm bstoreToStack(int sourceRegister, int spRegister, int offset) {
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				ldFramePointer(offset, output);
+				output.accept("ldc rr" + spRegister + ", r" + sourceRegister);
+			}
+		});
+		return this;
+	}
+
+	@NotNull
 	public BrilAsm iadd(int dest, int src) {
 		addCommand(new BrilCommand() {
 			@Override
@@ -121,6 +142,39 @@ public class BrilAsm {
 		});
 		return this;
 	}
+
+	@NotNull
+	public BrilAsm ilt(int dest, int left, int right) {
+		final String labelTrue = "comparison_" + labelCounter++;
+		final String labelNext = "comparison_" + labelCounter++;
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("ld r" + dest + ", #0");
+				output.accept("cp r" + left + ", r" + right);
+			}
+		});
+		addCommand(new BrilCommand.Branch("lt", labelTrue));
+		addCommand(new BrilCommand.Branch("nz", labelNext));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
+			}
+		});
+		addCommand(new BrilCommand.Branch("uge", labelNext));
+		addCommand(new BrilCommand.Label(labelTrue));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("dec r" + dest);
+			}
+		});
+		addCommand(new BrilCommand.Label(labelNext));
+		return this;
+	}
+
+
 
 	@NotNull
 	public BrilAsm iconst(int register, int value) {

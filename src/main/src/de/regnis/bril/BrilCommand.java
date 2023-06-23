@@ -55,10 +55,18 @@ public interface BrilCommand {
 	}
 
 	@SuppressWarnings("InnerClassOfInterface")
-	record ILoad(int dest, int src) implements BrilCommand {
+	record Load16(int dest, int src) implements BrilCommand {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
+			output.accept("ld r" + dest + ", r" + src);
+		}
+	}
+
+	@SuppressWarnings("InnerClassOfInterface")
+	record Load8(int dest, int src) implements BrilCommand {
+		@Override
+		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + dest + ", r" + src);
 		}
 	}

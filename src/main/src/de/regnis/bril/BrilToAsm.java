@@ -60,16 +60,22 @@ public final class BrilToAsm {
 			}
 
 			if (BrilInstructions.ADD.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
-				binary(instruction, dest,
-				       (destReg, srcReg, asm1) -> asm1.iadd(destReg, srcReg),
-				       varMapping, asm);
+				ibinary(instruction, dest,
+				        (destReg, srcReg, asm1) -> asm1.iadd(destReg, srcReg),
+				        varMapping, asm);
 				continue;
 			}
 
 			if (BrilInstructions.SUB.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
-				binary(instruction, dest,
-				       (destReg, srcReg, asm1) -> asm1.isub(destReg, srcReg),
-				       varMapping, asm);
+				ibinary(instruction, dest,
+				        (destReg, srcReg, asm1) -> asm1.isub(destReg, srcReg),
+				        varMapping, asm);
+				continue;
+			}
+
+			if (BrilInstructions.LT.equals(op) && dest != null && BrilInstructions.BOOL.equals(type)) {
+				bi_binary(instruction, dest,
+				          varMapping, asm);
 				continue;
 			}
 
@@ -108,10 +114,19 @@ public final class BrilToAsm {
 		varMapping.loadConstant(dest, value, asm);
 	}
 
-	private static void binary(BrilNode instruction, String dest, BinaryRegisterOperator binaryRegisterOperator, VarMapping varMapping, BrilAsm asm) {
+	private static void ibinary(BrilNode instruction, String dest, BinaryRegisterOperator binaryRegisterOperator, VarMapping varMapping, BrilAsm asm) {
 		final String var1 = BrilInstructions.getVar1NotNull(instruction);
 		final String var2 = BrilInstructions.getVar2NotNull(instruction);
-		varMapping.ibinaryOperator(dest, asm, var1, var2, binaryRegisterOperator);
+		varMapping.i_binaryOperator(dest, asm, var1, var2, binaryRegisterOperator);
+	}
+
+	private static void bi_binary(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
+		final String var1 = BrilInstructions.getVar1NotNull(instruction);
+		final String var2 = BrilInstructions.getVar2NotNull(instruction);
+		final int register1 = varMapping.iload(var1, 0, asm);
+		final int register2 = varMapping.iload(var2, 2, asm);
+		asm.ilt(0, register1, register2);
+		varMapping.store(dest, 0, asm);
 	}
 
 	private static void call(BrilNode instruction, String dest, String type, VarMapping varMapping, BrilAsm asm) {
@@ -132,7 +147,7 @@ public final class BrilToAsm {
 		asm.call(name);
 
 		if (BrilInstructions.INT.equals(type)) {
-			varMapping.storeReturnValueInVar(dest, asm);
+			varMapping.istoreReturnValueInVar(dest, asm);
 		}
 		else {
 			throw new UnsupportedOperationException(type);
@@ -372,23 +387,40 @@ public final class BrilToAsm {
 			}
 		}
 
-		public void istore(String var, int register, BrilAsm asm) {
+		public void store(String var, int register, BrilAsm asm) {
 			final int offsetOrRegister = getOffset(var);
-			if (offsetOrRegister < 0) {
-				if (register != -offsetOrRegister) {
-					asm.iload(-offsetOrRegister, register);
+
+			final String type = getType(var);
+			if (BrilInstructions.INT.equals(type)) {
+				if (offsetOrRegister < 0) {
+					if (register != -offsetOrRegister) {
+						asm.iload(-offsetOrRegister, register);
+					}
+				}
+				else {
+					asm.istoreToStack(register, getSpRegister(), offsetOrRegister);
+				}
+			}
+			else if (BrilInstructions.BOOL.equals(type)) {
+				if (offsetOrRegister < 0) {
+					if (register != -offsetOrRegister) {
+						asm.bload(-offsetOrRegister, register);
+					}
+				}
+				else {
+					asm.bstoreToStack(register, getSpRegister(), offsetOrRegister);
 				}
 			}
 			else {
-				asm.istoreToStack(register, getSpRegister(), offsetOrRegister);
+				throw new UnsupportedOperationException("unsupported type " + type);
 			}
 		}
 
-		public void storeReturnValueInVar(String dest, BrilAsm asm) {
-			istore(dest, 10, asm);
+		public void istoreReturnValueInVar(String dest, BrilAsm asm) {
+			store(dest, 10, asm);
 		}
 
-		public void ibinaryOperator(String dest, BrilAsm asm, String var1, String var2, BinaryRegisterOperator operator) {
+		public void i_binaryOperator(String dest, BrilAsm asm, String var1, String var2, BinaryRegisterOperator operator) {
 			final int destOffsetOrRegister = getOffset(dest);
 			final int destRegister = destOffsetOrRegister < 0 ? -destOffsetOrRegister : 0;
 			iloadTo(var1, destRegister, asm);
@@ -398,6 +430,19 @@ public final class BrilToAsm {
 
 			if (destOffsetOrRegister >= 0) {
 				asm.istoreToStack(0, getSpRegister(), destOffsetOrRegister);
+			}
+		}
+
+		public void bi_binaryOperator(String dest, BrilAsm asm, String var1, String var2, BinaryRegisterOperator operator) {
+			final int destOffsetOrRegister = getOffset(dest);
+			final int destRegister = destOffsetOrRegister < 0 ? -destOffsetOrRegister : 0;
+			iloadTo(var1, destRegister, asm);
+			final int register2 = iload(var2, 2, asm);
+
+			operator.handle(destRegister, register2, asm);
+
+			if (destOffsetOrRegister >= 0) {
+				asm.bstoreToStack(0, getSpRegister(), destOffsetOrRegister);
 			}
 		}
 	}

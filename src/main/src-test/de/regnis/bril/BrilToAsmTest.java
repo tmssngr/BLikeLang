@@ -91,4 +91,38 @@ public class BrilToAsmTest {
 		                    )
 		);
 	}
+
+	@Test
+	public void testIfLessThan() {
+		Assert.assertEquals(new BrilAsm()
+				                    .label("max")
+				                    //.lessThan("cond", "a", "b")
+				                    .ilt(0, 10, 12)
+				                    .bload(4, 0)
+				                    //.branch("cond", "takeB", "takeA")
+				                    .brElse(4, "takeA")
+				                    //.ret("b")
+				                    .iload(10, 12)
+				                    .label("takeA")
+				                    //.ret("a")
+				                    .ret()
+				                    .toLines(),
+		                    BrilToAsm.convertToAsm(List.of(
+				                                           BrilFactory.createFunction("max", BrilInstructions.INT, List.of(
+						                                                                      BrilFactory.argument("a", BrilInstructions.INT),
+						                                                                      BrilFactory.argument("b", BrilInstructions.INT)
+				                                                                      ),
+				                                                                      new BrilInstructions()
+						                                                                      .lessThan("cond", "a", "b")
+						                                                                      .branch("cond", "takeB", "takeA")
+						                                                                      .label("takeB")
+						                                                                      .ret("b")
+						                                                                      .label("takeA")
+						                                                                      .ret("a")
+						                                                                      .get()
+				                                           )
+		                                           )
+		                    )
+		);
+	}
 }
