@@ -33,9 +33,8 @@ public class BrilToAsmTest {
 				                    //==========
 				                    .label("sum")
 				                    //.add("sum", "a", "b")
-				                    .iload(0, 10)
-				                    .iadd(0, 12)
-				                    .iload(4, 0)
+				                    .iload(4, 10)
+				                    .iadd(4, 12)
 				                    //.ret("sum")
 				                    .iload(10, 4)
 				                    .ret()
