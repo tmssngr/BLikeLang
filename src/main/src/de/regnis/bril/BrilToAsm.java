@@ -66,6 +66,13 @@ public final class BrilToAsm {
 				continue;
 			}
 
+			if (BrilInstructions.SUB.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
+				binary(instruction, dest,
+				       (destReg, srcReg, asm1) -> asm1.isub(destReg, srcReg),
+				       varMapping, asm);
+				continue;
+			}
+
 			if (BrilInstructions.CALL.equals(op) && dest != null && type != null) {
 				call(instruction, dest, type, varMapping, asm);
 				continue;

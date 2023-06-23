@@ -106,6 +106,18 @@ public class BrilAsm {
 	}
 
 	@NotNull
+	public BrilAsm isub(int dest, int src) {
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("sub r" + (dest + 1) + ", r" + (src + 1));
+				output.accept("sbc r" + dest + ", r" + src);
+			}
+		});
+		return this;
+	}
+
+	@NotNull
 	public BrilAsm iconst(int register, int value) {
 		addCommand(new BrilCommand() {
 			@Override
