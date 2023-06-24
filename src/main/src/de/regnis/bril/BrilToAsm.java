@@ -49,180 +49,164 @@ public final class BrilToAsm {
 	}
 
 	private static void convertToAsm(List<BrilNode> instructions, String exitLabel, VarMapping varMapping, BrilAsm asm) {
-		for (final Iterator<BrilNode> it = instructions.iterator(); it.hasNext(); ) {
-			final BrilNode instruction = it.next();
-			final String op = BrilInstructions.getOp(instruction);
-			final String dest = BrilInstructions.getDest(instruction);
-			final String type = BrilInstructions.getType(instruction);
-			if (BrilInstructions.CONST.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
-				constant(instruction, dest, varMapping, asm);
-				continue;
+		final class MyHandler extends BrilInstructions.Handler {
+			@Nullable
+			private String exitLabel;
+
+			private MyHandler(@NotNull String exitLabel) {
+				this.exitLabel = exitLabel;
 			}
 
-			if (BrilInstructions.ADD.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
-				ibinary(instruction, dest,
+			@Override
+			protected void label(String name) {
+				asm.label(name);
+			}
+
+			@Override
+			protected void constant(String dest, int value) {
+				varMapping.loadConstant(dest, value, asm);
+			}
+
+			@Override
+			protected void id(String dest, String var) {
+				varMapping.id(dest, var, asm);
+			}
+
+			@Override
+			protected void add(String dest, String var1, String var2) {
+				ibinary(dest, var1, var2,
 				        (destReg, srcReg, asm1) -> asm1.iadd(destReg, srcReg),
 				        varMapping, asm);
-				continue;
 			}
 
-			if (BrilInstructions.SUB.equals(op) && dest != null && BrilInstructions.INT.equals(type)) {
-				ibinary(instruction, dest,
+			@Override
+			protected void sub(String dest, String var1, String var2) {
+				ibinary(dest, var1, var2,
 				        (destReg, srcReg, asm1) -> asm1.isub(destReg, srcReg),
 				        varMapping, asm);
-				continue;
 			}
 
-			if (BrilInstructions.LT.equals(op) && dest != null && BrilInstructions.BOOL.equals(type)) {
-				bi_binary(instruction, dest,
-				          varMapping, asm);
-				continue;
+			@Override
+			protected void mul(String dest, String var1, String var2) {
+				throw new UnsupportedOperationException();
 			}
 
-			if (BrilInstructions.ID.equals(op) && dest != null) {
-				id(instruction, dest, varMapping, asm);
-				continue;
+			@Override
+			protected void and(String dest, String var1, String var2) {
+				throw new UnsupportedOperationException();
 			}
 
-			if (BrilInstructions.CALL.equals(op) && dest != null && type != null) {
-				call(instruction, dest, type, varMapping, asm);
-				continue;
+			@Override
+			protected void lessThan(String dest, String var1, String var2) {
+				final int register1 = varMapping.iload(var1, 0, asm);
+				final int register2 = varMapping.iload(var2, 2, asm);
+				asm.ilt(0, register1, register2);
+				varMapping.store(dest, 0, asm);
 			}
 
-			if (BrilInstructions.RET.equals(op)) {
-				ret(instruction, it.hasNext() ? exitLabel : null, varMapping, asm);
-				continue;
+			@Override
+			protected void ret() {
+				throw new UnsupportedOperationException();
 			}
 
-			if (BrilInstructions.PRINT.equals(op)) {
-				print(instruction, varMapping, asm);
-				continue;
-			}
+			@Override
+			protected void ret(String var) {
+				final String varType = varMapping.getType(var);
+				if (BrilInstructions.INT.equals(varType)) {
+					varMapping.ireturnValueFromVar(var, asm);
+				}
+				else {
+					throw new UnsupportedOperationException(varType);
+				}
 
-			if (BrilInstructions.BR.equals(op)) {
-				branch(instruction, varMapping, asm);
-				continue;
-			}
-
-			if (BrilInstructions.JMP.equals(op)) {
-				jump(instruction, asm);
-				continue;
-			}
-
-			final String label = BrilInstructions.getLabel(instruction);
-			if (label != null) {
-				asm.label(label);
-				continue;
-			}
-
-			throw new UnsupportedOperationException(op);
-		}
-	}
-
-	private static void constant(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
-		final int value = BrilInstructions.getIntValue(instruction);
-		varMapping.loadConstant(dest, value, asm);
-	}
-
-	private static void ibinary(BrilNode instruction, String dest, BinaryRegisterOperator binaryRegisterOperator, VarMapping varMapping, BrilAsm asm) {
-		final String var1 = BrilInstructions.getVar1NotNull(instruction);
-		final String var2 = BrilInstructions.getVar2NotNull(instruction);
-		varMapping.i_binaryOperator(dest, asm, var1, var2, binaryRegisterOperator);
-	}
-
-	private static void bi_binary(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
-		final String var1 = BrilInstructions.getVar1NotNull(instruction);
-		final String var2 = BrilInstructions.getVar2NotNull(instruction);
-		final int register1 = varMapping.iload(var1, 0, asm);
-		final int register2 = varMapping.iload(var2, 2, asm);
-		asm.ilt(0, register1, register2);
-		varMapping.store(dest, 0, asm);
-	}
-
-	private static void id(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
-		final String var = BrilInstructions.getVarNotNull(instruction);
-		varMapping.id(dest, var, asm);
-	}
-
-	private static void call(BrilNode instruction, String dest, String type, VarMapping varMapping, BrilAsm asm) {
-		final String name = BrilInstructions.getName(instruction);
-		final List<String> args = BrilInstructions.getArgs(instruction);
-
-		for (int i = 0; i < args.size(); i++) {
-			final String arg = args.get(i);
-			final String argType = varMapping.getType(arg);
-			if (BrilInstructions.INT.equals(argType)) {
-				varMapping.callArgument(arg, i, asm);
-			}
-			else {
-				throw new UnsupportedOperationException(argType);
-			}
-		}
-
-		asm.call(name);
-
-		if (BrilInstructions.INT.equals(type)) {
-			varMapping.istoreReturnValueInVar(dest, asm);
-		}
-		else {
-			throw new UnsupportedOperationException(type);
-		}
-
-		for (int i = 0; i < args.size(); i++) {
-			final String arg = args.get(i);
-			final String argType = varMapping.getType(arg);
-			if (BrilInstructions.INT.equals(argType)) {
-				if (i > 1) {
-					asm.ipop(0);
+				if (exitLabel != null) {
+					asm.jump(exitLabel);
 				}
 			}
-			else {
-				throw new UnsupportedOperationException(argType);
+
+			@Override
+			protected void jump(String target) {
+				asm.jump(target);
+			}
+
+			@Override
+			protected void branch(String var, String thenLabel, String elseLabel) {
+				final String varType = varMapping.getType(var);
+				if (!BrilInstructions.BOOL.equals(varType)) {
+					throw new IllegalArgumentException("Expected a bool variable for the br command");
+				}
+
+				final int register = varMapping.bload(var, 0, asm);
+				asm.brIfElse(register, thenLabel, elseLabel);
+			}
+
+			@Override
+			protected void call(String name, List<String> args) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			protected void call(String dest, String name, List<String> args) {
+				for (int i = 0; i < args.size(); i++) {
+					final String arg = args.get(i);
+					final String argType = varMapping.getType(arg);
+					if (BrilInstructions.INT.equals(argType)) {
+						varMapping.callArgument(arg, i, asm);
+					}
+					else {
+						throw new UnsupportedOperationException(argType);
+					}
+				}
+
+				asm.call(name);
+
+				final String type = varMapping.getType(dest);
+				if (BrilInstructions.INT.equals(type)) {
+					varMapping.istoreReturnValueInVar(dest, asm);
+				}
+				else {
+					throw new UnsupportedOperationException(type);
+				}
+
+				for (int i = 0; i < args.size(); i++) {
+					final String arg = args.get(i);
+					final String argType = varMapping.getType(arg);
+					if (BrilInstructions.INT.equals(argType)) {
+						if (i > 1) {
+							asm.ipop(0);
+						}
+					}
+					else {
+						throw new UnsupportedOperationException(argType);
+					}
+				}
+			}
+
+			@Override
+			protected void print(String var) {
+				final String varType = varMapping.getType(var);
+				if (BrilInstructions.INT.equals(varType)) {
+					varMapping.callArgument(var, 0, asm);
+				}
+				else {
+					throw new UnsupportedOperationException(varType);
+				}
+
+				asm.call("print");
 			}
 		}
-	}
-
-	private static void print(BrilNode instruction, VarMapping varMapping, BrilAsm asm) {
-		final String var = BrilInstructions.getVarNotNull(instruction);
-		final String varType = varMapping.getType(var);
-		if (BrilInstructions.INT.equals(varType)) {
-			varMapping.callArgument(var, 0, asm);
-		}
-		else {
-			throw new UnsupportedOperationException(varType);
-		}
-
-		asm.call("print");
-	}
-
-	private static void ret(BrilNode instruction, @Nullable String exitLabel, VarMapping varMapping, BrilAsm asm) {
-		final String var = BrilInstructions.getVarNotNull(instruction);
-		final String varType = varMapping.getType(var);
-		if (BrilInstructions.INT.equals(varType)) {
-			varMapping.ireturnValueFromVar(var, asm);
-		}
-		else {
-			throw new UnsupportedOperationException(varType);
-		}
-
-		if (exitLabel != null) {
-			asm.jump(exitLabel);
+		final MyHandler handler = new MyHandler(exitLabel);
+		for (final Iterator<BrilNode> it = instructions.iterator(); it.hasNext(); ) {
+			final BrilNode instruction = it.next();
+			if (!it.hasNext()) {
+				handler.exitLabel = null;
+			}
+			handler.visit(instruction);
 		}
 	}
 
-	private static void branch(BrilNode instruction, VarMapping varMapping, BrilAsm asm) {
-		final String var = BrilInstructions.getVarNotNull(instruction);
-		final String varType = varMapping.getType(var);
-		if (!BrilInstructions.BOOL.equals(varType)) {
-			throw new IllegalArgumentException("Expected a bool variable for the br command");
-		}
-
-		final int register = varMapping.bload(var, 0, asm);
-		asm.brIfElse(register, BrilInstructions.getThenTarget(instruction), BrilInstructions.getElseTarget(instruction));
-	}
-
-	private static void jump(BrilNode instruction, BrilAsm asm) {
-		asm.jump(BrilInstructions.getTarget(instruction));
+	private static void ibinary(String dest, String var1, String var2, BinaryRegisterOperator binaryRegisterOperator, VarMapping varMapping, BrilAsm asm) {
+		varMapping.i_binaryOperator(dest, asm, var1, var2, binaryRegisterOperator);
 	}
 
 	private static VarMapping createVarMapping(BrilNode function) {
@@ -332,15 +316,7 @@ public final class BrilToAsm {
 
 	// Inner Classes ==========================================================
 
-	private static final class VarMapping {
-		public final Map<String, VarInfo> varToInfo;
-		public final int localBytes;
-
-		public VarMapping(Map<String, VarInfo> varToInfo, int localBytes) {
-			this.varToInfo  = varToInfo;
-			this.localBytes = localBytes;
-		}
-
+	private record VarMapping(Map<String, VarInfo> varToInfo, int localBytes) {
 		private int getOffset(String var) {
 			return varToInfo.get(var).offset;
 		}

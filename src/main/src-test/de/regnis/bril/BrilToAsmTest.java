@@ -162,7 +162,7 @@ public class BrilToAsmTest {
 									//.ret("b")
 				                    .iload(10, 6)
 
-				                    .label("fibonacci exit")
+				                    //.label("fibonacci exit")
 				                    .freeSpace(4)
 				                    .ret()
 				                    .toLines(),
