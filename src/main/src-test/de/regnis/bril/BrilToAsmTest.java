@@ -125,4 +125,72 @@ public class BrilToAsmTest {
 		                    )
 		);
 	}
+
+	@Test
+	public void testLoop() {
+		Assert.assertEquals(new BrilAsm()
+				                    .label("fibonacci")
+				                    .allocSpace(4)
+									//.constant("a", 0)
+				                    .iconst(4, 0)
+									//.constant("b", 0)
+				                    .iconst(6, 0)
+
+									.label("while")
+									//.constant("one", 1)
+				                    .iconst(8, 1)
+									//.lessThan("cond", "a", "one")
+				                    .ilt(0, 4, 8)
+				                    .bstoreToStack(0, 14, 0)
+									//.branch("cond", "exit", "body")
+				                    .bloadFromStack(0, 14, 0)
+				                    .brIfElse(0, "exit", "body")
+
+									.label("body")
+									//.add("sum", "a", "b")
+				                    .iload(0, 4)
+				                    .iadd(0, 6)
+				                    .istoreToStack(0, 14, 2)
+									//.id("a", "b")
+				                    .iload(4, 6)
+									//.id("b", "sum")
+				                    .iloadFromStack(6, 14, 2)
+									//.jump("while")
+				                    .jump("while")
+
+									.label("exit")
+									//.ret("b")
+				                    .iload(10, 6)
+
+				                    .label("fibonacci exit")
+				                    .freeSpace(4)
+				                    .ret()
+				                    .toLines(),
+		                    BrilToAsm.convertToAsm(List.of(
+				                                           BrilFactory.createFunction("fibonacci", BrilInstructions.INT, List.of(
+						                                                                      BrilFactory.argument("n", BrilInstructions.INT)
+				                                                                      ),
+				                                                                      new BrilInstructions()
+						                                                                      .constant("a", 0)
+						                                                                      .constant("b", 0)
+
+						                                                                      .label("while")
+						                                                                      .constant("one", 1)
+						                                                                      .lessThan("cond", "a", "one")
+						                                                                      .branch("cond", "exit", "body")
+
+						                                                                      .label("body")
+						                                                                      .add("sum", "a", "b")
+						                                                                      .id("a", "b")
+						                                                                      .id("b", "sum")
+						                                                                      .jump("while")
+
+						                                                                      .label("exit")
+						                                                                      .ret("b")
+						                                                                      .get()
+				                                           )
+		                                           )
+		                    )
+		);
+	}
 }

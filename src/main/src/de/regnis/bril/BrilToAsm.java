@@ -79,6 +79,11 @@ public final class BrilToAsm {
 				continue;
 			}
 
+			if (BrilInstructions.ID.equals(op) && dest != null) {
+				id(instruction, dest, varMapping, asm);
+				continue;
+			}
+
 			if (BrilInstructions.CALL.equals(op) && dest != null && type != null) {
 				call(instruction, dest, type, varMapping, asm);
 				continue;
@@ -96,6 +101,11 @@ public final class BrilToAsm {
 
 			if (BrilInstructions.BR.equals(op)) {
 				branch(instruction, varMapping, asm);
+				continue;
+			}
+
+			if (BrilInstructions.JMP.equals(op)) {
+				jump(instruction, asm);
 				continue;
 			}
 
@@ -127,6 +137,11 @@ public final class BrilToAsm {
 		final int register2 = varMapping.iload(var2, 2, asm);
 		asm.ilt(0, register1, register2);
 		varMapping.store(dest, 0, asm);
+	}
+
+	private static void id(BrilNode instruction, String dest, VarMapping varMapping, BrilAsm asm) {
+		final String var = BrilInstructions.getVarNotNull(instruction);
+		varMapping.id(dest, var, asm);
 	}
 
 	private static void call(BrilNode instruction, String dest, String type, VarMapping varMapping, BrilAsm asm) {
@@ -206,6 +221,10 @@ public final class BrilToAsm {
 		asm.brIfElse(register, BrilInstructions.getThenTarget(instruction), BrilInstructions.getElseTarget(instruction));
 	}
 
+	private static void jump(BrilNode instruction, BrilAsm asm) {
+		asm.jump(BrilInstructions.getTarget(instruction));
+	}
+
 	private static VarMapping createVarMapping(BrilNode function) {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
@@ -238,9 +257,20 @@ public final class BrilToAsm {
 	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars) {
 		for (BrilNode instruction : instructions) {
 			final String dest = BrilInstructions.getDest(instruction);
-			final String type = BrilInstructions.getType(instruction);
+			String type = BrilInstructions.getType(instruction);
 			if (dest == null && type == null) {
 				continue;
+			}
+
+			final String op = BrilInstructions.getOp(instruction);
+			if (BrilInstructions.ID.equals(op)) {
+				final String var = BrilInstructions.getVarNotNull(instruction);
+				final VarInfo info = varToInfo.get(var);
+				if (info == null) {
+					throw new IllegalArgumentException("variable " + var + " undefined for " + instruction);
+				}
+
+				type = info.type;
 			}
 
 			if (dest != null && type != null) {
@@ -433,16 +463,30 @@ public final class BrilToAsm {
 			}
 		}
 
-		public void bi_binaryOperator(String dest, BrilAsm asm, String var1, String var2, BinaryRegisterOperator operator) {
+		private void id(String dest, String var, BrilAsm asm) {
 			final int destOffsetOrRegister = getOffset(dest);
-			final int destRegister = destOffsetOrRegister < 0 ? -destOffsetOrRegister : 0;
-			iloadTo(var1, destRegister, asm);
-			final int register2 = iload(var2, 2, asm);
+			final int varOffsetOrRegister = getOffset(var);
+			if (destOffsetOrRegister == varOffsetOrRegister) {
+				return;
+			}
 
-			operator.handle(destRegister, register2, asm);
-
-			if (destOffsetOrRegister >= 0) {
-				asm.bstoreToStack(0, getSpRegister(), destOffsetOrRegister);
+			if (destOffsetOrRegister < 0) {
+				final int destRegister = -destOffsetOrRegister;
+				if (varOffsetOrRegister < 0) {
+					asm.iload(destRegister, -varOffsetOrRegister);
+				}
+				else {
+					asm.iloadFromStack(destRegister, getSpRegister(), varOffsetOrRegister);
+				}
+			}
+			else {
+				if (varOffsetOrRegister < 0) {
+					asm.istoreToStack(-varOffsetOrRegister, getSpRegister(), destOffsetOrRegister);
+				}
+				else {
+					asm.iloadFromStack(0, getSpRegister(), varOffsetOrRegister);
+					asm.istoreToStack(0, getSpRegister(), destOffsetOrRegister);
+				}
 			}
 		}
 	}

@@ -77,6 +77,10 @@ public class BrilInstructions {
 		return node.getString(KEY_ELSE_TARGET);
 	}
 
+	public static String getTarget(BrilNode node) {
+		return node.getString(KEY_JMP_TARGET);
+	}
+
 	@Nullable
 	public static String getDest(BrilNode node) {
 		return node.getString(KEY_DEST);
