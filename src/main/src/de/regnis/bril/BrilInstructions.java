@@ -178,55 +178,33 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions call(String name, List<String> args) {
+	public BrilInstructions label(String name) {
 		return add(new BrilNode()
-				         .set(KEY_OP, CALL)
-				         .set(KEY_NAME, name)
-				         .set(KEY_ARGS, args));
+				           .set(LABEL, name));
 	}
 
 	@NotNull
-	public BrilInstructions call(String dest, String name, List<String> args) {
+	public BrilInstructions constant(String dest, int value) {
 		return add(new BrilNode()
-				         .set(KEY_OP, CALL)
-				         .set(KEY_DEST, dest)
-				         .set(KEY_TYPE, INT)
-				         .set(KEY_NAME, name)
-				         .set(KEY_ARGS, args));
+				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, INT)
+				           .set(KEY_OP, CONST)
+				           .set(KEY_VALUE, value));
 	}
 
 	@NotNull
-	public BrilInstructions ret() {
-		return add(new BrilNode()
-				         .set(KEY_OP, RET));
+	public BrilInstructions id(String dest, String src) {
+		return add(_id(dest, src));
 	}
 
 	@NotNull
-	public BrilInstructions ret(String var) {
+	public BrilInstructions binary(String dest, String type, String op, String var1, String var2) {
 		return add(new BrilNode()
-				         .set(KEY_OP, RET)
-				         .set(KEY_VAR, var));
-	}
-
-	@NotNull
-	public BrilInstructions jump(String label) {
-		return add(new BrilNode()
-				         .set(KEY_OP, JMP)
-				         .set(KEY_JMP_TARGET, label));
-	}
-
-	@NotNull
-	public BrilInstructions branch(String var, String thenLabel, String elseLabel) {
-		return add(new BrilNode()
-				         .set(KEY_OP, BR)
-				         .set(KEY_VAR, var)
-				         .set(KEY_IF_TARGET, thenLabel)
-				         .set(KEY_ELSE_TARGET, elseLabel));
-	}
-
-	@NotNull
-	public BrilInstructions lessThan(String dest, String var1, String var2) {
-		return binary(dest, BOOL, LT, var1, var2);
+				           .set(KEY_OP, op)
+				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, type)
+				           .set(KEY_VAR1, var1)
+				           .set(KEY_VAR2, var2));
 	}
 
 	@NotNull
@@ -250,40 +228,62 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions binary(String dest, String type, String op, String var1, String var2) {
-		return add(new BrilNode()
-				           .set(KEY_OP, op)
-				           .set(KEY_DEST, dest)
-				           .set(KEY_TYPE, type)
-				           .set(KEY_VAR1, var1)
-				           .set(KEY_VAR2, var2));
+	public BrilInstructions lessThan(String dest, String var1, String var2) {
+		return binary(dest, BOOL, LT, var1, var2);
 	}
 
 	@NotNull
-	public BrilInstructions constant(String dest, int value) {
+	public BrilInstructions ret() {
 		return add(new BrilNode()
+				           .set(KEY_OP, RET));
+	}
+
+	@NotNull
+	public BrilInstructions ret(String var) {
+		return add(new BrilNode()
+				           .set(KEY_OP, RET)
+				           .set(KEY_VAR, var));
+	}
+
+	@NotNull
+	public BrilInstructions jump(String label) {
+		return add(new BrilNode()
+				           .set(KEY_OP, JMP)
+				           .set(KEY_JMP_TARGET, label));
+	}
+
+	@NotNull
+	public BrilInstructions branch(String var, String thenLabel, String elseLabel) {
+		return add(new BrilNode()
+				           .set(KEY_OP, BR)
+				           .set(KEY_VAR, var)
+				           .set(KEY_IF_TARGET, thenLabel)
+				           .set(KEY_ELSE_TARGET, elseLabel));
+	}
+
+	@NotNull
+	public BrilInstructions call(String name, List<String> args) {
+		return add(new BrilNode()
+				           .set(KEY_OP, CALL)
+				           .set(KEY_NAME, name)
+				           .set(KEY_ARGS, args));
+	}
+
+	@NotNull
+	public BrilInstructions call(String dest, String name, List<String> args) {
+		return add(new BrilNode()
+				           .set(KEY_OP, CALL)
 				           .set(KEY_DEST, dest)
 				           .set(KEY_TYPE, INT)
-				           .set(KEY_OP, CONST)
-				           .set(KEY_VALUE, value));
-	}
-
-	@NotNull
-	public BrilInstructions id(String dest, String src) {
-		return add(_id(dest, src));
-	}
-
-	@NotNull
-	public BrilInstructions label(String name) {
-		return add(new BrilNode()
-				         .set(LABEL, name));
+				           .set(KEY_NAME, name)
+				           .set(KEY_ARGS, args));
 	}
 
 	@NotNull
 	public BrilInstructions print(String var) {
 		return add(new BrilNode()
-				         .set(KEY_OP, PRINT)
-				         .set(KEY_VAR, var));
+				           .set(KEY_OP, PRINT)
+				           .set(KEY_VAR, var));
 	}
 
 	@NotNull
@@ -298,6 +298,113 @@ public class BrilInstructions {
 		final String var = node.getString(key);
 		if (var != null) {
 			node.set(key, varReplace.apply(var));
+		}
+	}
+
+	// Inner Classes ==========================================================
+
+	public abstract static class Handler {
+		public final void visit(BrilNode instruction) {
+			final String op = getOp(instruction);
+			final String dest = getDest(instruction);
+			if (CONST.equals(op)) {
+				constant(dest, getIntValue(instruction));
+			}
+			else if (ID.equals(op)) {
+				id(dest, getVarNotNull(instruction));
+			}
+			else if (ADD.equals(op)) {
+				add(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (SUB.equals(op)) {
+				sub(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (MUL.equals(op)) {
+				mul(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (AND.equals(op)) {
+				and(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (LT.equals(op)) {
+				lessThan(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (RET.equals(op)) {
+				final String var = instruction.getString(KEY_VAR);
+				if (var != null) {
+					ret(var);
+				}
+				else {
+					ret();
+				}
+			}
+			else if (JMP.equals(op)) {
+				jump(getTarget(instruction));
+			}
+			else if (BR.equals(op)) {
+				branch(getVarNotNull(instruction), getThenTarget(instruction), getElseTarget(instruction));
+			}
+			else if (CALL.equals(op)) {
+				if (dest != null) {
+					call(dest, getName(instruction), getArgs(instruction));
+				}
+				else {
+					call(getName(instruction), getArgs(instruction));
+				}
+			}
+			else if (PRINT.equals(op)) {
+				print(getVarNotNull(instruction));
+			}
+			else if (op == null) {
+				label(getLabel(instruction));
+			}
+			else {
+				throw new IllegalArgumentException("unsupported instruction " + instruction);
+			}
+		}
+
+		protected void label(String name) {
+		}
+
+		protected void constant(String dest, int value) {
+		}
+
+		protected void id(String dest, String var) {
+		}
+
+		protected void add(String dest, String var1, String var2) {
+		}
+
+		protected void sub(String dest, String var1, String var2) {
+		}
+
+		protected void mul(String dest, String var1, String var2) {
+		}
+
+		protected void and(String dest, String var1, String var2) {
+		}
+
+		protected void lessThan(String dest, String var1, String var2) {
+		}
+
+		protected void ret() {
+		}
+
+		protected void ret(String var) {
+		}
+
+		protected void jump(String target) {
+		}
+
+		protected void branch(String var, String thenLabel, String elseLabel) {
+		}
+
+		protected void call(String name, List<String> args) {
+		}
+
+		protected void call(String dest, String name, List<String> args) {
+		}
+
+		protected void print(String var) {
 		}
 	}
 }
