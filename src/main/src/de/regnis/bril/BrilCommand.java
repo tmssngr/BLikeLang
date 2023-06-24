@@ -58,8 +58,8 @@ public interface BrilCommand {
 	record Load16(int dest, int src) implements BrilCommand {
 		@Override
 		public void appendTo(Consumer<String> output) {
-			output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
 			output.accept("ld r" + dest + ", r" + src);
+			output.accept("ld r" + (dest + 1) + ", r" + (src + 1));
 		}
 	}
 
