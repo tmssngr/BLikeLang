@@ -11,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Thomas Singer
  */
-public class BrilAsmTransformationsTest {
+public class BrilAsmSimplifierTest {
 
 	@Test
 	public void testFixJumpToNextLabel() {
-		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmTransformations.transform();
+		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmSimplifier.create();
 
 		assertEquals(List.of(new BrilCommand.Label("test"),
 		                     new DummyCommand(),
@@ -39,7 +39,7 @@ public class BrilAsmTransformationsTest {
 
 	@Test
 	public void testObsoleteLabels() {
-		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmTransformations.transform();
+		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmSimplifier.create();
 
 		assertEquals(List.of(new BrilCommand.Label("test"),
 		                     new BrilCommand.Branch("z", "a"),

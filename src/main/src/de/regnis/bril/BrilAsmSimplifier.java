@@ -9,11 +9,11 @@ import java.util.function.Function;
 /**
  * @author Thomas Singer
  */
-public final class BrilAsmTransformations {
+public final class BrilAsmSimplifier {
 
 	// Static =================================================================
 
-	public static Function<List<BrilCommand>, List<BrilCommand>> transform() {
+	public static Function<List<BrilCommand>, List<BrilCommand>> create() {
 		return new Function<>() {
 			@Override
 			public List<BrilCommand> apply(List<BrilCommand> prevCommands) {
@@ -30,7 +30,7 @@ public final class BrilAsmTransformations {
 	// Utils ==================================================================
 
 	private static void fixJumpToNextLabel(List<BrilCommand> commands) {
-		new DualIterator(commands) {
+		new DualPeepHoleSimplifier(commands) {
 			@Override
 			protected void handle(BrilCommand command1, BrilCommand command2) {
 				if (command1 instanceof BrilCommand.Jump jump
@@ -48,7 +48,7 @@ public final class BrilAsmTransformations {
 	}
 
 	private static void fixCallRet(List<BrilCommand> commands) {
-		new DualIterator(commands) {
+		new DualPeepHoleSimplifier(commands) {
 			@Override
 			protected void handle(BrilCommand command1, BrilCommand command2) {
 				if (command1 instanceof BrilCommand.Call call
@@ -61,7 +61,7 @@ public final class BrilAsmTransformations {
 	}
 
 	private static void fixBiDiLoad(List<BrilCommand> commands) {
-		new DualIterator(commands) {
+		new DualPeepHoleSimplifier(commands) {
 			@Override
 			protected void handle(BrilCommand command1, BrilCommand command2) {
 				if (command1 instanceof BrilCommand.Load16 load1
@@ -77,7 +77,7 @@ public final class BrilAsmTransformations {
 	private static void fixObsoleteLabels(List<BrilCommand> commands) {
 		final Map<String, String> obsoleteToNewLabels = getObsoleteToNewLabels(commands);
 
-		new SingleIterator(commands) {
+		new SinglePeepHoleSimplifier(commands) {
 			@Override
 			protected void handle(BrilCommand command) {
 				if (command instanceof BrilCommand.Label label) {
@@ -157,14 +157,14 @@ public final class BrilAsmTransformations {
 
 	// Inner Classes ==========================================================
 
-	private abstract static class SingleIterator {
+	private abstract static class SinglePeepHoleSimplifier {
 		private int i;
 
 		protected abstract void handle(BrilCommand command);
 
 		private final List<BrilCommand> commands;
 
-		protected SingleIterator(List<BrilCommand> commands) {
+		protected SinglePeepHoleSimplifier(List<BrilCommand> commands) {
 			this.commands = commands;
 		}
 
@@ -186,14 +186,14 @@ public final class BrilAsmTransformations {
 		}
 	}
 
-	private abstract static class DualIterator {
+	private abstract static class DualPeepHoleSimplifier {
 		private int i;
 
 		protected abstract void handle(BrilCommand command1, BrilCommand command2);
 
 		private final List<BrilCommand> commands;
 
-		protected DualIterator(List<BrilCommand> commands) {
+		protected DualPeepHoleSimplifier(List<BrilCommand> commands) {
 			this.commands = commands;
 		}
 

@@ -38,7 +38,7 @@ public class BrilAsm {
 		}
 	}
 
-	public BrilAsm transform(Function<List<BrilCommand>, List<BrilCommand>> transformation) {
+	public BrilAsm simplify(Function<List<BrilCommand>, List<BrilCommand>> transformation) {
 		boolean changed;
 		do {
 			final List<BrilCommand> newCommands = transformation.apply(Collections.unmodifiableList(commands));
