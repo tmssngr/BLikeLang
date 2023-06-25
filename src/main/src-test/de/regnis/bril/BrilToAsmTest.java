@@ -130,17 +130,17 @@ public class BrilToAsmTest {
 	public void testLoop() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("fibonacci")
-				                    .allocSpace(4)
+				                    .allocSpace(6)
 									//.constant("a", 0)
 				                    .iconst(4, 0)
-									//.constant("b", 0)
-				                    .iconst(6, 0)
+									//.constant("b", 1)
+				                    .iconst(6, 1)
 
 									.label("while")
 									//.constant("one", 1)
 				                    .iconst(8, 1)
-									//.lessThan("cond", "a", "one")
-				                    .ilt(0, 4, 8)
+									//.lessThan("cond", "n", "one")
+				                    .ilt(0, 10, 8)
 				                    .bstoreToStack(0, 14, 0)
 									//.branch("cond", "exit", "body")
 				                    .bloadFromStack(0, 14, 0)
@@ -155,6 +155,10 @@ public class BrilToAsmTest {
 				                    .iload(4, 6)
 									//.id("b", "sum")
 				                    .iloadFromStack(6, 14, 2)
+				                    //.constant("one", 1)
+				                    .iconst(8, 1)
+				                    //.sub("n", "n", "one")
+				                    .isub(10, 8)
 									//.jump("while")
 				                    .jump("while")
 
@@ -163,7 +167,7 @@ public class BrilToAsmTest {
 				                    .iload(10, 6)
 
 				                    //.label("fibonacci exit")
-				                    .freeSpace(4)
+				                    .freeSpace(6)
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
@@ -172,17 +176,19 @@ public class BrilToAsmTest {
 				                                                                      ),
 				                                                                      new BrilInstructions()
 						                                                                      .constant("a", 0)
-						                                                                      .constant("b", 0)
+						                                                                      .constant("b", 1)
 
 						                                                                      .label("while")
 						                                                                      .constant("one", 1)
-						                                                                      .lessThan("cond", "a", "one")
+						                                                                      .lessThan("cond", "n", "one")
 						                                                                      .branch("cond", "exit", "body")
 
 						                                                                      .label("body")
 						                                                                      .add("sum", "a", "b")
 						                                                                      .id("a", "b")
 						                                                                      .id("b", "sum")
+						                                                                      .constant("one", 1)
+						                                                                      .sub("n", "n", "one")
 						                                                                      .jump("while")
 
 						                                                                      .label("exit")
