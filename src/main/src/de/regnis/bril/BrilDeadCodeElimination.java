@@ -14,7 +14,7 @@ public final class BrilDeadCodeElimination {
 
 	public static void simpleDce(BrilNode cfgFunction) {
 		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
-		BrilCfgDetectVarLiveness.detectLiveness(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, false);
 		for (BrilNode block : blocks) {
 			final List<BrilNode> instructions = BrilCfg.getInstructions(block);
 			final Set<String> varsAfterBlock = BrilCfgDetectVarLiveness.getLiveOut(block);

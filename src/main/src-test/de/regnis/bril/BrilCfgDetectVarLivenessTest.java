@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -63,16 +64,31 @@ public class BrilCfgDetectVarLivenessTest {
 				                    List.of("print"), List.of())
 		);
 
-		BrilCfgDetectVarLiveness.detectLiveness(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 
 		Assert.assertEquals(4, blocks.size());
-		assertEqualsCfg(Set.of(), Set.of("v"),
+		assertEqualsCfg(Set.of(),
+		                List.of(
+				                Set.of("v"),
+				                Set.of("v")
+		                ),
+		                Set.of("v"),
 		                blocks.get(0));
-		assertEqualsCfg(Set.of(), Set.of("v"),
+		assertEqualsCfg(Set.of(),
+		                List.of(
+				                Set.of("v")
+		                ),
+		                Set.of("v"),
 		                blocks.get(1));
-		assertEqualsCfg(Set.of("v"), Set.of(),
+		assertEqualsCfg(Set.of("v"),
+		                List.of(
+				                Set.of()
+		                ),
+		                Set.of(),
 		                blocks.get(2));
-		assertEqualsCfg(Set.of(), Set.of(),
+		assertEqualsCfg(Set.of(),
+		                List.of(),
+		                Set.of(),
 		                blocks.get(3));
 	}
 
@@ -80,21 +96,50 @@ public class BrilCfgDetectVarLivenessTest {
 	public void testPrintMax() {
 		final List<BrilNode> blocks = BrilCfg.getBlocks(createPrintMaxCfg());
 
-		BrilCfgDetectVarLiveness.detectLiveness(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 
 		Assert.assertEquals(3, blocks.size());
-		assertEqualsCfg(Set.of("a", "b"), Set.of("result", "b"),
+		assertEqualsCfg(Set.of("a", "b"),
+		                List.of(
+				                Set.of("result", "a", "b"),
+				                Set.of("result", "b", "lt"),
+				                Set.of("result", "b")
+		                ),
+		                Set.of("result", "b"),
 		                blocks.get(0));
-		assertEqualsCfg(Set.of("b"), Set.of("result"),
+		assertEqualsCfg(Set.of("b"),
+		                List.of(
+				                Set.of("result")
+		                ),
+		                Set.of("result"),
 		                blocks.get(1));
-		assertEqualsCfg(Set.of("result"), Set.of(),
+		assertEqualsCfg(Set.of("result"),
+		                List.of(
+				                Set.of()
+		                ),
+		                Set.of(),
 		                blocks.get(2));
 	}
 
 	// Utils ==================================================================
 
 	private void assertEqualsCfg(Set<String> expectedLiveBefore,
+	                             List<Set<String>> expectedInstructionsLiveOut,
 	                             Set<String> expectedLiveAfter, BrilNode blockNode) {
+		final Iterator<Set<String>> expectedIt = expectedInstructionsLiveOut.iterator();
+		final Iterator<BrilNode> instructionsIt = BrilCfg.getInstructions(blockNode).iterator();
+		while (true) {
+			final boolean hasNext = expectedIt.hasNext();
+			Assert.assertEquals(hasNext, instructionsIt.hasNext());
+			if (!hasNext) {
+				break;
+			}
+
+			final Set<String> expectedOut = expectedIt.next();
+			final BrilNode instruction = instructionsIt.next();
+			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
+			Assert.assertEquals(expectedOut, liveOut);
+		}
 		Assert.assertEquals(expectedLiveBefore, BrilCfgDetectVarLiveness.getLiveIn(blockNode));
 		Assert.assertEquals(expectedLiveAfter, BrilCfgDetectVarLiveness.getLiveOut(blockNode));
 	}

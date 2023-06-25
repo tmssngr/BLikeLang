@@ -80,7 +80,7 @@ public final class BrilCfgSsa {
 		blocks = BrilCfg.getBlocks(cfgFunction);
 		BrilCfg.testValidSuccessorsAndPredecessors(blocks);
 
-		BrilCfgDetectVarLiveness.detectLiveness(blocks);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, false);
 	}
 
 	// Utils ==================================================================

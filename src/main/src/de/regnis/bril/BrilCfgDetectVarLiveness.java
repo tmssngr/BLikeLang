@@ -17,33 +17,35 @@ public final class BrilCfgDetectVarLiveness {
 
 	// Static =================================================================
 
-	public static void detectLiveness(List<BrilNode> blocks) {
-		final BrilCfgDetectVarLiveness dvu = new BrilCfgDetectVarLiveness(blocks);
+	public static void detectLiveness(List<BrilNode> blocks, boolean setLiveOutToInstructions) {
+		final BrilCfgDetectVarLiveness dvu = new BrilCfgDetectVarLiveness(blocks, setLiveOutToInstructions);
 
 		while (dvu.detect()) {
 		}
 	}
 
 	@NotNull
-	public static Set<String> getLiveIn(BrilNode block) {
-		return new HashSet<>(block.getStringList(KEY_LIVE_IN));
+	public static Set<String> getLiveIn(BrilNode blockOrInstruction) {
+		return new HashSet<>(blockOrInstruction.getStringList(KEY_LIVE_IN));
 	}
 
 	@NotNull
-	public static Set<String> getLiveOut(BrilNode block) {
-		return new HashSet<>(block.getStringList(KEY_LIVE_OUT));
+	public static Set<String> getLiveOut(BrilNode blockOrInstruction) {
+		return new HashSet<>(blockOrInstruction.getStringList(KEY_LIVE_OUT));
 	}
 
 	// Fields =================================================================
 
-	private final Map<String, BrilNode> nameToBlock;
 	private final List<BrilNode> blocks;
+	private final boolean setLiveOutToInstructions;
+	private final Map<String, BrilNode> nameToBlock;
 
 	// Setup ==================================================================
 
-	private BrilCfgDetectVarLiveness(List<BrilNode> blocks) {
-		nameToBlock = BrilCfg.getNameToBlock(blocks);
-		this.blocks = blocks;
+	private BrilCfgDetectVarLiveness(List<BrilNode> blocks, boolean setLiveOutToInstructions) {
+		this.blocks                   = blocks;
+		this.setLiveOutToInstructions = setLiveOutToInstructions;
+		nameToBlock                   = BrilCfg.getNameToBlock(blocks);
 	}
 
 	// Utils ==================================================================
@@ -76,13 +78,14 @@ public final class BrilCfgDetectVarLiveness {
 	private boolean process(BrilNode block) {
 		final Set<String> live = getLiveInFromAllNext(block);
 
-		final Set<String> liveOut = new HashSet<>(block.getOrCreateStringList(KEY_LIVE_OUT));
-		boolean changed = liveOut.addAll(live);
-		block.set(KEY_LIVE_OUT, new ArrayList<>(liveOut));
+		boolean changed = addAll(KEY_LIVE_OUT, live, block);
 
 		final List<BrilNode> instructions = new ArrayList<>(BrilCfg.getInstructions(block));
 		Collections.reverse(instructions);
 		for (BrilNode instruction : instructions) {
+			if (setLiveOutToInstructions && addAll(KEY_LIVE_OUT, live, instruction)) {
+				changed = true;
+			}
 			final String destVar = BrilInstructions.getDest(instruction);
 			if (destVar != null) {
 				live.remove(destVar);
@@ -92,9 +95,7 @@ public final class BrilCfgDetectVarLiveness {
 			live.addAll(requiredVars);
 		}
 
-		final Set<String> liveIn = new HashSet<>(block.getOrCreateStringList(KEY_LIVE_IN));
-		if (liveIn.addAll(live)) {
-			block.set(KEY_LIVE_IN, new ArrayList<>(liveIn));
+		if (addAll(KEY_LIVE_IN, live, block)) {
 			changed = true;
 		}
 
@@ -108,5 +109,14 @@ public final class BrilCfgDetectVarLiveness {
 			liveIn.addAll(nextBlock.getOrCreateStringList(KEY_LIVE_IN));
 		}
 		return liveIn;
+	}
+
+	private static boolean addAll(String key, Set<String> newVars, BrilNode node) {
+		final Set<String> existingVars = new HashSet<>(node.getOrCreateStringList(key));
+		if (existingVars.addAll(newVars)) {
+			node.set(key, new ArrayList<>(existingVars));
+			return true;
+		}
+		return false;
 	}
 }
