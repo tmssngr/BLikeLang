@@ -20,15 +20,15 @@ final class BrilVarMapping {
 
 	// Constants ==============================================================
 
-	public static final int A_REGISTER = 0;
+	public static final int A_REGISTER = 0; // call-clobbered
 	@SuppressWarnings({"PointlessArithmeticExpression", "WeakerAccess"})
-	public static final int B_REGISTER = A_REGISTER + 2;
-	public static final int VAR0_REGISTER = B_REGISTER + 2;
-	public static final int VAR1_REGISTER = VAR0_REGISTER + 2;
-	public static final int VAR2_REGISTER = VAR1_REGISTER + 2;
-	public static final int ARG0_REGISTER = VAR2_REGISTER + 2;
-	public static final int ARG1_REGISTER = ARG0_REGISTER + 2;
-	public static final int FP_REGISTER = ARG1_REGISTER + 2;
+	public static final int B_REGISTER = A_REGISTER + 2; // call-clobbered
+	public static final int VAR0_REGISTER = B_REGISTER + 2; // call-preserved
+	public static final int VAR1_REGISTER = VAR0_REGISTER + 2; // call-preserved
+	public static final int VAR2_REGISTER = VAR1_REGISTER + 2; // call-preserved
+	public static final int ARG0_REGISTER = VAR2_REGISTER + 2; // call-clobbered
+	public static final int ARG1_REGISTER = ARG0_REGISTER + 2; // call-clobbered
+	public static final int FP_REGISTER = ARG1_REGISTER + 2; // call-clobbered
 
 	// Static =================================================================
 
@@ -48,19 +48,31 @@ final class BrilVarMapping {
 		final int offset = byteCountForSpilledLocalVars + 2;
 		assignArguments(arguments, varToInfo, offset);
 
-		return new BrilVarMapping(Collections.unmodifiableMap(varToInfo), byteCountForSpilledLocalVars);
+		return new BrilVarMapping(varToInfo, byteCountForSpilledLocalVars);
 	}
 
 	// Fields =================================================================
 
 	private final Map<String, VarInfo> varToInfo;
 	private final int localBytes;
+	private final List<Integer> usedRegisters;
 
 	// Setup ==================================================================
 
 	private BrilVarMapping(Map<String, VarInfo> varToInfo, int localBytes) {
-		this.varToInfo  = varToInfo;
 		this.localBytes = localBytes;
+		usedRegisters   = getUsedRegisters(varToInfo);
+
+		final int pushedOffset = usedRegisters.size() * 2;
+
+		for (Map.Entry<String, VarInfo> entry : varToInfo.entrySet()) {
+			final VarInfo varInfo = entry.getValue();
+			if (varInfo.offset >= 0) {
+				entry.setValue(new VarInfo(varInfo.offset + pushedOffset, varInfo.type));
+			}
+		}
+
+		this.varToInfo  = Collections.unmodifiableMap(varToInfo);
 	}
 
 	// Accessing ==============================================================
@@ -72,9 +84,18 @@ final class BrilVarMapping {
 
 	public void allocLocalVarSpace(BrilAsm asm) {
 		asm.allocSpace(localBytes);
+
+		for (Integer usedRegister : usedRegisters) {
+			asm.ipush(usedRegister);
+		}
 	}
 
 	public void freeLocalVarSpace(BrilAsm asm) {
+		final List<Integer> usedRegisters = new ArrayList<>(this.usedRegisters);
+		Collections.reverse(usedRegisters);
+		for (Integer usedRegister : usedRegisters) {
+			asm.ipop(usedRegister);
+		}
 		asm.freeSpace(localBytes);
 	}
 
@@ -165,6 +186,19 @@ final class BrilVarMapping {
 	}
 
 	// Utils ==================================================================
+
+	private List<Integer> getUsedRegisters(Map<String, VarInfo> varToInfo) {
+		final Set<Integer> usedRegisters = new HashSet<>();
+		for (Map.Entry<String, VarInfo> entry : varToInfo.entrySet()) {
+			final int offset = -entry.getValue().offset;
+			if (offset >= VAR0_REGISTER && offset <= VAR2_REGISTER) {
+				usedRegisters.add(offset);
+			}
+		}
+		final List<Integer> usedRegistersSorted = new ArrayList<>(usedRegisters);
+		usedRegistersSorted.sort(Comparator.naturalOrder());
+		return Collections.unmodifiableList(usedRegistersSorted);
+	}
 
 	private void store(String var, int register, BrilAsm asm) {
 		final int offsetOrRegister = getOffset(var);
