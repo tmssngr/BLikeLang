@@ -35,6 +35,7 @@ public class BrilAsm {
 	public void toLines(Consumer<String> output) {
 		for (BrilCommand command : commands) {
 			command.appendTo(output);
+			output.accept("\n");
 		}
 	}
 
