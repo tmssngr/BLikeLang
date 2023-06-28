@@ -157,6 +157,12 @@ public class BrilInstructions {
 				.set(KEY_VAR, src);
 	}
 
+	@NotNull
+	public static BrilNode createLabel(String name) {
+		return new BrilNode()
+				.set(LABEL, name);
+	}
+
 	// Fields =================================================================
 
 	private final List<BrilNode> instructions;
@@ -179,8 +185,7 @@ public class BrilInstructions {
 
 	@NotNull
 	public BrilInstructions label(String name) {
-		return add(new BrilNode()
-				           .set(LABEL, name));
+		return add(createLabel(name));
 	}
 
 	@NotNull

@@ -25,10 +25,12 @@ public final class BrilToAsm {
 	// Utils ==================================================================
 
 	private static void convertToAsm(BrilNode function, BrilAsm asm) {
-		final String name = BrilFactory.getName(function);
+		final BrilNode functionFromCfg = toCfgAndBackToInstructions(function);
+
+		final String name = BrilFactory.getName(functionFromCfg);
 		asm.label(name);
 
-		final BrilVarMapping varMapping = BrilVarMapping.createVarMapping(function);
+		final BrilVarMapping varMapping = BrilVarMapping.createVarMapping(functionFromCfg);
 		varMapping.allocLocalVarSpace(asm);
 
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
@@ -38,6 +40,19 @@ public final class BrilToAsm {
 		asm.label(exitLabel);
 		varMapping.freeLocalVarSpace(asm);
 		asm.ret();
+	}
+
+	private static BrilNode toCfgAndBackToInstructions(BrilNode function) {
+		final BrilNode cfgFunction;
+		try {
+			cfgFunction = BrilCfg.buildBlocks(function);
+		}
+		catch (BrilCfg.DuplicateLabelException | BrilCfg.NoExitBlockException | BrilCfg.InvalidTargetLabelException e) {
+			throw new AssertionError(e);
+		}
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
+		return BrilCfg.flattenBlocks(cfgFunction);
 	}
 
 	private static void convertToAsm(List<BrilNode> instructions, String exitLabel, BrilVarMapping varMapping, BrilAsm asm) {

@@ -249,6 +249,19 @@ public final class BrilCfg {
 		return block;
 	}
 
+	public static BrilNode flattenBlocks(BrilNode cfgFunction) {
+		final String name = BrilFactory.getName(cfgFunction);
+		final String type = BrilFactory.getType(cfgFunction);
+		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+		final List<BrilNode> instructions = new ArrayList<>();
+		for (BrilNode block : getBlocks(cfgFunction)) {
+			final String blockName = getName(block);
+			instructions.add(BrilInstructions.createLabel(blockName));
+			instructions.addAll(getInstructions(block));
+		}
+		return BrilFactory.createFunction(name, type, arguments, instructions);
+	}
+
 	/**
 	 * @throws IllegalStateException
 	 */
