@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import de.regnis.b.ir.UndirectedGraph;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -36,11 +37,13 @@ final class BrilVarMapping {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
 
+		final UndirectedGraph<String> graph = new UndirectedGraph<>();
+
 		final Map<String, VarInfo> varToInfo = new HashMap<>();
-		addVarInfoTypesForArguments(arguments, varToInfo);
+		addVarInfoTypesForArguments(arguments, varToInfo, graph);
 
 		final Set<String> localVars = new LinkedHashSet<>();
-		addVarInfoTypesForInstructions(instructions, varToInfo, localVars);
+		addVarInfoTypesForInstructions(instructions, varToInfo, localVars, graph);
 
 		final int byteCountForSpilledLocalVars = assignLocalVars(localVars, varToInfo);
 
@@ -261,18 +264,26 @@ final class BrilVarMapping {
 		return varToInfo.get(var).offset;
 	}
 
-	private static void addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo) {
-		for (BrilNode argument : arguments) {
+	private static void addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, UndirectedGraph<String> graph) {
+		final Set<String> argNames = new HashSet<>();
+		for (int i = 0; i < arguments.size(); i++) {
+			final BrilNode argument = arguments.get(i);
 			final String argName = BrilFactory.getArgName(argument);
 			final String argType = BrilFactory.getArgType(argument);
-			if (varToInfo.put(argName, new VarInfo(0, argType)) != null) {
+			final int offsetOrReg = i < 2 ? -(ARG0_REGISTER + 2 * i) : 0;
+			if (varToInfo.put(argName, new VarInfo(offsetOrReg, argType)) != null) {
 				throw new IllegalArgumentException("duplicate parameter " + argName);
 			}
+			argNames.add(argName);
 		}
+		graph.addEdgesBetween(argNames);
 	}
 
-	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars) {
+	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars, UndirectedGraph<String> graph) {
 		for (BrilNode instruction : instructions) {
+			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
+			graph.addEdgesBetween(liveOut);
+
 			final String dest = BrilInstructions.getDest(instruction);
 			String type = BrilInstructions.getType(instruction);
 			if (dest == null && type == null) {
@@ -327,23 +338,17 @@ final class BrilVarMapping {
 	}
 
 	private static void assignArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, int offset) {
-		int count = 0;
-		for (BrilNode argument : arguments) {
+		for (int i = 0; i < arguments.size(); i++) {
+			final BrilNode argument = arguments.get(i);
 			final String argName = BrilFactory.getArgName(argument);
 			final VarInfo info = notNull(varToInfo.get(argName));
-			final int registerOrOffset;
-			if (count == 0) {
-				registerOrOffset = -ARG0_REGISTER;
+			if (i < 2) {
+				continue;
 			}
-			else if (count == 1) {
-				registerOrOffset = -ARG1_REGISTER;
-			}
-			else {
-				registerOrOffset = offset;
-				offset += 2;
-			}
+
+			final int registerOrOffset = offset;
+			offset += 2;
 			varToInfo.put(argName, new VarInfo(registerOrOffset, info.type));
-			count++;
 		}
 	}
 
