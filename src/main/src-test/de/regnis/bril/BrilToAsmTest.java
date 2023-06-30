@@ -103,17 +103,15 @@ public class BrilToAsmTest {
 	public void testIfLessThan() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("max")
-				                    .ipush(BrilVarMapping.VAR0_REGISTER)
 				                    //.lessThan("cond", "a", "b")
 				                    .ilt(BrilVarMapping.A_REGISTER, BrilVarMapping.ARG0_REGISTER, BrilVarMapping.ARG1_REGISTER)
-				                    .bload(BrilVarMapping.VAR0_REGISTER, BrilVarMapping.A_REGISTER)
+				                    .bload(BrilVarMapping.ARG0_REGISTER, BrilVarMapping.A_REGISTER)
 				                    //.branch("cond", "takeB", "takeA")
-				                    .brElse(BrilVarMapping.VAR0_REGISTER, "takeA")
+				                    .brElse(BrilVarMapping.ARG0_REGISTER, "takeA")
 				                    //.ret("b")
 				                    .iload(BrilVarMapping.ARG0_REGISTER, BrilVarMapping.ARG1_REGISTER)
 				                    .label("takeA")
 				                    //.ret("a")
-				                    .ipop(BrilVarMapping.VAR0_REGISTER)
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
