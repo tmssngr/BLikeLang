@@ -23,8 +23,14 @@ package de.regnis.bril;
  *   foo:
  *     push rr0 (the used register is irrelevant, it is just for modifying the stack pointer)
  *     push rr0
+ *     push rr4 (save preserved local registers)
+ *     push rr6
+ *     push rr8
  *     ...      (body)
- *     pop  rr0
+ *     pop rr8 (prestore preserved local registers)
+ *     pop rr6
+ *     pop rr4
+ *     pop  rr0 (cleanup local variable space)
  *     pop  rr0
  *     ret
  * In the body of the subroutine the stack might look like:
