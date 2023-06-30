@@ -1,6 +1,6 @@
 package de.regnis.bril;
 
-import de.regnis.b.ir.UndirectedGraph;
+import de.regnis.b.ir.RegisterAllocation2;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -37,19 +37,18 @@ final class BrilVarMapping {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
 
-		final UndirectedGraph<String> graph = new UndirectedGraph<>();
+		final RegisterAllocation2 registerAllocation = new RegisterAllocation2();
 
 		final Map<String, VarInfo> varToInfo = new HashMap<>();
-		addVarInfoTypesForArguments(arguments, varToInfo, graph);
+		addVarInfoTypesForArguments(arguments, varToInfo, registerAllocation);
 
 		final Set<String> localVars = new LinkedHashSet<>();
-		addVarInfoTypesForInstructions(instructions, varToInfo, localVars, graph);
+		addVarInfoTypesForInstructions(instructions, varToInfo, localVars, registerAllocation);
 
-		final int byteCountForSpilledLocalVars = assignLocalVars(localVars, varToInfo);
-
-		// return address
-		final int offset = byteCountForSpilledLocalVars + 2;
-		assignArguments(arguments, varToInfo, offset);
+		registerAllocation.build();
+		final Map<String, VarStore> varToStore = new HashMap<>();
+		assignLocalVars(localVars, arguments.size(), registerAllocation, varToStore);
+		assignArguments(arguments, registerAllocation, varToStore);
 
 		return new BrilVarMapping(varToInfo, byteCountForSpilledLocalVars);
 	}
@@ -264,25 +263,26 @@ final class BrilVarMapping {
 		return varToInfo.get(var).offset;
 	}
 
-	private static void addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, UndirectedGraph<String> graph) {
+	private static void addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, RegisterAllocation2 registerAllocation) {
 		final Set<String> argNames = new HashSet<>();
 		for (int i = 0; i < arguments.size(); i++) {
 			final BrilNode argument = arguments.get(i);
 			final String argName = BrilFactory.getArgName(argument);
 			final String argType = BrilFactory.getArgType(argument);
-			final int offsetOrReg = i < 2 ? -(ARG0_REGISTER + 2 * i) : 0;
-			if (varToInfo.put(argName, new VarInfo(offsetOrReg, argType)) != null) {
+			if (varToInfo.put(argName, new VarInfo(0, argType)) != null) {
 				throw new IllegalArgumentException("duplicate parameter " + argName);
 			}
+
 			argNames.add(argName);
+			registerAllocation.setRegister(argName, i);
 		}
-		graph.addEdgesBetween(argNames);
+		registerAllocation.addEdgesBetween(argNames);
 	}
 
-	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars, UndirectedGraph<String> graph) {
+	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars, RegisterAllocation2 registerAllocation) {
 		for (BrilNode instruction : instructions) {
 			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
-			graph.addEdgesBetween(liveOut);
+			registerAllocation.addEdgesBetween(liveOut);
 
 			final String dest = BrilInstructions.getDest(instruction);
 			String type = BrilInstructions.getType(instruction);
@@ -315,32 +315,44 @@ final class BrilVarMapping {
 		}
 	}
 
-	private static int assignLocalVars(Set<String> localVars, Map<String, VarInfo> varToInfo) {
-		int maxRegisters = 3;
-		int offset = 0;
-		int register = VAR0_REGISTER;
+	private static void assignLocalVars(Set<String> localVars, int parameterCount, RegisterAllocation2 registerAllocation, Map<String, VarStore> varToStore) {
 		for (String localVar : localVars) {
-			final VarInfo info = notNull(varToInfo.get(localVar));
-			final int registerOrOffset;
-			if (maxRegisters > 0) {
-				registerOrOffset = -register;
-				register += 2;
-				maxRegisters--;
+			int virtualRegister = registerAllocation.getVirtualRegister(localVar);
+			final VarStore varStore;
+			if (virtualRegister < parameterCount) {
+				// reused parameter?
+				if (virtualRegister < 2) {
+					varStore = new Register(2 * virtualRegister + ARG0_REGISTER);
+				}
+				else {
+					virtualRegister -= 2;
+					varStore = new PushedParameter(2 * virtualRegister);
+				}
 			}
 			else {
-				registerOrOffset = offset;
-				offset += 2;
+				virtualRegister -= parameterCount;
+				if (virtualRegister < 3) {
+					varStore = new Register(2 * virtualRegister + VAR0_REGISTER);
+				}
+				else {
+					virtualRegister -= 3;
+					varStore = new SpilledRegister(2 * virtualRegister);
+				}
 			}
-			varToInfo.put(localVar, new VarInfo(registerOrOffset, info.type));
+			varToStore.put(localVar, varStore);
 		}
-
-		return offset;
 	}
 
-	private static void assignArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, int offset) {
+	private interface VarStore {}
+	private record Register(int reg) implements VarStore {}
+	private record PushedParameter(int i) implements VarStore {}
+	private record SpilledRegister(int i) implements VarStore {}
+
+	private static void assignArguments(List<BrilNode> arguments, RegisterAllocation2 registerAllocation, Map<String, VarStore> varToStore) {
 		for (int i = 0; i < arguments.size(); i++) {
 			final BrilNode argument = arguments.get(i);
 			final String argName = BrilFactory.getArgName(argument);
+			final int virtualRegister = registerAllocation.getVirtualRegister(argName);
 			final VarInfo info = notNull(varToInfo.get(argName));
 			if (i < 2) {
 				continue;
