@@ -126,12 +126,36 @@ public class BrilCfgTest {
 		                List.of("block 0", ".loop"),
 		                List.of(".end", ".loop"),
 		                iterator.next());
-		assertEqualsCfg(".end", List.of(),
+		assertEqualsCfg(".end", new BrilInstructions()
+				                .jump("exit 3")
+				                .get(),
 		                List.of(".loop"),
 		                List.of("exit 3"),
 		                iterator.next());
 		assertEqualsCfg("exit 3", List.of(),
 		                List.of(".end"),
+		                List.of(),
+		                iterator.next());
+		Assert.assertFalse(iterator.hasNext());
+	}
+
+	@Test
+	public void testBuildBlocksRetSum() throws Exception {
+		final List<BrilNode> blocks = BrilCfg.buildBlocks(new BrilInstructions()
+				                                                  .add("sum", "a", "b")
+				                                                  .ret("sum")
+				                                                  .get());
+		final Iterator<BrilNode> iterator = blocks.iterator();
+		assertEqualsCfg("block 0", new BrilInstructions()
+				                .add("sum", "a", "b")
+				                .ret("sum")
+				                .jump("exit 1")
+				                .get(),
+		                List.of(),
+		                List.of("exit 1"),
+		                iterator.next());
+		assertEqualsCfg("exit 1", List.of(),
+		                List.of("block 0"),
 		                List.of(),
 		                iterator.next());
 		Assert.assertFalse(iterator.hasNext());

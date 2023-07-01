@@ -124,8 +124,10 @@ public final class BrilCfg {
 
 			final String op = BrilInstructions.getOp(lastInstruction);
 			if (BrilInstructions.RET.equals(op)) {
-				blockInstructions.remove(lastInstruction);
-				connectBlocks(block, exitBlock);
+				if (BrilInstructions.getRequiredVars(lastInstruction).isEmpty()) {
+					blockInstructions.remove(lastInstruction);
+				}
+				connectBlocksAndAppendJump(block, exitBlock);
 				continue;
 			}
 
