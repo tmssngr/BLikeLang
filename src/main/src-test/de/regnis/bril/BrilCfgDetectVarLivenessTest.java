@@ -121,6 +121,36 @@ public class BrilCfgDetectVarLivenessTest {
 		                blocks.get(2));
 	}
 
+	@Test
+	public void testRetSum() {
+		final List<BrilNode> blocks = List.of(
+				BrilCfg.createBlock("start", new BrilInstructions()
+						.add("sum", "a", "b")
+						.ret("sum")
+						.jump("exit 1")
+						.get(), List.of(), List.of("exit 1")),
+
+				BrilCfg.createBlock("exit 1", List.of(),
+						            List.of("start"), List.of())
+		);
+
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
+
+		Assert.assertEquals(2, blocks.size());
+		assertEqualsCfg(Set.of("a", "b"),
+		                List.of(
+				                Set.of("sum"),
+				                Set.of(),
+				                Set.of()
+		                ),
+		                Set.of(),
+		                blocks.get(0));
+		assertEqualsCfg(Set.of(),
+		                List.of(),
+		                Set.of(),
+		                blocks.get(1));
+	}
+
 	// Utils ==================================================================
 
 	private void assertEqualsCfg(Set<String> expectedLiveBefore,
