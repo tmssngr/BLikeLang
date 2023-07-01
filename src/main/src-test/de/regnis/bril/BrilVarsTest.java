@@ -23,9 +23,9 @@ public class BrilVarsTest {
 		                       "b", 1,
 		                       "cond", 0)::get);
 		Assert.assertEquals(0, brilVars.getByteCountForSpilledLocalVars());
-		Assert.assertEquals(-BrilVarMapping.ARG0_REGISTER, brilVars.getOffset("a"));
-		Assert.assertEquals(-BrilVarMapping.ARG1_REGISTER, brilVars.getOffset("b"));
-		Assert.assertEquals(-BrilVarMapping.ARG0_REGISTER, brilVars.getOffset("cond"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG0_REGISTER), brilVars.getLocation("a"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG1_REGISTER), brilVars.getLocation("b"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG0_REGISTER), brilVars.getLocation("cond"));
 	}
 
 	@Test
@@ -37,8 +37,8 @@ public class BrilVarsTest {
 		                       "b", 1,
 		                       "sum", 0)::get);
 		Assert.assertEquals(0, brilVars.getByteCountForSpilledLocalVars());
-		Assert.assertEquals(-BrilVarMapping.ARG0_REGISTER, brilVars.getOffset("a"));
-		Assert.assertEquals(-BrilVarMapping.ARG1_REGISTER, brilVars.getOffset("b"));
-		Assert.assertEquals(-BrilVarMapping.ARG0_REGISTER, brilVars.getOffset("sum"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG0_REGISTER), brilVars.getLocation("a"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG1_REGISTER), brilVars.getLocation("b"));
+		Assert.assertEquals(new BrilVars.VarLocation(true, BrilVarMapping.ARG0_REGISTER), brilVars.getLocation("sum"));
 	}
 }

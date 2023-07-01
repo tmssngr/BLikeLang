@@ -37,22 +37,23 @@ final class BrilVarMapping {
 
 		final RegisterAllocation2 registerAllocation = new RegisterAllocation2();
 
-		final Map<String, VarInfo> varToInfo = new HashMap<>();
-		final List<String> argNames = addVarInfoTypesForArguments(arguments, varToInfo, registerAllocation);
+		final Map<String, String> varToType = new HashMap<>();
+		final List<String> argNames = addVarInfoTypesForArguments(arguments, varToType, registerAllocation);
 
 		final Set<String> localVars = new LinkedHashSet<>();
-		addVarInfoTypesForInstructions(instructions, varToInfo, localVars, registerAllocation);
+		addVarInfoTypesForInstructions(instructions, varToType, localVars, registerAllocation);
 
 		registerAllocation.build();
 
 		final BrilVars brilVars = new BrilVars();
 		brilVars.assign(argNames, localVars,
 		                name -> registerAllocation.getVirtualRegister(name));
-		for (Map.Entry<String, VarInfo> entry : varToInfo.entrySet()) {
+		final Map<String, VarInfo> varToInfo = new HashMap<>();
+		for (Map.Entry<String, String> entry : varToType.entrySet()) {
 			final String var = entry.getKey();
-			final String type = entry.getValue().type();
-			final int offset = brilVars.getOffset(var);
-			entry.setValue(new VarInfo(offset, type));
+			final String type = entry.getValue();
+			final BrilVars.VarLocation location = brilVars.getLocation(var);
+			varToInfo.put(var, new VarInfo(location, type));
 		}
 
 		final int byteCountForSpilledLocalVars = brilVars.getByteCountForSpilledLocalVars();
@@ -70,18 +71,8 @@ final class BrilVarMapping {
 
 	private BrilVarMapping(Map<String, VarInfo> varToInfo, int localBytes) {
 		this.localBytes = localBytes;
-		usedRegisters   = getUsedRegisters(varToInfo);
-
-		final int pushedOffset = usedRegisters.size() * 2;
-
-		for (Map.Entry<String, VarInfo> entry : varToInfo.entrySet()) {
-			final VarInfo varInfo = entry.getValue();
-			if (varInfo.offset >= 0) {
-				entry.setValue(new VarInfo(varInfo.offset + pushedOffset, varInfo.type));
-			}
-		}
-
 		this.varToInfo  = Collections.unmodifiableMap(varToInfo);
+		usedRegisters   = getUsedRegisters(varToInfo);
 	}
 
 	// Accessing ==============================================================
@@ -126,13 +117,13 @@ final class BrilVarMapping {
 	}
 
 	public void loadConstant(String dest, int value, BrilAsm asm) {
-		final int offsetOrRegister = getOffset(dest);
-		if (offsetOrRegister < 0) {
-			asm.iconst(-offsetOrRegister, value);
+		final BrilVars.VarLocation location = getLocation(dest);
+		if (location.isRegister()) {
+			asm.iconst(location.reg(), value);
 		}
 		else {
 			asm.iconst(0, value);
-			asm.istoreToStack(0, FP_REGISTER, offsetOrRegister);
+			asm.istoreToStack(0, FP_REGISTER, location.offset());
 		}
 	}
 
@@ -141,15 +132,15 @@ final class BrilVarMapping {
 	}
 
 	public void i_binaryOperator(String dest, String var1, String var2, BrilAsm asm, I_BinaryRegisterOperator operator) {
-		final int destOffsetOrRegister = getOffset(dest);
-		final int destRegister = destOffsetOrRegister < 0 ? -destOffsetOrRegister : A_REGISTER;
+		final BrilVars.VarLocation location = getLocation(dest);
+		final int destRegister = location.isRegister() ? location.reg() : A_REGISTER;
 		iloadTo(var1, destRegister, asm);
 		final int register2 = iload(var2, B_REGISTER, asm);
 
 		operator.handle(destRegister, register2, asm);
 
-		if (destOffsetOrRegister >= 0) {
-			asm.istoreToStack(destRegister, FP_REGISTER, destOffsetOrRegister);
+		if (location.isStackOffset()) {
+			asm.istoreToStack(destRegister, FP_REGISTER, location.offset());
 		}
 	}
 
@@ -162,29 +153,30 @@ final class BrilVarMapping {
 		store(dest, A_REGISTER, asm);
 	}
 
-	public void id(String dest, String var, BrilAsm asm) {
-		final int destOffsetOrRegister = getOffset(dest);
-		final int varOffsetOrRegister = getOffset(var);
-		if (destOffsetOrRegister == varOffsetOrRegister) {
+	public void id(String dest, String src, BrilAsm asm) {
+		final BrilVars.VarLocation destLocation = getLocation(dest);
+		final BrilVars.VarLocation srcLocation = getLocation(src);
+		if (Objects.equals(destLocation, srcLocation)) {
 			return;
 		}
 
-		if (destOffsetOrRegister < 0) {
-			final int destRegister = -destOffsetOrRegister;
-			if (varOffsetOrRegister < 0) {
-				asm.iload(destRegister, -varOffsetOrRegister);
+		if (destLocation.isRegister()) {
+			final int destRegister = destLocation.reg();
+			if (srcLocation.isRegister()) {
+				asm.iload(destRegister, srcLocation.reg());
 			}
 			else {
-				asm.iloadFromStack(destRegister, FP_REGISTER, varOffsetOrRegister);
+				asm.iloadFromStack(destRegister, FP_REGISTER, srcLocation.offset());
 			}
 		}
 		else {
-			if (varOffsetOrRegister < 0) {
-				asm.istoreToStack(-varOffsetOrRegister, FP_REGISTER, destOffsetOrRegister);
+			final int destStackOffset = destLocation.offset();
+			if (srcLocation.isRegister()) {
+				asm.istoreToStack(srcLocation.reg(), FP_REGISTER, destStackOffset);
 			}
 			else {
-				asm.iloadFromStack(0, FP_REGISTER, varOffsetOrRegister);
-				asm.istoreToStack(0, FP_REGISTER, destOffsetOrRegister);
+				asm.iloadFromStack(0, FP_REGISTER, srcLocation.offset());
+				asm.istoreToStack(0, FP_REGISTER, destStackOffset);
 			}
 		}
 	}
@@ -199,9 +191,12 @@ final class BrilVarMapping {
 	private List<Integer> getUsedRegisters(Map<String, VarInfo> varToInfo) {
 		final Set<Integer> usedRegisters = new HashSet<>();
 		for (Map.Entry<String, VarInfo> entry : varToInfo.entrySet()) {
-			final int offset = -entry.getValue().offset;
-			if (offset >= VAR0_REGISTER && offset <= VAR2_REGISTER) {
-				usedRegisters.add(offset);
+			final BrilVars.VarLocation location = entry.getValue().location;
+			if (location.isRegister()) {
+				final int reg = location.reg();
+				if (reg >= VAR0_REGISTER && reg <= VAR2_REGISTER) {
+					usedRegisters.add(reg);
+				}
 			}
 		}
 		final List<Integer> usedRegistersSorted = new ArrayList<>(usedRegisters);
@@ -210,27 +205,27 @@ final class BrilVarMapping {
 	}
 
 	private void store(String var, int register, BrilAsm asm) {
-		final int offsetOrRegister = getOffset(var);
+		final BrilVars.VarLocation location = getLocation(var);
 
 		final String type = getType(var);
 		if (BrilInstructions.INT.equals(type)) {
-			if (offsetOrRegister < 0) {
-				if (register != -offsetOrRegister) {
-					asm.iload(-offsetOrRegister, register);
+			if (location.isRegister()) {
+				if (register != location.reg()) {
+					asm.iload(location.reg(), register);
 				}
 			}
 			else {
-				asm.istoreToStack(register, FP_REGISTER, offsetOrRegister);
+				asm.istoreToStack(register, FP_REGISTER, location.offset());
 			}
 		}
 		else if (BrilInstructions.BOOL.equals(type)) {
-			if (offsetOrRegister < 0) {
-				if (register != -offsetOrRegister) {
-					asm.bload(-offsetOrRegister, register);
+			if (location.isRegister()) {
+				if (register != location.reg()) {
+					asm.bload(location.reg(), register);
 				}
 			}
 			else {
-				asm.bstoreToStack(register, FP_REGISTER, offsetOrRegister);
+				asm.bstoreToStack(register, FP_REGISTER, location.offset());
 			}
 		}
 		else {
@@ -239,23 +234,23 @@ final class BrilVarMapping {
 	}
 
 	private int iload(String var, int registerForSpilledVar, BrilAsm asm) {
-		final int offsetOrRegister = getOffset(var);
-		if (offsetOrRegister < 0) {
-			return -offsetOrRegister;
+		final BrilVars.VarLocation location = getLocation(var);
+		if (location.isRegister()) {
+			return location.reg();
 		}
 
-		asm.iloadFromStack(registerForSpilledVar, FP_REGISTER, offsetOrRegister);
+		asm.iloadFromStack(registerForSpilledVar, FP_REGISTER, location.offset());
 		return registerForSpilledVar;
 	}
 
 	@SuppressWarnings("SameParameterValue")
 	private int bload(String var, int registerForSpilledVar, BrilAsm asm) {
-		final int offsetOrRegister = getOffset(var);
-		if (offsetOrRegister < 0) {
-			return -offsetOrRegister;
+		final BrilVars.VarLocation location = getLocation(var);
+		if (location.isRegister()) {
+			return location.reg();
 		}
 
-		asm.bloadFromStack(registerForSpilledVar, FP_REGISTER, offsetOrRegister);
+		asm.bloadFromStack(registerForSpilledVar, FP_REGISTER, location.offset());
 		return registerForSpilledVar;
 	}
 
@@ -266,17 +261,17 @@ final class BrilVarMapping {
 		}
 	}
 
-	private int getOffset(String var) {
-		return varToInfo.get(var).offset;
+	private BrilVars.VarLocation getLocation(String var) {
+		return varToInfo.get(var).location;
 	}
 
-	private static List<String> addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, VarInfo> varToInfo, RegisterAllocation2 registerAllocation) {
+	private static List<String> addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, String> varToType, RegisterAllocation2 registerAllocation) {
 		final List<String> argNames = new ArrayList<>();
 		for (int i = 0; i < arguments.size(); i++) {
 			final BrilNode argument = arguments.get(i);
 			final String argName = BrilFactory.getArgName(argument);
 			final String argType = BrilFactory.getArgType(argument);
-			if (varToInfo.put(argName, new VarInfo(0, argType)) != null) {
+			if (varToType.put(argName, argType) != null) {
 				throw new IllegalArgumentException("duplicate parameter " + argName);
 			}
 
@@ -287,7 +282,7 @@ final class BrilVarMapping {
 		return argNames;
 	}
 
-	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, VarInfo> varToInfo, Set<String> localVars, RegisterAllocation2 registerAllocation) {
+	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, String> varToType, Set<String> localVars, RegisterAllocation2 registerAllocation) {
 		for (BrilNode instruction : instructions) {
 			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
 			registerAllocation.addEdgesBetween(liveOut);
@@ -301,18 +296,16 @@ final class BrilVarMapping {
 			final String op = BrilInstructions.getOp(instruction);
 			if (BrilInstructions.ID.equals(op)) {
 				final String var = BrilInstructions.getVarNotNull(instruction);
-				final VarInfo info = varToInfo.get(var);
-				if (info == null) {
+				type = varToType.get(var);
+				if (type == null) {
 					throw new IllegalArgumentException("variable " + var + " undefined for " + instruction);
 				}
-
-				type = info.type;
 			}
 
 			if (dest != null && type != null) {
-				final VarInfo prevInfo = varToInfo.put(dest, new VarInfo(0, type));
-				if (prevInfo != null && !Objects.equals(prevInfo.type, type)) {
-					throw new IllegalArgumentException("invalid type for " + dest + ": " + type + " vs. " + prevInfo.type);
+				final String prevType = varToType.put(dest, type);
+				if (prevType != null && !Objects.equals(prevType, type)) {
+					throw new IllegalArgumentException("invalid type for " + dest + ": " + type + " vs. " + prevType);
 				}
 
 				localVars.add(dest);
@@ -333,6 +326,6 @@ final class BrilVarMapping {
 		void handle(int destReg, int leftReg, int rightReg, BrilAsm asm);
 	}
 
-	private record VarInfo(int offset, String type) {
+	private record VarInfo(BrilVars.VarLocation location, String type) {
 	}
 }

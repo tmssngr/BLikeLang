@@ -15,7 +15,7 @@ final class BrilVars {
 
 	// Fields =================================================================
 
-	private final Map<String, VarStore> varToStore = new HashMap<>();
+	private final Map<String, InternalVarStore> varToStore = new HashMap<>();
 
 	private int registers;
 	private int registerParameter;
@@ -30,14 +30,14 @@ final class BrilVars {
 	// Accessing ==============================================================
 
 	public void assign(List<String> arguments, Set<String> localVars, Function<String, Integer> varToVirtualRegister) {
-		final Map<Integer, VarStore> virtualVarToStore = new HashMap<>();
+		final Map<Integer, InternalVarStore> virtualVarToStore = new HashMap<>();
 		for (int i = 0; i < arguments.size(); i++) {
 			final String argName = arguments.get(i);
 			final int virtualRegister = varToVirtualRegister.apply(argName);
 			Utils.assertTrue(virtualRegister == i);
-			final VarStore varStore;
+			final InternalVarStore varStore;
 			if (virtualRegister < 2) {
-				varStore = new Register(BrilVarMapping.ARG0_REGISTER + 2 * virtualRegister);
+				varStore = new InternalRegister(BrilVarMapping.ARG0_REGISTER + 2 * virtualRegister);
 				registerParameter++;
 			}
 			else {
@@ -50,10 +50,10 @@ final class BrilVars {
 
 		for (String localVar : localVars) {
 			final int virtualRegister = varToVirtualRegister.apply(localVar);
-			VarStore varStore = virtualVarToStore.get(virtualRegister);
+			InternalVarStore varStore = virtualVarToStore.get(virtualRegister);
 			if (varStore == null) {
 				if (registers < 3) {
-					varStore = new Register(BrilVarMapping.VAR0_REGISTER + 2 * registers);
+					varStore = new InternalRegister(BrilVarMapping.VAR0_REGISTER + 2 * registers);
 					registers++;
 					virtualVarToStore.put(virtualRegister, varStore);
 				}
@@ -67,17 +67,17 @@ final class BrilVars {
 		}
 	}
 
-	public int getOffset(String var) {
-		final VarStore varStore = Utils.notNull(varToStore.get(var));
-		if (varStore instanceof Register register) {
-			return -register.reg;
+	public VarLocation getLocation(String var) {
+		final InternalVarStore varStore = Utils.notNull(varToStore.get(var));
+		if (varStore instanceof InternalRegister register) {
+			return new VarLocation(true, register.reg);
 		}
 		if (varStore instanceof SpilledRegister spilledRegister) {
-			return 2 * registers + spilledRegister.i;
+			return new VarLocation(false, 2 * registers + spilledRegister.i);
 		}
 		if (varStore instanceof PushedParameter parameter) {
 			//noinspection OverlyComplexArithmeticExpression
-			return 2 * registers + 2 * spilledVariables + 2 + 2 * pushedParameters - parameter.i;
+			return new VarLocation(false, 2 * registers + 2 * spilledVariables + 2 + 2 * pushedParameters - parameter.i);
 		}
 		throw new IllegalStateException(var + ": " + varStore);
 	}
@@ -88,15 +88,31 @@ final class BrilVars {
 
 	// Inner Classes ==========================================================
 
-	private interface VarStore {
+	private interface InternalVarStore {
 	}
 
-	private record Register(int reg) implements VarStore {
+	private record InternalRegister(int reg) implements InternalVarStore {
 	}
 
-	private record PushedParameter(int i) implements VarStore {
+	private record PushedParameter(int i) implements InternalVarStore {
 	}
 
-	private record SpilledRegister(int i) implements VarStore {
+	private record SpilledRegister(int i) implements InternalVarStore {
+	}
+
+	public record VarLocation(boolean isRegister, int value) {
+		public boolean isStackOffset() {
+			return !isRegister;
+		}
+
+		public int reg() {
+			Utils.assertTrue(isRegister);
+			return value;
+		}
+
+		public int offset() {
+			Utils.assertTrue(!isRegister);
+			return value;
+		}
 	}
 }
