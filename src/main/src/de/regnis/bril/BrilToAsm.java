@@ -109,7 +109,9 @@ public final class BrilToAsm {
 
 			@Override
 			protected void ret() {
-				throw new UnsupportedOperationException();
+				if (exitLabel != null) {
+					asm.jump(exitLabel);
+				}
 			}
 
 			@Override
@@ -122,9 +124,7 @@ public final class BrilToAsm {
 					throw new UnsupportedOperationException(varType);
 				}
 
-				if (exitLabel != null) {
-					asm.jump(exitLabel);
-				}
+				ret();
 			}
 
 			@Override
