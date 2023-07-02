@@ -40,6 +40,7 @@ public class BrilInstructions {
 	private static final String KEY_VAR2 = "var2";
 	private static final String KEY_VAR = "var";
 	public static final String KEY_VALUE = "value";
+	public static final String VOID = "void";
 	public static final String INT = "int";
 	public static final String BOOL = "bool";
 	public static final String KEY_NAME = "name";
