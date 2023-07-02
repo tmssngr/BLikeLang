@@ -1,0 +1,149 @@
+	n = 0
+						(n)
+	sum = 0
+
+loop:					(sum, n)
+	val = readInt()
+						(val, sum, n)
+	cond = val < 0
+						(cond, sum, n, val)
+	if cond jp exit
+
+						(sum, n, val)
+	n = n + 1
+						(sum, n, val)
+	sum = sum + val
+						(sum, n)
+	av = sum / n
+						(av, sum, n)
+	print(av)
+						(sum, n)
+	jp loop
+
+exit:					()
+
+
+use virtual registers
+=====================
+
+	v0 = 0
+						(v0)
+	v1 = 0
+
+loop:					(v0, v1)
+	v2 = readInt()
+						(v0, v1, v2)
+	v3 = v2 < 0
+						(v0, v1, v2, v3)
+	if v3 jp exit
+
+						(v0, v1, v2)
+	v0 = v0 + 1
+						(v0, v1, v2)
+	v1 = v1 + v2
+						(v0, v1)
+	v2 = v1 / v0
+						(v0, v1, v2)
+	print(v2)
+						(v0, v1)
+	jp loop
+
+exit:					()
+
+
+count uses
+==========
+
+	v0 = 0
+						v0:3u
+	v1 = 0
+
+loop:					v0:3u, v1:3u
+	v2 = readInt()
+						v0:3u, v1:3u, v2:2u
+	v3 = v2 < 0
+						v0:3u, v1:3u, v2:1u, v3:1u
+	if v3 jp exit
+
+						v0:3u, v1:3u, v2:1u
+	v0 = v0 + 1
+						v0:1u, v1:3u, v2:1u
+	v1 = v1 + v2
+						v0:1u, v1:1u
+	v2 = v1 / v0
+						v0:3u, v1:3u, v2:1u
+	print(v2)
+						v0:3u, v1:3u
+	jp loop
+
+exit:					-
+
+
+next use in x commands
+======================
+
+	v0 = 0
+						v0:4n
+	v1 = 0
+
+loop:					v0:3n, v1:4n
+	v2 = readInt()
+						v0:2n, v1:3n, v2:0n
+	v3 = v2 < 0
+						v0:1n, v1:2n, v2:2n, v3:0n
+	if v3 jp exit
+
+						v0:0n, v1:1n, v2:1n
+	v0 = v0 + 1
+						v0:1n, v1:0n, v2:0n
+	v1 = v1 + v2
+						v0:0n, v1:0n
+	v2 = v1 / v0
+						v0:4n, v1:5n, v2:0n
+	print(v2)
+						v0:3n, v1:4n
+	jp loop
+
+exit:					-
+
+
+Spilled var
+===========================================================================
+- decide which var to spil (assuming we only can use 3 registers):
+  -> spil v2 because it has the highest use in next command and the lowed use
+  store it at stack as s2, use temp variable t0
+
+liveness
+--------
+
+	v0 = 0
+						v0
+	v1 = 0
+
+loop:					v0, v1
+	t0 = readInt()
+						v0, v1, t0
+	s2 = t0
+						v0, v1, s2
+	t0 = s2
+						v0, v1, t0, s2
+	v3 = t0 < 0
+						v0, v1, v3, s2
+	if v3 jp exit
+
+						v0, v1, s2
+	v0 = v0 + 1
+						v0, v1, s2
+	t0 = s2
+						v0, v1, t0
+	v1 = v1 + t0
+						v0, v1
+	v2 = v1 / v0
+						v0, v1, v2
+	print(v2)
+						v0, v1
+	jp loop
+
+exit:					-
+
+No more than 3 local registers (v0, v1, t0 or v0, v1, v3) as s2 does not count
