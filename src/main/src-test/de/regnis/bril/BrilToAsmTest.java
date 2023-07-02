@@ -214,4 +214,86 @@ public class BrilToAsmTest {
 		                    )
 		);
 	}
+
+	@Test
+	public void testAverage() {
+		Assert.assertEquals(new BrilAsm()
+				                    .label("average")
+				                    .allocSpace(2)
+				                    .ipush(VAR0_REGISTER)
+				                    .ipush(VAR1_REGISTER)
+				                    .ipush(VAR2_REGISTER)
+									//    .constant("n", 0)
+				                    .iconst(VAR0_REGISTER, 0)
+									//    .constant("sum", 0)
+				                    .iconst(VAR1_REGISTER, 0)
+
+									.label("loop")
+									//    .call("value", "getInt", List.of())
+				                    .call("getInt")
+				                    .iload(VAR2_REGISTER, ARG0_REGISTER)
+									//    .constant("zero", 0)
+				                    .iconst(A_REGISTER, 0)
+				                    .istoreToStack(A_REGISTER, FP_REGISTER, 6)
+									//    .lessThan("cond", "value", "zero")
+				                    .iloadFromStack(B_REGISTER, FP_REGISTER, 6)
+				                    .ilt(A_REGISTER, VAR2_REGISTER, B_REGISTER)
+				                    .bstoreToStack(A_REGISTER, FP_REGISTER, 6)
+				                    .bloadFromStack(A_REGISTER, FP_REGISTER, 6)
+									//    .branch("cond", "exit", "body")
+				                    .brIfElse(A_REGISTER, "exit", "body")
+
+									.label("body")
+									//    .constant("one", 1)
+				                    .iconst(A_REGISTER, 1)
+				                    .istoreToStack(A_REGISTER, FP_REGISTER, 6)
+									//    .add("n", "n", "one")
+				                    .iloadFromStack(B_REGISTER, FP_REGISTER, 6)
+				                    .iadd(VAR0_REGISTER, B_REGISTER)
+									//    .add("sum", "sum", "value")
+				                    .iadd(VAR1_REGISTER, VAR2_REGISTER)
+									//    .call("average", "div", List.of("sum", "n"))
+				                    .iload(ARG0_REGISTER, VAR1_REGISTER)
+				                    .iload(ARG1_REGISTER, VAR0_REGISTER)
+				                    .call("div")
+				                    .iload(VAR2_REGISTER, ARG0_REGISTER)
+									//    .print("average")
+				                    .call("print")
+									.jump("loop")
+
+									.label("exit")
+				                    .ipop(VAR2_REGISTER)
+				                    .ipop(VAR1_REGISTER)
+				                    .ipop(VAR0_REGISTER)
+				                    .freeSpace(2)
+				                    .ret()
+				                    .toLines(),
+		                    BrilToAsm.convertToAsm(List.of(
+				                                           BrilFactory.createFunction("average", BrilInstructions.VOID, List.of(),
+				                                                                      new BrilInstructions()
+						                                                                      .constant("n", 0)
+						                                                                      .constant("sum", 0)
+
+						                                                                      .label("loop")
+						                                                                      .call("value", "getInt", List.of())
+						                                                                      .constant("zero", 0)
+						                                                                      .lessThan("cond", "value", "zero")
+						                                                                      .branch("cond", "exit", "body")
+
+						                                                                      .label("body")
+						                                                                      .constant("one", 1)
+						                                                                      .add("n", "n", "one")
+						                                                                      .add("sum", "sum", "value")
+						                                                                      .call("average", "div", List.of("sum", "n"))
+						                                                                      .print("average")
+						                                                                      .jump("loop")
+
+						                                                                      .label("exit")
+						                                                                      .ret()
+						                                                                      .get()
+				                                           )
+		                                           )
+		                    )
+		);
+	}
 }
