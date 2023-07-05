@@ -258,10 +258,14 @@ public final class BrilCfg {
 		final String type = BrilFactory.getType(cfgFunction);
 		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
 		final List<BrilNode> instructions = new ArrayList<>();
+		boolean addLabel = false;
 		for (BrilNode block : getBlocks(cfgFunction)) {
 			final String blockName = getName(block);
-			instructions.add(BrilInstructions.createLabel(blockName));
+			if (addLabel) {
+				instructions.add(BrilInstructions.createLabel(blockName));
+			}
 			instructions.addAll(getInstructions(block));
+			addLabel = true;
 		}
 		return BrilFactory.createFunction(name, type, arguments, instructions);
 	}
