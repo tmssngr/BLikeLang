@@ -46,6 +46,14 @@ public final class BrilCfgDetectVarLiveness {
 		this.blocks                   = blocks;
 		this.setLiveOutToInstructions = setLiveOutToInstructions;
 		nameToBlock                   = BrilCfg.getNameToBlock(blocks);
+
+		for (BrilNode block : blocks) {
+			clearInOut(block);
+
+			for (BrilNode instruction : BrilCfg.getInstructions(block)) {
+				clearInOut(instruction);
+			}
+		}
 	}
 
 	// Utils ==================================================================
@@ -109,6 +117,11 @@ public final class BrilCfgDetectVarLiveness {
 			liveIn.addAll(nextBlock.getOrCreateStringList(KEY_LIVE_IN));
 		}
 		return liveIn;
+	}
+
+	private static void clearInOut(BrilNode blockOrInstruction) {
+		blockOrInstruction.getOrCreateStringList(KEY_LIVE_IN).clear();
+		blockOrInstruction.getOrCreateStringList(KEY_LIVE_OUT).clear();
 	}
 
 	private static boolean addAll(String key, Set<String> newVars, BrilNode node) {
