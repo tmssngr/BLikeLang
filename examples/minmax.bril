@@ -1,0 +1,132 @@
+fn minMax(int x1, int y1, int x2, int y2) {
+							x1, x2, y1, y2
+	cond = x1 < x2
+							cond, x1, x2, y1, y2
+	br cond xlt, xge
+
+
+xlt:
+							x1, x2, y1, y2
+	xmin = x1
+							x2, xmin, y1, y2
+	xmax = x2
+							xmax, xmin, y1, y2
+	jp xnext
+
+xge:
+							x2, x1, y1, y2
+	xmin = x2
+							x1, xmin, y1, y2
+	xmax = x1
+							xmax, xmin, y1, y2
+	jp xnext
+
+xnext:
+							xmax, xmin, y1, y2
+	width = xmax - xmin
+							y1, y2, xmin, width
+	cond = y1 < y2
+							cond, y1, y2, xmin, width
+	br cond ylt, yge
+							y1, y2, xmin, width
+
+ylt:
+							y1, y2, xmin, width
+	ymin = y1
+							y2, ymin, xmin, width
+	ymax = y2
+							ymax, ymin, xmin, width
+	jp ynext
+
+yge:
+							y2, y1, xmin, width
+	ymin = y2
+							y1, ymin, xmin, width
+	ymax = y1
+							ymax, ymin, xmin, width
+	jp ynext
+
+ynext:
+							ymax, ymin, xmin, width
+	height = ymax - ymin
+							xmin, ymin, width, height
+	print xmin
+							ymin, width, height
+	print ymin
+							width, height
+	print width
+							height
+	print height
+							-
+	ret
+}
+
+
+width wird gespillt:
+
+fn minMax(int x1, int y1, int x2, int y2) {
+
+	cond = x1 < x2
+
+	br cond xlt, xge
+
+
+xlt:
+
+	xmin = x1
+
+	xmax = x2
+							xmax, xmin, y1, y2
+	jp xnext
+
+xge:
+
+	xmin = x2
+
+	xmax = x1
+							xmax, xmin, y1, y2
+	jp xnext
+
+xnext:
+							xmax, xmin, y1, y2
+	t = xmax - xmin
+							t, y1, y2, xmin
+	swidth = t
+							y1, y2, xmin, swidth
+	cond = y1 < y2
+							cond, y1, y2, xmin, swidth
+	br cond ylt, yge
+
+
+ylt:
+							y1, y2, xmin, swidth
+	ymin = y1
+							y2, ymin, xmin, swidth
+	ymax = y2
+							ymax, ymin, xmin, swidth
+	jp ynext
+
+yge:
+							y2, y1, xmin, swidth
+	ymin = y2
+							y1, ymin, xmin, swidth
+	ymax = y1
+							ymax, ymin, xmin, swidth
+	jp ynext
+
+ynext:
+							ymax, ymin, xmin, swidth
+	height = ymax - ymin
+							xmin, ymin, swidth, height
+	print xmin
+							ymin, swidth, height
+	print ymin
+							swidth, height
+	t = swidth
+							t, height
+	print t
+							height
+	print height
+							-
+	ret
+}
