@@ -13,7 +13,29 @@ import static de.regnis.bril.BrilVarMapping.*;
 public class BrilToAsmTest {
 
 	@Test
-	public void testSimple() {
+	public void testBasicRetValue() {
+		Assert.assertEquals(new BrilAsm()
+				                    .label("sum")
+				                    //.add("sum", "a", "b")
+				                    .iadd(ARG0_REGISTER, ARG1_REGISTER)
+				                    //.ret("sum")
+				                    // .label("sum exit")
+				                    .ret()
+				                    .toLines(),
+		                    BrilToAsm.convertToAsm(List.of(
+				                                           BrilFactory.createFunction("sum", "int", List.of(BrilFactory.argument("a", "int"), BrilFactory.argument("b", "int")),
+				                                                                      new BrilInstructions()
+						                                                                      .add("sum", "a", "b")
+						                                                                      .ret("sum")
+						                                                                      .get()
+				                                           )
+		                                           )
+		                    )
+		);
+	}
+
+	@Test
+	public void testCall() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("main")
 				                    .ipush(VAR0_REGISTER)
@@ -36,13 +58,6 @@ public class BrilToAsmTest {
 				                    .ipop(VAR1_REGISTER)
 				                    .ipop(VAR0_REGISTER)
 				                    .ret()
-				                    //==========
-				                    .label("sum")
-				                    //.add("sum", "a", "b")
-				                    .iadd(ARG0_REGISTER, ARG1_REGISTER)
-				                    //.ret("sum")
-				                    // .label("sum exit")
-				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
 				                                           BrilFactory.createFunction("main", "void", List.of(),
@@ -51,12 +66,6 @@ public class BrilToAsmTest {
 						                                                                      .constant("value2", 3)
 						                                                                      .call("result", "sum", List.of("value1", "value2"))
 						                                                                      .print("result")
-						                                                                      .get()
-				                                           ),
-				                                           BrilFactory.createFunction("sum", "int", List.of(BrilFactory.argument("a", "int"), BrilFactory.argument("b", "int")),
-				                                                                      new BrilInstructions()
-						                                                                      .add("sum", "a", "b")
-						                                                                      .ret("sum")
 						                                                                      .get()
 				                                           )
 		                                           )
