@@ -25,7 +25,7 @@ public final class RegisterAllocation {
 
 	// Fields =================================================================
 
-	private final RegisterAllocation2 registerAllocation = new RegisterAllocation2();
+	private final RegisterColoring registerAllocation = new RegisterColoring();
 	private final int parameterCount;
 
 	// Setup ==================================================================

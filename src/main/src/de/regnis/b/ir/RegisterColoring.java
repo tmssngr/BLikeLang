@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * @author Thomas Singer
  */
-public class RegisterAllocation2 {
+public class RegisterColoring {
 
 	// Fields =================================================================
 
@@ -16,7 +16,7 @@ public class RegisterAllocation2 {
 
 	// Setup ==================================================================
 
-	public RegisterAllocation2() {
+	public RegisterColoring() {
 	}
 
 	// Accessing ==============================================================

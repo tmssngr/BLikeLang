@@ -1,6 +1,6 @@
 package de.regnis.bril;
 
-import de.regnis.b.ir.RegisterAllocation2;
+import de.regnis.b.ir.RegisterColoring;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,7 +35,7 @@ final class BrilVarMapping {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
 
-		final RegisterAllocation2 registerAllocation = new RegisterAllocation2();
+		final RegisterColoring registerAllocation = new RegisterColoring();
 
 		final Map<String, String> varToType = new HashMap<>();
 		final List<String> argNames = addVarInfoTypesForArguments(arguments, varToType, registerAllocation);
@@ -265,7 +265,7 @@ final class BrilVarMapping {
 		return varToInfo.get(var).location;
 	}
 
-	private static List<String> addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, String> varToType, RegisterAllocation2 registerAllocation) {
+	private static List<String> addVarInfoTypesForArguments(List<BrilNode> arguments, Map<String, String> varToType, RegisterColoring registerAllocation) {
 		final List<String> argNames = new ArrayList<>();
 		for (int i = 0; i < arguments.size(); i++) {
 			final BrilNode argument = arguments.get(i);
@@ -282,7 +282,7 @@ final class BrilVarMapping {
 		return argNames;
 	}
 
-	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, String> varToType, Set<String> localVars, RegisterAllocation2 registerAllocation) {
+	private static void addVarInfoTypesForInstructions(List<BrilNode> instructions, Map<String, String> varToType, Set<String> localVars, RegisterColoring registerAllocation) {
 		for (BrilNode instruction : instructions) {
 			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
 			registerAllocation.addEdgesBetween(liveOut);
