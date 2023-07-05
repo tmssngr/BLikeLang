@@ -341,6 +341,16 @@ public final class BrilCfg {
 		nextBlock.getOrCreateStringList(KEY_PREDECESSORS).add(getName(prevBlock));
 	}
 
+	public static void debugPrint(List<BrilNode> blocks) {
+		for (BrilNode block : blocks) {
+			System.out.println(getName(block) + ":");
+
+			for (BrilNode instruction : getInstructions(block)) {
+				System.out.println("\t" + instruction);
+			}
+		}
+	}
+
 	// Inner Classes ==========================================================
 
 	public static class DuplicateLabelException extends Exception {
