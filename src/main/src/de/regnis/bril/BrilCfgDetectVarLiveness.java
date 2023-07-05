@@ -50,8 +50,10 @@ public final class BrilCfgDetectVarLiveness {
 		for (BrilNode block : blocks) {
 			clearInOut(block);
 
-			for (BrilNode instruction : BrilCfg.getInstructions(block)) {
-				clearInOut(instruction);
+			if (setLiveOutToInstructions) {
+				for (BrilNode instruction : BrilCfg.getInstructions(block)) {
+					clearInOut(instruction);
+				}
 			}
 		}
 	}
