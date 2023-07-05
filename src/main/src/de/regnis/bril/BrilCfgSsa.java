@@ -150,7 +150,7 @@ public final class BrilCfgSsa {
 	private void transform(BrilNode block, BlockInfo varToVariant) {
 		for (BrilNode instruction : BrilCfg.getInstructions(block)) {
 			final String dest = BrilInstructions.getDest(instruction);
-			BrilInstructions.replaceVars(var -> varToVariant.getUsageName(var), instruction);
+			BrilInstructions.replaceInVars(var -> varToVariant.getUsageName(var), instruction);
 			if (dest != null) {
 				BrilInstructions.setDest(varToVariant.getAssignmentName(dest), instruction);
 			}

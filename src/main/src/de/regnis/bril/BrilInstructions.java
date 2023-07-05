@@ -135,7 +135,7 @@ public class BrilInstructions {
 		return node.getStringList(KEY_ARGS);
 	}
 
-	public static void replaceVars(Function<String, String> varReplace, BrilNode node) {
+	public static void replaceInVars(Function<String, String> varReplace, BrilNode node) {
 		replace(KEY_VAR, varReplace, node);
 		replace(KEY_VAR1, varReplace, node);
 		replace(KEY_VAR2, varReplace, node);
