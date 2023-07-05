@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -339,6 +341,28 @@ public final class BrilCfg {
 	private static void connectBlocks(@NotNull BrilNode prevBlock, @NotNull BrilNode nextBlock) {
 		prevBlock.getOrCreateStringList(KEY_SUCCESSORS).add(getName(nextBlock));
 		nextBlock.getOrCreateStringList(KEY_PREDECESSORS).add(getName(prevBlock));
+	}
+
+	public static void foreachInstructionOverAllBlocks(List<BrilNode> blocks, Consumer<BrilNode> instructionConsumer) {
+		for (BrilNode block : blocks) {
+			final List<BrilNode> instructions = getInstructions(block);
+			for (BrilNode instruction : instructions) {
+				instructionConsumer.accept(instruction);
+			}
+		}
+	}
+
+	public static void replaceAllVars(BrilNode cfgFunction, Function<String, String> varReplace) {
+		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+		for (BrilNode argument : arguments) {
+			final String argName = BrilFactory.getArgName(argument);
+			final String newArgName = varReplace.apply(argName);
+			BrilFactory.setArgName(newArgName, argument);
+		}
+
+		final List<BrilNode> blocks = getBlocks(cfgFunction);
+		foreachInstructionOverAllBlocks(blocks,
+		                                instruction -> BrilInstructions.replaceVars(varReplace, instruction));
 	}
 
 	public static void debugPrint(List<BrilNode> blocks) {
