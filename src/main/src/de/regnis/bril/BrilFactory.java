@@ -67,6 +67,10 @@ public class BrilFactory {
 		return argument.getString(KEY_ARG_NAME);
 	}
 
+	public static void setArgName(String name, BrilNode argument) {
+		argument.set(KEY_ARG_NAME, name);
+	}
+
 	@NotNull
 	public static String getArgType(BrilNode argument) {
 		return argument.getString(KEY_ARG_TYPE);
