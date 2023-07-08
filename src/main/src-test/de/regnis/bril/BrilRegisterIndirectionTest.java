@@ -3,7 +3,6 @@ package de.regnis.bril;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,6 +10,8 @@ import static org.junit.Assert.assertEquals;
  * @author Thomas Singer
  */
 public class BrilRegisterIndirectionTest {
+
+	// Accessing ==============================================================
 
 	@Test
 	public void testReadWriteStackParameters() {
@@ -32,6 +33,30 @@ public class BrilRegisterIndirectionTest {
 		                                                "sum", "p.0",
 		                                                "diff", "p.1"),
 		                                         var -> var.startsWith("p."))
+				             .transformInstructions(new BrilInstructions()
+						                                    .constant("a", 1)
+						                                    .constant("b", 2)
+						                                    .add("sum", "a", "b")
+						                                    .sub("diff", "sum", "a")
+						                                    .get()));
+	}
+
+	@Test
+	public void testSpilVar() {
+		assertEquals(new BrilInstructions()
+				             // .constant("a", 1)
+				             .constant("a", 1)
+				             // .constant("b", 2)
+				             .constant("b", 2)
+				             // .add("sum", "a", "b")
+				             .add("t.4", "a", "b")
+				             .id("sum", "t.4")
+				             // .sub("diff", "sum", "a")
+				             .id("t.5", "sum")
+				             .sub("diff", "t.5", "a")
+				             .get(),
+		             new BrilRegisterIndirection(4,
+		                                         var -> var.equals("sum"))
 				             .transformInstructions(new BrilInstructions()
 						                                    .constant("a", 1)
 						                                    .constant("b", 2)

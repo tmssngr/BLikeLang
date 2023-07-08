@@ -1,9 +1,11 @@
 package de.regnis.bril;
 
-import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -13,20 +15,35 @@ public final class BrilRegisterIndirection {
 
 	// Fields =================================================================
 
+	@Nullable
 	private final Map<String, String> mapping;
-	private final Set<String> vars;
 	private final Predicate<String> needsTempAccess;
 
+	private int tempIndex;
+
 	// Setup ==================================================================
+
+	public BrilRegisterIndirection(int tempIndex, Predicate<String> needsTempAccess) {
+		this.needsTempAccess = needsTempAccess;
+		this.tempIndex       = tempIndex;
+		mapping              = null;
+	}
 
 	public BrilRegisterIndirection(Map<String, String> mapping, Predicate<String> needsTempAccess) {
 		this.mapping         = new HashMap<>(mapping);
 		this.needsTempAccess = needsTempAccess;
-		vars                 = new HashSet<>(mapping.values());
-		Utils.assertTrue(vars.size() == mapping.size());
+		tempIndex            = mapping.size();
 	}
 
 	// Accessing ==============================================================
+
+	public void transformBlocks(List<BrilNode> blocks) {
+		for (BrilNode block : blocks) {
+			final List<BrilNode> oldInstructions = BrilCfg.getInstructions(block);
+			final List<BrilNode> newInstructions = transformInstructions(oldInstructions);
+			BrilCfg.setInstructions(newInstructions, block);
+		}
+	}
 
 	public List<BrilNode> transformInstructions(List<BrilNode> instructions) {
 		final BrilInstructions factory = new BrilInstructions();
@@ -41,8 +58,8 @@ public final class BrilRegisterIndirection {
 
 	@NotNull
 	private String createTemp() {
-		final String temp = "t." + vars.size();
-		vars.add(temp);
+		final String temp = "t." + tempIndex;
+		tempIndex++;
 		return temp;
 	}
 
@@ -51,6 +68,10 @@ public final class BrilRegisterIndirection {
 	}
 
 	private String getMapped(String var) {
+		if (mapping == null) {
+			return var;
+		}
+
 		final String mapped = mapping.get(var);
 		if (mapped == null) {
 			throw new IllegalArgumentException("unknown var " + var);
