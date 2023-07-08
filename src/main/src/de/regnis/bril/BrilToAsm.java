@@ -1,6 +1,8 @@
 package de.regnis.bril;
 
 import de.regnis.b.ir.RegisterColoring;
+import de.regnis.utils.Utils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -10,6 +12,14 @@ import java.util.function.Function;
  * @author Thomas Singer
  */
 public final class BrilToAsm {
+
+	// Constants ==============================================================
+
+	private static final String PREFIX_STACK_PARAMETER = "p.";
+	private static final String PREFIX_REGISTER = "r.";
+	private static final String PREFIX_VIRTUAL_REGISTER = "v.";
+	private static final int MAX_PARAMETERS_IN_REGISTERS = 2;
+	private static final int MAX_REGISTERS = 8;
 
 	// Static =================================================================
 
@@ -44,24 +54,22 @@ public final class BrilToAsm {
 		varMapping.allocLocalVarSpace(asm);
 
 		final List<BrilNode> instructions = BrilFactory.getInstructions(functionFromCfg);
-		final String exitLabel = name + " exit";
 		convertToAsm(instructions, varMapping, asm);
 
-		asm.label(exitLabel);
 		varMapping.freeLocalVarSpace(asm);
 		asm.ret();
 	}
 
 	private static void createVarMapping(BrilNode cfgFunction) {
-		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
-		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
-		final List<String> argNames = getArgNames(arguments);
-
 		// (a, b, foo) -> (v.0, v.1, v.2)
-		initialVarRename(blocks, argNames, cfgFunction);
-		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
+		initialVarRename(cfgFunction);
 
-		if (false) {
+		boolean spilled = false;
+		while (true) {
+			final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+			final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+			final List<String> argNames = getArgNames(arguments);
+
 			final RegisterColoring registerColoring = new RegisterColoring();
 			registerColoring.addEdgesBetween(new HashSet<>(argNames));
 			for (int i = 0; i < argNames.size(); i++) {
@@ -79,23 +87,36 @@ public final class BrilToAsm {
 
 			registerColoring.build();
 
+			final Function<String, String> mapping = var -> {
+				final int virtualRegister = registerColoring.getVirtualRegister(var);
+				if (localVars.contains(var)) {
+					return PREFIX_VIRTUAL_REGISTER + virtualRegister;
+				}
+				return var;
+			};
+
+			BrilFactory.renameArgs(mapping, cfgFunction);
 			BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction ->
-					BrilInstructions.replaceInOutVars(new Function<>() {
-						@Override
-						public String apply(String var) {
-							final int virtualRegister = registerColoring.getVirtualRegister(var);
-							if (localVars.contains(var)) {
-								return "v." + virtualRegister;
-							}
-							return var;
-						}
-					}, instruction)
+					BrilInstructions.replaceInOutVars(mapping, instruction)
 			);
 
 			BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 
+			final int maxAllowedRegisters = getMaxAllowedRegisters(cfgFunction, spilled);
+			final String varToSpil = getVarToSpil(blocks, maxAllowedRegisters);
+			if (varToSpil == null) {
+				return;
+			}
+
+			spilled = true;
+
+			final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(argNames.size() + registerColoring.getRegisterCount(),
+			                                                                                var -> var.equals(varToSpil));
+			registerIndirection.transformBlocks(blocks);
+
 			BrilCfg.debugPrint(blocks);
 		}
+
 
 /*
 		final BrilVars brilVars = new BrilVars();
@@ -104,11 +125,57 @@ public final class BrilToAsm {
 */
 	}
 
-	private static void initialVarRename(List<BrilNode> blocks, List<String> argNames, BrilNode cfgFunction) {
+	private static int getMaxAllowedRegisters(BrilNode cfgFunction, boolean spilled) {
+		final int argCount = BrilFactory.getArguments(cfgFunction).size();
+		int registers = MAX_REGISTERS;
+		final int maxParametersInRegisters = MAX_PARAMETERS_IN_REGISTERS;
+		registers -= Math.min(maxParametersInRegisters, argCount);
+		if (argCount > maxParametersInRegisters || spilled) {
+			registers -= 1;
+		}
+
+		return registers;
+	}
+
+	@Nullable
+	private static String getVarToSpil(List<BrilNode> blocks, int maxAllowedRegisters) {
+		final Set<String> largestOut = new HashSet<>();
+		BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction -> {
+			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
+			final Set<String> registerVars = new HashSet<>();
+			for (String var : liveOut) {
+				if (var.startsWith("s.")) {
+					continue;
+				}
+
+				registerVars.add(var);
+			}
+
+			if (registerVars.size() <= maxAllowedRegisters) {
+				return;
+			}
+
+			if (registerVars.size() > largestOut.size()) {
+				largestOut.clear();
+				largestOut.addAll(registerVars);
+			}
+		});
+
+		final Iterator<String> iterator = largestOut.iterator();
+		return iterator.hasNext() ? iterator.next() : null;
+	}
+
+	private static void initialVarRename(BrilNode cfgFunction) {
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+
 		final Map<String, String> mapping = new HashMap<>();
-		for (int i = 0; i < argNames.size(); i++) {
-			final String argName = argNames.get(i);
-			mapping.put(argName, (i < 2 ? "r." : "p.") + i);
+
+		for (int i = 0; i < arguments.size(); i++) {
+			final BrilNode argument = arguments.get(i);
+			final String argName = BrilFactory.getArgName(argument);
+			final String newName = (i < MAX_PARAMETERS_IN_REGISTERS ? PREFIX_REGISTER : PREFIX_STACK_PARAMETER) + i;
+			mapping.put(argName, newName);
 		}
 
 		BrilCfg.foreachInstructionOverAllBlocks(blocks, new Consumer<>() {
@@ -126,21 +193,18 @@ public final class BrilToAsm {
 
 			private void addRenameMapping(String var) {
 				if (!mapping.containsKey(var)) {
-					mapping.put(var, "v." + mapping.size());
+					mapping.put(var, PREFIX_VIRTUAL_REGISTER + mapping.size());
 				}
 			}
 		});
 
-		BrilFactory.renameArgs(mapping, cfgFunction);
+		BrilFactory.renameArgs(mapping::get, cfgFunction);
 
 		final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(mapping,
-		                                                                                var -> var.startsWith("p."));
+		                                                                                var -> var.startsWith(PREFIX_STACK_PARAMETER));
+		registerIndirection.transformBlocks(blocks);
 
-		for (BrilNode block : blocks) {
-			final List<BrilNode> oldInstructions = BrilCfg.getInstructions(block);
-			final List<BrilNode> newInstructions = registerIndirection.transformInstructions(oldInstructions);
-			BrilCfg.setInstructions(newInstructions, block);
-		}
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 	}
 
 	private static List<String> getArgNames(List<BrilNode> arguments) {
@@ -224,44 +288,34 @@ public final class BrilToAsm {
 
 			@Override
 			protected void call(String name, List<String> args) {
-				throw new UnsupportedOperationException();
+				if (name.equals(BrilRegisterIndirection.CALL_PUSH)) {
+					Utils.assertTrue(args.size() == 1);
+					final String arg = args.get(0);
+					final int register = varToRegister(arg);
+					asm.ipush(register);
+					return;
+				}
+
+				Utils.assertTrue(args.isEmpty());
+				asm.call(name);
 			}
 
 			@Override
 			protected void call(String dest, String name, List<String> args) {
-				for (int i = 0; i < args.size(); i++) {
-					final String arg = args.get(i);
-					final String argType = varMapping.getType(arg);
-					if (BrilInstructions.INT.equals(argType)) {
-						varMapping.callArgument(arg, i, asm);
-					}
-					else {
-						throw new UnsupportedOperationException(argType);
-					}
+				if (name.equals(BrilRegisterIndirection.CALL_POP)) {
+					Utils.assertTrue(args.isEmpty());
+					final int register = varToRegister(dest);
+					asm.ipop(register);
+					return;
 				}
 
+				Utils.assertTrue(args.isEmpty());
 				asm.call(name);
+			}
 
-				final String type = varMapping.getType(dest);
-				if (BrilInstructions.INT.equals(type)) {
-					varMapping.istoreReturnValueInVar(dest, asm);
-				}
-				else {
-					throw new UnsupportedOperationException(type);
-				}
-
-				for (int i = 0; i < args.size(); i++) {
-					final String arg = args.get(i);
-					final String argType = varMapping.getType(arg);
-					if (BrilInstructions.INT.equals(argType)) {
-						if (i > 1) {
-							asm.ipop(0);
-						}
-					}
-					else {
-						throw new UnsupportedOperationException(argType);
-					}
-				}
+			private int varToRegister(String arg) {
+				Utils.assertTrue(arg.startsWith(PREFIX_REGISTER));
+				return 2 * Integer.parseInt(arg.substring(PREFIX_REGISTER.length()));
 			}
 
 			@Override

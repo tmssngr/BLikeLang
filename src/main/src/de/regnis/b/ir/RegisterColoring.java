@@ -54,6 +54,10 @@ public class RegisterColoring {
 		return maxUsedRegister;
 	}
 
+	public int getRegisterCount() {
+		return getMaxUsedRegister() + 1;
+	}
+
 	public boolean containsVar(@NotNull String name) {
 		return varToRegister.containsKey(name);
 	}

@@ -2,6 +2,7 @@ package de.regnis.bril;
 
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -62,6 +63,25 @@ public class BrilRegisterIndirectionTest {
 						                                    .constant("b", 2)
 						                                    .add("sum", "a", "b")
 						                                    .sub("diff", "sum", "a")
+						                                    .get()));
+	}
+
+	@Test
+	public void testCall() {
+		assertEquals(new BrilInstructions()
+				             .constant("a", 1)
+				             .constant("b", 2)
+				             //.call("sum", "add", List.of("b", "a"))
+				             .id("r.0", "b")
+				             .id("r.1", "a")
+				             .call("r.0", "add", List.of("b", "a"))
+				             .id("sum", "r.0")
+				             .get(),
+		             new BrilRegisterIndirection(4, var -> false)
+				             .transformInstructions(new BrilInstructions()
+						                                    .constant("a", 1)
+						                                    .constant("b", 2)
+						                                    .call("sum", "add", List.of("b", "a"))
 						                                    .get()));
 	}
 }

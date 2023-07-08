@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * according to https://capra.cs.cornell.edu/bril/lang/
@@ -83,11 +84,14 @@ public class BrilFactory {
 				.set(KEY_ARG_TYPE, type);
 	}
 
-	public static void renameArgs(Map<String, String> mapping, BrilNode function) {
+	public static void renameArgs(Function<String, String> mapping, BrilNode function) {
 		final List<BrilNode> arguments = getArguments(function);
 		for (BrilNode argument : arguments) {
 			final String argName = getArgName(argument);
-			final String newName = mapping.get(argName);
+			final String newName = mapping.apply(argName);
+			if (newName == null) {
+				throw new IllegalArgumentException("no mapping for " + argName);
+			}
 			setArgName(newName, argument);
 		}
 	}

@@ -13,6 +13,13 @@ import java.util.function.Predicate;
  */
 public final class BrilRegisterIndirection {
 
+	// Constants ==============================================================
+
+	private static final String PREFIX_TEMP = "t.";
+	private static final String PREFIX_REGISTER = "r.";
+	static final String CALL_PUSH = ".push";
+	static final String CALL_POP = ".pop";
+
 	// Fields =================================================================
 
 	@Nullable
@@ -58,7 +65,7 @@ public final class BrilRegisterIndirection {
 
 	@NotNull
 	private String createTemp() {
-		final String temp = "t." + tempIndex;
+		final String temp = PREFIX_TEMP + tempIndex;
 		tempIndex++;
 		return temp;
 	}
@@ -219,7 +226,7 @@ public final class BrilRegisterIndirection {
 				final String arg = args.get(i);
 				String newArg = getMapped(arg);
 				if (i < 2) {
-					factory.id("r.0", newArg);
+					factory.id(PREFIX_REGISTER + i, newArg);
 				}
 				else {
 					if (isStackParameter(newArg)) {
@@ -229,10 +236,10 @@ public final class BrilRegisterIndirection {
 						factory.id(temp, newArg);
 						newArg = temp;
 					}
-					factory.call(".push", List.of(newArg));
+					factory.call(CALL_PUSH, List.of(newArg));
 				}
 			}
-			factory.call(name, List.of());
+			factory.call(name, args);
 
 			for (int i = 2; i < args.size(); i++) {
 				final String arg = args.get(i);
@@ -240,16 +247,46 @@ public final class BrilRegisterIndirection {
 				if (temp == null) {
 					temp = createTemp();
 				}
-				factory.call(newArg, ".pop", List.of());
+				factory.call(newArg, CALL_POP, List.of());
 			}
 		}
 
 		@Override
 		protected void call(String dest, String name, List<String> args) {
-			call(name, args);
+			String temp = null;
+			for (int i = 0; i < args.size(); i++) {
+				final String arg = args.get(i);
+				String newArg = getMapped(arg);
+				if (i < 2) {
+					factory.id(PREFIX_REGISTER + i, newArg);
+				}
+				else {
+					if (isStackParameter(newArg)) {
+						if (temp == null) {
+							temp = createTemp();
+						}
+						factory.id(temp, newArg);
+						newArg = temp;
+					}
+					factory.call(CALL_PUSH, List.of(newArg));
+				}
+			}
+
+			final String result = PREFIX_REGISTER + 0;
+
+			factory.call(result, name, args);
+
 			final String newDest = getMapped(dest);
-			factory.constant("r.0", 0); // for usages
-			factory.id(newDest, "r.0");
+			factory.id(newDest, result);
+
+			for (int i = 2; i < args.size(); i++) {
+				final String arg = args.get(i);
+				final String newArg = getMapped(arg);
+				if (temp == null) {
+					temp = createTemp();
+				}
+				factory.call(newArg, CALL_POP, List.of());
+			}
 		}
 
 		@Override
