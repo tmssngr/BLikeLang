@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -80,6 +81,15 @@ public class BrilFactory {
 		return new BrilNode()
 				.set(KEY_ARG_NAME, name)
 				.set(KEY_ARG_TYPE, type);
+	}
+
+	public static void renameArgs(Map<String, String> mapping, BrilNode function) {
+		final List<BrilNode> arguments = getArguments(function);
+		for (BrilNode argument : arguments) {
+			final String argName = getArgName(argument);
+			final String newName = mapping.get(argName);
+			setArgName(newName, argument);
+		}
 	}
 
 	// Fields =================================================================

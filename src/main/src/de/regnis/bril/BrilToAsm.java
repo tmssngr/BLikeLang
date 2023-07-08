@@ -33,7 +33,7 @@ public final class BrilToAsm {
 			throw new AssertionError(e);
 		}
 		createVarMapping(cfgFunction);
-		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+//		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
 //		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 		final BrilNode functionFromCfg = BrilCfg.flattenBlocks(cfgFunction);
 
@@ -57,8 +57,8 @@ public final class BrilToAsm {
 		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
 		final List<String> argNames = getArgNames(arguments);
 
+		// (a, b, foo) -> (v.0, v.1, v.2)
 		initialVarRename(blocks, argNames, cfgFunction);
-
 		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 
 		if (false) {
@@ -106,8 +106,10 @@ public final class BrilToAsm {
 
 	private static void initialVarRename(List<BrilNode> blocks, List<String> argNames, BrilNode cfgFunction) {
 		final Map<String, String> mapping = new HashMap<>();
-		final Consumer<String> addMapping = var -> mapping.put(var, "v." + mapping.size());
-		argNames.forEach(addMapping);
+		for (int i = 0; i < argNames.size(); i++) {
+			final String argName = argNames.get(i);
+			mapping.put(argName, (i < 2 ? "r." : "p.") + i);
+		}
 
 		BrilCfg.foreachInstructionOverAllBlocks(blocks, new Consumer<>() {
 			@Override
@@ -124,30 +126,21 @@ public final class BrilToAsm {
 
 			private void addRenameMapping(String var) {
 				if (!mapping.containsKey(var)) {
-					addMapping.accept(var);
+					mapping.put(var, "v." + mapping.size());
 				}
 			}
 		});
 
-		BrilCfg.replaceAllVars(cfgFunction,
-		                       var -> mapping.get(var));
-	}
+		BrilFactory.renameArgs(mapping, cfgFunction);
 
-	private static Set<String> getLocalVars(List<BrilNode> blocks, List<String> argNames) {
-		final Set<String> localVars = new HashSet<>();
-		BrilCfg.foreachInstructionOverAllBlocks(blocks, new Consumer<>() {
-			@Override
-			public void accept(BrilNode instruction) {
-				final String dest = BrilInstructions.getDest(instruction);
-				if (dest != null) {
-					localVars.add(dest);
-				}
-				final Set<String> requiredVars = BrilInstructions.getRequiredVars(instruction);
-				localVars.addAll(requiredVars);
-			}
-		});
-		argNames.forEach(localVars::remove);
-		return localVars;
+		final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(mapping,
+		                                                                                var -> var.startsWith("p."));
+
+		for (BrilNode block : blocks) {
+			final List<BrilNode> oldInstructions = BrilCfg.getInstructions(block);
+			final List<BrilNode> newInstructions = registerIndirection.transformInstructions(oldInstructions);
+			BrilCfg.setInstructions(newInstructions, block);
+		}
 	}
 
 	private static List<String> getArgNames(List<BrilNode> arguments) {
@@ -157,6 +150,7 @@ public final class BrilToAsm {
 		}
 		return argNames;
 	}
+
 	private static void convertToAsm(List<BrilNode> instructions, BrilVarMapping varMapping, BrilAsm asm) {
 		final class MyHandler extends BrilInstructions.Handler {
 			@Override
