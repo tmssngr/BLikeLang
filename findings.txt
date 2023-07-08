@@ -1,2 +1,6 @@
 For (while) loops the conditional expression must NOT be moved before the loop, otherwise it only is executed once (before the loop).
 Instead, it needs to remain part of the while-block, so after looping the code is executed again.
+
+Register Coloring:
+If a virtual register is reused by a variable with a different type, we can't distinguish any more between different types just by looking at the variable.
+The variables (registers) may change their type (int <-> bool).
