@@ -82,11 +82,11 @@ public class BrilToAsmTest {
 				                    //.ret("left")
 				                    // .label("takeLeft")
 				                    .iload(ARG0_REGISTER, ARG1_REGISTER)
-				                    .jump("getLeftOrRight exit")
+				                    .jump("exit 3")
 				                    .label("takeRight")
 				                    //.ret("right")
 				                    .iloadFromStack(ARG0_REGISTER, FP_REGISTER, 4)
-				                    .label("getLeftOrRight exit")
+				                    .label("exit 3")
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(

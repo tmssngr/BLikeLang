@@ -1,9 +1,5 @@
 package de.regnis.bril;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -33,9 +29,9 @@ public final class BrilToAsm {
 		final BrilVarMapping varMapping = BrilVarMapping.createVarMapping(functionFromCfg);
 		varMapping.allocLocalVarSpace(asm);
 
-		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
+		final List<BrilNode> instructions = BrilFactory.getInstructions(functionFromCfg);
 		final String exitLabel = name + " exit";
-		convertToAsm(instructions, exitLabel, varMapping, asm);
+		convertToAsm(instructions, varMapping, asm);
 
 		asm.label(exitLabel);
 		varMapping.freeLocalVarSpace(asm);
@@ -55,15 +51,8 @@ public final class BrilToAsm {
 		return BrilCfg.flattenBlocks(cfgFunction);
 	}
 
-	private static void convertToAsm(List<BrilNode> instructions, String exitLabel, BrilVarMapping varMapping, BrilAsm asm) {
+	private static void convertToAsm(List<BrilNode> instructions, BrilVarMapping varMapping, BrilAsm asm) {
 		final class MyHandler extends BrilInstructions.Handler {
-			@Nullable
-			private String exitLabel;
-
-			private MyHandler(@NotNull String exitLabel) {
-				this.exitLabel = exitLabel;
-			}
-
 			@Override
 			protected void label(String name) {
 				asm.label(name);
@@ -108,13 +97,6 @@ public final class BrilToAsm {
 			}
 
 			@Override
-			protected void ret() {
-				if (exitLabel != null) {
-					asm.jump(exitLabel);
-				}
-			}
-
-			@Override
 			protected void ret(String var) {
 				final String varType = varMapping.getType(var);
 				if (BrilInstructions.INT.equals(varType)) {
@@ -123,8 +105,6 @@ public final class BrilToAsm {
 				else {
 					throw new UnsupportedOperationException(varType);
 				}
-
-				ret();
 			}
 
 			@Override
@@ -197,12 +177,8 @@ public final class BrilToAsm {
 				asm.call("print");
 			}
 		}
-		final MyHandler handler = new MyHandler(exitLabel);
-		for (final Iterator<BrilNode> it = instructions.iterator(); it.hasNext(); ) {
-			final BrilNode instruction = it.next();
-			if (!it.hasNext()) {
-				handler.exitLabel = null;
-			}
+		final MyHandler handler = new MyHandler();
+		for (BrilNode instruction : instructions) {
 			handler.visit(instruction);
 		}
 	}
