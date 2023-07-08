@@ -1,6 +1,10 @@
 package de.regnis.bril;
 
-import java.util.List;
+import de.regnis.b.ir.RegisterColoring;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -21,7 +25,17 @@ public final class BrilToAsm {
 	// Utils ==================================================================
 
 	private static void convertToAsm(BrilNode function, BrilAsm asm) {
-		final BrilNode functionFromCfg = toCfgAndBackToInstructions(function);
+		final BrilNode cfgFunction;
+		try {
+			cfgFunction = BrilCfg.buildBlocks(function);
+		}
+		catch (BrilCfg.DuplicateLabelException | BrilCfg.NoExitBlockException | BrilCfg.InvalidTargetLabelException e) {
+			throw new AssertionError(e);
+		}
+		createVarMapping(cfgFunction);
+		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+//		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
+		final BrilNode functionFromCfg = BrilCfg.flattenBlocks(cfgFunction);
 
 		final String name = BrilFactory.getName(functionFromCfg);
 		asm.label(name);
@@ -38,19 +52,111 @@ public final class BrilToAsm {
 		asm.ret();
 	}
 
-	private static BrilNode toCfgAndBackToInstructions(BrilNode function) {
-		final BrilNode cfgFunction;
-		try {
-			cfgFunction = BrilCfg.buildBlocks(function);
-		}
-		catch (BrilCfg.DuplicateLabelException | BrilCfg.NoExitBlockException | BrilCfg.InvalidTargetLabelException e) {
-			throw new AssertionError(e);
-		}
+	private static void createVarMapping(BrilNode cfgFunction) {
 		final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
+		final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
+		final List<String> argNames = getArgNames(arguments);
+
+		initialVarRename(blocks, argNames, cfgFunction);
+
 		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
-		return BrilCfg.flattenBlocks(cfgFunction);
+
+		if (false) {
+			final RegisterColoring registerColoring = new RegisterColoring();
+			registerColoring.addEdgesBetween(new HashSet<>(argNames));
+			for (int i = 0; i < argNames.size(); i++) {
+				final String argName = argNames.get(i);
+				registerColoring.setRegister(argName, i);
+			}
+
+			final Set<String> localVars = new HashSet<>();
+			BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction -> {
+				final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
+				registerColoring.addEdgesBetween(liveOut);
+				localVars.addAll(liveOut);
+			});
+			argNames.forEach(localVars::remove);
+
+			registerColoring.build();
+
+			BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction ->
+					BrilInstructions.replaceInOutVars(new Function<>() {
+						@Override
+						public String apply(String var) {
+							final int virtualRegister = registerColoring.getVirtualRegister(var);
+							if (localVars.contains(var)) {
+								return "v." + virtualRegister;
+							}
+							return var;
+						}
+					}, instruction)
+			);
+
+			BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
+
+			BrilCfg.debugPrint(blocks);
+		}
+
+/*
+		final BrilVars brilVars = new BrilVars();
+		brilVars.assign(argNames, localVars,
+		                name -> registerAllocation.getVirtualRegister(name));
+*/
 	}
 
+	private static void initialVarRename(List<BrilNode> blocks, List<String> argNames, BrilNode cfgFunction) {
+		final Map<String, String> mapping = new HashMap<>();
+		final Consumer<String> addMapping = var -> mapping.put(var, "v." + mapping.size());
+		argNames.forEach(addMapping);
+
+		BrilCfg.foreachInstructionOverAllBlocks(blocks, new Consumer<>() {
+			@Override
+			public void accept(BrilNode instruction) {
+				final String dest = BrilInstructions.getDest(instruction);
+				if (dest != null) {
+					addRenameMapping(dest);
+				}
+
+				for (String requiredVar : BrilInstructions.getRequiredVars(instruction)) {
+					addRenameMapping(requiredVar);
+				}
+			}
+
+			private void addRenameMapping(String var) {
+				if (!mapping.containsKey(var)) {
+					addMapping.accept(var);
+				}
+			}
+		});
+
+		BrilCfg.replaceAllVars(cfgFunction,
+		                       var -> mapping.get(var));
+	}
+
+	private static Set<String> getLocalVars(List<BrilNode> blocks, List<String> argNames) {
+		final Set<String> localVars = new HashSet<>();
+		BrilCfg.foreachInstructionOverAllBlocks(blocks, new Consumer<>() {
+			@Override
+			public void accept(BrilNode instruction) {
+				final String dest = BrilInstructions.getDest(instruction);
+				if (dest != null) {
+					localVars.add(dest);
+				}
+				final Set<String> requiredVars = BrilInstructions.getRequiredVars(instruction);
+				localVars.addAll(requiredVars);
+			}
+		});
+		argNames.forEach(localVars::remove);
+		return localVars;
+	}
+
+	private static List<String> getArgNames(List<BrilNode> arguments) {
+		final List<String> argNames = new ArrayList<>();
+		for (BrilNode argument : arguments) {
+			argNames.add(BrilFactory.getArgName(argument));
+		}
+		return argNames;
+	}
 	private static void convertToAsm(List<BrilNode> instructions, BrilVarMapping varMapping, BrilAsm asm) {
 		final class MyHandler extends BrilInstructions.Handler {
 			@Override

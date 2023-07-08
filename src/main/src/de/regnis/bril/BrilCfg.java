@@ -366,7 +366,7 @@ public final class BrilCfg {
 
 		final List<BrilNode> blocks = getBlocks(cfgFunction);
 		foreachInstructionOverAllBlocks(blocks,
-		                                instruction -> BrilInstructions.replaceInVars(varReplace, instruction));
+		                                instruction -> BrilInstructions.replaceInOutVars(varReplace, instruction));
 	}
 
 	public static void debugPrint(List<BrilNode> blocks) {
