@@ -41,7 +41,11 @@ public final class BrilNode {
 	public String toString() {
 		final List<String> keys = new ArrayList<>(children.keySet());
 		keys.sort(Comparator.naturalOrder());
-		return Utils.appendCommaSeparated(keys, key -> key + ": " + children.get(key), new StringBuilder()).toString();
+		final StringBuilder buffer = new StringBuilder();
+		buffer.append("[");
+		Utils.appendCommaSeparated(keys, key -> key + ": " + children.get(key), buffer);
+		buffer.append("]");
+		return buffer.toString();
 	}
 
 	// Accessing ==============================================================
