@@ -69,6 +69,9 @@ public class RegisterColoring {
 	}
 
 	public int getVirtualRegister(@NotNull String var) {
+		if (!varToRegister.containsKey(var)) {
+			throw new IllegalArgumentException("no var found: " + var);
+		}
 		return varToRegister.get(var);
 	}
 

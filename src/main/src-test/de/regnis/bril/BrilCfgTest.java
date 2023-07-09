@@ -33,10 +33,10 @@ public class BrilCfgTest {
 				.branch("cond", "print_i", "endif")
 
 				.label("print_i")
-				.print("i")
+				.printi("i")
 
 				.label("endif")
-				.call("printAscii", List.of("i"))
+				.call("printAscii", List.of(BrilFactory.argi("i")))
 				.constant("one", 1)
 				.add("i", "i", "one")
 				.jump("loop")
@@ -61,12 +61,12 @@ public class BrilCfgTest {
 
 		instructions = new ArrayList<>(instructions);
 		instructions.addAll(new BrilInstructions()
-				                    .print("a")
+				                    .printi("a")
 				                    .get());
 		BrilCfg.setInstructions(instructions, block);
 		Assert.assertEquals(new BrilInstructions()
 				                    .add("a", "b", "c")
-				                    .print("a")
+				                    .printi("a")
 				                    .get(), BrilCfg.getInstructions(block));
 	}
 
@@ -82,14 +82,14 @@ public class BrilCfgTest {
 						.get(),
 				new BrilInstructions()
 						.label(".somewhere")
-						.print("v")
+						.printi("v")
 						.get()
 		), BrilCfg.splitIntoBlocks(new BrilInstructions()
 				                           .constant("v", 4)
 				                           .jump(".somewhere")
 				                           .constant("v", 2)
 				                           .label(".somewhere")
-				                           .print("v")
+				                           .printi("v")
 				                           .get()));
 	}
 
@@ -99,7 +99,7 @@ public class BrilCfgTest {
 				                                                  .constant("v", 4)
 
 				                                                  .label(".loop")
-				                                                  .print("v")
+				                                                  .printi("v")
 				                                                  .constant("one", 1)
 				                                                  .sub("v", "v", "one")
 				                                                  .lessThan("cond", "v", "one")
@@ -117,7 +117,7 @@ public class BrilCfgTest {
 		                List.of(".loop"),
 		                iterator.next());
 		assertEqualsCfg(".loop", new BrilInstructions()
-				                .print("v")
+				                .printi("v")
 				                .constant("one", 1)
 				                .sub("v", "v", "one")
 				                .lessThan("cond", "v", "one")
@@ -143,12 +143,12 @@ public class BrilCfgTest {
 	public void testBuildBlocksRetSum() throws Exception {
 		final List<BrilNode> blocks = BrilCfg.buildBlocks(new BrilInstructions()
 				                                                  .add("sum", "a", "b")
-				                                                  .ret("sum")
+				                                                  .reti("sum")
 				                                                  .get());
 		final Iterator<BrilNode> iterator = blocks.iterator();
 		assertEqualsCfg("block 0", new BrilInstructions()
 				                .add("sum", "a", "b")
-				                .ret("sum")
+				                .reti("sum")
 				                .jump("exit 1")
 				                .get(),
 		                List.of(),
@@ -190,8 +190,8 @@ public class BrilCfgTest {
 		final List<BrilNode> blocks = BrilCfg.buildBlocks(createLoopInstructions());
 		assertLoopInstructions(blocks.iterator());
 
-		final BrilNode function = BrilCfg.buildBlocks(BrilFactory.createFunction(
-				"test", "void", List.of(),
+		final BrilNode function = BrilCfg.buildBlocks(BrilFactory.createFunctionV(
+				"test", List.of(),
 				createLoopInstructions()
 		));
 		assertLoopInstructions(BrilCfg.getBlocks(function).iterator());
@@ -204,9 +204,9 @@ public class BrilCfgTest {
 				                                                  .lessThan("cond", "input", "zero")
 				                                                  .branch("cond", "then", "endif")
 				                                                  .label("then")
-				                                                  .id("input", "zero")
+				                                                  .idi("input", "zero")
 				                                                  .label("endif")
-				                                                  .print("input")
+				                                                  .printi("input")
 				                                                  .get());
 		final Iterator<BrilNode> iterator = blocks.iterator();
 		assertEqualsCfg("block 0", new BrilInstructions()
@@ -218,14 +218,14 @@ public class BrilCfgTest {
 		                List.of("then", "endif"),
 		                iterator.next());
 		assertEqualsCfg("then", new BrilInstructions()
-				                .id("input", "zero")
+				                .idi("input", "zero")
 				                .jump("endif")
 				                .get(),
 		                List.of("block 0"),
 		                List.of("endif"),
 		                iterator.next());
 		assertEqualsCfg("endif", new BrilInstructions()
-				                .print("input")
+				                .printi("input")
 				                .get(),
 		                List.of("block 0", "then"),
 		                List.of(),
@@ -242,7 +242,7 @@ public class BrilCfgTest {
 				                                                  .constant("v", 2)
 
 				                                                  .label(".somewhere")
-				                                                  .print("v")
+				                                                  .printi("v")
 				                                                  .get()
 		);
 		Iterator<BrilNode> iterator = blocks.iterator();
@@ -261,7 +261,7 @@ public class BrilCfgTest {
 		                List.of(".somewhere"),
 		                iterator.next());
 		assertEqualsCfg(".somewhere", new BrilInstructions()
-				                .print("v")
+				                .printi("v")
 				                .get(),
 		                List.of("block 0", "block 1"),
 		                List.of(),
@@ -280,7 +280,7 @@ public class BrilCfgTest {
 		                iterator.next());
 
 		assertEqualsCfg(".somewhere", new BrilInstructions()
-				                .print("v")
+				                .printi("v")
 				                .get(),
 		                List.of("block 0"),
 		                List.of(),
@@ -417,13 +417,13 @@ public class BrilCfgTest {
 		                List.of("loop"), List.of("print_i", "endif"),
 		                iterator.next());
 		assertEqualsCfg("print_i", new BrilInstructions()
-				                .print("i")
+				                .printi("i")
 				                .jump("endif")
 				                .get(),
 		                List.of("body"), List.of("endif"),
 		                iterator.next());
 		assertEqualsCfg("endif", new BrilInstructions()
-				                .call("printAscii", List.of("i"))
+				                .call("printAscii", List.of(BrilFactory.argi("i")))
 				                .constant("one", 1)
 				                .add("i", "i", "one")
 				                .jump("loop")

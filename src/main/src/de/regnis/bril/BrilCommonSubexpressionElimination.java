@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -40,19 +41,20 @@ public class BrilCommonSubexpressionElimination {
 		final String op = BrilInstructions.getOp(instruction);
 
 		final String dest = BrilInstructions.getDest(instruction);
+		final String type = BrilInstructions.getType(instruction);
 		if (dest != null) {
-			if (BrilInstructions.CONST.equals(op)) {
+			if (BrilInstructions.CONST.equals(op) && BrilInstructions.INT.equals(type)) {
 				final CanonicalExpression canonicalExpression = new Literal(BrilInstructions.getIntValue(instruction));
 				final int canonicalIndex = findCanonicalExpression(canonicalExpression);
 				if (canonicalIndex < 0) {
-					addValue(dest, canonicalExpression);
+					addValue(dest, type, canonicalExpression);
 				}
 				return factory.add(instruction);
 			}
 
-			if (BrilInstructions.ID.equals(op)) {
+			if (BrilInstructions.ID.equals(op) && type != null) {
 				final String var = BrilInstructions.getVarNotNull(instruction);
-				final int varIndex = getVarIndex(var);
+				final int varIndex = getVarIndex(var, type);
 				final Value value = getValueAtIndex(varIndex);
 				varToIndex.put(dest, varIndex);
 				if (value.canonicalExpression instanceof Literal literal) {
@@ -62,11 +64,11 @@ public class BrilCommonSubexpressionElimination {
 				return id(dest, value, factory);
 			}
 
-			if (BrilInstructions.ADD.equals(op)) {
+			if (BrilInstructions.ADD.equals(op) && BrilInstructions.INT.equals(type)) {
 				final String var1 = BrilInstructions.getVar1NotNull(instruction);
 				final String var2 = BrilInstructions.getVar2NotNull(instruction);
-				final int varIndex1 = getVarIndex(var1);
-				final int varIndex2 = getVarIndex(var2);
+				final int varIndex1 = getVarIndex(var1, type);
+				final int varIndex2 = getVarIndex(var2, type);
 				final Value value1 = getValueAtIndex(varIndex1);
 				final Value value2 = getValueAtIndex(varIndex2);
 				if (value1.canonicalExpression instanceof Literal literal1
@@ -77,8 +79,8 @@ public class BrilCommonSubexpressionElimination {
 				final CanonicalExpression canonicalExpression = new Binary(op, varIndex1, varIndex2);
 				final int expressionIndex = findCanonicalExpression(canonicalExpression);
 				if (expressionIndex < 0) {
-					addValue(dest, canonicalExpression);
-					return factory.binary(dest, BrilInstructions.getType(instruction), op, value1.getCanonicalVar(), value2.getCanonicalVar());
+					addValue(dest, type, canonicalExpression);
+					return factory.binary(dest, type, op, value1.getCanonicalVar(), value2.getCanonicalVar());
 				}
 
 				final Value value = getValueAtIndex(expressionIndex);
@@ -86,11 +88,18 @@ public class BrilCommonSubexpressionElimination {
 			}
 		}
 
-		if (BrilInstructions.PRINT.equals(op)) {
-			final String var = BrilInstructions.getVarNotNull(instruction);
-			final Value value = getValueForVar(var);
-			final String canonicalVar = value.getCanonicalVar();
-			return factory.print(canonicalVar);
+		if (BrilInstructions.CALL.equals(op)) {
+			Utils.todo(); // return value
+			final List<BrilNode> args = BrilInstructions.getArgs(instruction);
+			final List<BrilNode> newArgs = new ArrayList<>();
+			for (BrilNode arg : args) {
+				final String var = BrilFactory.getArgName(arg);
+				final String argType = BrilFactory.getArgType(arg);
+				final Value value = getValueForVar(var, argType);
+				final String canonicalVar = value.getCanonicalVar();
+				newArgs.add(BrilFactory.arg(canonicalVar, argType));
+			}
+			return factory.call(BrilInstructions.getName(instruction), newArgs);
 		}
 
 		if (BrilInstructions.getRequiredVars(instruction).size() > 0) {
@@ -104,10 +113,12 @@ public class BrilCommonSubexpressionElimination {
 	private static BrilInstructions id(String dest, Value value, BrilInstructions factory) {
 		final String canonicalVar = value.getCanonicalVar();
 		value.addVar(dest);
-		return factory.id(dest, canonicalVar);
+		Utils.todo();
+		final String type = BrilInstructions.INT;
+		return factory.id(dest, type, canonicalVar);
 	}
 
-	private int addValue(String dest, CanonicalExpression canonicalExpression) {
+	private int addValue(String dest, String type, CanonicalExpression canonicalExpression) {
 		final int index = getNextIndex();
 		final Integer prevIndex = varToIndex.put(dest, index);
 		if (prevIndex != null) {
@@ -117,13 +128,13 @@ public class BrilCommonSubexpressionElimination {
 				availableValues.remove(oldValueInDest);
 			}
 		}
-		availableValues.add(new Value(index, canonicalExpression, dest));
+		availableValues.add(new Value(index, type, canonicalExpression, dest));
 		return index;
 	}
 
 	@NotNull
-	private Value getValueForVar(String var) {
-		final int varIndex = getVarIndex(var);
+	private Value getValueForVar(String var, String type) {
+		final int varIndex = getVarIndex(var, type);
 		return getValueAtIndex(varIndex);
 	}
 
@@ -145,11 +156,11 @@ public class BrilCommonSubexpressionElimination {
 		throw new IllegalArgumentException("Unexpected index " + index);
 	}
 
-	private int getVarIndex(String var) {
+	private int getVarIndex(String var, String type) {
 		final Integer index = varToIndex.get(var);
 		return index != null
 				? index
-				: addValue(var, new Parameter(var));
+				: addValue(var, type, new Parameter(var));
 	}
 
 	private int getNextIndex() {
@@ -179,11 +190,13 @@ public class BrilCommonSubexpressionElimination {
 	private static final class Value {
 
 		private final int index;
+		private final String type;
 		private final CanonicalExpression canonicalExpression;
 		private final List<String> canonicalVars;
 
-		public Value(int index, CanonicalExpression canonicalExpression, String canonicalVar) {
+		public Value(int index, String type, CanonicalExpression canonicalExpression, String canonicalVar) {
 			this.index               = index;
+			this.type                = type;
 			this.canonicalExpression = canonicalExpression;
 
 			canonicalVars = new ArrayList<>();
@@ -192,7 +205,7 @@ public class BrilCommonSubexpressionElimination {
 
 		@Override
 		public String toString() {
-			return "#" + index + " (" + canonicalVars + "): " + canonicalExpression;
+			return "#" + index + ": " + type + " (" + canonicalVars + "): " + canonicalExpression;
 		}
 
 		public String getCanonicalVar() {

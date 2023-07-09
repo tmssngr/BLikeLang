@@ -17,14 +17,14 @@ public class BrilLargerTest {
 				               BrilCfg.createBlock("block 0",
 				                                   new BrilInstructions()
 						                                   .constant("a.1", 2)
-						                                   .print("a.1")
+						                                   .printi("a.1")
 						                                   .get())
 		               ),
-		               BrilFactory.createFunction("main", "void", List.of(),
+		               BrilFactory.createFunctionV("main", List.of(),
 		                                          new BrilInstructions()
 				                                          .constant("a", 1)
 				                                          .constant("a", 2)
-				                                          .print("a")
+				                                          .printi("a")
 				                                          .get()
 		               )
 		);
@@ -36,7 +36,7 @@ public class BrilLargerTest {
 				               BrilCfg.createBlock("block 0",
 				                                   new BrilInstructions()
 						                                   .constant("i", 0x20)
-						                                   .id("i.1", "i")
+						                                   .idi("i.1", "i")
 						                                   .jump("loop")
 						                                   .get()
 				               ),
@@ -58,22 +58,22 @@ public class BrilLargerTest {
 				               ),
 				               BrilCfg.createBlock("print_i",
 				                                   new BrilInstructions()
-						                                   .print("i.1")
+						                                   .printi("i.1")
 						                                   .jump("endif")
 						                                   .get()
 				               ),
 				               BrilCfg.createBlock("endif",
 				                                   new BrilInstructions()
-						                                   .id("i.2", "i.1")
-						                                   .call("printAscii", List.of("i.2"))
+						                                   .idi("i.2", "i.1")
+						                                   .call("printAscii", List.of(BrilFactory.argi("i.2")))
 						                                   .constant("one", 1)
 						                                   .add("i.3", "i.2", "one")
-						                                   .id("i.1", "i.3")
+						                                   .idi("i.1", "i.3")
 						                                   .jump("loop")
 						                                   .get()
 				               ),
 				               BrilCfg.createBlock("exit", List.of())
-		               ), BrilFactory.createFunction("test", "void", List.of(),
+		               ), BrilFactory.createFunctionV("test", List.of(),
 		                                             BrilCfgTest.createLoopInstructions())
 		);
 	}

@@ -23,10 +23,10 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("sum", "int", List.of(BrilFactory.argument("a", "int"), BrilFactory.argument("b", "int")),
+				                                           BrilFactory.createFunctionI("sum", List.of(BrilFactory.argi("a"), BrilFactory.argi("b")),
 				                                                                      new BrilInstructions()
 						                                                                      .add("sum", "a", "b")
-						                                                                      .ret("sum")
+						                                                                      .reti("sum")
 						                                                                      .get()
 				                                           )
 		                                           )
@@ -60,12 +60,13 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("main", "void", List.of(),
+				                                           BrilFactory.createFunctionV("main", List.of(),
 				                                                                      new BrilInstructions()
 						                                                                      .constant("value1", 2)
 						                                                                      .constant("value2", 3)
-						                                                                      .call("result", "sum", List.of("value1", "value2"))
-						                                                                      .print("result")
+						                                                                      .calli("result", "sum", List.of(BrilFactory.argi("value1"),
+						                                                                                                      BrilFactory.argi("value2")))
+						                                                                      .printi("result")
 						                                                                      .get()
 				                                           )
 		                                           )
@@ -90,17 +91,17 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("getLeftOrRight", BrilInstructions.INT, List.of(
-						                                                                      BrilFactory.argument("leftOrRight", BrilInstructions.BOOL),
-						                                                                      BrilFactory.argument("left", BrilInstructions.INT),
-						                                                                      BrilFactory.argument("right", BrilInstructions.INT)
+				                                           BrilFactory.createFunctionI("getLeftOrRight", List.of(
+						                                                                      BrilFactory.argb("leftOrRight"),
+						                                                                      BrilFactory.argi("left"),
+						                                                                      BrilFactory.argi("right")
 				                                                                      ),
 				                                                                      new BrilInstructions()
 						                                                                      .branch("leftOrRight", "takeLeft", "takeRight")
 						                                                                      .label("takeLeft")
-						                                                                      .ret("left")
+						                                                                      .reti("left")
 						                                                                      .label("takeRight")
-						                                                                      .ret("right")
+						                                                                      .reti("right")
 						                                                                      .get()
 				                                           )
 		                                           )
@@ -130,17 +131,17 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("max", BrilInstructions.INT, List.of(
-						                                                                      BrilFactory.argument("a", BrilInstructions.INT),
-						                                                                      BrilFactory.argument("b", BrilInstructions.INT)
+				                                           BrilFactory.createFunctionI("max", List.of(
+						                                                                      BrilFactory.argi("a"),
+						                                                                      BrilFactory.argi("b")
 				                                                                      ),
 				                                                                      new BrilInstructions()
 						                                                                      .lessThan("cond", "a", "b")
 						                                                                      .branch("cond", "takeB", "takeA")
 						                                                                      .label("takeB")
-						                                                                      .ret("b")
+						                                                                      .reti("b")
 						                                                                      .label("takeA")
-						                                                                      .ret("a")
+						                                                                      .reti("a")
 						                                                                      .get()
 				                                           )
 		                                           )
@@ -195,8 +196,8 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("fibonacci", BrilInstructions.INT, List.of(
-						                                                                      BrilFactory.argument("n", BrilInstructions.INT)
+				                                           BrilFactory.createFunctionI("fibonacci", List.of(
+						                                                                      BrilFactory.argi("n")
 				                                                                      ),
 				                                                                      new BrilInstructions()
 						                                                                      .constant("a", 0)
@@ -209,14 +210,14 @@ public class BrilToAsmTest {
 
 						                                                                      .label("body")
 						                                                                      .add("sum", "a", "b")
-						                                                                      .id("a", "b")
-						                                                                      .id("b", "sum")
+						                                                                      .idi("a", "b")
+						                                                                      .idi("b", "sum")
 						                                                                      .constant("one", 1)
 						                                                                      .sub("n", "n", "one")
 						                                                                      .jump("while")
 
 						                                                                      .label("exit")
-						                                                                      .ret("b")
+						                                                                      .reti("b")
 						                                                                      .get()
 				                                           )
 		                                           )
@@ -278,13 +279,13 @@ public class BrilToAsmTest {
 				                    .ret()
 				                    .toLines(),
 		                    BrilToAsm.convertToAsm(List.of(
-				                                           BrilFactory.createFunction("average", BrilInstructions.VOID, List.of(),
+				                                           BrilFactory.createFunctionV("average", List.of(),
 				                                                                      new BrilInstructions()
 						                                                                      .constant("n", 0)
 						                                                                      .constant("sum", 0)
 
 						                                                                      .label("loop")
-						                                                                      .call("value", "getInt", List.of())
+						                                                                      .calli("value", "getInt", List.of())
 						                                                                      .constant("zero", 0)
 						                                                                      .lessThan("cond", "value", "zero")
 						                                                                      .branch("cond", "exit", "body")
@@ -293,8 +294,9 @@ public class BrilToAsmTest {
 						                                                                      .constant("one", 1)
 						                                                                      .add("n", "n", "one")
 						                                                                      .add("sum", "sum", "value")
-						                                                                      .call("average", "div", List.of("sum", "n"))
-						                                                                      .print("average")
+						                                                                      .calli("average", "div", List.of(BrilFactory.argi("sum"),
+						                                                                                                       BrilFactory.argi("n")))
+						                                                                      .printi("average")
 						                                                                      .jump("loop")
 
 						                                                                      .label("exit")

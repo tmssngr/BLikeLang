@@ -106,7 +106,7 @@ public final class BrilRegisterIndirection {
 			if (isStackParameter(newDest)) {
 				final String temp = createTemp();
 				factory.constant(temp, value);
-				factory.id(newDest, temp);
+				factory.idi(newDest, temp);
 			}
 			else {
 				factory.constant(newDest, value);
@@ -114,16 +114,16 @@ public final class BrilRegisterIndirection {
 		}
 
 		@Override
-		protected void id(String dest, String src) {
+		protected void id(String dest, String type, String src) {
 			final String newSrc = getMapped(src);
 			final String newDest = getMapped(dest);
 			if (isStackParameter(newSrc) || isStackParameter(newDest)) {
 				final String temp = createTemp();
-				factory.id(temp, newSrc);
-				factory.id(newDest, temp);
+				factory.id(temp, type, newSrc);
+				factory.id(newDest, type, temp);
 			}
 			else {
-				factory.id(newDest, newSrc);
+				factory.id(newDest, type, newSrc);
 			}
 		}
 
@@ -131,20 +131,20 @@ public final class BrilRegisterIndirection {
 			void binary(String dest, String var1, String var2);
 		}
 
-		private void binary(String dest, String var1, String var2, BinaryOp op) {
+		private void binary(String dest, String type, String var1, String var2, BinaryOp op) {
 			String newVar1 = getMapped(var1);
 			String newVar2 = getMapped(var2);
 			final String newDest = getMapped(dest);
 			String temp1 = null;
 			if (isStackParameter(newVar1)) {
 				temp1 = createTemp();
-				factory.id(temp1, newVar1);
+				factory.id(temp1, type, newVar1);
 				newVar1 = temp1;
 			}
 			String temp2 = null;
 			if (isStackParameter(newVar2)) {
 				temp2 = createTemp();
-				factory.id(temp2, newVar2);
+				factory.id(temp2, type, newVar2);
 				newVar2 = temp2;
 			}
 
@@ -155,7 +155,7 @@ public final class BrilRegisterIndirection {
 						? temp2
 						: createTemp();
 				op.binary(temp, newVar1, newVar2);
-				factory.id(newDest, temp);
+				factory.id(newDest, type, temp);
 			}
 			else {
 				op.binary(newDest, newVar1, newVar2);
@@ -164,31 +164,31 @@ public final class BrilRegisterIndirection {
 
 		@Override
 		protected void add(String dest, String var1, String var2) {
-			binary(dest, var1, var2,
+			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.add(d, v1, v2));
 		}
 
 		@Override
 		protected void sub(String dest, String var1, String var2) {
-			binary(dest, var1, var2,
+			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.sub(d, v1, v2));
 		}
 
 		@Override
 		protected void mul(String dest, String var1, String var2) {
-			binary(dest, var1, var2,
+			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.mul(d, v1, v2));
 		}
 
 		@Override
 		protected void and(String dest, String var1, String var2) {
-			binary(dest, var1, var2,
+			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.and(d, v1, v2));
 		}
 
 		@Override
 		protected void lessThan(String dest, String var1, String var2) {
-			binary(dest, var1, var2,
+			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.lessThan(d, v1, v2));
 		}
 
@@ -198,9 +198,9 @@ public final class BrilRegisterIndirection {
 		}
 
 		@Override
-		protected void ret(String var) {
+		protected void ret(String var, String type) {
 			final String newVar = getMapped(var);
-			factory.id("r.0", newVar);
+			factory.id("r.0", type, newVar);
 		}
 
 		@Override
@@ -213,91 +213,88 @@ public final class BrilRegisterIndirection {
 			String newVar = getMapped(var);
 			if (isStackParameter(newVar)) {
 				final String temp = createTemp();
-				factory.id(temp, newVar);
+				factory.idb(temp, newVar);
 				newVar = temp;
 			}
 			factory.branch(newVar, thenLabel, elseLabel);
 		}
 
 		@Override
-		protected void call(String name, List<String> args) {
+		protected void call(String name, List<BrilNode> args) {
 			String temp = null;
 			for (int i = 0; i < args.size(); i++) {
-				final String arg = args.get(i);
-				String newArg = getMapped(arg);
+				final BrilNode arg = args.get(i);
+				final String argName = BrilFactory.getArgName(arg);
+				final String argType = BrilFactory.getArgType(arg);
+				String newArg = getMapped(argName);
 				if (i < 2) {
-					factory.id(PREFIX_REGISTER + i, newArg);
+					factory.id(PREFIX_REGISTER + i, argType, newArg);
 				}
 				else {
 					if (isStackParameter(newArg)) {
 						if (temp == null) {
 							temp = createTemp();
 						}
-						factory.id(temp, newArg);
+						factory.id(temp, argType, newArg);
 						newArg = temp;
 					}
-					factory.call(CALL_PUSH, List.of(newArg));
+					factory.call(CALL_PUSH, List.of(BrilFactory.arg(newArg, argType)));
 				}
 			}
 			factory.call(name, args);
 
 			for (int i = 2; i < args.size(); i++) {
-				final String arg = args.get(i);
-				final String newArg = getMapped(arg);
+				final BrilNode arg = args.get(i);
+				final String argName = BrilFactory.getArgName(arg);
+				final String argType = BrilFactory.getArgType(arg);
+				final String newArg = getMapped(argName);
 				if (temp == null) {
 					temp = createTemp();
 				}
-				factory.call(newArg, CALL_POP, List.of());
+				factory.call(newArg, argType, CALL_POP, List.of());
 			}
 		}
 
 		@Override
-		protected void call(String dest, String name, List<String> args) {
+		protected void call(String dest, String type, String name, List<BrilNode> args) {
 			String temp = null;
 			for (int i = 0; i < args.size(); i++) {
-				final String arg = args.get(i);
-				String newArg = getMapped(arg);
+				final BrilNode arg = args.get(i);
+				final String argName = BrilFactory.getArgName(arg);
+				final String argType = BrilFactory.getArgType(arg);
+				String newArg = getMapped(argName);
 				if (i < 2) {
-					factory.id(PREFIX_REGISTER + i, newArg);
+					factory.id(PREFIX_REGISTER + i, argType, newArg);
 				}
 				else {
 					if (isStackParameter(newArg)) {
 						if (temp == null) {
 							temp = createTemp();
 						}
-						factory.id(temp, newArg);
+						factory.id(temp, argType, newArg);
 						newArg = temp;
 					}
-					factory.call(CALL_PUSH, List.of(newArg));
+					factory.call(CALL_PUSH, List.of(BrilFactory.arg(newArg, argType)));
 				}
 			}
 
 			final String result = PREFIX_REGISTER + 0;
 
-			factory.call(result, name, args);
+			factory.call(result, type, name, args);
 
 			final String newDest = getMapped(dest);
-			factory.id(newDest, result);
+			factory.id(newDest, type, result);
 
 			for (int i = 2; i < args.size(); i++) {
-				final String arg = args.get(i);
-				final String newArg = getMapped(arg);
+				final BrilNode arg = args.get(i);
+				final String argName = BrilFactory.getArgName(arg);
+				final String argType = BrilFactory.getArgType(arg);
+				final String newArg = getMapped(argName);
 				if (temp == null) {
 					temp = createTemp();
 				}
-				factory.call(newArg, CALL_POP, List.of());
+				factory.call(newArg, argType, CALL_POP, List.of());
 			}
-		}
-
-		@Override
-		protected void print(String var) {
-			String newVar = getMapped(var);
-			if (isStackParameter(newVar)) {
-				final String temp = createTemp();
-				factory.id(temp, newVar);
-				newVar = temp;
-			}
-			factory.print(newVar);
 		}
 	}
 }

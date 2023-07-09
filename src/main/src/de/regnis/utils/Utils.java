@@ -53,7 +53,7 @@ public final class Utils {
 					case '\'' -> chr;
 					case '"' -> chr;
 					case '\\' -> chr;
-					case 't' ->  '\t';
+					case 't' -> '\t';
 					case 'n' -> '\n';
 					case 'r' -> '\r';
 					default -> 0;
@@ -175,5 +175,9 @@ public final class Utils {
 			v += 'A' - '9' - 1;
 		}
 		return (char) (v + '0');
+	}
+
+	@Deprecated
+	public static void todo() {
 	}
 }

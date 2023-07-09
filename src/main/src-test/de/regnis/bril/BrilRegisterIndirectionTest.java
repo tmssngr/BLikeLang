@@ -23,11 +23,11 @@ public class BrilRegisterIndirectionTest {
 				             .constant("v.1", 2)
 				             // .add("sum", "a", "b")
 				             .add("t.4", "v.0", "v.1")
-				             .id("p.0", "t.4")
+				             .idi("p.0", "t.4")
 				             // .sub("diff", "sum", "a")
-				             .id("t.5", "p.0")
+				             .idi("t.5", "p.0")
 				             .sub("t.5", "t.5", "v.0")
-				             .id("p.1", "t.5")
+				             .idi("p.1", "t.5")
 				             .get(),
 		             new BrilRegisterIndirection(Map.of("a", "v.0",
 		                                                "b", "v.1",
@@ -51,9 +51,9 @@ public class BrilRegisterIndirectionTest {
 				             .constant("b", 2)
 				             // .add("sum", "a", "b")
 				             .add("t.4", "a", "b")
-				             .id("sum", "t.4")
+				             .idi("sum", "t.4")
 				             // .sub("diff", "sum", "a")
-				             .id("t.5", "sum")
+				             .idi("t.5", "sum")
 				             .sub("diff", "t.5", "a")
 				             .get(),
 		             new BrilRegisterIndirection(4,
@@ -72,16 +72,16 @@ public class BrilRegisterIndirectionTest {
 				             .constant("a", 1)
 				             .constant("b", 2)
 				             //.call("sum", "add", List.of("b", "a"))
-				             .id("r.0", "b")
-				             .id("r.1", "a")
-				             .call("r.0", "add", List.of("b", "a"))
-				             .id("sum", "r.0")
+				             .idi("r.0", "b")
+				             .idi("r.1", "a")
+				             .calli("r.0", "add", List.of(BrilFactory.argi("b"), BrilFactory.argi("a")))
+				             .idi("sum", "r.0")
 				             .get(),
 		             new BrilRegisterIndirection(4, var -> false)
 				             .transformInstructions(new BrilInstructions()
 						                                    .constant("a", 1)
 						                                    .constant("b", 2)
-						                                    .call("sum", "add", List.of("b", "a"))
+						                                    .calli("sum", "add", List.of(BrilFactory.argi("b"), BrilFactory.argi("a")))
 						                                    .get()));
 	}
 }

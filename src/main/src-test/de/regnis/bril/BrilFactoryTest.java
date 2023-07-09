@@ -13,15 +13,15 @@ public class BrilFactoryTest {
 	public void test() {
 		final BrilFactory factory = new BrilFactory();
 		factory.addFunction("max", "int",
-		                    List.of(BrilFactory.argument("a", "int"),
-		                            BrilFactory.argument("b", "int")),
+		                    List.of(BrilFactory.argi("a"),
+		                            BrilFactory.argi("b")),
 		                    new BrilInstructions()
-				                    .id("result", "a")
+				                    .idi("result", "a")
 				                    .lessThan("cond", "a", "b")
 				                    .branch("cond", "then", "else")
 
 				                    .label("then")
-				                    .id("result", "b")
+				                    .idi("result", "b")
 				                    .jump("next")
 
 				                    .label("else")
@@ -34,7 +34,8 @@ public class BrilFactoryTest {
 		                    new BrilInstructions()
 				                    .constant("a", 1)
 				                    .constant("b", 2)
-				                    .call("max", List.of("a", "b"))
+				                    .call("max", List.of(BrilFactory.argi("a"),
+				                                         BrilFactory.argi("b")))
 				                    .ret()
 				                    .get());
 	}

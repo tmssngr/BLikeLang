@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import static de.regnis.utils.Utils.notNull;
+
 /**
  * @author Thomas Singer
  */
@@ -27,7 +29,6 @@ public class BrilInstructions {
 	public static final String ID = "id";
 	public static final String JMP = "jmp";
 	private static final String LABEL = "label";
-	public static final String PRINT = "print";
 	public static final String RET = "ret";
 	public static final String KEY_OP = "op";
 	private static final String KEY_JMP_TARGET = "target";
@@ -92,13 +93,24 @@ public class BrilInstructions {
 		return node.getString(KEY_TYPE);
 	}
 
+	@NotNull
+	public static String getTypeNotNull(BrilNode instruction) {
+		return notNull(instruction.getString(KEY_TYPE));
+	}
+
 	public static void setDest(String dest, BrilNode node) {
 		node.set(KEY_DEST, dest);
 	}
 
+	@Nullable
+	public static String getVar(BrilNode node) {
+		return node.getString(KEY_VAR);
+	}
+
 	@NotNull
 	public static String getVarNotNull(BrilNode node) {
-		return node.getString(KEY_VAR);
+		//noinspection DataFlowIssue
+		return getVar(node);
 	}
 
 	@NotNull
@@ -122,17 +134,20 @@ public class BrilInstructions {
 
 	public static Set<String> getRequiredVars(BrilNode node) {
 		final Set<String> requiredVars = new HashSet<>();
-		requiredVars.add(node.getString(KEY_VAR));
+		requiredVars.add(getVar(node));
 		requiredVars.add(node.getString(KEY_VAR1));
 		requiredVars.add(node.getString(KEY_VAR2));
-		requiredVars.addAll(getArgs(node));
+		final List<BrilNode> args = getArgs(node);
+		for (BrilNode arg : args) {
+			requiredVars.add(BrilFactory.getArgName(arg));
+		}
 		requiredVars.remove(null);
 		return requiredVars;
 	}
 
 	@NotNull
-	public static List<String> getArgs(BrilNode node) {
-		return node.getStringList(KEY_ARGS);
+	public static List<BrilNode> getArgs(BrilNode node) {
+		return node.getNodeList(KEY_ARGS);
 	}
 
 	public static void replaceInOutVars(Function<String, String> varReplace, BrilNode node) {
@@ -146,20 +161,21 @@ public class BrilInstructions {
 		replace(KEY_VAR1, varReplace, node);
 		replace(KEY_VAR2, varReplace, node);
 
-		final List<String> args = getArgs(node);
+		final List<BrilNode> args = getArgs(node);
 		if (args.size() > 0) {
-			final List<String> newArgs = new ArrayList<>(args.size());
-			for (String arg : args) {
-				newArgs.add(varReplace.apply(arg));
+			for (BrilNode arg : args) {
+				final String argName = BrilFactory.getArgName(arg);
+				final String newName = varReplace.apply(argName);
+				BrilFactory.setArgName(newName, arg);
 			}
-			node.set(KEY_ARGS, newArgs);
 		}
 	}
 
 	@NotNull
-	public static BrilNode _id(String dest, String src) {
+	public static BrilNode _id(String dest, String type, String src) {
 		return new BrilNode()
 				.set(KEY_DEST, dest)
+				.set(KEY_TYPE, type)
 				.set(KEY_OP, ID)
 				.set(KEY_VAR, src);
 	}
@@ -205,8 +221,18 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions id(String dest, String src) {
-		return add(_id(dest, src));
+	public BrilInstructions id(String dest, String type, String src) {
+		return add(_id(dest, type, src));
+	}
+
+	@NotNull
+	public BrilInstructions idi(String dest, String src) {
+		return id(dest, INT, src);
+	}
+
+	@NotNull
+	public BrilInstructions idb(String dest, String src) {
+		return id(dest, BOOL, src);
 	}
 
 	@NotNull
@@ -251,9 +277,18 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions ret(String var) {
+	public BrilInstructions reti(String var) {
 		return add(new BrilNode()
 				           .set(KEY_OP, RET)
+				           .set(KEY_TYPE, INT)
+				           .set(KEY_VAR, var));
+	}
+
+	@NotNull
+	public BrilInstructions retb(String var) {
+		return add(new BrilNode()
+				           .set(KEY_OP, RET)
+				           .set(KEY_TYPE, BOOL)
 				           .set(KEY_VAR, var));
 	}
 
@@ -274,28 +309,46 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions call(String name, List<String> args) {
+	public BrilInstructions call(String name, List<BrilNode> args) {
 		return add(new BrilNode()
 				           .set(KEY_OP, CALL)
 				           .set(KEY_NAME, name)
-				           .set(KEY_ARGS, args));
+				           .setNodes(KEY_ARGS, args));
 	}
 
 	@NotNull
-	public BrilInstructions call(String dest, String name, List<String> args) {
+	public BrilInstructions call(String dest, String type, String name, List<BrilNode> args) {
 		return add(new BrilNode()
-				           .set(KEY_OP, CALL)
-				           .set(KEY_DEST, dest)
-				           .set(KEY_TYPE, INT)
-				           .set(KEY_NAME, name)
-				           .set(KEY_ARGS, args));
+				.set(KEY_OP, CALL)
+				.set(KEY_DEST, dest)
+				.set(KEY_TYPE, type)
+				.set(KEY_NAME, name)
+				.setNodes(KEY_ARGS, args));
 	}
 
 	@NotNull
-	public BrilInstructions print(String var) {
-		return add(new BrilNode()
-				           .set(KEY_OP, PRINT)
-				           .set(KEY_VAR, var));
+	public BrilInstructions calli(String dest, String name, List<BrilNode> args) {
+		return call(dest, INT, name, args);
+	}
+
+	@NotNull
+	public BrilInstructions callb(String dest, String name, List<BrilNode> args) {
+		return call(dest, BOOL, name, args);
+	}
+
+	@NotNull
+	public BrilInstructions printi(String dest) {
+		return print(dest, INT);
+	}
+
+	@NotNull
+	public BrilInstructions printb(String dest) {
+		return print(dest, BOOL);
+	}
+
+	@NotNull
+	public BrilInstructions print(String dest, String type) {
+		return call("call", List.of(BrilFactory.arg(dest, type)));
 	}
 
 	@NotNull
@@ -323,7 +376,7 @@ public class BrilInstructions {
 				constant(dest, getIntValue(instruction));
 			}
 			else if (ID.equals(op)) {
-				id(dest, getVarNotNull(instruction));
+				id(dest, getTypeNotNull(instruction), getVarNotNull(instruction));
 			}
 			else if (ADD.equals(op)) {
 				add(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
@@ -341,9 +394,9 @@ public class BrilInstructions {
 				lessThan(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
 			else if (RET.equals(op)) {
-				final String var = instruction.getString(KEY_VAR);
+				final String var = getVar(instruction);
 				if (var != null) {
-					ret(var);
+					ret(var, getTypeNotNull(instruction));
 				}
 				else {
 					ret();
@@ -357,14 +410,11 @@ public class BrilInstructions {
 			}
 			else if (CALL.equals(op)) {
 				if (dest != null) {
-					call(dest, getName(instruction), getArgs(instruction));
+					call(dest, getTypeNotNull(instruction), getName(instruction), getArgs(instruction));
 				}
 				else {
 					call(getName(instruction), getArgs(instruction));
 				}
-			}
-			else if (PRINT.equals(op)) {
-				print(getVarNotNull(instruction));
 			}
 			else if (op == null) {
 				label(getLabel(instruction));
@@ -380,7 +430,7 @@ public class BrilInstructions {
 		protected void constant(String dest, int value) {
 		}
 
-		protected void id(String dest, String var) {
+		protected void id(String dest, String type, String src) {
 		}
 
 		protected void add(String dest, String var1, String var2) {
@@ -401,7 +451,7 @@ public class BrilInstructions {
 		protected void ret() {
 		}
 
-		protected void ret(String var) {
+		protected void ret(String var, String type) {
 		}
 
 		protected void jump(String target) {
@@ -410,13 +460,10 @@ public class BrilInstructions {
 		protected void branch(String var, String thenLabel, String elseLabel) {
 		}
 
-		protected void call(String name, List<String> args) {
+		protected void call(String name, List<BrilNode> args) {
 		}
 
-		protected void call(String dest, String name, List<String> args) {
-		}
-
-		protected void print(String var) {
+		protected void call(String dest, String type, String name, List<BrilNode> args) {
 		}
 	}
 }

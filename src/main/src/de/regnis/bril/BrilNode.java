@@ -65,6 +65,11 @@ public final class BrilNode {
 		return this;
 	}
 
+	public BrilNode setNodes(String key, List<BrilNode> nodes) {
+		children.put(key, nodes);
+		return this;
+	}
+
 	public List<BrilNode> getOrCreateNodeList(String key) {
 		//noinspection unchecked
 		List<BrilNode> list = (List<BrilNode>) children.get(key);
@@ -74,6 +79,16 @@ public final class BrilNode {
 		}
 
 		return list;
+	}
+
+	public List<BrilNode> getNodeList(String key) {
+		//noinspection unchecked
+		List<BrilNode> list = (List<BrilNode>) children.get(key);
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+
+		return Collections.unmodifiableList(list);
 	}
 
 	public List<String> getOrCreateStringList(String key) {

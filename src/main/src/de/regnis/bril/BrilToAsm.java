@@ -228,8 +228,8 @@ public final class BrilToAsm {
 			}
 
 			@Override
-			protected void id(String dest, String var) {
-				varMapping.id(dest, var, asm);
+			protected void id(String dest, String type, String src) {
+				varMapping.id(dest, type, src, asm);
 			}
 
 			@Override
@@ -261,13 +261,12 @@ public final class BrilToAsm {
 			}
 
 			@Override
-			protected void ret(String var) {
-				final String varType = varMapping.getType(var);
-				if (BrilInstructions.INT.equals(varType)) {
+			protected void ret(String var, String type) {
+				if (BrilInstructions.INT.equals(type)) {
 					varMapping.ireturnValueFromVar(var, asm);
 				}
 				else {
-					throw new UnsupportedOperationException(varType);
+					throw new UnsupportedOperationException(type);
 				}
 			}
 
@@ -278,20 +277,16 @@ public final class BrilToAsm {
 
 			@Override
 			protected void branch(String var, String thenLabel, String elseLabel) {
-				final String varType = varMapping.getType(var);
-				if (!BrilInstructions.BOOL.equals(varType)) {
-					throw new IllegalArgumentException("Expected a bool variable for the br command");
-				}
-
 				varMapping.branch(var, thenLabel, elseLabel, asm);
 			}
 
 			@Override
-			protected void call(String name, List<String> args) {
+			protected void call(String name, List<BrilNode> args) {
 				if (name.equals(BrilRegisterIndirection.CALL_PUSH)) {
 					Utils.assertTrue(args.size() == 1);
-					final String arg = args.get(0);
-					final int register = varToRegister(arg);
+					final BrilNode arg = args.get(0);
+					final String argName = BrilFactory.getArgName(arg);
+					final int register = varToRegister(argName);
 					asm.ipush(register);
 					return;
 				}
@@ -301,7 +296,7 @@ public final class BrilToAsm {
 			}
 
 			@Override
-			protected void call(String dest, String name, List<String> args) {
+			protected void call(String dest, String type, String name, List<BrilNode> args) {
 				if (name.equals(BrilRegisterIndirection.CALL_POP)) {
 					Utils.assertTrue(args.isEmpty());
 					final int register = varToRegister(dest);
@@ -316,19 +311,6 @@ public final class BrilToAsm {
 			private int varToRegister(String arg) {
 				Utils.assertTrue(arg.startsWith(PREFIX_REGISTER));
 				return 2 * Integer.parseInt(arg.substring(PREFIX_REGISTER.length()));
-			}
-
-			@Override
-			protected void print(String var) {
-				final String varType = varMapping.getType(var);
-				if (BrilInstructions.INT.equals(varType)) {
-					varMapping.callArgument(var, 0, asm);
-				}
-				else {
-					throw new UnsupportedOperationException(varType);
-				}
-
-				asm.call("print");
 			}
 		}
 		final MyHandler handler = new MyHandler();

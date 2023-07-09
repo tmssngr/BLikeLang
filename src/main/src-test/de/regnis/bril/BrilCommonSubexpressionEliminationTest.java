@@ -18,13 +18,13 @@ public class BrilCommonSubexpressionEliminationTest {
 				                .constant("a", 1)
 				                .constant("b", 1)
 				                .constant("c", 1)
-				                .print("a")
+				                .printi("a")
 				                .get(),
 		                new BrilInstructions()
 				                .constant("a", 1)
-				                .id("b", "a")
-				                .id("c", "b")
-				                .print("c")
+				                .idi("b", "a")
+				                .idi("c", "b")
+				                .printi("c")
 				                .get());
 	}
 
@@ -47,7 +47,7 @@ public class BrilCommonSubexpressionEliminationTest {
 		assertTransform(new BrilInstructions()
 				                .constant("b", 2)
 				                .add("sum1", "a", "b")
-				                .id("sum2", "sum1")
+				                .idi("sum2", "sum1")
 				                .get(),
 		                new BrilInstructions()
 				                .constant("b", 2)
@@ -61,7 +61,7 @@ public class BrilCommonSubexpressionEliminationTest {
 		assertTransform(new BrilInstructions()
 				                .constant("b", 2)
 				                .add("sum1", "a", "b")
-				                .id("sum2", "sum1")
+				                .idi("sum2", "sum1")
 				                .get(),
 		                new BrilInstructions()
 				                .constant("b", 2)
@@ -73,12 +73,12 @@ public class BrilCommonSubexpressionEliminationTest {
 	@Test
 	public void testIndirectBinReplacement() {
 		assertTransform(new BrilInstructions()
-				                .id("c", "b")
+				                .idi("c", "b")
 				                .add("sum1", "a", "b")
-				                .id("sum2", "sum1")
+				                .idi("sum2", "sum1")
 				                .get(),
 		                new BrilInstructions()
-				                .id("c", "b")
+				                .idi("c", "b")
 				                .add("sum1", "a", "b")
 				                .add("sum2", "a", "c")
 				                .get());
@@ -89,13 +89,13 @@ public class BrilCommonSubexpressionEliminationTest {
 		assertTransform(new BrilInstructions()
 				                .constant("one", 1)
 				                .add("anext", "a", "one")
-				                .id("a", "b")
+				                .idi("a", "b")
 				                .add("anext", "b", "one")
 				                .get(),
 		                new BrilInstructions()
 				                .constant("one", 1)
 				                .add("anext", "a", "one")
-				                .id("a", "b")
+				                .idi("a", "b")
 				                .add("anext", "a", "one")
 				                .get());
 	}

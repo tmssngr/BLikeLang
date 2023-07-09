@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -55,6 +54,30 @@ public class BrilFactory {
 	}
 
 	@NotNull
+	public static BrilNode createFunctionI(String name, List<BrilNode> arguments, List<BrilNode> instructions) {
+		final BrilNode node = createFunction(name, BrilInstructions.INT, arguments);
+		node.getOrCreateNodeList(KEY_INSTRS)
+				.addAll(instructions);
+		return node;
+	}
+
+	@NotNull
+	public static BrilNode createFunctionB(String name, List<BrilNode> arguments, List<BrilNode> instructions) {
+		final BrilNode node = createFunction(name, BrilInstructions.BOOL, arguments);
+		node.getOrCreateNodeList(KEY_INSTRS)
+				.addAll(instructions);
+		return node;
+	}
+
+	@NotNull
+	public static BrilNode createFunctionV(String name, List<BrilNode> arguments, List<BrilNode> instructions) {
+		final BrilNode node = createFunction(name, BrilInstructions.VOID, arguments);
+		node.getOrCreateNodeList(KEY_INSTRS)
+				.addAll(instructions);
+		return node;
+	}
+
+	@NotNull
 	public static List<BrilNode> getArguments(BrilNode function) {
 		return function.getOrCreateNodeList(KEY_ARGS);
 	}
@@ -78,7 +101,15 @@ public class BrilFactory {
 		return argument.getString(KEY_ARG_TYPE);
 	}
 
-	public static BrilNode argument(String name, String type) {
+	public static BrilNode argi(String name) {
+		return arg(name, BrilInstructions.INT);
+	}
+
+	public static BrilNode argb(String name) {
+		return arg(name, BrilInstructions.BOOL);
+	}
+
+	public static BrilNode arg(String name, String type) {
 		return new BrilNode()
 				.set(KEY_ARG_NAME, name)
 				.set(KEY_ARG_TYPE, type);

@@ -17,10 +17,10 @@ public class BrilCfgDetectVarLivenessTest {
 
 	@NotNull
 	public static BrilNode createPrintMaxCfg() {
-		return BrilCfg.createFunction("printMax", "int", List.of(BrilFactory.argument("a", "int"), BrilFactory.argument("b", "int")),
+		return BrilCfg.createFunction("printMax", BrilInstructions.INT, List.of(BrilFactory.argi("a"), BrilFactory.argi("b")),
 		                              List.of(BrilCfg.createBlock("start",
 		                                                          new BrilInstructions()
-				                                                          .id("result", "a")
+				                                                          .idi("result", "a")
 				                                                          .lessThan("lt", "a", "b")
 				                                                          .branch("lt", "b>a", "exit")
 				                                                          .get(),
@@ -28,13 +28,13 @@ public class BrilCfgDetectVarLivenessTest {
 		                                      ),
 		                                      BrilCfg.createBlock("b>a",
 		                                                          new BrilInstructions()
-				                                                          .id("result", "b")
+				                                                          .idi("result", "b")
 				                                                          .get(),
 		                                                          List.of("start"), List.of("exit")
 		                                      ),
 		                                      BrilCfg.createBlock("exit",
 		                                                          new BrilInstructions()
-				                                                          .print("result")
+				                                                          .printi("result")
 				                                                          .get(),
 		                                                          List.of("start", "b>a"), List.of()
 		                                      )
@@ -57,7 +57,7 @@ public class BrilCfgDetectVarLivenessTest {
 						.get(), List.of(), List.of("print")),
 
 				BrilCfg.createBlock("print", new BrilInstructions()
-						.print("v")
+						.printi("v")
 						.get(), List.of("start", "unused"), List.of("exit")),
 
 				BrilCfg.createBlock("exit", List.of(),
@@ -126,7 +126,7 @@ public class BrilCfgDetectVarLivenessTest {
 		final List<BrilNode> blocks = List.of(
 				BrilCfg.createBlock("start", new BrilInstructions()
 						.add("sum", "a", "b")
-						.ret("sum")
+						.reti("sum")
 						.jump("exit 1")
 						.get(), List.of(), List.of("exit 1")),
 

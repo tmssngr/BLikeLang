@@ -17,7 +17,7 @@ public class BrilDeadCodeEliminationTest {
 				                    .constant("a", 4)
 				                    .constant("b", 2)
 				                    .add("d", "a", "b")
-				                    .print("d")
+				                    .printi("d")
 				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
 				                    new BrilInstructions()
@@ -25,7 +25,7 @@ public class BrilDeadCodeEliminationTest {
 						                    .constant("b", 2)
 						                    .constant("c", 1)
 						                    .add("d", "a", "b")
-						                    .print("d")
+						                    .printi("d")
 						                    .get(), Set.of()));
 	}
 
@@ -36,7 +36,7 @@ public class BrilDeadCodeEliminationTest {
 				                    .constant("b", 2)
 				                    .constant("c", 1)
 				                    .add("d", "a", "b")
-				                    .print("d")
+				                    .printi("d")
 				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
 				                    new BrilInstructions()
@@ -44,7 +44,7 @@ public class BrilDeadCodeEliminationTest {
 						                    .constant("b", 2)
 						                    .constant("c", 1)
 						                    .add("d", "a", "b")
-						                    .print("d")
+						                    .printi("d")
 						                    .get(), Set.of("c")));
 	}
 
@@ -54,7 +54,7 @@ public class BrilDeadCodeEliminationTest {
 				                    .constant("a", 4)
 				                    .constant("b", 2)
 				                    .add("d", "a", "b")
-				                    .print("d")
+				                    .printi("d")
 				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
 				                    new BrilInstructions()
@@ -63,7 +63,7 @@ public class BrilDeadCodeEliminationTest {
 						                    .constant("c", 1)
 						                    .add("d", "a", "b")
 						                    .add("e", "c", "d")
-						                    .print("d")
+						                    .printi("d")
 						                    .get(), Set.of()));
 	}
 
@@ -75,7 +75,7 @@ public class BrilDeadCodeEliminationTest {
 				                    .constant("c", 1)
 				                    .add("d", "a", "b")
 				                    .add("e", "c", "d")
-				                    .print("d")
+				                    .printi("d")
 				                    .get(),
 		                    BrilDeadCodeElimination.simpleDce(
 				                    new BrilInstructions()
@@ -84,7 +84,7 @@ public class BrilDeadCodeEliminationTest {
 						                    .constant("c", 1)
 						                    .add("d", "a", "b")
 						                    .add("e", "c", "d")
-						                    .print("d")
+						                    .printi("d")
 						                    .get(), Set.of("a", "e")));
 	}
 
@@ -101,7 +101,7 @@ public class BrilDeadCodeEliminationTest {
 						                    List.of(), List.of("next")
 						),
 						BrilCfg.createBlock("next", new BrilInstructions()
-								                    .print("b")
+								                    .printi("b")
 								                    .get(),
 						                    List.of("entry"), List.of()
 						)
@@ -117,7 +117,7 @@ public class BrilDeadCodeEliminationTest {
 				                                        List.of(), List.of("next")
 				                    ),
 				                    BrilCfg.createBlock("next", new BrilInstructions()
-						                                        .print("b")
+						                                        .printi("b")
 						                                        .get(),
 				                                        List.of("entry"), List.of()
 				                    )

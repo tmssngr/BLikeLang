@@ -51,7 +51,9 @@ public final class BrilCfgSsa {
 					final BrilNode predecessorBlock = nameToBlock.get(predecessor);
 					final List<BrilNode> predecessorInstructions = new ArrayList<>(BrilCfg.getInstructions(predecessorBlock));
 					assertTrue(BrilInstructions.getJmpTargets(Utils.getLast(predecessorInstructions)).size() == 1);
-					predecessorInstructions.add(predecessorInstructions.size() - 1, BrilInstructions._id(dest, parameter));
+					Utils.todo();
+					final String type = BrilInstructions.INT;
+					predecessorInstructions.add(predecessorInstructions.size() - 1, BrilInstructions._id(dest, type, parameter));
 					BrilCfg.setInstructions(predecessorInstructions, predecessorBlock);
 				}
 			}
@@ -138,7 +140,9 @@ public final class BrilCfgSsa {
 					instructions.add(_phi(phiFunction.ssaName, phiParameters));
 				}
 				else {
-					instructions.add(BrilInstructions._id(phiFunction.ssaName, phiParameters.get(0)));
+					Utils.todo();
+					final String type = BrilInstructions.INT;
+					instructions.add(BrilInstructions._id(phiFunction.ssaName, type, phiParameters.get(0)));
 				}
 			}
 
@@ -188,12 +192,6 @@ public final class BrilCfgSsa {
 
 		@NotNull
 		public String getAssignmentName(@NotNull String originalName) {
-/*
-			if (originalName.equals(ControlFlowGraph.RESULT)) {
-				return originalName;
-			}
-*/
-
 			final Integer currentVariant = varToHighest.get(originalName);
 			final int variant;
 			if (currentVariant != null) {
