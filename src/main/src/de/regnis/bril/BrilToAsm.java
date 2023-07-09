@@ -64,6 +64,10 @@ public final class BrilToAsm {
 		// (a, b, foo) -> (v.0, v.1, v.2)
 		initialVarRename(cfgFunction);
 
+		if (true) {
+			return;
+		}
+
 		boolean spilled = false;
 		while (true) {
 			final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
