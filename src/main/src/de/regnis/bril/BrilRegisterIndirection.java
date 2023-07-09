@@ -3,6 +3,7 @@ package de.regnis.bril;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -221,50 +222,41 @@ public final class BrilRegisterIndirection {
 
 		@Override
 		protected void call(String name, List<BrilNode> args) {
-			String temp = null;
-			for (int i = 0; i < args.size(); i++) {
-				final BrilNode arg = args.get(i);
-				final String argName = BrilFactory.getArgName(arg);
-				final String argType = BrilFactory.getArgType(arg);
-				String newArg = getMapped(argName);
-				if (i < 2) {
-					factory.id(PREFIX_REGISTER + i, argType, newArg);
-				}
-				else {
-					if (isStackParameter(newArg)) {
-						if (temp == null) {
-							temp = createTemp();
-						}
-						factory.id(temp, argType, newArg);
-						newArg = temp;
-					}
-					factory.call(CALL_PUSH, List.of(BrilFactory.arg(newArg, argType)));
-				}
-			}
-			factory.call(name, args);
+			final List<BrilNode> newArgs = handleCallArgs(args);
 
-			for (int i = 2; i < args.size(); i++) {
-				final BrilNode arg = args.get(i);
-				final String argName = BrilFactory.getArgName(arg);
-				final String argType = BrilFactory.getArgType(arg);
-				final String newArg = getMapped(argName);
-				if (temp == null) {
-					temp = createTemp();
-				}
-				factory.call(newArg, argType, CALL_POP, List.of());
-			}
+			factory.call(name, newArgs);
+
+			cleanupCallArgs(args);
 		}
 
 		@Override
 		protected void call(String dest, String type, String name, List<BrilNode> args) {
+			final List<BrilNode> newArgs = handleCallArgs(args);
+
+			final String result = PREFIX_REGISTER + 0;
+
+			factory.call(result, type, name, newArgs);
+
+			final String newDest = getMapped(dest);
+			factory.id(newDest, type, result);
+
+			cleanupCallArgs(args);
+		}
+
+		@NotNull
+		private List<BrilNode> handleCallArgs(List<BrilNode> args) {
+			final List<BrilNode> newArgs = new ArrayList<>();
 			String temp = null;
+
 			for (int i = 0; i < args.size(); i++) {
 				final BrilNode arg = args.get(i);
 				final String argName = BrilFactory.getArgName(arg);
 				final String argType = BrilFactory.getArgType(arg);
 				String newArg = getMapped(argName);
 				if (i < 2) {
-					factory.id(PREFIX_REGISTER + i, argType, newArg);
+					final String registerParameter = PREFIX_REGISTER + i;
+					factory.id(registerParameter, argType, newArg);
+					newArgs.add(BrilFactory.arg(registerParameter, argType));
 				}
 				else {
 					if (isStackParameter(newArg)) {
@@ -275,16 +267,14 @@ public final class BrilRegisterIndirection {
 						newArg = temp;
 					}
 					factory.call(CALL_PUSH, List.of(BrilFactory.arg(newArg, argType)));
+					newArgs.add(BrilFactory.arg(newArg, argType));
 				}
 			}
+			return newArgs;
+		}
 
-			final String result = PREFIX_REGISTER + 0;
-
-			factory.call(result, type, name, args);
-
-			final String newDest = getMapped(dest);
-			factory.id(newDest, type, result);
-
+		private void cleanupCallArgs(List<BrilNode> args) {
+			String temp = null;
 			for (int i = 2; i < args.size(); i++) {
 				final BrilNode arg = args.get(i);
 				final String argName = BrilFactory.getArgName(arg);

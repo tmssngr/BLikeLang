@@ -74,7 +74,7 @@ public class BrilRegisterIndirectionTest {
 				             //.call("sum", "add", List.of("b", "a"))
 				             .idi("r.0", "b")
 				             .idi("r.1", "a")
-				             .calli("r.0", "add", List.of(BrilFactory.argi("b"), BrilFactory.argi("a")))
+				             .calli("r.0", "add", List.of(BrilFactory.argi("r.0"), BrilFactory.argi("r.1")))
 				             .idi("sum", "r.0")
 				             .get(),
 		             new BrilRegisterIndirection(4, var -> false)

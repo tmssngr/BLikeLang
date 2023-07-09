@@ -291,7 +291,6 @@ public final class BrilToAsm {
 					return;
 				}
 
-				Utils.assertTrue(args.isEmpty());
 				asm.call(name);
 			}
 
@@ -304,7 +303,6 @@ public final class BrilToAsm {
 					return;
 				}
 
-				Utils.assertTrue(args.isEmpty());
 				asm.call(name);
 			}
 

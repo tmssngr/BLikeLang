@@ -348,7 +348,7 @@ public class BrilInstructions {
 
 	@NotNull
 	public BrilInstructions print(String dest, String type) {
-		return call("call", List.of(BrilFactory.arg(dest, type)));
+		return call("print", List.of(BrilFactory.arg(dest, type)));
 	}
 
 	@NotNull
