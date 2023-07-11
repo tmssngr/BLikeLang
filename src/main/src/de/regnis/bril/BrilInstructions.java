@@ -3,10 +3,7 @@ package de.regnis.bril;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static de.regnis.utils.Utils.notNull;
@@ -186,6 +183,10 @@ public class BrilInstructions {
 				.set(LABEL, name);
 	}
 
+	public static Map<String, Object> getMap(BrilNode instruction) {
+		return instruction.getMap(Set.of(KEY_DEST, KEY_TYPE, KEY_OP, KEY_VAR, KEY_VAR1, KEY_VAR2, KEY_ARGS, KEY_IF_TARGET, KEY_ELSE_TARGET, KEY_JMP_TARGET));
+	}
+
 	// Fields =================================================================
 
 	private final List<BrilNode> instructions;
@@ -319,11 +320,11 @@ public class BrilInstructions {
 	@NotNull
 	public BrilInstructions call(String dest, String type, String name, List<BrilNode> args) {
 		return add(new BrilNode()
-				.set(KEY_OP, CALL)
-				.set(KEY_DEST, dest)
-				.set(KEY_TYPE, type)
-				.set(KEY_NAME, name)
-				.setNodes(KEY_ARGS, args));
+				           .set(KEY_OP, CALL)
+				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, type)
+				           .set(KEY_NAME, name)
+				           .setNodes(KEY_ARGS, args));
 	}
 
 	@NotNull
