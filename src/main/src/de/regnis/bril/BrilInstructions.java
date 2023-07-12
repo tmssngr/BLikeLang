@@ -185,7 +185,7 @@ public class BrilInstructions {
 	}
 
 	public static Map<String, Object> getMap(BrilNode instruction) {
-		return instruction.getMap(List.of(KEY_DEST, KEY_TYPE, KEY_OP, KEY_VAR, KEY_VAR1, KEY_VAR2, KEY_ARGS, KEY_IF_TARGET, KEY_ELSE_TARGET, KEY_JMP_TARGET));
+		return instruction.getMap(List.of(KEY_DEST, KEY_TYPE, KEY_OP, KEY_NAME, KEY_VAR, KEY_VAR1, KEY_VAR2, KEY_ARGS, KEY_IF_TARGET, KEY_ELSE_TARGET, KEY_JMP_TARGET));
 	}
 
 	// Fields =================================================================
