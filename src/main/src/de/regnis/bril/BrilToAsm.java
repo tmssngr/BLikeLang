@@ -24,7 +24,7 @@ public final class BrilToAsm {
 		for (BrilNode function : functions) {
 			convertToAsm(function, asm);
 		}
-		asm.simplify(BrilAsmSimplifier.create());
+//		asm.simplify(BrilAsmSimplifier.create());
 		return asm.toLines();
 	}
 
@@ -87,12 +87,14 @@ public final class BrilToAsm {
 
 			@Override
 			protected void mul(String dest, String var1, String var2) {
-				throw new UnsupportedOperationException();
+				varMapping.i_binaryOperator(dest, var1, var2, asm,
+				                            (destReg, srcReg, asm1) -> asm1.imul(destReg, srcReg));
 			}
 
 			@Override
 			protected void div(String dest, String var1, String var2) {
-				throw new UnsupportedOperationException();
+				varMapping.i_binaryOperator(dest, var1, var2, asm,
+				                            (destReg, srcReg, asm1) -> asm1.idiv(destReg, srcReg));
 			}
 
 			@Override

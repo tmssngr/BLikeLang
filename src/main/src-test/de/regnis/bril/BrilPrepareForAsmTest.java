@@ -35,8 +35,7 @@ public class BrilPrepareForAsmTest {
 				                                                      .constant("one", 1)
 				                                                      .add("n", "n", "one")
 				                                                      .add("sum", "sum", "value")
-				                                                      .calli("average", "div", List.of(BrilFactory.argi("sum"),
-				                                                                                       BrilFactory.argi("n")))
+				                                                      .div("average", "sum", "n")
 				                                                      .printi("average")
 				                                                      .jump("loop")
 
@@ -54,8 +53,8 @@ public class BrilPrepareForAsmTest {
 		                List.of(), List.of("loop"),
 		                blocks.next());
 		assertEqualsCfg("loop", new BrilInstructions()
-				                .calli("v.3", "getInt", List.of())
-				                .idi("v.2", "v.3")
+				                .calli("v.2", "getInt", List.of())
+				                .idi("v.2", "v.2")
 				                .constant("v.3", 0)
 				                .lessThan("v.3", "v.2", "v.3")
 				                .branch("v.3", "exit", "body")
@@ -66,13 +65,9 @@ public class BrilPrepareForAsmTest {
 				                .constant("v.3", 1)
 				                .add("v.1", "v.1", "v.3")
 				                .add("v.0", "v.0", "v.2")
-				                .idi("v.3", "v.0")
-				                .idi("v.2", "v.1")
-				                .calli("v.3", "div", List.of(BrilFactory.argi("v.3"),
-				                                             BrilFactory.argi("v.2")))
-				                .idi("v.2", "v.3")
-				                .idi("v.3", "v.2")
-				                .printi("v.3")
+				                .div("v.2", "v.0", "v.1")
+				                .idi("v.2", "v.2")
+				                .printi("v.2")
 				                .jump("loop")
 				                .get(),
 		                List.of("loop"), List.of("loop"),

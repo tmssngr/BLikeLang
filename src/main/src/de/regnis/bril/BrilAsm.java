@@ -1,5 +1,6 @@
 package de.regnis.bril;
 
+import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -139,6 +140,32 @@ public class BrilAsm {
 			public void appendTo(Consumer<String> output) {
 				output.accept("sub r" + (dest + 1) + ", r" + (src + 1));
 				output.accept("sbc r" + dest + ", r" + src);
+			}
+		});
+		return this;
+	}
+
+	@NotNull
+	public BrilAsm imul(int dest, int src) {
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				Utils.todo();
+				output.accept("MUL r" + (dest + 1) + ", r" + (src + 1));
+				output.accept("MUL r" + dest + ", r" + src);
+			}
+		});
+		return this;
+	}
+
+	@NotNull
+	public BrilAsm idiv(int dest, int src) {
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				Utils.todo();
+				output.accept("DIV r" + (dest + 1) + ", r" + (src + 1));
+				output.accept("DIV r" + dest + ", r" + src);
 			}
 		});
 		return this;
