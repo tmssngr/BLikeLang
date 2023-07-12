@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -79,6 +80,13 @@ public final class Utils {
 	}
 
 	public static <O> StringBuilder appendCommaSeparated(Iterable<? extends O> collection, Function<O, String> function, StringBuilder buffer) {
+		return appendCommaSeparated(collection,
+		                            (BiConsumer<O, StringBuilder>)
+				                            (obj, stringBuilder) -> buffer.append(function.apply(obj)),
+		                            buffer);
+	}
+
+	public static <O> StringBuilder appendCommaSeparated(Iterable<? extends O> collection, BiConsumer<O, StringBuilder> biConsumer, StringBuilder buffer) {
 		boolean isFirst = true;
 		for (O obj : collection) {
 			if (isFirst) {
@@ -87,7 +95,7 @@ public final class Utils {
 			else {
 				buffer.append(", ");
 			}
-			buffer.append(function.apply(obj));
+			biConsumer.accept(obj, buffer);
 		}
 
 		return buffer;
