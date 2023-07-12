@@ -91,6 +91,11 @@ public final class BrilToAsm {
 			}
 
 			@Override
+			protected void div(String dest, String var1, String var2) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			protected void and(String dest, String var1, String var2) {
 				throw new UnsupportedOperationException();
 			}

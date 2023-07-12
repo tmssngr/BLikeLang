@@ -18,6 +18,7 @@ public class BrilInstructions {
 	public static final String ADD = "add";
 	public static final String SUB = "sub";
 	public static final String MUL = "mul";
+	public static final String DIV = "div";
 	public static final String AND = "and";
 	public static final String LT = "lt";
 	public static final String BR = "br";
@@ -262,6 +263,11 @@ public class BrilInstructions {
 	}
 
 	@NotNull
+	public BrilInstructions div(String dest, String var1, String var2) {
+		return binary(dest, INT, DIV, var1, var2);
+	}
+
+	@NotNull
 	public BrilInstructions and(String dest, String var1, String var2) {
 		return binary(dest, INT, AND, var1, var2);
 	}
@@ -388,6 +394,9 @@ public class BrilInstructions {
 			else if (MUL.equals(op)) {
 				mul(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
+			else if (DIV.equals(op)) {
+				div(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
 			else if (AND.equals(op)) {
 				and(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
@@ -441,6 +450,9 @@ public class BrilInstructions {
 		}
 
 		protected void mul(String dest, String var1, String var2) {
+		}
+
+		protected void div(String dest, String var1, String var2) {
 		}
 
 		protected void and(String dest, String var1, String var2) {

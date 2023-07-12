@@ -182,6 +182,12 @@ public final class BrilRegisterIndirection {
 		}
 
 		@Override
+		protected void div(String dest, String var1, String var2) {
+			binary(dest, BrilInstructions.INT, var1, var2,
+			       (d, v1, v2) -> factory.div(d, v1, v2));
+		}
+
+		@Override
 		protected void and(String dest, String var1, String var2) {
 			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.and(d, v1, v2));
