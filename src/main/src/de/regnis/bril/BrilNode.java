@@ -120,7 +120,7 @@ public final class BrilNode {
 		return list;
 	}
 
-	public Map<String, Object> getMap(Set<String> keys) {
+	public Map<String, Object> getMap(Collection<String> keys) {
 		final Map<String, Object> map = new LinkedHashMap<>();
 		for (String key : keys) {
 			if (children.containsKey(key)) {
