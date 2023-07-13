@@ -48,7 +48,7 @@ public final class BrilPrepareForAsm {
 		while (true) {
 			final List<BrilNode> blocks = BrilCfg.getBlocks(cfgFunction);
 			final List<BrilNode> arguments = BrilFactory.getArguments(cfgFunction);
-			final List<String> argNames = getArgNames(arguments);
+			final List<String> argNames = BrilFactory.getArgNames(arguments);
 
 			final RegisterColoring registerColoring = new RegisterColoring();
 			registerColoring.addEdgesBetween(new HashSet<>(argNames));
@@ -186,13 +186,5 @@ public final class BrilPrepareForAsm {
 
 		final Iterator<String> iterator = largestOut.iterator();
 		return iterator.hasNext() ? iterator.next() : null;
-	}
-
-	private static List<String> getArgNames(List<BrilNode> arguments) {
-		final List<String> argNames = new ArrayList<>();
-		for (BrilNode argument : arguments) {
-			argNames.add(BrilFactory.getArgName(argument));
-		}
-		return argNames;
 	}
 }

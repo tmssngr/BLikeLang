@@ -2,6 +2,7 @@ package de.regnis.bril;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -90,6 +91,14 @@ public class BrilFactory {
 	@NotNull
 	public static String getArgName(BrilNode argument) {
 		return argument.getString(KEY_ARG_NAME);
+	}
+
+	public static List<String> getArgNames(List<BrilNode> arguments) {
+		final List<String> argNames = new ArrayList<>();
+		for (BrilNode argument : arguments) {
+			argNames.add(getArgName(argument));
+		}
+		return argNames;
 	}
 
 	public static void setArgName(String name, BrilNode argument) {
