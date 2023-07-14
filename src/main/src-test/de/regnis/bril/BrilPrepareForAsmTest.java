@@ -46,28 +46,28 @@ public class BrilPrepareForAsmTest {
 		final BrilNode cfg = prepare.prepare(function);
 		final Iterator<BrilNode> blocks = BrilCfg.getBlocks(cfg).iterator();
 		assertEqualsCfg("block 0", new BrilInstructions()
+				                .constant("v.2", 0)
 				                .constant("v.1", 0)
-				                .constant("v.0", 0)
 				                .jump("loop")
 				                .get(),
 		                List.of(), List.of("loop"),
 		                blocks.next());
 		assertEqualsCfg("loop", new BrilInstructions()
-				                .calli("v.2", "getInt", List.of())
-				                .idi("v.2", "v.2")
+				                .calli("r.0", "getInt", List.of())
+				                .idi("v.0", "r.0")
 				                .constant("v.3", 0)
-				                .lessThan("v.3", "v.2", "v.3")
+				                .lessThan("v.3", "v.0", "v.3")
 				                .branch("v.3", "exit", "body")
 				                .get(),
 		                List.of("block 0", "body"), List.of("exit", "body"),
 		                blocks.next());
 		assertEqualsCfg("body", new BrilInstructions()
 				                .constant("v.3", 1)
-				                .add("v.1", "v.1", "v.3")
-				                .add("v.0", "v.0", "v.2")
-				                .div("v.2", "v.0", "v.1")
-				                .idi("v.2", "v.2")
-				                .printi("v.2")
+				                .add("v.2", "v.2", "v.3")
+				                .add("v.1", "v.1", "v.0")
+				                .div("v.0", "v.1", "v.2")
+				                .idi("r.0", "v.0")
+				                .printi("r.0")
 				                .jump("loop")
 				                .get(),
 		                List.of("loop"), List.of("loop"),
