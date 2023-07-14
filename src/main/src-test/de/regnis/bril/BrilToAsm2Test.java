@@ -36,13 +36,9 @@ public class BrilToAsm2Test {
 	public void test2ParamRetValue() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("sum")
-				                    .ipush(4)
-				                    .iload(4, ARG0_REGISTER)
-				                    .iadd(4, ARG1_REGISTER)
-				                    .iload(ARG0_REGISTER, 4)
+				                    .iadd(ARG0_REGISTER, ARG1_REGISTER)
 				                    .jump("exit 1")
 				                    .label("exit 1")
-				                    .ipop(4)
 				                    .ret()
 				                    .toLines(),
 		                    brilToAsm(BrilFactory.createFunctionI("sum", List.of(BrilFactory.argi("a"), BrilFactory.argi("b")),
@@ -58,24 +54,21 @@ public class BrilToAsm2Test {
 	public void testCall() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("main")
-/*
-				                    .ipush(VAR0_REGISTER)
-				                    .ipush(VAR1_REGISTER)
+				                    .ipush(ARG0_REGISTER)
+				                    .ipush(ARG1_REGISTER)
 				                    //.constant("value1", 2)
-				                    .iconst(VAR0_REGISTER, 2)
+				                    .iconst(ARG0_REGISTER, 2)
 				                    //.constant("value2", 3)
-				                    .iconst(VAR1_REGISTER, 3)
+				                    .iconst(ARG1_REGISTER, 3)
 
 				                    //.call("result", "sum", List.of("value1", "value2"))
 				                    .call("sum")
-				                    // .iload(BrilVarMapping.ARG0_REGISTER, BrilVarMapping.VAR1_REGISTER)
 
 				                    //.print("result")
 				                    .call("print")
 				                    // .label("main exit")
-				                    .ipop(VAR1_REGISTER)
-				                    .ipop(VAR0_REGISTER)
-*/
+				                    .ipop(ARG1_REGISTER)
+				                    .ipop(ARG0_REGISTER)
 				                    .ret()
 				                    .toLines(),
 		                    brilToAsm(BrilFactory.createFunctionV("main", List.of(),
@@ -127,12 +120,11 @@ public class BrilToAsm2Test {
 	public void testIfLessThan() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("max")
+				                    .ipush(4)
 				                    //.lessThan("cond", "a", "b")
-/*
-				                    .ilt(A_REGISTER, ARG0_REGISTER, ARG1_REGISTER)
-				                    .bload(VAR0_REGISTER, A_REGISTER)
+				                    .ilt(4, ARG0_REGISTER, ARG1_REGISTER)
 				                    //.branch("cond", "takeB", "takeA")
-				                    .brElse(VAR0_REGISTER, "takeA")
+				                    .brElse(4, "takeA")
 				                    .jump("takeB")
 				                    //.ret("b")
 				                    .label("takeB")
@@ -143,8 +135,7 @@ public class BrilToAsm2Test {
 				                    //.ret("a")
 				                    .jump("exit 3")
 				                    .label("exit 3")
-				                    .ipop(VAR0_REGISTER)
-*/
+				                    .ipop(4)
 				                    .ret()
 				                    .toLines(),
 		                    brilToAsm(BrilFactory.createFunctionI("max", List.of(

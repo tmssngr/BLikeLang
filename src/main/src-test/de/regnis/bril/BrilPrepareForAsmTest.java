@@ -54,9 +54,9 @@ public class BrilPrepareForAsmTest {
 		                blocks.next());
 		assertEqualsCfg("loop", new BrilInstructions()
 				                .calli("r.0", "getInt", List.of())
-				                .idi("v.0", "r.0")
+				                .idi("r.0", "r.0")
 				                .constant("v.3", 0)
-				                .lessThan("v.3", "v.0", "v.3")
+				                .lessThan("v.3", "r.0", "v.3")
 				                .branch("v.3", "exit", "body")
 				                .get(),
 		                List.of("block 0", "body"), List.of("exit", "body"),
@@ -64,9 +64,9 @@ public class BrilPrepareForAsmTest {
 		assertEqualsCfg("body", new BrilInstructions()
 				                .constant("v.3", 1)
 				                .add("v.2", "v.2", "v.3")
-				                .add("v.1", "v.1", "v.0")
-				                .div("v.0", "v.1", "v.2")
-				                .idi("r.0", "v.0")
+				                .add("v.1", "v.1", "r.0")
+				                .div("r.0", "v.1", "v.2")
+				                .idi("r.0", "r.0")
 				                .printi("r.0")
 				                .jump("loop")
 				                .get(),

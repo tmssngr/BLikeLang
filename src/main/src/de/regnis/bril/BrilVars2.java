@@ -64,25 +64,26 @@ final class BrilVars2 {
 
 	public void assignLocalVariables(Set<String> localVars) {
 		int nextRegister = registerParameterCount;
-		for (String localVar : localVars) {
-			if (varToStore.containsKey(localVar)) {
+		for (String var : localVars) {
+			if (varToStore.containsKey(var)) {
 				continue;
 			}
 
-			if (localVar.startsWith(prefixVirtualRegister)) {
-				varToStore.put(localVar, new InternalRegister(nextRegister));
+			if (var.startsWith(prefixVirtualRegister)) {
+				varToStore.put(var, new InternalRegister(nextRegister));
 				nextRegister++;
 				continue;
 			}
 
-			final int resultRegister = 0;
-			final String resultName = prefixRegister + resultRegister;
-			if (localVar.equals(resultName)) {
-				varToStore.put(localVar, new InternalRegister(resultRegister));
-				continue;
+			if (var.startsWith(prefixRegister)) {
+				final int register = Integer.parseInt(var.substring(prefixRegister.length()));
+				if (register >= 0 && register < maxParametersInRegisters) {
+					varToStore.put(var, new InternalRegister(register));
+					continue;
+				}
 			}
 
-			throw new UnsupportedOperationException(localVar);
+			throw new UnsupportedOperationException(var);
 /*
 
 			if (registers < 3) {
@@ -140,9 +141,6 @@ final class BrilVars2 {
 			return new VarLocation(true, 2 * register.reg);
 		}
 
-		if (true) {
-			throw new UnsupportedOperationException(var);
-		}
 		// The subroutine receives the parameters on the stack. The stack pointer (SP, register pair FE+FF on Z8) points
 		// to the previously pushed byte.
 		//

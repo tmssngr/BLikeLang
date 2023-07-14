@@ -1,6 +1,8 @@
 package de.regnis.bril;
 
 import de.regnis.b.ir.RegisterColoring;
+import de.regnis.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -72,13 +74,7 @@ public final class BrilPrepareForAsm {
 
 			registerColoring.build();
 
-			final Function<String, String> mapping = var -> {
-				final int virtualRegister = registerColoring.getVirtualRegister(var);
-				if (!localVars.contains(var) || !var.startsWith(prefixVirtualRegister)) {
-					return var;
-				}
-				return prefixVirtualRegister + virtualRegister;
-			};
+			final Function<String, String> mapping = createVarMapping(registerColoring);
 
 			BrilFactory.renameArgs(mapping, cfgFunction);
 			BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction ->
@@ -111,6 +107,43 @@ public final class BrilPrepareForAsm {
 	}
 
 	// Utils ==================================================================
+
+	@NotNull
+	private Function<String, String> createVarMapping(RegisterColoring registerColoring) {
+		final Map<String, String> varToNewVar = new HashMap<>();
+		final Map<Integer, String> virtRegToNewVar = new HashMap<>();
+		for (Map.Entry<String, Integer> entry : registerColoring.getMappingInOrder().entrySet()) {
+			final String var = entry.getKey();
+			final int virtRegister = entry.getValue();
+			if (var.startsWith(prefixRegister)) {
+				Utils.assertTrue(var.equals(prefixRegister + virtRegister));
+				varToNewVar.put(var, var);
+				virtRegToNewVar.put(virtRegister, var);
+			}
+		}
+
+		for (Map.Entry<String, Integer> entry : registerColoring.getMappingInOrder().entrySet()) {
+			final String var = entry.getKey();
+			final int virtRegister = entry.getValue();
+			if (var.startsWith(prefixRegister)) {
+				continue;
+			}
+
+			if (var.startsWith(prefixVirtualRegister)) {
+				String newVar = virtRegToNewVar.get(virtRegister);
+				if (newVar == null) {
+					newVar = prefixVirtualRegister + virtRegister;
+				}
+				varToNewVar.put(var, newVar);
+				continue;
+			}
+
+			if (var.startsWith(prefixStackParameter)) {
+				varToNewVar.put(var, prefixStackParameter + virtRegister);
+			}
+		}
+		return var -> varToNewVar.get(var);
+	}
 
 	private int getMaxAllowedRegisters(BrilNode cfgFunction, boolean spilled) {
 		final int argCount = BrilFactory.getArguments(cfgFunction).size();
@@ -155,6 +188,8 @@ public final class BrilPrepareForAsm {
 				}
 			}
 		});
+
+		BrilCfgDetectVarLiveness.detectLiveness(blocks, true);
 
 		BrilFactory.renameArgs(mapping::get, cfgFunction);
 

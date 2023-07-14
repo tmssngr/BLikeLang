@@ -378,7 +378,7 @@ public class BrilInstructions {
 	// Inner Classes ==========================================================
 
 	public abstract static class Handler {
-		public final void visit(BrilNode instruction) {
+		public void visit(BrilNode instruction) {
 			final String op = getOp(instruction);
 			final String dest = getDest(instruction);
 			if (CONST.equals(op)) {

@@ -3,10 +3,7 @@ package de.regnis.bril;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -99,8 +96,17 @@ public final class BrilRegisterIndirection {
 	private class MyHandler extends BrilInstructions.Handler {
 		private final BrilInstructions factory;
 
+		private BrilNode instruction;
+
 		public MyHandler(BrilInstructions factory) {
 			this.factory = factory;
+		}
+
+		@Override
+		public void visit(BrilNode instruction) {
+			this.instruction = instruction;
+			super.visit(instruction);
+			this.instruction = null;
 		}
 
 		@Override
@@ -237,15 +243,18 @@ public final class BrilRegisterIndirection {
 
 		@Override
 		protected void call(String name, List<BrilNode> args) {
+			final List<Integer> registersToPop = pushArgRegisters(args, null);
 			final List<BrilNode> newArgs = handleCallArgs(args);
 
 			factory.call(name, newArgs);
 
 			cleanupCallArgs(args);
+			popRegisters(registersToPop);
 		}
 
 		@Override
 		protected void call(String dest, String type, String name, List<BrilNode> args) {
+			final List<Integer> registersToPop = pushArgRegisters(args, dest);
 			final List<BrilNode> newArgs = handleCallArgs(args);
 
 			final String result = prefixRegister + 0;
@@ -256,6 +265,33 @@ public final class BrilRegisterIndirection {
 			factory.id(newDest, type, result);
 
 			cleanupCallArgs(args);
+			popRegisters(registersToPop);
+		}
+
+		@NotNull
+		private List<Integer> pushArgRegisters(List<BrilNode> args, @Nullable String dest) {
+			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
+
+			final List<Integer> registersToPop = new ArrayList<>();
+			for (int i = 0; i < args.size() && i < maxParametersInRegisters; i++) {
+				final BrilNode arg = args.get(i);
+				final String argName = BrilFactory.getArgName(arg);
+				if (argName.equals(dest)) {
+					continue;
+				}
+
+				if (liveOut.contains(argName)) {
+					factory.call(CALL_PUSH, List.of(BrilFactory.arg(prefixRegister + i, BrilInstructions.INT)));
+					registersToPop.add(0, i);
+				}
+			}
+			return registersToPop;
+		}
+
+		private void popRegisters(List<Integer> registersToPop) {
+			for (int reg : registersToPop) {
+				factory.call(prefixRegister + reg, BrilInstructions.INT, CALL_POP, List.of());
+			}
 		}
 
 		@NotNull
