@@ -65,14 +65,19 @@ public final class BrilPrepareForAsm {
 			});
 			argNames.forEach(localVars::remove);
 
+			final String returnValueVar = prefixRegister + 0;
+			if (localVars.contains(returnValueVar) && !registerColoring.containsVar(returnValueVar)) {
+				registerColoring.setRegister(returnValueVar, 0);
+			}
+
 			registerColoring.build();
 
 			final Function<String, String> mapping = var -> {
 				final int virtualRegister = registerColoring.getVirtualRegister(var);
-				if (localVars.contains(var)) {
-					return prefixVirtualRegister + virtualRegister;
+				if (!localVars.contains(var) || !var.startsWith(prefixVirtualRegister)) {
+					return var;
 				}
-				return var;
+				return prefixVirtualRegister + virtualRegister;
 			};
 
 			BrilFactory.renameArgs(mapping, cfgFunction);
@@ -91,7 +96,7 @@ public final class BrilPrepareForAsm {
 			spilled = true;
 
 			final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(argNames.size() + registerColoring.getRegisterCount(),
-			                                                                                var -> var.equals(varToSpil));
+			                                                                                var -> var.equals(varToSpil), prefixRegister, prefixVirtualRegister, 2);
 			registerIndirection.transformBlocks(blocks);
 
 			BrilCfg.debugPrint(blocks);
@@ -153,7 +158,7 @@ public final class BrilPrepareForAsm {
 
 		BrilFactory.renameArgs(mapping::get, cfgFunction);
 
-		final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(mapping,
+		final BrilRegisterIndirection registerIndirection = new BrilRegisterIndirection(prefixRegister, prefixVirtualRegister, maxParametersInRegisters, mapping,
 		                                                                                var -> var.startsWith(prefixStackParameter));
 		registerIndirection.transformBlocks(blocks);
 
@@ -161,13 +166,13 @@ public final class BrilPrepareForAsm {
 	}
 
 	@Nullable
-	private static String getVarToSpil(List<BrilNode> blocks, int maxAllowedRegisters) {
+	private String getVarToSpil(List<BrilNode> blocks, int maxAllowedRegisters) {
 		final Set<String> largestOut = new HashSet<>();
 		BrilCfg.foreachInstructionOverAllBlocks(blocks, instruction -> {
 			final Set<String> liveOut = BrilCfgDetectVarLiveness.getLiveOut(instruction);
 			final Set<String> registerVars = new HashSet<>();
 			for (String var : liveOut) {
-				if (var.startsWith("s.")) {
+				if (var.startsWith(prefixStackParameter)) {
 					continue;
 				}
 

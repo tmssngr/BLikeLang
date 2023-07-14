@@ -27,11 +27,13 @@ final class BrilVarMapping2 {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<String> argNames = BrilFactory.getArgNames(arguments);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
+		final String functionReturnType = BrilFactory.getType(function);
 
 		final Set<String> localVars = getLocalVars(instructions);
 
 		final BrilVars2 brilVars = new BrilVars2(prefixVirtualRegister, prefixRegister, prefixStackParameter, maxParametersInRegisters);
 		brilVars.assignArguments(argNames);
+		brilVars.assignReturnValue(functionReturnType);
 		brilVars.assignLocalVariables(localVars);
 
 		final Map<String, BrilVars2.VarLocation> varToLocation = brilVars.getVarToLocationMapping();
@@ -291,6 +293,11 @@ final class BrilVarMapping2 {
 
 			if (dest != null && type != null) {
 				localVars.add(dest);
+				continue;
+			}
+
+			final String op = BrilInstructions.getOp(instruction);
+			if (BrilInstructions.RET.equals(op)) {
 				continue;
 			}
 

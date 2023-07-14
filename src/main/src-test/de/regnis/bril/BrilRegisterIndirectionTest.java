@@ -29,10 +29,10 @@ public class BrilRegisterIndirectionTest {
 				             .sub("t.5", "t.5", "v.0")
 				             .idi("p.1", "t.5")
 				             .get(),
-		             new BrilRegisterIndirection(Map.of("a", "v.0",
-		                                                "b", "v.1",
-		                                                "sum", "p.0",
-		                                                "diff", "p.1"),
+		             new BrilRegisterIndirection("r.", "t.", 2, Map.of("a", "v.0",
+		                                                               "b", "v.1",
+		                                                               "sum", "p.0",
+		                                                               "diff", "p.1"),
 		                                         var -> var.startsWith("p."))
 				             .transformInstructions(new BrilInstructions()
 						                                    .constant("a", 1)
@@ -57,7 +57,7 @@ public class BrilRegisterIndirectionTest {
 				             .sub("diff", "t.5", "a")
 				             .get(),
 		             new BrilRegisterIndirection(4,
-		                                         var -> var.equals("sum"))
+		                                         var -> var.equals("sum"), "r.", "t.", 2)
 				             .transformInstructions(new BrilInstructions()
 						                                    .constant("a", 1)
 						                                    .constant("b", 2)
@@ -77,7 +77,7 @@ public class BrilRegisterIndirectionTest {
 				             .calli("r.0", "add", List.of(BrilFactory.argi("r.0"), BrilFactory.argi("r.1")))
 				             .idi("sum", "r.0")
 				             .get(),
-		             new BrilRegisterIndirection(4, var -> false)
+		             new BrilRegisterIndirection(4, var -> false, "r.", "t.", 2)
 				             .transformInstructions(new BrilInstructions()
 						                                    .constant("a", 1)
 						                                    .constant("b", 2)

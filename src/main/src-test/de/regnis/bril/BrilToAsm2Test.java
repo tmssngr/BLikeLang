@@ -17,6 +17,24 @@ public class BrilToAsm2Test {
 	@Test
 	public void testBasicRetValue() {
 		Assert.assertEquals(new BrilAsm()
+				                    .label("pi10000")
+				                    .iconst(0, 31415)
+				                    .jump("exit 1")
+				                    .label("exit 1")
+				                    .ret()
+				                    .toLines(),
+		                    brilToAsm(BrilFactory.createFunctionI("pi10000", List.of(),
+		                                                          new BrilInstructions()
+				                                                          .constant("pi10000", 31415)
+				                                                          .reti("pi10000")
+				                                                          .get()
+		                    ))
+		);
+	}
+
+	@Test
+	public void test2ParamRetValue() {
+		Assert.assertEquals(new BrilAsm()
 				                    .label("sum")
 				                    .ipush(4)
 				                    .iload(4, ARG0_REGISTER)

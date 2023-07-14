@@ -16,8 +16,6 @@ public final class BrilRegisterIndirection {
 
 	// Constants ==============================================================
 
-	private static final String PREFIX_TEMP = "t.";
-	private static final String PREFIX_REGISTER = "r.";
 	static final String CALL_PUSH = ".push";
 	static final String CALL_POP = ".pop";
 
@@ -26,21 +24,30 @@ public final class BrilRegisterIndirection {
 	@Nullable
 	private final Map<String, String> mapping;
 	private final Predicate<String> needsTempAccess;
+	private final String prefixRegister;
+	private final int maxParametersInRegisters;
+	private final String prefixTempVar;
 
 	private int tempIndex;
 
 	// Setup ==================================================================
 
-	public BrilRegisterIndirection(int tempIndex, Predicate<String> needsTempAccess) {
-		this.needsTempAccess = needsTempAccess;
-		this.tempIndex       = tempIndex;
-		mapping              = null;
+	public BrilRegisterIndirection(int tempIndex, Predicate<String> needsTempAccess, String prefixRegister, String prefixTempVar, int maxParametersInRegisters) {
+		this.needsTempAccess          = needsTempAccess;
+		this.tempIndex                = tempIndex;
+		this.prefixRegister           = prefixRegister;
+		this.prefixTempVar            = prefixTempVar;
+		this.maxParametersInRegisters = maxParametersInRegisters;
+		mapping                       = null;
 	}
 
-	public BrilRegisterIndirection(Map<String, String> mapping, Predicate<String> needsTempAccess) {
-		this.mapping         = new HashMap<>(mapping);
-		this.needsTempAccess = needsTempAccess;
-		tempIndex            = mapping.size();
+	public BrilRegisterIndirection(String prefixRegister, String prefixTempVar, int maxParametersInRegisters, Map<String, String> mapping, Predicate<String> needsTempAccess) {
+		this.mapping                  = new HashMap<>(mapping);
+		this.needsTempAccess          = needsTempAccess;
+		tempIndex                     = mapping.size();
+		this.prefixRegister           = prefixRegister;
+		this.prefixTempVar            = prefixTempVar;
+		this.maxParametersInRegisters = maxParametersInRegisters;
 	}
 
 	// Accessing ==============================================================
@@ -66,7 +73,7 @@ public final class BrilRegisterIndirection {
 
 	@NotNull
 	private String createTemp() {
-		final String temp = PREFIX_TEMP + tempIndex;
+		final String temp = prefixTempVar + tempIndex;
 		tempIndex++;
 		return temp;
 	}
@@ -208,6 +215,8 @@ public final class BrilRegisterIndirection {
 		protected void ret(String var, String type) {
 			final String newVar = getMapped(var);
 			factory.id("r.0", type, newVar);
+			// only necessary for making r.0 used:
+			factory.ret("r.0", type);
 		}
 
 		@Override
@@ -239,7 +248,7 @@ public final class BrilRegisterIndirection {
 		protected void call(String dest, String type, String name, List<BrilNode> args) {
 			final List<BrilNode> newArgs = handleCallArgs(args);
 
-			final String result = PREFIX_REGISTER + 0;
+			final String result = prefixRegister + 0;
 
 			factory.call(result, type, name, newArgs);
 
@@ -259,8 +268,8 @@ public final class BrilRegisterIndirection {
 				final String argName = BrilFactory.getArgName(arg);
 				final String argType = BrilFactory.getArgType(arg);
 				String newArg = getMapped(argName);
-				if (i < 2) {
-					final String registerParameter = PREFIX_REGISTER + i;
+				if (i < maxParametersInRegisters) {
+					final String registerParameter = prefixRegister + i;
 					factory.id(registerParameter, argType, newArg);
 					newArgs.add(BrilFactory.arg(registerParameter, argType));
 				}

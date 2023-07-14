@@ -21,6 +21,7 @@ final class BrilVars2 {
 	private int registerParameterCount;
 	private int pushedParameters;
 	private int spilledVariables;
+	private int returnValueCount;
 
 	// Setup ==================================================================
 
@@ -51,6 +52,16 @@ final class BrilVars2 {
 		}
 	}
 
+	public void assignReturnValue(String returnType) {
+		if (BrilInstructions.INT.equals(returnType)
+				|| BrilInstructions.BOOL.equals(returnType)) {
+			returnValueCount = 1;
+		}
+		else if (!BrilInstructions.VOID.equals(returnType)) {
+			throw new UnsupportedOperationException(returnType);
+		}
+	}
+
 	public void assignLocalVariables(Set<String> localVars) {
 		int nextRegister = registerParameterCount;
 		for (String localVar : localVars) {
@@ -61,6 +72,13 @@ final class BrilVars2 {
 			if (localVar.startsWith(prefixVirtualRegister)) {
 				varToStore.put(localVar, new InternalRegister(nextRegister));
 				nextRegister++;
+				continue;
+			}
+
+			final int resultRegister = 0;
+			final String resultName = prefixRegister + resultRegister;
+			if (localVar.equals(resultName)) {
+				varToStore.put(localVar, new InternalRegister(resultRegister));
 				continue;
 			}
 
@@ -97,11 +115,12 @@ final class BrilVars2 {
 	}
 
 	public List<Integer> getUsedNonArgumentRegisters() {
+		final int firstRegisterToPush = Math.max(registerParameterCount, returnValueCount);
 		final Set<Integer> usedRegisters = new HashSet<>();
 		for (Map.Entry<String, InternalVarStore> entry : varToStore.entrySet()) {
 			final InternalVarStore store = entry.getValue();
 			if (store instanceof InternalRegister register) {
-				if (register.reg < registerParameterCount) {
+				if (register.reg < firstRegisterToPush) {
 					continue;
 				}
 

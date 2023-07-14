@@ -284,19 +284,21 @@ public class BrilInstructions {
 	}
 
 	@NotNull
-	public BrilInstructions reti(String var) {
+	public BrilInstructions ret(String var, String type) {
 		return add(new BrilNode()
 				           .set(KEY_OP, RET)
-				           .set(KEY_TYPE, INT)
+				           .set(KEY_TYPE, type)
 				           .set(KEY_VAR, var));
 	}
 
 	@NotNull
+	public BrilInstructions reti(String var) {
+		return ret(var, INT);
+	}
+
+	@NotNull
 	public BrilInstructions retb(String var) {
-		return add(new BrilNode()
-				           .set(KEY_OP, RET)
-				           .set(KEY_TYPE, BOOL)
-				           .set(KEY_VAR, var));
+		return ret(var, BOOL);
 	}
 
 	@NotNull
