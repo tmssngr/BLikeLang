@@ -69,35 +69,33 @@ final class BrilVars2 {
 				continue;
 			}
 
+			if (!var.startsWith(prefixRegister)) {
+				continue;
+			}
+
+			final int register = Integer.parseInt(var.substring(prefixRegister.length()));
+			Utils.assertTrue(register >= 0 && register < maxParametersInRegisters);
+
+			varToStore.put(var, new InternalRegister(register));
+			nextRegister = Math.max(nextRegister, register + 1);
+		}
+
+		for (String var : localVars) {
+			if (varToStore.containsKey(var)) {
+				continue;
+			}
+
+			if (var.startsWith(prefixRegister)) {
+				continue;
+			}
+
 			if (var.startsWith(prefixVirtualRegister)) {
 				varToStore.put(var, new InternalRegister(nextRegister));
 				nextRegister++;
 				continue;
 			}
 
-			if (var.startsWith(prefixRegister)) {
-				final int register = Integer.parseInt(var.substring(prefixRegister.length()));
-				if (register >= 0 && register < maxParametersInRegisters) {
-					varToStore.put(var, new InternalRegister(register));
-					continue;
-				}
-			}
-
 			throw new UnsupportedOperationException(var);
-/*
-
-			if (registers < 3) {
-				varStore = new InternalRegister(BrilVarMapping.VAR0_REGISTER + 2 * registers);
-				registers++;
-				varToStore.put(virtualRegister, varStore);
-			}
-			else {
-				varStore = new SpilledRegister(2 * spilledVariables);
-				spilledVariables++;
-				varToStore.put(virtualRegister, varStore);
-			}
-			this.varToStore.put(localVar, varStore);
-*/
 		}
 	}
 
