@@ -142,7 +142,7 @@ public class BrilPrepareForAsmTest {
 	}
 
 	@Test
-	public void testLoop() {
+	public void testFibonacci() {
 		assertInstructions(new BrilInstructions()
 				                   .constant("v.1", 0)
 				                   .constant("v.2", 1)
