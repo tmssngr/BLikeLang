@@ -5,12 +5,12 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static de.regnis.bril.BrilVarMapping2.*;
+import static de.regnis.bril.BrilVarMapping.*;
 
 /**
  * @author Thomas Singer
  */
-public class BrilToAsm2Test {
+public class BrilToAsmTest {
 
 	// Accessing ==============================================================
 
@@ -249,7 +249,7 @@ public class BrilToAsm2Test {
 
 	private static List<String> brilToAsm(BrilNode function) {
 		final BrilAsm asm = new BrilAsm();
-		BrilToAsm2.convertToAsm(function, asm);
+		BrilToAsm.convertToAsm(function, asm);
 		return asm.toLines();
 	}
 }

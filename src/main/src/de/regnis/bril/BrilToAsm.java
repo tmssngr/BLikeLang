@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Thomas Singer
  */
-public final class BrilToAsm2 {
+public final class BrilToAsm {
 
 	// Constants ==============================================================
 
@@ -28,7 +28,7 @@ public final class BrilToAsm2 {
 		final String name = BrilFactory.getName(functionFromCfg);
 		asm.label(name);
 
-		final BrilVarMapping2 varMapping = BrilVarMapping2.createVarMapping(functionFromCfg, PREFIX_VIRTUAL_REGISTER, PREFIX_REGISTER, PREFIX_STACK_PARAMETER, MAX_PARAMETERS_IN_REGISTERS);
+		final BrilVarMapping varMapping = BrilVarMapping.createVarMapping(functionFromCfg, PREFIX_VIRTUAL_REGISTER, PREFIX_REGISTER, PREFIX_STACK_PARAMETER, MAX_PARAMETERS_IN_REGISTERS);
 		varMapping.allocLocalVarSpace(asm);
 
 		final MyHandler handler = new MyHandler(varMapping, asm);
@@ -46,10 +46,10 @@ public final class BrilToAsm2 {
 
 	private static final class MyHandler extends BrilInstructions.Handler {
 
-		private final BrilVarMapping2 varMapping;
+		private final BrilVarMapping varMapping;
 		private final BrilAsm asm;
 
-		public MyHandler(BrilVarMapping2 varMapping, BrilAsm asm) {
+		public MyHandler(BrilVarMapping varMapping, BrilAsm asm) {
 			this.varMapping = varMapping;
 			this.asm        = asm;
 		}

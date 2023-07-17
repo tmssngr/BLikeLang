@@ -13,7 +13,7 @@ import java.util.*;
  *
  * @author Thomas Singer
  */
-final class BrilVarMapping2 {
+final class BrilVarMapping {
 
 	// Constants ==============================================================
 
@@ -23,7 +23,7 @@ final class BrilVarMapping2 {
 
 	// Static =================================================================
 
-	public static BrilVarMapping2 createVarMapping(BrilNode function, String prefixVirtualRegister, String prefixRegister, String prefixStackParameter, int maxParametersInRegisters) {
+	public static BrilVarMapping createVarMapping(BrilNode function, String prefixVirtualRegister, String prefixRegister, String prefixStackParameter, int maxParametersInRegisters) {
 		final List<BrilNode> arguments = BrilFactory.getArguments(function);
 		final List<String> argNames = BrilFactory.getArgNames(arguments);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(function);
@@ -31,27 +31,27 @@ final class BrilVarMapping2 {
 
 		final Set<String> localVars = getLocalVars(instructions);
 
-		final BrilVars2 brilVars = new BrilVars2(prefixVirtualRegister, prefixRegister, prefixStackParameter, maxParametersInRegisters);
+		final BrilVars brilVars = new BrilVars(prefixVirtualRegister, prefixRegister, prefixStackParameter, maxParametersInRegisters);
 		brilVars.assignArguments(argNames);
 		brilVars.assignReturnValue(functionReturnType);
 		brilVars.assignLocalVariables(localVars);
 
-		final Map<String, BrilVars2.VarLocation> varToLocation = brilVars.getVarToLocationMapping();
+		final Map<String, BrilVars.VarLocation> varToLocation = brilVars.getVarToLocationMapping();
 		final int byteCountForSpilledLocalVars = brilVars.getByteCountForSpilledLocalVars();
 		final List<Integer> globberedRegisters = brilVars.getUsedNonArgumentRegisters();
 
-		return new BrilVarMapping2(varToLocation, byteCountForSpilledLocalVars, globberedRegisters);
+		return new BrilVarMapping(varToLocation, byteCountForSpilledLocalVars, globberedRegisters);
 	}
 
 	// Fields =================================================================
 
-	private final Map<String, BrilVars2.VarLocation> varToLocation;
+	private final Map<String, BrilVars.VarLocation> varToLocation;
 	private final int localBytes;
 	private final List<Integer> globberedRegisters;
 
 	// Setup ==================================================================
 
-	private BrilVarMapping2(Map<String, BrilVars2.VarLocation> varToLocation, int localBytes, List<Integer> globberedRegisters) {
+	private BrilVarMapping(Map<String, BrilVars.VarLocation> varToLocation, int localBytes, List<Integer> globberedRegisters) {
 		this.varToLocation      = Collections.unmodifiableMap(varToLocation);
 		this.localBytes         = localBytes;
 		this.globberedRegisters = globberedRegisters;
@@ -96,7 +96,7 @@ final class BrilVarMapping2 {
 	}
 
 	public void loadConstant(String dest, int value, BrilAsm asm) {
-		final BrilVars2.VarLocation location = getLocation(dest);
+		final BrilVars.VarLocation location = getLocation(dest);
 		if (location.isRegister()) {
 			asm.iconst(location.reg(), value);
 		}
@@ -142,8 +142,8 @@ final class BrilVarMapping2 {
 	}
 
 	public void id(String dest, String type, String src, BrilAsm asm) {
-		final BrilVars2.VarLocation destLocation = getLocation(dest);
-		final BrilVars2.VarLocation srcLocation = getLocation(src);
+		final BrilVars.VarLocation destLocation = getLocation(dest);
+		final BrilVars.VarLocation srcLocation = getLocation(src);
 		if (Objects.equals(destLocation, srcLocation)) {
 			return;
 		}
@@ -207,7 +207,7 @@ final class BrilVarMapping2 {
 	// Utils ==================================================================
 
 	private void istore(String var, int register, BrilAsm asm) {
-		final BrilVars2.VarLocation location = getLocation(var);
+		final BrilVars.VarLocation location = getLocation(var);
 		if (location.isRegister()) {
 			if (register != location.reg()) {
 				asm.iload(location.reg(), register);
@@ -219,7 +219,7 @@ final class BrilVarMapping2 {
 	}
 
 	private void bstore(String var, int register, BrilAsm asm) {
-		final BrilVars2.VarLocation location = getLocation(var);
+		final BrilVars.VarLocation location = getLocation(var);
 		if (location.isRegister()) {
 			if (register != location.reg()) {
 				asm.bload(location.reg(), register);
@@ -231,7 +231,7 @@ final class BrilVarMapping2 {
 	}
 
 	private int iload(String var, int registerForSpilledVar, BrilAsm asm) {
-		final BrilVars2.VarLocation location = getLocation(var);
+		final BrilVars.VarLocation location = getLocation(var);
 		if (location.isRegister()) {
 			return location.reg();
 		}
@@ -242,7 +242,7 @@ final class BrilVarMapping2 {
 
 	@SuppressWarnings("SameParameterValue")
 	private int bload(String var, int registerForSpilledVar, BrilAsm asm) {
-		final BrilVars2.VarLocation location = getLocation(var);
+		final BrilVars.VarLocation location = getLocation(var);
 		if (location.isRegister()) {
 			return location.reg();
 		}
@@ -258,12 +258,12 @@ final class BrilVarMapping2 {
 		}
 	}
 
-	private BrilVars2.VarLocation getLocation(String var) {
+	private BrilVars.VarLocation getLocation(String var) {
 		return varToLocation.get(var);
 	}
 
 	private int getRegisterLocation(String var) {
-		final BrilVars2.VarLocation location = varToLocation.get(var);
+		final BrilVars.VarLocation location = varToLocation.get(var);
 		Utils.assertTrue(location.isRegister());
 		return location.reg();
 	}

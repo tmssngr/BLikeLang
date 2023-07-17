@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * @author Thomas Singer
  */
-final class BrilVars2 {
+final class BrilVars {
 
 	// Fields =================================================================
 
@@ -25,7 +25,7 @@ final class BrilVars2 {
 
 	// Setup ==================================================================
 
-	public BrilVars2(String prefixVirtualRegister, String prefixRegister, String prefixStackParameter, int maxParametersInRegisters) {
+	public BrilVars(String prefixVirtualRegister, String prefixRegister, String prefixStackParameter, int maxParametersInRegisters) {
 		this.prefixVirtualRegister    = prefixVirtualRegister;
 		this.prefixRegister           = prefixRegister;
 		this.prefixStackParameter     = prefixStackParameter;
