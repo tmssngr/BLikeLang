@@ -1,46 +1,99 @@
 package de.regnis.bril;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Thomas Singer
  */
 public class BrilInterpreterTest {
 
+	// Static =================================================================
+
+	@NotNull
+	public static BrilNode createFibonacci() {
+		return BrilFactory.createFunctionI("fibonacci", List.of(
+				                                   BrilFactory.argi("n")
+		                                   ),
+		                                   new BrilInstructions()
+				                                   .constant("a", 0)
+				                                   .constant("b", 1)
+
+				                                   .label("while")
+				                                   .constant("one", 1)
+				                                   .lessThan("cond", "n", "one")
+				                                   .branch("cond", "exit", "body")
+
+				                                   .label("body")
+				                                   .add("sum", "a", "b")
+				                                   .idi("a", "b")
+				                                   .idi("b", "sum")
+				                                   .constant("one", 1)
+				                                   .sub("n", "n", "one")
+				                                   .jump("while")
+
+				                                   .label("exit")
+				                                   .reti("b")
+				                                   .get()
+		);
+	}
+
+	@NotNull
+	public static BrilNode createGetLeftOrRight() {
+		return BrilFactory.createFunctionI("getLeftOrRight", List.of(
+				                                   BrilFactory.argb("leftOrRight"),
+				                                   BrilFactory.argi("left"),
+				                                   BrilFactory.argi("right")
+		                                   ),
+		                                   new BrilInstructions()
+				                                   .branch("leftOrRight", "takeLeft", "takeRight")
+				                                   .label("takeLeft")
+				                                   .reti("left")
+				                                   .label("takeRight")
+				                                   .reti("right")
+				                                   .get()
+		);
+	}
+
+	@NotNull
+	public static BrilNode createAverage() {
+		return BrilFactory.createFunctionV("average", List.of(),
+		                                   new BrilInstructions()
+				                                   .constant("n", 0)
+				                                   .constant("sum", 0)
+
+				                                   .label("loop")
+				                                   .calli("value", "getInt", List.of())
+				                                   .constant("zero", 0)
+				                                   .lessThan("cond", "value", "zero")
+				                                   .branch("cond", "exit", "body")
+
+				                                   .label("body")
+				                                   .constant("one", 1)
+				                                   .add("n", "n", "one")
+				                                   .add("sum", "sum", "value")
+				                                   .div("average", "sum", "n")
+				                                   .printi("average")
+				                                   .jump("loop")
+
+				                                   .label("exit")
+				                                   .ret()
+				                                   .get()
+		);
+	}
+
 	// Accessing ==============================================================
 
 	@Test
 	public void testFibonacci() {
-		final BrilNode function = BrilFactory.createFunctionI("fibonacci", List.of(
-				                                                      BrilFactory.argi("n")
-		                                                      ),
-		                                                      new BrilInstructions()
-				                                                      .constant("a", 0)
-				                                                      .constant("b", 1)
-
-				                                                      .label("while")
-				                                                      .constant("one", 1)
-				                                                      .lessThan("cond", "n", "one")
-				                                                      .branch("cond", "exit", "body")
-
-				                                                      .label("body")
-				                                                      .add("sum", "a", "b")
-				                                                      .idi("a", "b")
-				                                                      .idi("b", "sum")
-				                                                      .constant("one", 1)
-				                                                      .sub("n", "n", "one")
-				                                                      .jump("while")
-
-				                                                      .label("exit")
-				                                                      .reti("b")
-				                                                      .get()
-		);
+		final BrilNode function = createFibonacci();
 		final BrilInterpreter interpreter = new BrilInterpreter();
 		assertEquals(1, interpreter.run(function, List.of(0)));
 		assertEquals(1, interpreter.run(function, List.of(1)));
@@ -53,19 +106,7 @@ public class BrilInterpreterTest {
 
 	@Test
 	public void testIfBoolean() {
-		final BrilNode function = BrilFactory.createFunctionI("getLeftOrRight", List.of(
-				                                                      BrilFactory.argb("leftOrRight"),
-				                                                      BrilFactory.argi("left"),
-				                                                      BrilFactory.argi("right")
-		                                                      ),
-		                                                      new BrilInstructions()
-				                                                      .branch("leftOrRight", "takeLeft", "takeRight")
-				                                                      .label("takeLeft")
-				                                                      .reti("left")
-				                                                      .label("takeRight")
-				                                                      .reti("right")
-				                                                      .get()
-		);
+		final BrilNode function = createGetLeftOrRight();
 		final BrilInterpreter interpreter = new BrilInterpreter();
 		assertEquals(0, interpreter.run(function, List.of(true, 0, 1)));
 		assertEquals(1, interpreter.run(function, List.of(false, 0, 1)));
@@ -75,29 +116,7 @@ public class BrilInterpreterTest {
 
 	@Test
 	public void testAverage() {
-		final BrilNode function = BrilFactory.createFunctionV("average", List.of(),
-		                                                      new BrilInstructions()
-				                                                      .constant("n", 0)
-				                                                      .constant("sum", 0)
-
-				                                                      .label("loop")
-				                                                      .calli("value", "getInt", List.of())
-				                                                      .constant("zero", 0)
-				                                                      .lessThan("cond", "value", "zero")
-				                                                      .branch("cond", "exit", "body")
-
-				                                                      .label("body")
-				                                                      .constant("one", 1)
-				                                                      .add("n", "n", "one")
-				                                                      .add("sum", "sum", "value")
-				                                                      .div("average", "sum", "n")
-				                                                      .printi("average")
-				                                                      .jump("loop")
-
-				                                                      .label("exit")
-				                                                      .ret()
-				                                                      .get()
-		);
+		final BrilNode function = createAverage();
 		assertNull(new BrilInterpreter(new TestCallSupport()
 				                               .add("getInt", List.of(), -1)
 		).run(function, List.of()));
@@ -142,7 +161,7 @@ public class BrilInterpreterTest {
 			if (!expectedCall.name.equals(name)
 					|| !expectedCall.arguments.equals(arguments)) {
 				throw new BrilInterpreter.InterpretingFailedException("Expected call " + expectedCall.name + " (" + expectedCall.arguments
-				                                                      + "), but got " + name + "(" + arguments + ")");
+						                                                      + "), but got " + name + "(" + arguments + ")");
 			}
 
 			return expectedCall.result;

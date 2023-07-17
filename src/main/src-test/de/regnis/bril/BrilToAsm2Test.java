@@ -100,19 +100,7 @@ public class BrilToAsm2Test {
 				                    .label("exit 3")
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilFactory.createFunctionI("getLeftOrRight", List.of(
-				                                                          BrilFactory.argb("leftOrRight"),
-				                                                          BrilFactory.argi("left"),
-				                                                          BrilFactory.argi("right")
-		                                                          ),
-		                                                          new BrilInstructions()
-				                                                          .branch("leftOrRight", "takeLeft", "takeRight")
-				                                                          .label("takeLeft")
-				                                                          .reti("left")
-				                                                          .label("takeRight")
-				                                                          .reti("right")
-				                                                          .get()
-		                    ))
+		                    brilToAsm(BrilInterpreterTest.createGetLeftOrRight())
 		);
 	}
 
@@ -155,7 +143,7 @@ public class BrilToAsm2Test {
 	}
 
 	@Test
-	public void testLoop() {
+	public void testFibonacci() {
 		Assert.assertEquals(new BrilAsm()
 				                    .label("fibonacci")
 				                    .ipush(ARG1_REGISTER)
@@ -202,30 +190,7 @@ public class BrilToAsm2Test {
 				                    .ipop(ARG1_REGISTER)
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilFactory.createFunctionI("fibonacci", List.of(
-				                                                          BrilFactory.argi("n")
-		                                                          ),
-		                                                          new BrilInstructions()
-				                                                          .constant("a", 0)
-				                                                          .constant("b", 1)
-
-				                                                          .label("while")
-				                                                          .constant("one", 1)
-				                                                          .lessThan("cond", "n", "one")
-				                                                          .branch("cond", "exit", "body")
-
-				                                                          .label("body")
-				                                                          .add("sum", "a", "b")
-				                                                          .idi("a", "b")
-				                                                          .idi("b", "sum")
-				                                                          .constant("one", 1)
-				                                                          .sub("n", "n", "one")
-				                                                          .jump("while")
-
-				                                                          .label("exit")
-				                                                          .reti("b")
-				                                                          .get()
-		                    ))
+		                    brilToAsm(BrilInterpreterTest.createFibonacci())
 		);
 	}
 
@@ -276,29 +241,7 @@ public class BrilToAsm2Test {
 				                    .ipop(0)
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilFactory.createFunctionV("average", List.of(),
-		                                                          new BrilInstructions()
-				                                                          .constant("n", 0)
-				                                                          .constant("sum", 0)
-
-				                                                          .label("loop")
-				                                                          .calli("value", "getInt", List.of())
-				                                                          .constant("zero", 0)
-				                                                          .lessThan("cond", "value", "zero")
-				                                                          .branch("cond", "exit", "body")
-
-				                                                          .label("body")
-				                                                          .constant("one", 1)
-				                                                          .add("n", "n", "one")
-				                                                          .add("sum", "sum", "value")
-				                                                          .div("average", "sum", "n")
-				                                                          .printi("average")
-				                                                          .jump("loop")
-
-				                                                          .label("exit")
-				                                                          .ret()
-				                                                          .get()
-		                    ))
+		                    brilToAsm(BrilInterpreterTest.createAverage())
 		);
 	}
 
