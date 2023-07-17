@@ -138,6 +138,98 @@ public class BrilInterpreterTest {
 		).run(function, List.of()));
 	}
 
+	@Test
+	public void testWeekDay() {
+		final BrilNode function = BrilFactory.createFunctionI("getWeekDay", List.of(
+				                                                      BrilFactory.argi("dayInMonth"),
+				                                                      BrilFactory.argi("month"),
+				                                                      BrilFactory.argi("year")
+		                                                      ),
+		                                                      new BrilInstructions()
+				                                                      .constant("hundred", 100)
+				                                                      .div("h", "year", "hundred")
+				                                                      .constant("fourhundred", 400)
+				                                                      .div("v", "year", "fourhundred")
+				                                                      .constant("four", 4)
+				                                                      .div("z", "year", "four")
+				                                                      .add("z", "z", "year")
+				                                                      .sub("z", "z", "h")
+				                                                      .add("z", "z", "v")
+				                                                      .constant("one", 1)
+				                                                      .add("z", "z", "one")
+				                                                      .constant("seven", 7)
+				                                                      .mod("z", "z", "seven")
+				                                                      .constant("four", 4)
+				                                                      .mod("i", "year", "four")
+				                                                      .constant("hundred", 100)
+				                                                      .mod("h", "year", "hundred")
+				                                                      .constant("fourhundred", 400)
+				                                                      .mod("v", "year", "fourhundred")
+				                                                      .constant("zero", 0)
+				                                                      .equal("cond", "h", "zero")
+				                                                      .branch("cond", "if1", "endif1")
+				                                                      .label("if1")
+				                                                      .constant("one", 1)
+				                                                      .add("i", "i", "one")
+				                                                      .label("endif1")
+				                                                      .constant("zero", 0)
+				                                                      .equal("cond", "v", "zero")
+				                                                      .branch("cond", "if2", "endif2")
+				                                                      .label("if2")
+				                                                      .constant("one", 1)
+				                                                      .sub("i", "i", "one")
+				                                                      .label("endif2")
+				                                                      .constant("d", -30)
+				                                                      .constant("b", 1)
+				                                                      .constant("a", 0)
+				                                                      .constant("zero", 0)
+				                                                      .greaterThan("cond", "i", "zero")
+				                                                      .branch("cond", "if3", "endif3")
+				                                                      .label("if3")
+				                                                      .constant("a", 1)
+				                                                      .label("endif3")
+				                                                      .constant("two", 2)
+				                                                      .greaterThan("cond", "month", "two")
+				                                                      .branch("cond", "if4", "endif4")
+				                                                      .label("if4")
+				                                                      .constant("one", 1)
+				                                                      .sub("d", "d", "one")
+				                                                      .sub("d", "d", "a")
+				                                                      .label("endif4")
+				                                                      .constant("eight", 8)
+				                                                      .greaterThan("cond", "month", "eight")
+				                                                      .branch("cond", "if5", "endif5")
+				                                                      .label("if5")
+				                                                      .constant("b", 2)
+				                                                      .label("endif5")
+				                                                      .label("while")
+				                                                      .add("temp", "month", "b")
+				                                                      .constant("two", 2)
+				                                                      .mod("temp", "temp", "two")
+				                                                      .constant("thirty", 30)
+				                                                      .add("d", "d", "thirty")
+				                                                      .add("d", "d", "temp")
+				                                                      .constant("one", 1)
+				                                                      .sub("month", "month", "one")
+				                                                      .lessThan("cond", "month", "one")
+				                                                      .branch("cond", "end", "while")
+				                                                      .label("end")
+				                                                      .add("d", "d", "dayInMonth")
+				                                                      .add("d", "d", "z")
+				                                                      .add("d", "d", "a")
+				                                                      .constant("three", 3)
+				                                                      .add("d", "d", "three")
+				                                                      .constant("seven", 7)
+				                                                      .mod("d", "d", "seven")
+				                                                      .reti("d")
+				                                                      .get()
+		);
+		final BrilInterpreter interpreter = new BrilInterpreter();
+		assertEquals(0, interpreter.run(function, List.of(17, 7, 2023))); // monday
+		assertEquals(5, interpreter.run(function, List.of(17, 6, 2023))); // saturday
+		assertEquals(0, interpreter.run(function, List.of(24, 6, 1974))); // monday
+	}
+
 	// Inner Classes ==========================================================
 
 	private static class TestCallSupport extends BrilInterpreter.CallSupport {
