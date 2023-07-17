@@ -19,8 +19,11 @@ public class BrilInstructions {
 	public static final String SUB = "sub";
 	public static final String MUL = "mul";
 	public static final String DIV = "div";
+	public static final String MOD = "mod";
 	public static final String AND = "and";
+	public static final String EQ = "eq";
 	public static final String LT = "lt";
+	public static final String GT = "gt";
 	public static final String BR = "br";
 	public static final String CALL = "call";
 	public static final String CONST = "const";
@@ -268,13 +271,28 @@ public class BrilInstructions {
 	}
 
 	@NotNull
+	public BrilInstructions mod(String dest, String var1, String var2) {
+		return binary(dest, INT, MOD, var1, var2);
+	}
+
+	@NotNull
 	public BrilInstructions and(String dest, String var1, String var2) {
 		return binary(dest, INT, AND, var1, var2);
 	}
 
 	@NotNull
+	public BrilInstructions equal(String dest, String var1, String var2) {
+		return binary(dest, BOOL, EQ, var1, var2);
+	}
+
+	@NotNull
 	public BrilInstructions lessThan(String dest, String var1, String var2) {
 		return binary(dest, BOOL, LT, var1, var2);
+	}
+
+	@NotNull
+	public BrilInstructions greaterThan(String dest, String var1, String var2) {
+		return binary(dest, BOOL, GT, var1, var2);
 	}
 
 	@NotNull
@@ -399,11 +417,20 @@ public class BrilInstructions {
 			else if (DIV.equals(op)) {
 				div(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
+			else if (MOD.equals(op)) {
+				mod(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
 			else if (AND.equals(op)) {
 				and(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
+			else if (EQ.equals(op)) {
+				equal(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
 			else if (LT.equals(op)) {
 				lessThan(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
+			}
+			else if (GT.equals(op)) {
+				greaterThan(dest, getVar1NotNull(instruction), getVar2NotNull(instruction));
 			}
 			else if (RET.equals(op)) {
 				final String var = getVar(instruction);
@@ -457,10 +484,19 @@ public class BrilInstructions {
 		protected void div(String dest, String var1, String var2) {
 		}
 
+		protected void mod(String dest, String var1, String var2) {
+		}
+
 		protected void and(String dest, String var1, String var2) {
 		}
 
+		protected void equal(String dest, String var1, String var2) {
+		}
+
 		protected void lessThan(String dest, String var1, String var2) {
+		}
+
+		protected void greaterThan(String dest, String var1, String var2) {
 		}
 
 		protected void ret() {

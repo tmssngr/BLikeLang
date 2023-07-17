@@ -94,14 +94,32 @@ public final class BrilToAsm {
 		}
 
 		@Override
+		protected void mod(String dest, String var1, String var2) {
+			varMapping.i_binaryOperator(dest, var1, var2, asm,
+			                            (destReg, srcReg, asm) -> asm.imod(destReg, srcReg));
+		}
+
+		@Override
 		protected void and(String dest, String var1, String var2) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		protected void equal(String dest, String var1, String var2) {
+			varMapping.b_binaryOperator(dest, var1, var2, asm,
+			                            (destReg, leftReg, rightReg, asm) -> asm.ieq(destReg, leftReg, rightReg));
 		}
 
 		@Override
 		protected void lessThan(String dest, String var1, String var2) {
 			varMapping.b_binaryOperator(dest, var1, var2, asm,
 			                            (destReg, leftReg, rightReg, asm) -> asm.ilt(destReg, leftReg, rightReg));
+		}
+
+		@Override
+		protected void greaterThan(String dest, String var1, String var2) {
+			varMapping.b_binaryOperator(dest, var1, var2, asm,
+			                            (destReg, leftReg, rightReg, asm) -> asm.igt(destReg, leftReg, rightReg));
 		}
 
 		@Override

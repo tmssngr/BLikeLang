@@ -225,13 +225,28 @@ public class BrilInterpreter {
 		}
 
 		@Override
+		protected void mod(String dest, String var1, String var2) {
+			varToValue.put(dest, getIntValue(var1) % getIntValue(var2));
+		}
+
+		@Override
 		protected void and(String dest, String var1, String var2) {
 			varToValue.put(dest, getIntValue(var1) & getIntValue(var2));
 		}
 
 		@Override
+		protected void equal(String dest, String var1, String var2) {
+			varToValue.put(dest, getIntValue(var1) == getIntValue(var2));
+		}
+
+		@Override
 		protected void lessThan(String dest, String var1, String var2) {
 			varToValue.put(dest, getIntValue(var1) < getIntValue(var2));
+		}
+
+		@Override
+		protected void greaterThan(String dest, String var1, String var2) {
+			varToValue.put(dest, getIntValue(var1) > getIntValue(var2));
 		}
 
 		@Override

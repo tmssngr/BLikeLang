@@ -172,6 +172,49 @@ public class BrilAsm {
 	}
 
 	@NotNull
+	public BrilAsm imod(int dest, int src) {
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				Utils.todo();
+				output.accept("MOD r" + (dest + 1) + ", r" + (src + 1));
+				output.accept("MOD r" + dest + ", r" + src);
+			}
+		});
+		return this;
+	}
+
+	@NotNull
+	public BrilAsm ieq(int dest, int left, int right) {
+		final String labelTrue = "comparison_" + labelCounter++;
+		final String labelNext = "comparison_" + labelCounter++;
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("ld r" + dest + ", #0");
+				output.accept("cp r" + left + ", r" + right);
+			}
+		});
+		addCommand(new BrilCommand.Branch("nz", labelNext));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
+			}
+		});
+		addCommand(new BrilCommand.Branch("nz", labelNext));
+		addCommand(new BrilCommand.Label(labelTrue));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("dec r" + dest);
+			}
+		});
+		addCommand(new BrilCommand.Label(labelNext));
+		return this;
+	}
+
+	@NotNull
 	public BrilAsm ilt(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
@@ -191,6 +234,37 @@ public class BrilAsm {
 			}
 		});
 		addCommand(new BrilCommand.Branch("uge", labelNext));
+		addCommand(new BrilCommand.Label(labelTrue));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("dec r" + dest);
+			}
+		});
+		addCommand(new BrilCommand.Label(labelNext));
+		return this;
+	}
+
+	@NotNull
+	public BrilAsm igt(int dest, int left, int right) {
+		final String labelTrue = "comparison_" + labelCounter++;
+		final String labelNext = "comparison_" + labelCounter++;
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("ld r" + dest + ", #0");
+				output.accept("cp r" + left + ", r" + right);
+			}
+		});
+		addCommand(new BrilCommand.Branch("gt", labelTrue));
+		addCommand(new BrilCommand.Branch("nz", labelNext));
+		addCommand(new BrilCommand() {
+			@Override
+			public void appendTo(Consumer<String> output) {
+				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
+			}
+		});
+		addCommand(new BrilCommand.Branch("ule", labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
 		addCommand(new BrilCommand() {
 			@Override

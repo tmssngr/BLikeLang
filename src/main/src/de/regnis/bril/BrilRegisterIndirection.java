@@ -201,15 +201,33 @@ public final class BrilRegisterIndirection {
 		}
 
 		@Override
+		protected void mod(String dest, String var1, String var2) {
+			binary(dest, BrilInstructions.INT, var1, var2,
+			       (d, v1, v2) -> factory.mod(d, v1, v2));
+		}
+
+		@Override
 		protected void and(String dest, String var1, String var2) {
 			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.and(d, v1, v2));
 		}
 
 		@Override
+		protected void equal(String dest, String var1, String var2) {
+			binary(dest, BrilInstructions.INT, var1, var2,
+			       (d, v1, v2) -> factory.equal(d, v1, v2));
+		}
+
+		@Override
 		protected void lessThan(String dest, String var1, String var2) {
 			binary(dest, BrilInstructions.INT, var1, var2,
 			       (d, v1, v2) -> factory.lessThan(d, v1, v2));
+		}
+
+		@Override
+		protected void greaterThan(String dest, String var1, String var2) {
+			binary(dest, BrilInstructions.INT, var1, var2,
+			       (d, v1, v2) -> factory.greaterThan(d, v1, v2));
 		}
 
 		@Override
