@@ -77,34 +77,29 @@ public class BrilPrepareForAsmTest {
 
 	@Test
 	public void testIfBoolean() {
-		assertInstructions(new BrilInstructions()
-				                   .branch("r.0", "takeLeft", "takeRight")
-				                   .label("takeLeft")
-				                   .idi("r.0", "r.1")
-				                   .reti("r.0")
-				                   .jump("exit 3")
+		final List<BrilNode> expectedInstructions = new BrilInstructions()
+				.branch("r.0", "takeLeft", "takeRight")
+				.label("takeLeft")
+				.idi("r.0", "r.1")
+				.reti("r.0")
+				.jump("exit 3")
 
-				                   .label("takeRight")
-				                   .idi("r.0", "s.2")
-				                   .reti("r.0")
-				                   .jump("exit 3")
+				.label("takeRight")
+				.idi("r.0", "s.2")
+				.reti("r.0")
+				.jump("exit 3")
 
-				                   .label("exit 3")
-				                   .get(),
-		                   prepare(BrilFactory.createFunctionI("getLeftOrRight", List.of(
-				                                                       BrilFactory.argb("leftOrRight"),
-				                                                       BrilFactory.argi("left"),
-				                                                       BrilFactory.argi("right")
-		                                                       ),
-		                                                       new BrilInstructions()
-				                                                       .branch("leftOrRight", "takeLeft", "takeRight")
-				                                                       .label("takeLeft")
-				                                                       .reti("left")
-				                                                       .label("takeRight")
-				                                                       .reti("right")
-				                                                       .get()
-		                   ))
+				.label("exit 3")
+				.get();
+		assertInstructions(expectedInstructions,
+		                   prepare(BrilInterpreterTest.createGetLeftOrRight())
 		);
+		BrilInterpreterTest.testGetLeftOrRight(BrilFactory.createFunctionI("getLeftOrRight", List.of(
+				                                                                   BrilFactory.argb("r.0"),
+				                                                                   BrilFactory.argi("r.1"),
+				                                                                   BrilFactory.argi("s.2")
+		                                                                   ),
+		                                                                   expectedInstructions));
 	}
 
 	@Test
@@ -143,109 +138,72 @@ public class BrilPrepareForAsmTest {
 
 	@Test
 	public void testFibonacci() {
-		assertInstructions(new BrilInstructions()
-				                   .constant("v.1", 0)
-				                   .constant("v.2", 1)
-				                   .jump("while")
+		final List<BrilNode> expectedInstructions = new BrilInstructions()
+				.constant("v.1", 0)
+				.constant("v.2", 1)
+				.jump("while")
 
-				                   .label("while")
-				                   .constant("v.3", 1)
-				                   .lessThan("v.3", "r.0", "v.3")
-				                   .branch("v.3", "exit", "body")
+				.label("while")
+				.constant("v.3", 1)
+				.lessThan("v.3", "r.0", "v.3")
+				.branch("v.3", "exit", "body")
 
-				                   .label("body")
-				                   .add("v.3", "v.1", "v.2")
-				                   .idi("v.1", "v.2")
-				                   .idi("v.2", "v.3")
-				                   .constant("v.3", 1)
-				                   .sub("r.0", "r.0", "v.3")
-				                   .jump("while")
+				.label("body")
+				.add("v.3", "v.1", "v.2")
+				.idi("v.1", "v.2")
+				.idi("v.2", "v.3")
+				.constant("v.3", 1)
+				.sub("r.0", "r.0", "v.3")
+				.jump("while")
 
-				                   .label("exit")
-				                   .idi("r.0", "v.2")
-				                   .reti("r.0")
-				                   .jump("exit 4")
+				.label("exit")
+				.idi("r.0", "v.2")
+				.reti("r.0")
+				.jump("exit 4")
 
-				                   .label("exit 4")
-				                   .get(),
-		                   prepare(BrilFactory.createFunctionI("fibonacci", List.of(
-				                                                       BrilFactory.argi("n")
-		                                                       ),
-		                                                       new BrilInstructions()
-				                                                       .constant("a", 0)
-				                                                       .constant("b", 1)
-
-				                                                       .label("while")
-				                                                       .constant("one", 1)
-				                                                       .lessThan("cond", "n", "one")
-				                                                       .branch("cond", "exit", "body")
-
-				                                                       .label("body")
-				                                                       .add("sum", "a", "b")
-				                                                       .idi("a", "b")
-				                                                       .idi("b", "sum")
-				                                                       .constant("one", 1)
-				                                                       .sub("n", "n", "one")
-				                                                       .jump("while")
-
-				                                                       .label("exit")
-				                                                       .reti("b")
-				                                                       .get()
-		                   ))
+				.label("exit 4")
+				.get();
+		assertInstructions(expectedInstructions,
+		                   prepare(BrilInterpreterTest.createFibonacci())
 		);
+		BrilInterpreterTest.testFibonacci(BrilFactory.createFunctionI("fibonacci", List.of(
+				                                                              BrilFactory.argi("r.0")
+		                                                              ),
+		                                                              expectedInstructions));
 	}
 
 	@Test
 	public void testAverage() {
-		assertInstructions(new BrilInstructions()
-				                   .constant("v.2", 0)
-				                   .constant("v.1", 0)
-				                   .jump("loop")
+		final List<BrilNode> expectedInstructions = new BrilInstructions()
+				.constant("v.2", 0)
+				.constant("v.1", 0)
+				.jump("loop")
 
-				                   .label("loop")
-				                   .calli("r.0", "getInt", List.of())
-				                   .idi("r.0", "r.0")
-				                   .constant("v.3", 0)
-				                   .lessThan("v.3", "r.0", "v.3")
-				                   .branch("v.3", "exit", "body")
+				.label("loop")
+				.calli("r.0", "getInt", List.of())
+				.idi("r.0", "r.0")
+				.constant("v.3", 0)
+				.lessThan("v.3", "r.0", "v.3")
+				.branch("v.3", "exit", "body")
 
-				                   .label("body")
-				                   .constant("v.3", 1)
-				                   .add("v.2", "v.2", "v.3")
-				                   .add("v.1", "v.1", "r.0")
-				                   .div("r.0", "v.1", "v.2")
-				                   .idi("r.0", "r.0")
-				                   .printi("r.0")
-				                   .jump("loop")
+				.label("body")
+				.constant("v.3", 1)
+				.add("v.2", "v.2", "v.3")
+				.add("v.1", "v.1", "r.0")
+				.div("r.0", "v.1", "v.2")
+				.idi("r.0", "r.0")
+				.printi("r.0")
+				.jump("loop")
 
-				                   .label("exit")
-				                   .jump("exit 4")
+				.label("exit")
+				.jump("exit 4")
 
-				                   .label("exit 4")
-				                   .get(),
-		                   prepare(BrilFactory.createFunctionV("average", List.of(),
-		                                                       new BrilInstructions()
-				                                                       .constant("n", 0)
-				                                                       .constant("sum", 0)
-
-				                                                       .label("loop")
-				                                                       .calli("value", "getInt", List.of())
-				                                                       .constant("zero", 0)
-				                                                       .lessThan("cond", "value", "zero")
-				                                                       .branch("cond", "exit", "body")
-
-				                                                       .label("body")
-				                                                       .constant("one", 1)
-				                                                       .add("n", "n", "one")
-				                                                       .add("sum", "sum", "value")
-				                                                       .div("average", "sum", "n")
-				                                                       .printi("average")
-				                                                       .jump("loop")
-
-				                                                       .label("exit")
-				                                                       .ret()
-				                                                       .get()
-		                   )));
+				.label("exit 4")
+				.get();
+		assertInstructions(expectedInstructions,
+		                   prepare(BrilInterpreterTest.createAverage()));
+		BrilInterpreterTest.testAverage(BrilFactory.createFunctionV("average", List.of(),
+		                                                            expectedInstructions));
 	}
 
 	// Utils ==================================================================
