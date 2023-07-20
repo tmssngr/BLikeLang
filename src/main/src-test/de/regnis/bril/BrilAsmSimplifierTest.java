@@ -26,7 +26,7 @@ public class BrilAsmSimplifierTest {
 		                                          new BrilCommand.Jump("a"),
 		                                          new BrilCommand.Label("a"),
 		                                          new DummyCommand(),
-		                                          new BrilCommand.Branch("z", "b"),
+		                                          new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "b"),
 		                                          new BrilCommand.Label("b"),
 		                                          new DummyCommand()))
 		);
@@ -42,12 +42,12 @@ public class BrilAsmSimplifierTest {
 		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmSimplifier.create();
 
 		assertEquals(List.of(new BrilCommand.Label("test"),
-		                     new BrilCommand.Branch("z", "a"),
+		                     new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "a"),
 		                     new BrilCommand.Jump("a"),
 		                     new DummyCommand(),
 		                     new BrilCommand.Label("a")),
 		             transformation.apply(List.of(new BrilCommand.Label("test"),
-		                                          new BrilCommand.Branch("z", "b"),
+		                                          new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "b"),
 		                                          new BrilCommand.Jump("a"),
 		                                          new DummyCommand(),
 		                                          new BrilCommand.Label("a"),

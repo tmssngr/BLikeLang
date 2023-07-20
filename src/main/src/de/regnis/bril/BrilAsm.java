@@ -1,6 +1,5 @@
 package de.regnis.bril;
 
-import de.regnis.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -58,129 +57,72 @@ public class BrilAsm {
 	}
 
 	public BrilAsm iload(int dest, int src) {
-		if (dest != src) {
-			addCommand(new BrilCommand.Load16(dest, src));
-		}
+		addCommand(new BrilCommand.Load16(dest, src));
 		return this;
 	}
 
 	public BrilAsm iloadFromStack(int destRegister, int spRegister, int offset) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				ldFramePointer(offset, output);
-				output.accept("ldc r" + destRegister + ", rr" + spRegister);
-				output.accept("incw r" + spRegister);
-				output.accept("ldc r" + (destRegister + 1) + ", rr" + spRegister);
-			}
-		});
+		addLoadStackPointer(offset);
+		addCommand(new BrilCommand.LoadFromMem8(destRegister, spRegister));
+		addCommand(new BrilCommand.AddConst16(spRegister, 1));
+		addCommand(new BrilCommand.LoadFromMem8(destRegister + 1, spRegister));
 		return this;
 	}
 
 	public BrilAsm bload(int dest, int src) {
-		if (dest != src) {
-			addCommand(new BrilCommand.Load8(dest, src));
-		}
+		addCommand(new BrilCommand.Load8(dest, src));
 		return this;
 	}
 
 	public BrilAsm bloadFromStack(int destRegister, int spRegister, int offset) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				ldFramePointer(offset, output);
-				output.accept("ldc r" + destRegister + ", rr" + spRegister);
-			}
-		});
+		addLoadStackPointer(offset);
+		addCommand(new BrilCommand.LoadFromMem8(destRegister, spRegister));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm istoreToStack(int sourceRegister, int spRegister, int offset) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				ldFramePointer(offset, output);
-				output.accept("ldc rr" + spRegister + ", r" + sourceRegister);
-				output.accept("incw r" + spRegister);
-				output.accept("ldc rr" + spRegister + ", r" + (sourceRegister + 1));
-			}
-		});
+		addLoadStackPointer(offset);
+		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister));
+		addCommand(new BrilCommand.AddConst16(spRegister, 1));
+		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister + 1));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm bstoreToStack(int sourceRegister, int spRegister, int offset) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				ldFramePointer(offset, output);
-				output.accept("ldc rr" + spRegister + ", r" + sourceRegister);
-			}
-		});
+		addLoadStackPointer(offset);
+		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm iadd(int dest, int src) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("add r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("adc r" + dest + ", r" + src);
-			}
-		});
+		addCommand(new BrilCommand.Add16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm isub(int dest, int src) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("sub r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("sbc r" + dest + ", r" + src);
-			}
-		});
+		addCommand(new BrilCommand.Sub16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm imul(int dest, int src) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				Utils.todo();
-				output.accept("MUL r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("MUL r" + dest + ", r" + src);
-			}
-		});
+		addCommand(new BrilCommand.Mul16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm idiv(int dest, int src) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				Utils.todo();
-				output.accept("DIV r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("DIV r" + dest + ", r" + src);
-			}
-		});
+		addCommand(new BrilCommand.Div16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm imod(int dest, int src) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				Utils.todo();
-				output.accept("MOD r" + (dest + 1) + ", r" + (src + 1));
-				output.accept("MOD r" + dest + ", r" + src);
-			}
-		});
+		addCommand(new BrilCommand.Mod16(dest, src));
 		return this;
 	}
 
@@ -188,28 +130,13 @@ public class BrilAsm {
 	public BrilAsm ieq(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("ld r" + dest + ", #0");
-				output.accept("cp r" + left + ", r" + right);
-			}
-		});
-		addCommand(new BrilCommand.Branch("nz", labelNext));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
-			}
-		});
-		addCommand(new BrilCommand.Branch("nz", labelNext));
+		addCommand(new BrilCommand.LoadConst8(dest, 0));
+		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
+		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("dec r" + dest);
-			}
-		});
+		addCommand(new BrilCommand.LoadConst8(dest, 255));
 		addCommand(new BrilCommand.Label(labelNext));
 		return this;
 	}
@@ -218,29 +145,14 @@ public class BrilAsm {
 	public BrilAsm ilt(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("ld r" + dest + ", #0");
-				output.accept("cp r" + left + ", r" + right);
-			}
-		});
-		addCommand(new BrilCommand.Branch("lt", labelTrue));
-		addCommand(new BrilCommand.Branch("nz", labelNext));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
-			}
-		});
-		addCommand(new BrilCommand.Branch("uge", labelNext));
+		addCommand(new BrilCommand.LoadConst8(dest, 0));
+		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.LT, labelTrue));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
+		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.UGE, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("dec r" + dest);
-			}
-		});
+		addCommand(new BrilCommand.LoadConst8(dest, 255));
 		addCommand(new BrilCommand.Label(labelNext));
 		return this;
 	}
@@ -249,68 +161,35 @@ public class BrilAsm {
 	public BrilAsm igt(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("ld r" + dest + ", #0");
-				output.accept("cp r" + left + ", r" + right);
-			}
-		});
-		addCommand(new BrilCommand.Branch("gt", labelTrue));
-		addCommand(new BrilCommand.Branch("nz", labelNext));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("cp r" + (left + 1) + ", r" + (right + 1));
-			}
-		});
-		addCommand(new BrilCommand.Branch("ule", labelNext));
+		addCommand(new BrilCommand.LoadConst8(dest, 0));
+		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.GT, labelTrue));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
+		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.ULE, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("dec r" + dest);
-			}
-		});
+		addCommand(new BrilCommand.LoadConst8(dest, 255));
 		addCommand(new BrilCommand.Label(labelNext));
 		return this;
 	}
 
-
-
 	@NotNull
 	public BrilAsm iconst(int register, int value) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("ld r" + register + ", #" + highByte(value));
-				output.accept("ld r" + (register + 1) + ", #" + lowByte(value));
-			}
-		});
+		addCommand(new BrilCommand.LoadConst16(register, value));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm ipush(int register) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("push r" + register);
-				output.accept("push r" + (register + 1));
-			}
-		});
+		addCommand(new BrilCommand.Push8(register));
+		addCommand(new BrilCommand.Push8(register + 1));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsm ipop(int register) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("pop r" + (register + 1));
-				output.accept("pop r" + register);
-			}
-		});
+		addCommand(new BrilCommand.Pop8(register + 1));
+		addCommand(new BrilCommand.Pop8(register));
 		return this;
 	}
 
@@ -320,29 +199,15 @@ public class BrilAsm {
 	}
 
 	public BrilAsm allocSpace(int byteCount) {
-		if (byteCount > 0) {
-			addCommand(new BrilCommand() {
-				@Override
-				public void appendTo(Consumer<String> output) {
-					for (int i = 0; i < byteCount; i++) {
-						output.accept("push r0");
-					}
-				}
-			});
+		for (int i = 0; i < byteCount; i++) {
+			addCommand(new BrilCommand.Push8(0));
 		}
 		return this;
 	}
 
 	public BrilAsm freeSpace(int byteCount) {
-		if (byteCount > 0) {
-			addCommand(new BrilCommand() {
-				@Override
-				public void appendTo(Consumer<String> output) {
-					for (int i = 0; i < byteCount; i++) {
-						output.accept("pop r0");
-					}
-				}
-			});
+		for (int i = 0; i < byteCount; i++) {
+			addCommand(new BrilCommand.Pop8(0));
 		}
 		return this;
 	}
@@ -353,25 +218,15 @@ public class BrilAsm {
 	}
 
 	public BrilAsm brIfElse(int register, String thenTarget, String elseTarget) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("or r" + register + ", r" + register);
-			}
-		});
-		addCommand(new BrilCommand.Branch("z", elseTarget));
+		addCommand(new BrilCommand.Or8(register, register));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.Z, elseTarget));
 		addCommand(new BrilCommand.Jump(thenTarget));
 		return this;
 	}
 
 	public BrilAsm brElse(int register, String elseTarget) {
-		addCommand(new BrilCommand() {
-			@Override
-			public void appendTo(Consumer<String> output) {
-				output.accept("or r" + register + ", r" + register);
-			}
-		});
-		addCommand(new BrilCommand.Branch("z", elseTarget));
+		addCommand(new BrilCommand.Or8(register, register));
+		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.Z, elseTarget));
 		return this;
 	}
 
@@ -386,19 +241,8 @@ public class BrilAsm {
 		commands.add(command);
 	}
 
-	private BrilAsm ldFramePointer(int offset, Consumer<String> output) {
-		output.accept("ld r14, %FE");
-		output.accept("ld r15, %FF");
-		output.accept("add r15, #" + lowByte(offset));
-		output.accept("adc r14, #" + highByte(offset));
-		return this;
-	}
-
-	private static int highByte(int offset) {
-		return offset >> 8;
-	}
-
-	private static int lowByte(int offset) {
-		return offset & 0xFF;
+	private void addLoadStackPointer(int offset) {
+		addCommand(new BrilCommand.Load16SP(14));
+		addCommand(new BrilCommand.AddConst16(14, offset));
 	}
 }

@@ -97,7 +97,9 @@ final class BrilVarMapping {
 		final int var1Reg = getRegisterLocation(var1);
 		final int var2Reg = getRegisterLocation(var2);
 		final int destReg = getRegisterLocation(dest);
-		asm.iload(destReg, var1Reg);
+		if (destReg != var1Reg) {
+			asm.iload(destReg, var1Reg);
+		}
 		operator.handle(destReg, var2Reg, asm);
 	}
 

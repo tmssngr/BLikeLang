@@ -188,4 +188,12 @@ public final class Utils {
 	@Deprecated
 	public static void todo() {
 	}
+
+	public static int highByte(int offset) {
+		return offset >> 8;
+	}
+
+	public static int lowByte(int offset) {
+		return offset & 0xFF;
+	}
 }
