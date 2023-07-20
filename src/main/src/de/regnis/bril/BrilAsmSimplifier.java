@@ -94,7 +94,7 @@ public final class BrilAsmSimplifier {
 				else if (command instanceof BrilCommand.Branch branch) {
 					final String newTarget = obsoleteToNewLabels.get(branch.target());
 					if (newTarget != null) {
-						replace(new BrilCommand.Branch(branch.conditon(), newTarget));
+						replace(new BrilCommand.Branch(branch.condition(), newTarget));
 					}
 				}
 			}

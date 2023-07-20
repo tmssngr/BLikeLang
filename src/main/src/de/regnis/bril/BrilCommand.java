@@ -31,10 +31,10 @@ public interface BrilCommand {
 	}
 
 	@SuppressWarnings("InnerClassOfInterface")
-	record Branch(String conditon, String target) implements BrilCommand {
+	record Branch(String condition, String target) implements BrilCommand {
 		@Override
 		public void appendTo(Consumer<String> output) {
-			output.accept("jp " + conditon + ", " + target);
+			output.accept("jp " + condition + ", " + target);
 		}
 	}
 
