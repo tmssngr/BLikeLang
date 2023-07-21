@@ -16,7 +16,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testBasicRetValue() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("pi10000")
 				                    .iconst(0, 31415)
 				                    .jump("exit 1")
@@ -34,7 +34,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void test2ParamRetValue() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("sum")
 				                    .iadd(ARG0_REGISTER, ARG1_REGISTER)
 				                    .jump("exit 1")
@@ -52,7 +52,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testCall() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("main")
 				                    .ipush(ARG0_REGISTER)
 				                    .ipush(ARG1_REGISTER)
@@ -85,7 +85,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testIfBoolean() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("getLeftOrRight")
 				                    .brElse(ARG0_REGISTER, "takeRight")
 				                    .jump("takeLeft")
@@ -106,7 +106,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testIfLessThan() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("max")
 				                    .ipush(4)
 				                    //.lessThan("cond", "a", "b")
@@ -144,7 +144,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testFibonacci() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("fibonacci")
 				                    .ipush(ARG1_REGISTER)
 				                    .ipush(4)
@@ -196,7 +196,7 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testAverage() {
-		Assert.assertEquals(new BrilAsm()
+		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("average")
 				                    .ipush(0)
 				                    .ipush(2)
@@ -248,7 +248,7 @@ public class BrilToAsmTest {
 	// Utils ==================================================================
 
 	private static List<String> brilToAsm(BrilNode function) {
-		final BrilAsm asm = new BrilAsm();
+		final BrilAsmFactory asm = new BrilAsmFactory();
 		BrilToAsm.convertToAsm(function, asm);
 		return asm.toLines();
 	}

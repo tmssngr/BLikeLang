@@ -19,7 +19,7 @@ public final class BrilToAsm {
 
 	// Static =================================================================
 
-	public static void convertToAsm(BrilNode function, BrilAsm asm) {
+	public static void convertToAsm(BrilNode function, BrilAsmFactory asm) {
 		final BrilPrepareForAsm prepare = new BrilPrepareForAsm(PREFIX_VIRTUAL_REGISTER, PREFIX_REGISTER, PREFIX_STACK_PARAMETER, MAX_REGISTERS, MAX_PARAMETERS_IN_REGISTERS);
 		final BrilNode cfgFunction = prepare.prepare(function);
 
@@ -47,9 +47,9 @@ public final class BrilToAsm {
 	private static final class MyHandler extends BrilInstructions.Handler {
 
 		private final BrilVarMapping varMapping;
-		private final BrilAsm asm;
+		private final BrilAsmFactory asm;
 
-		public MyHandler(BrilVarMapping varMapping, BrilAsm asm) {
+		public MyHandler(BrilVarMapping varMapping, BrilAsmFactory asm) {
 			this.varMapping = varMapping;
 			this.asm        = asm;
 		}

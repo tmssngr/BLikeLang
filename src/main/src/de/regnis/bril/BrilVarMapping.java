@@ -58,7 +58,7 @@ final class BrilVarMapping {
 
 	// Accessing ==============================================================
 
-	public void allocLocalVarSpace(BrilAsm asm) {
+	public void allocLocalVarSpace(BrilAsmFactory asm) {
 		asm.allocSpace(localBytes);
 
 		for (Integer usedRegister : globberedRegisters) {
@@ -66,7 +66,7 @@ final class BrilVarMapping {
 		}
 	}
 
-	public void freeLocalVarSpace(BrilAsm asm) {
+	public void freeLocalVarSpace(BrilAsmFactory asm) {
 		final List<Integer> usedRegisters = new ArrayList<>(globberedRegisters);
 		Collections.reverse(usedRegisters);
 		for (Integer usedRegister : usedRegisters) {
@@ -75,7 +75,7 @@ final class BrilVarMapping {
 		asm.freeSpace(localBytes);
 	}
 
-	public void ireturnValueFromVar(String var, BrilAsm asm) {
+	public void ireturnValueFromVar(String var, BrilAsmFactory asm) {
 		final BrilVars.VarLocation location = getLocation(var);
 		if (location.isRegister()) {
 			final int register = location.reg();
@@ -88,12 +88,12 @@ final class BrilVarMapping {
 		}
 	}
 
-	public void loadConstant(String dest, int value, BrilAsm asm) {
+	public void loadConstant(String dest, int value, BrilAsmFactory asm) {
 		final int register = getRegisterLocation(dest);
 		asm.iconst(register, value);
 	}
 
-	public void i_binaryOperator(String dest, String var1, String var2, BrilAsm asm, I_BinaryRegisterOperator operator) {
+	public void i_binaryOperator(String dest, String var1, String var2, BrilAsmFactory asm, I_BinaryRegisterOperator operator) {
 		final int var1Reg = getRegisterLocation(var1);
 		final int var2Reg = getRegisterLocation(var2);
 		final int destReg = getRegisterLocation(dest);
@@ -103,14 +103,14 @@ final class BrilVarMapping {
 		operator.handle(destReg, var2Reg, asm);
 	}
 
-	public void b_binaryOperator(String dest, String var1, String var2, BrilAsm asm, B_BinaryRegisterOperator operator) {
+	public void b_binaryOperator(String dest, String var1, String var2, BrilAsmFactory asm, B_BinaryRegisterOperator operator) {
 		final int var1Reg = getRegisterLocation(var1);
 		final int var2Reg = getRegisterLocation(var2);
 		final int destReg = getRegisterLocation(dest);
 		operator.handle(destReg, var1Reg, var2Reg, asm);
 	}
 
-	public void id(String dest, String type, String src, BrilAsm asm) {
+	public void id(String dest, String type, String src, BrilAsmFactory asm) {
 		final BrilVars.VarLocation destLocation = getLocation(dest);
 		final BrilVars.VarLocation srcLocation = getLocation(src);
 		if (Objects.equals(destLocation, srcLocation)) {
@@ -164,7 +164,7 @@ final class BrilVarMapping {
 		}
 	}
 
-	public void branch(String var, String thenLabel, String elseLabel, BrilAsm asm) {
+	public void branch(String var, String thenLabel, String elseLabel, BrilAsmFactory asm) {
 		final int register = getRegisterLocation(var);
 		asm.brIfElse(register, thenLabel, elseLabel);
 	}
@@ -208,10 +208,10 @@ final class BrilVarMapping {
 	// Inner Classes ==========================================================
 
 	public interface I_BinaryRegisterOperator {
-		void handle(int destReg, int srcReg, BrilAsm asm);
+		void handle(int destReg, int srcReg, BrilAsmFactory asm);
 	}
 
 	public interface B_BinaryRegisterOperator {
-		void handle(int destReg, int leftReg, int rightReg, BrilAsm asm);
+		void handle(int destReg, int leftReg, int rightReg, BrilAsmFactory asm);
 	}
 }
