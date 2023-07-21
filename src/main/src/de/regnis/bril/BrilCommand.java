@@ -18,6 +18,13 @@ public interface BrilCommand {
 		}
 	};
 
+	BrilCommand NOP = new BrilCommand() {
+		@Override
+		public void appendTo(Consumer<String> output) {
+			output.accept("nop");
+		}
+	};
+
 	// Accessing ==============================================================
 
 	void appendTo(Consumer<String> output);
