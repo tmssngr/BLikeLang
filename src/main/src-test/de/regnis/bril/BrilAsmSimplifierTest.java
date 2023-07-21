@@ -14,43 +14,43 @@ public class BrilAsmSimplifierTest {
 
 	@Test
 	public void testFixJumpToNextLabel() {
-		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmSimplifier.create();
+		final Function<List<BrilAsm>, List<BrilAsm>> transformation = BrilAsmSimplifier.create();
 
-		assertEquals(List.of(new BrilCommand.Label("test"),
-		                     BrilCommand.NOP,
-		                     BrilCommand.NOP,
-		                     BrilCommand.NOP),
-		             transformation.apply(List.of(new BrilCommand.Label("test"),
-		                                          BrilCommand.NOP,
-		                                          new BrilCommand.Jump("a"),
-		                                          new BrilCommand.Label("a"),
-		                                          BrilCommand.NOP,
-		                                          new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "b"),
-		                                          new BrilCommand.Label("b"),
-		                                          BrilCommand.NOP))
+		assertEquals(List.of(new BrilAsm.Label("test"),
+		                     BrilAsm.NOP,
+		                     BrilAsm.NOP,
+		                     BrilAsm.NOP),
+		             transformation.apply(List.of(new BrilAsm.Label("test"),
+		                                          BrilAsm.NOP,
+		                                          new BrilAsm.Jump("a"),
+		                                          new BrilAsm.Label("a"),
+		                                          BrilAsm.NOP,
+		                                          new BrilAsm.Branch(BrilAsm.BranchCondition.Z, "b"),
+		                                          new BrilAsm.Label("b"),
+		                                          BrilAsm.NOP))
 		);
-		assertEquals(List.of(new BrilCommand.Label("a"),
-		                     new BrilCommand.Jump("a")),
-		             transformation.apply(List.of(new BrilCommand.Label("a"),
-		                                          new BrilCommand.Jump("a")))
+		assertEquals(List.of(new BrilAsm.Label("a"),
+		                     new BrilAsm.Jump("a")),
+		             transformation.apply(List.of(new BrilAsm.Label("a"),
+		                                          new BrilAsm.Jump("a")))
 		);
 	}
 
 	@Test
 	public void testObsoleteLabels() {
-		final Function<List<BrilCommand>, List<BrilCommand>> transformation = BrilAsmSimplifier.create();
+		final Function<List<BrilAsm>, List<BrilAsm>> transformation = BrilAsmSimplifier.create();
 
-		assertEquals(List.of(new BrilCommand.Label("test"),
-		                     new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "a"),
-		                     new BrilCommand.Jump("a"),
-		                     BrilCommand.NOP,
-		                     new BrilCommand.Label("a")),
-		             transformation.apply(List.of(new BrilCommand.Label("test"),
-		                                          new BrilCommand.Branch(BrilCommand.BranchCondition.Z, "b"),
-		                                          new BrilCommand.Jump("a"),
-		                                          BrilCommand.NOP,
-		                                          new BrilCommand.Label("a"),
-		                                          new BrilCommand.Label("b")))
+		assertEquals(List.of(new BrilAsm.Label("test"),
+		                     new BrilAsm.Branch(BrilAsm.BranchCondition.Z, "a"),
+		                     new BrilAsm.Jump("a"),
+		                     BrilAsm.NOP,
+		                     new BrilAsm.Label("a")),
+		             transformation.apply(List.of(new BrilAsm.Label("test"),
+		                                          new BrilAsm.Branch(BrilAsm.BranchCondition.Z, "b"),
+		                                          new BrilAsm.Jump("a"),
+		                                          BrilAsm.NOP,
+		                                          new BrilAsm.Label("a"),
+		                                          new BrilAsm.Label("b")))
 		);
 	}
 }

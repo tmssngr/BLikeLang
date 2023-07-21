@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 /**
  * @author Thomas Singer
  */
-public interface BrilCommand {
+public interface BrilAsm {
 
 	// Constants ==============================================================
 
-	BrilCommand RET = new BrilCommand() {
+	BrilAsm RET = new BrilAsm() {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ret");
@@ -23,7 +23,7 @@ public interface BrilCommand {
 		}
 	};
 
-	BrilCommand NOP = new BrilCommand() {
+	BrilAsm NOP = new BrilAsm() {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("nop");
@@ -91,7 +91,7 @@ public interface BrilCommand {
 
 	// Inner Classes ==========================================================
 
-	record Label(String label) implements BrilCommand {
+	record Label(String label) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept(label + ":");
@@ -105,7 +105,7 @@ public interface BrilCommand {
 
 	enum BranchCondition { Z, NZ, LT, GT, ULE, UGE }
 
-	record Branch(BranchCondition condition, String target) implements BrilCommand {
+	record Branch(BranchCondition condition, String target) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("jp " + condition + ", " + target);
@@ -117,7 +117,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Jump(String target) implements BrilCommand {
+	record Jump(String target) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("jp " + target);
@@ -129,7 +129,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Call(String target) implements BrilCommand {
+	record Call(String target) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("call " + target);
@@ -141,7 +141,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Load16(int dest, int src) implements BrilCommand {
+	record Load16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + dest + ", r" + src);
@@ -154,7 +154,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Load16SP(int dest) implements BrilCommand {
+	record Load16SP(int dest) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + dest + ", %FE");
@@ -167,7 +167,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Load8(int dest, int src) implements BrilCommand {
+	record Load8(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + dest + ", r" + src);
@@ -179,7 +179,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record LoadConst8(int dest, int value) implements BrilCommand {
+	record LoadConst8(int dest, int value) implements BrilAsm {
 		public LoadConst8(int dest, int value) {
 			this.dest  = dest;
 			this.value = Utils.lowByte(value);
@@ -196,7 +196,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record LoadConst16(int dest, int value) implements BrilCommand {
+	record LoadConst16(int dest, int value) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ld r" + dest + ", #" + Utils.highByte(value));
@@ -209,7 +209,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record LoadFromMem8(int dest, int addressReg) implements BrilCommand {
+	record LoadFromMem8(int dest, int addressReg) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ldc r" + dest + ", rr" + addressReg);
@@ -221,7 +221,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record StoreToMem8(int addressReg, int src) implements BrilCommand {
+	record StoreToMem8(int addressReg, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("ldc rr" + addressReg + ", r" + src);
@@ -233,7 +233,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Add16(int dest, int src) implements BrilCommand {
+	record Add16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("add r" + (dest + 1) + ", r" + (src + 1));
@@ -246,7 +246,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record AddConst16(int dest, int value) implements BrilCommand {
+	record AddConst16(int dest, int value) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			if (value == 1) {
@@ -264,7 +264,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Sub16(int dest, int src) implements BrilCommand {
+	record Sub16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("sub r" + (dest + 1) + ", r" + (src + 1));
@@ -277,7 +277,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Mul16(int dest, int src) implements BrilCommand {
+	record Mul16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			Utils.todo();
@@ -291,7 +291,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Div16(int dest, int src) implements BrilCommand {
+	record Div16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			Utils.todo();
@@ -305,7 +305,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Mod16(int dest, int src) implements BrilCommand {
+	record Mod16(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			Utils.todo();
@@ -319,7 +319,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Cp8(int dest, int src) implements BrilCommand {
+	record Cp8(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("cp r" + dest + ", r" + src);
@@ -331,7 +331,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Or8(int dest, int src) implements BrilCommand {
+	record Or8(int dest, int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("or r" + dest + ", r" + src);
@@ -343,7 +343,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Push8(int src) implements BrilCommand {
+	record Push8(int src) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("push r" + src);
@@ -355,7 +355,7 @@ public interface BrilCommand {
 		}
 	}
 
-	record Pop8(int dest) implements BrilCommand {
+	record Pop8(int dest) implements BrilAsm {
 		@Override
 		public void appendTo(Consumer<String> output) {
 			output.accept("pop r" + dest);

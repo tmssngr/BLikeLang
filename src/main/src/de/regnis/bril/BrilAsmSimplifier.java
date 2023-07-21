@@ -13,11 +13,11 @@ public final class BrilAsmSimplifier {
 
 	// Static =================================================================
 
-	public static Function<List<BrilCommand>, List<BrilCommand>> create() {
+	public static Function<List<BrilAsm>, List<BrilAsm>> create() {
 		return new Function<>() {
 			@Override
-			public List<BrilCommand> apply(List<BrilCommand> prevCommands) {
-				final List<BrilCommand> commands = new ArrayList<>(prevCommands);
+			public List<BrilAsm> apply(List<BrilAsm> prevCommands) {
+				final List<BrilAsm> commands = new ArrayList<>(prevCommands);
 				fixJumpToNextLabel(commands);
 				fixObsoleteLabels(commands);
 				fixCallRet(commands);
@@ -29,17 +29,17 @@ public final class BrilAsmSimplifier {
 
 	// Utils ==================================================================
 
-	private static void fixJumpToNextLabel(List<BrilCommand> commands) {
+	private static void fixJumpToNextLabel(List<BrilAsm> commands) {
 		new DualPeepHoleSimplifier(commands) {
 			@Override
-			protected void handle(BrilCommand command1, BrilCommand command2) {
-				if (command1 instanceof BrilCommand.Jump jump
-						&& command2 instanceof BrilCommand.Label label
+			protected void handle(BrilAsm command1, BrilAsm command2) {
+				if (command1 instanceof BrilAsm.Jump jump
+						&& command2 instanceof BrilAsm.Label label
 						&& jump.target().equals(label.label())) {
 					remove();
 				}
-				else if (command1 instanceof BrilCommand.Branch branch
-						&& command2 instanceof BrilCommand.Label label
+				else if (command1 instanceof BrilAsm.Branch branch
+						&& command2 instanceof BrilAsm.Label label
 						&& branch.target().equals(label.label())) {
 					remove();
 				}
@@ -47,25 +47,25 @@ public final class BrilAsmSimplifier {
 		}.iterator();
 	}
 
-	private static void fixCallRet(List<BrilCommand> commands) {
+	private static void fixCallRet(List<BrilAsm> commands) {
 		new DualPeepHoleSimplifier(commands) {
 			@Override
-			protected void handle(BrilCommand command1, BrilCommand command2) {
-				if (command1 instanceof BrilCommand.Call call
-						&& command2 == BrilCommand.RET) {
+			protected void handle(BrilAsm command1, BrilAsm command2) {
+				if (command1 instanceof BrilAsm.Call call
+						&& command2 == BrilAsm.RET) {
 					remove();
-					replace(new BrilCommand.Jump(call.target()));
+					replace(new BrilAsm.Jump(call.target()));
 				}
 			}
 		}.iterator();
 	}
 
-	private static void fixBiDiLoad(List<BrilCommand> commands) {
+	private static void fixBiDiLoad(List<BrilAsm> commands) {
 		new DualPeepHoleSimplifier(commands) {
 			@Override
-			protected void handle(BrilCommand command1, BrilCommand command2) {
-				if (command1 instanceof BrilCommand.Load16 load1
-						&& command2 instanceof BrilCommand.Load16 load2
+			protected void handle(BrilAsm command1, BrilAsm command2) {
+				if (command1 instanceof BrilAsm.Load16 load1
+						&& command2 instanceof BrilAsm.Load16 load2
 						&& load1.src() == load2.dest()
 						&& load1.dest() == load2.src()) {
 					removeNext();
@@ -74,27 +74,27 @@ public final class BrilAsmSimplifier {
 		}.iterator();
 	}
 
-	private static void fixObsoleteLabels(List<BrilCommand> commands) {
+	private static void fixObsoleteLabels(List<BrilAsm> commands) {
 		final Map<String, String> obsoleteToNewLabels = getObsoleteToNewLabels(commands);
 
 		new SinglePeepHoleSimplifier(commands) {
 			@Override
-			protected void handle(BrilCommand command) {
-				if (command instanceof BrilCommand.Label label) {
+			protected void handle(BrilAsm command) {
+				if (command instanceof BrilAsm.Label label) {
 					if (obsoleteToNewLabels.containsKey(label.label())) {
 						remove();
 					}
 				}
-				else if (command instanceof BrilCommand.Jump jump) {
+				else if (command instanceof BrilAsm.Jump jump) {
 					final String newTarget = obsoleteToNewLabels.get(jump.target());
 					if (newTarget != null) {
-						replace(new BrilCommand.Jump(newTarget));
+						replace(new BrilAsm.Jump(newTarget));
 					}
 				}
-				else if (command instanceof BrilCommand.Branch branch) {
+				else if (command instanceof BrilAsm.Branch branch) {
 					final String newTarget = obsoleteToNewLabels.get(branch.target());
 					if (newTarget != null) {
-						replace(new BrilCommand.Branch(branch.condition(), newTarget));
+						replace(new BrilAsm.Branch(branch.condition(), newTarget));
 					}
 				}
 			}
@@ -102,10 +102,10 @@ public final class BrilAsmSimplifier {
 	}
 
 	@NotNull
-	private static Map<String, String> getObsoleteToNewLabels(List<BrilCommand> commands) {
+	private static Map<String, String> getObsoleteToNewLabels(List<BrilAsm> commands) {
 		final Set<String> unusedLabels = new HashSet<>();
-		for (BrilCommand command : commands) {
-			if (command instanceof BrilCommand.Label labelCommand) {
+		for (BrilAsm command : commands) {
+			if (command instanceof BrilAsm.Label labelCommand) {
 				final String label = labelCommand.label();
 				if (!unusedLabels.add(label)) {
 					throw new IllegalStateException("Duplicate label definition " + label);
@@ -116,8 +116,8 @@ public final class BrilAsmSimplifier {
 		final Map<String, String> obsoleteToNewLabels = new HashMap<>();
 		boolean isFirst = true;
 		@Nullable String prevLabel = null;
-		for (BrilCommand command : commands) {
-			if (command instanceof BrilCommand.Label labelCommand) {
+		for (BrilAsm command : commands) {
+			if (command instanceof BrilAsm.Label labelCommand) {
 				final String label = labelCommand.label();
 				if (prevLabel == null) {
 					prevLabel = label;
@@ -129,13 +129,13 @@ public final class BrilAsmSimplifier {
 					obsoleteToNewLabels.put(label, prevLabel);
 				}
 			}
-			else if (command instanceof BrilCommand.Jump jump) {
+			else if (command instanceof BrilAsm.Jump jump) {
 				unusedLabels.remove(jump.target());
 			}
-			else if (command instanceof BrilCommand.Branch branch) {
+			else if (command instanceof BrilAsm.Branch branch) {
 				unusedLabels.remove(branch.target());
 			}
-			else if (command instanceof BrilCommand.Call call) {
+			else if (command instanceof BrilAsm.Call call) {
 				unusedLabels.remove(call.target());
 			}
 			else {
@@ -160,18 +160,18 @@ public final class BrilAsmSimplifier {
 	private abstract static class SinglePeepHoleSimplifier {
 		private int i;
 
-		protected abstract void handle(BrilCommand command);
+		protected abstract void handle(BrilAsm command);
 
-		private final List<BrilCommand> commands;
+		private final List<BrilAsm> commands;
 
-		protected SinglePeepHoleSimplifier(List<BrilCommand> commands) {
+		protected SinglePeepHoleSimplifier(List<BrilAsm> commands) {
 			this.commands = commands;
 		}
 
 		public void iterate() {
 			i = 0;
 			for (; i < commands.size(); i++) {
-				final BrilCommand command = commands.get(i);
+				final BrilAsm command = commands.get(i);
 				handle(command);
 			}
 		}
@@ -180,7 +180,7 @@ public final class BrilAsmSimplifier {
 			commands.remove(i);
 		}
 
-		protected void replace(BrilCommand command) {
+		protected void replace(BrilAsm command) {
 			remove();
 			commands.add(i, command);
 		}
@@ -189,19 +189,19 @@ public final class BrilAsmSimplifier {
 	private abstract static class DualPeepHoleSimplifier {
 		private int i;
 
-		protected abstract void handle(BrilCommand command1, BrilCommand command2);
+		protected abstract void handle(BrilAsm command1, BrilAsm command2);
 
-		private final List<BrilCommand> commands;
+		private final List<BrilAsm> commands;
 
-		protected DualPeepHoleSimplifier(List<BrilCommand> commands) {
+		protected DualPeepHoleSimplifier(List<BrilAsm> commands) {
 			this.commands = commands;
 		}
 
 		public void iterator() {
 			i = 0;
 			for (; i < commands.size() - 1; i++) {
-				final BrilCommand command1 = commands.get(i);
-				final BrilCommand command2 = commands.get(i + 1);
+				final BrilAsm command1 = commands.get(i);
+				final BrilAsm command2 = commands.get(i + 1);
 				handle(command1, command2);
 			}
 		}
@@ -214,7 +214,7 @@ public final class BrilAsmSimplifier {
 			commands.remove(i + 1);
 		}
 
-		protected void replace(BrilCommand command) {
+		protected void replace(BrilAsm command) {
 			remove();
 			commands.add(i, command);
 		}

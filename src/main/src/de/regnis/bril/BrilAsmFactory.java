@@ -15,7 +15,7 @@ public class BrilAsmFactory {
 
 	// Fields =================================================================
 
-	private final List<BrilCommand> commands = new ArrayList<>();
+	private final List<BrilAsm> commands = new ArrayList<>();
 
 	// Setup ==================================================================
 
@@ -33,16 +33,16 @@ public class BrilAsmFactory {
 	}
 
 	public void toLines(Consumer<String> output) {
-		for (BrilCommand command : commands) {
+		for (BrilAsm command : commands) {
 			command.appendTo(output);
 			output.accept("\n");
 		}
 	}
 
-	public BrilAsmFactory simplify(Function<List<BrilCommand>, List<BrilCommand>> transformation) {
+	public BrilAsmFactory simplify(Function<List<BrilAsm>, List<BrilAsm>> transformation) {
 		boolean changed;
 		do {
-			final List<BrilCommand> newCommands = transformation.apply(Collections.unmodifiableList(commands));
+			final List<BrilAsm> newCommands = transformation.apply(Collections.unmodifiableList(commands));
 			changed = !commands.equals(newCommands);
 			commands.clear();
 			commands.addAll(newCommands);
@@ -52,77 +52,77 @@ public class BrilAsmFactory {
 	}
 
 	public BrilAsmFactory label(String label) {
-		addCommand(new BrilCommand.Label(label));
+		addCommand(new BrilAsm.Label(label));
 		return this;
 	}
 
 	public BrilAsmFactory iload(int dest, int src) {
-		addCommand(new BrilCommand.Load16(dest, src));
+		addCommand(new BrilAsm.Load16(dest, src));
 		return this;
 	}
 
 	public BrilAsmFactory iloadFromStack(int destRegister, int spRegister, int offset) {
 		addLoadStackPointer(offset);
-		addCommand(new BrilCommand.LoadFromMem8(destRegister, spRegister));
-		addCommand(new BrilCommand.AddConst16(spRegister, 1));
-		addCommand(new BrilCommand.LoadFromMem8(destRegister + 1, spRegister));
+		addCommand(new BrilAsm.LoadFromMem8(destRegister, spRegister));
+		addCommand(new BrilAsm.AddConst16(spRegister, 1));
+		addCommand(new BrilAsm.LoadFromMem8(destRegister + 1, spRegister));
 		return this;
 	}
 
 	public BrilAsmFactory bload(int dest, int src) {
-		addCommand(new BrilCommand.Load8(dest, src));
+		addCommand(new BrilAsm.Load8(dest, src));
 		return this;
 	}
 
 	public BrilAsmFactory bloadFromStack(int destRegister, int spRegister, int offset) {
 		addLoadStackPointer(offset);
-		addCommand(new BrilCommand.LoadFromMem8(destRegister, spRegister));
+		addCommand(new BrilAsm.LoadFromMem8(destRegister, spRegister));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory istoreToStack(int sourceRegister, int spRegister, int offset) {
 		addLoadStackPointer(offset);
-		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister));
-		addCommand(new BrilCommand.AddConst16(spRegister, 1));
-		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister + 1));
+		addCommand(new BrilAsm.StoreToMem8(spRegister, sourceRegister));
+		addCommand(new BrilAsm.AddConst16(spRegister, 1));
+		addCommand(new BrilAsm.StoreToMem8(spRegister, sourceRegister + 1));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory bstoreToStack(int sourceRegister, int spRegister, int offset) {
 		addLoadStackPointer(offset);
-		addCommand(new BrilCommand.StoreToMem8(spRegister, sourceRegister));
+		addCommand(new BrilAsm.StoreToMem8(spRegister, sourceRegister));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory iadd(int dest, int src) {
-		addCommand(new BrilCommand.Add16(dest, src));
+		addCommand(new BrilAsm.Add16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory isub(int dest, int src) {
-		addCommand(new BrilCommand.Sub16(dest, src));
+		addCommand(new BrilAsm.Sub16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory imul(int dest, int src) {
-		addCommand(new BrilCommand.Mul16(dest, src));
+		addCommand(new BrilAsm.Mul16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory idiv(int dest, int src) {
-		addCommand(new BrilCommand.Div16(dest, src));
+		addCommand(new BrilAsm.Div16(dest, src));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory imod(int dest, int src) {
-		addCommand(new BrilCommand.Mod16(dest, src));
+		addCommand(new BrilAsm.Mod16(dest, src));
 		return this;
 	}
 
@@ -130,14 +130,14 @@ public class BrilAsmFactory {
 	public BrilAsmFactory ieq(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp8(left, right));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand.LoadConst8(dest, 255));
-		addCommand(new BrilCommand.Label(labelNext));
+		addCommand(new BrilAsm.LoadConst8(dest, 0));
+		addCommand(new BrilAsm.Cp8(left, right));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.NZ, labelNext));
+		addCommand(new BrilAsm.Cp8(left + 1, right + 1));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.NZ, labelNext));
+		addCommand(new BrilAsm.Label(labelTrue));
+		addCommand(new BrilAsm.LoadConst8(dest, 255));
+		addCommand(new BrilAsm.Label(labelNext));
 		return this;
 	}
 
@@ -145,15 +145,15 @@ public class BrilAsmFactory {
 	public BrilAsmFactory ilt(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp8(left, right));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.LT, labelTrue));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.UGE, labelNext));
-		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand.LoadConst8(dest, 255));
-		addCommand(new BrilCommand.Label(labelNext));
+		addCommand(new BrilAsm.LoadConst8(dest, 0));
+		addCommand(new BrilAsm.Cp8(left, right));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.LT, labelTrue));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.NZ, labelNext));
+		addCommand(new BrilAsm.Cp8(left + 1, right + 1));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.UGE, labelNext));
+		addCommand(new BrilAsm.Label(labelTrue));
+		addCommand(new BrilAsm.LoadConst8(dest, 255));
+		addCommand(new BrilAsm.Label(labelNext));
 		return this;
 	}
 
@@ -161,88 +161,88 @@ public class BrilAsmFactory {
 	public BrilAsmFactory igt(int dest, int left, int right) {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
-		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp8(left, right));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.GT, labelTrue));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.ULE, labelNext));
-		addCommand(new BrilCommand.Label(labelTrue));
-		addCommand(new BrilCommand.LoadConst8(dest, 255));
-		addCommand(new BrilCommand.Label(labelNext));
+		addCommand(new BrilAsm.LoadConst8(dest, 0));
+		addCommand(new BrilAsm.Cp8(left, right));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.GT, labelTrue));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.NZ, labelNext));
+		addCommand(new BrilAsm.Cp8(left + 1, right + 1));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.ULE, labelNext));
+		addCommand(new BrilAsm.Label(labelTrue));
+		addCommand(new BrilAsm.LoadConst8(dest, 255));
+		addCommand(new BrilAsm.Label(labelNext));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory iconst(int register, int value) {
-		addCommand(new BrilCommand.LoadConst16(register, value));
+		addCommand(new BrilAsm.LoadConst16(register, value));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory ipush(int register) {
-		addCommand(new BrilCommand.Push8(register));
-		addCommand(new BrilCommand.Push8(register + 1));
+		addCommand(new BrilAsm.Push8(register));
+		addCommand(new BrilAsm.Push8(register + 1));
 		return this;
 	}
 
 	@NotNull
 	public BrilAsmFactory ipop(int register) {
-		addCommand(new BrilCommand.Pop8(register + 1));
-		addCommand(new BrilCommand.Pop8(register));
+		addCommand(new BrilAsm.Pop8(register + 1));
+		addCommand(new BrilAsm.Pop8(register));
 		return this;
 	}
 
 	public BrilAsmFactory call(String target) {
-		addCommand(new BrilCommand.Call(target));
+		addCommand(new BrilAsm.Call(target));
 		return this;
 	}
 
 	public BrilAsmFactory allocSpace(int byteCount) {
 		for (int i = 0; i < byteCount; i++) {
-			addCommand(new BrilCommand.Push8(0));
+			addCommand(new BrilAsm.Push8(0));
 		}
 		return this;
 	}
 
 	public BrilAsmFactory freeSpace(int byteCount) {
 		for (int i = 0; i < byteCount; i++) {
-			addCommand(new BrilCommand.Pop8(0));
+			addCommand(new BrilAsm.Pop8(0));
 		}
 		return this;
 	}
 
 	public BrilAsmFactory ret() {
-		addCommand(BrilCommand.RET);
+		addCommand(BrilAsm.RET);
 		return this;
 	}
 
 	public BrilAsmFactory brIfElse(int register, String thenTarget, String elseTarget) {
-		addCommand(new BrilCommand.Or8(register, register));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.Z, elseTarget));
-		addCommand(new BrilCommand.Jump(thenTarget));
+		addCommand(new BrilAsm.Or8(register, register));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.Z, elseTarget));
+		addCommand(new BrilAsm.Jump(thenTarget));
 		return this;
 	}
 
 	public BrilAsmFactory brElse(int register, String elseTarget) {
-		addCommand(new BrilCommand.Or8(register, register));
-		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.Z, elseTarget));
+		addCommand(new BrilAsm.Or8(register, register));
+		addCommand(new BrilAsm.Branch(BrilAsm.BranchCondition.Z, elseTarget));
 		return this;
 	}
 
 	public BrilAsmFactory jump(String targetLabel) {
-		addCommand(new BrilCommand.Jump(targetLabel));
+		addCommand(new BrilAsm.Jump(targetLabel));
 		return this;
 	}
 
 	// Utils ==================================================================
 
-	private void addCommand(@NotNull BrilCommand command) {
+	private void addCommand(@NotNull BrilAsm command) {
 		commands.add(command);
 	}
 
 	private void addLoadStackPointer(int offset) {
-		addCommand(new BrilCommand.Load16SP(14));
-		addCommand(new BrilCommand.AddConst16(14, offset));
+		addCommand(new BrilAsm.Load16SP(14));
+		addCommand(new BrilAsm.AddConst16(14, offset));
 	}
 }
