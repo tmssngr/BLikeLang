@@ -131,9 +131,9 @@ public class BrilAsm {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
 		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Cp8(left, right));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
 		addCommand(new BrilCommand.LoadConst8(dest, 255));
@@ -146,10 +146,10 @@ public class BrilAsm {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
 		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Cp8(left, right));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.LT, labelTrue));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.UGE, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
 		addCommand(new BrilCommand.LoadConst8(dest, 255));
@@ -162,10 +162,10 @@ public class BrilAsm {
 		final String labelTrue = "comparison_" + labelCounter++;
 		final String labelNext = "comparison_" + labelCounter++;
 		addCommand(new BrilCommand.LoadConst8(dest, 0));
-		addCommand(new BrilCommand.Cp(left, right));
+		addCommand(new BrilCommand.Cp8(left, right));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.GT, labelTrue));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.NZ, labelNext));
-		addCommand(new BrilCommand.Cp(left + 1, right + 1));
+		addCommand(new BrilCommand.Cp8(left + 1, right + 1));
 		addCommand(new BrilCommand.Branch(BrilCommand.BranchCondition.ULE, labelNext));
 		addCommand(new BrilCommand.Label(labelTrue));
 		addCommand(new BrilCommand.LoadConst8(dest, 255));
