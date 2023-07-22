@@ -26,6 +26,10 @@ public class BrilAsmFactory {
 
 	// Accessing ==============================================================
 
+	public List<BrilAsm> getCommands() {
+		return Collections.unmodifiableList(commands);
+	}
+
 	public List<String> toLines() {
 		final List<String> lines = new ArrayList<>();
 		toLines(line -> lines.add(line));

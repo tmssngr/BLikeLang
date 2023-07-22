@@ -3,6 +3,7 @@ package de.regnis.bril;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static de.regnis.bril.BrilVarMapping.*;
@@ -144,6 +145,8 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testFibonacci() {
+		final BrilAsmFactory asm = new BrilAsmFactory();
+		BrilToAsm.convertToAsm(BrilInterpreterTest.createFibonacci(), asm);
 		Assert.assertEquals(new BrilAsmFactory()
 				                    .label("fibonacci")
 				                    .ipush(ARG1_REGISTER)
@@ -190,8 +193,27 @@ public class BrilToAsmTest {
 				                    .ipop(ARG1_REGISTER)
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilInterpreterTest.createFibonacci())
+		                    asm.toLines()
 		);
+
+		final List<BrilAsm> commands = new ArrayList<>();
+		commands.add(new BrilAsm.Label("main"));
+		commands.add(new BrilAsm.LoadConst16(0, 8));
+		commands.addAll(asm.getCommands());
+		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(commands,
+		                                                              (name, access) -> false);
+		interpreter.run();
+		interpreter.iterateRegisters(new BrilAsmInterpreter.ByteConsumer() {
+			@Override
+			public void consumer(int register, int value) {
+				final int expectedValue = switch (register) {
+					case 0 -> 0;
+					case 1 -> 34;
+					default -> BrilAsmInterpreter.UNKNOWN;
+				};
+				Assert.assertEquals(expectedValue, value);
+			}
+		});
 	}
 
 	@Test

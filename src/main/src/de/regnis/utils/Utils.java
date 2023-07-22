@@ -189,11 +189,11 @@ public final class Utils {
 	public static void todo() {
 	}
 
-	public static int highByte(int offset) {
-		return offset >> 8;
+	public static int highByte(int value) {
+		return value >> 8;
 	}
 
-	public static int lowByte(int offset) {
-		return offset & 0xFF;
+	public static int lowByte(int value) {
+		return value & 0xFF;
 	}
 }

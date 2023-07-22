@@ -103,7 +103,14 @@ public interface BrilAsm {
 		}
 	}
 
-	enum BranchCondition { Z, NZ, LT, GT, ULE, UGE }
+	enum BranchCondition {
+		Z, NZ, EQ, NEQ,
+		C, NC,
+		MI, PL,
+		OV, NOV,
+		LT, LE, GE, GT,
+		ULT, ULE, UGE, UGT
+	}
 
 	record Branch(BranchCondition condition, String target) implements BrilAsm {
 		@Override

@@ -79,6 +79,8 @@ public class BrilInterpreterTest {
 		assertEquals(5, interpreter.run(function, List.of(4)));
 		assertEquals(8, interpreter.run(function, List.of(5)));
 		assertEquals(13, interpreter.run(function, List.of(6)));
+		assertEquals(21, interpreter.run(function, List.of(7)));
+		assertEquals(34, interpreter.run(function, List.of(8)));
 	}
 
 	@NotNull
