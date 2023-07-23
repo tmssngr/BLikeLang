@@ -26,11 +26,10 @@ public class RegisterColoring {
 	}
 
 	public void setRegister(@NotNull String var, int register) {
-		if (varToRegister.containsKey(var)) {
-			throw new IllegalArgumentException();
+		final Integer prevRegister = varToRegister.put(var, register);
+		if (prevRegister != null && prevRegister != register) {
+			throw new IllegalArgumentException("var " + var + " had register " + prevRegister + " but was set now to " + register);
 		}
-
-		varToRegister.put(var, register);
 	}
 
 	public void build() {

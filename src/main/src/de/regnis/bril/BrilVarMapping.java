@@ -174,16 +174,16 @@ final class BrilVarMapping {
 		asm.brIfElse(register, thenLabel, elseLabel);
 	}
 
+	public int getRegisterLocation(String var) {
+		final BrilVars.VarLocation location = varToLocation.get(var);
+		Utils.assertTrue(location.isRegister());
+		return location.reg();
+	}
+
 	// Utils ==================================================================
 
 	private BrilVars.VarLocation getLocation(String var) {
 		return varToLocation.get(var);
-	}
-
-	private int getRegisterLocation(String var) {
-		final BrilVars.VarLocation location = varToLocation.get(var);
-		Utils.assertTrue(location.isRegister());
-		return location.reg();
 	}
 
 	private static Set<String> getLocalVars(List<BrilNode> instructions) {

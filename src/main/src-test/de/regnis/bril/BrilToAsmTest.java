@@ -86,7 +86,40 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testIfBoolean() {
+		final BrilAsmFactory asm = new BrilAsmFactory();
+		BrilToAsm.convertToAsm(BrilFactory.createFunctionI("main", List.of(),
+		                                                   new BrilInstructions()
+				                                                   .constant("leftOrRight", true)
+				                                                   .constant("left", 10)
+				                                                   .constant("right", 20)
+				                                                   .calli("result",
+				                                                          "getLeftOrRight",
+				                                                          List.of(BrilFactory.argb("leftOrRight"),
+				                                                                  BrilFactory.argi("left"),
+				                                                                  BrilFactory.argi("right")))
+				                                                   .reti("result")
+				                                                   .get()
+		), asm);
+		BrilToAsm.convertToAsm(BrilInterpreterTest.createGetLeftOrRight(), asm);
+
 		Assert.assertEquals(new BrilAsmFactory()
+				                    .label("main")
+				                    .ipush(2)
+				                    .ipush(4)
+				                    .bconst(0, true)
+				                    .iconst(2, 10)
+				                    .iconst(4, 20)
+				                    .ipush(8)
+				                    .call("getLeftOrRight")
+				                    .ipop(8)
+
+				                    .jump("exit 1")
+
+				                    .label("exit 1")
+				                    .ipop(4)
+				                    .ipop(2)
+				                    .ret()
+
 				                    .label("getLeftOrRight")
 				                    .brElse(ARG0_REGISTER, "takeRight")
 				                    .jump("takeLeft")
@@ -101,8 +134,22 @@ public class BrilToAsmTest {
 				                    .label("exit 3")
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilInterpreterTest.createGetLeftOrRight())
+		                    asm.toLines()
 		);
+		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(asm.getCommands(),
+		                                                              (name, access) -> false);
+		interpreter.run();
+		interpreter.iterateRegisters(new BrilAsmInterpreter.ByteConsumer() {
+			@Override
+			public void consumer(int register, int value) {
+				final int expectedValue = switch (register) {
+					case 0 -> 0;
+					case 1 -> 10;
+					default -> BrilAsmInterpreter.UNKNOWN;
+				};
+				Assert.assertEquals(expectedValue, value);
+			}
+		});
 	}
 
 	@Test

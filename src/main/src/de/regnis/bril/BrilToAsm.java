@@ -173,9 +173,8 @@ public final class BrilToAsm {
 			asm.call(name);
 		}
 
-		private int varToRegister(String arg) {
-			Utils.assertTrue(arg.startsWith(PREFIX_REGISTER));
-			return 2 * Integer.parseInt(arg.substring(PREFIX_REGISTER.length()));
+		private int varToRegister(String var) {
+			return 2 * varMapping.getRegisterLocation(var);
 		}
 	}
 }

@@ -66,6 +66,12 @@ public final class BrilPrepareForAsm {
 				localVars.addAll(liveOut);
 			});
 			argNames.forEach(localVars::remove);
+			for (String localVar : localVars) {
+				if (localVar.startsWith(prefixRegister)) {
+					final int register = Integer.parseInt(localVar.substring(prefixRegister.length()));
+					registerColoring.setRegister(localVar, register);
+				}
+			}
 
 			final String returnValueVar = prefixRegister + 0;
 			if (localVars.contains(returnValueVar) && !registerColoring.containsVar(returnValueVar)) {

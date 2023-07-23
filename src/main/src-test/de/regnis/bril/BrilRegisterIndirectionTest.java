@@ -67,7 +67,7 @@ public class BrilRegisterIndirectionTest {
 	}
 
 	@Test
-	public void testCall() {
+	public void testCall2Parameters() {
 		assertEquals(new BrilInstructions()
 				             .constant("a", 1)
 				             .constant("b", 2)
@@ -82,6 +82,48 @@ public class BrilRegisterIndirectionTest {
 						                                    .constant("a", 1)
 						                                    .constant("b", 2)
 						                                    .calli("sum", "add", List.of(BrilFactory.argi("b"), BrilFactory.argi("a")))
+						                                    .get()));
+	}
+
+	@Test
+	public void testCall3Parameters() {
+		assertEquals(new BrilInstructions()
+				             .constant("v.0", true)
+				             .constant("v.1", 10)
+				             .constant("v.2", 20)
+				             .idb("r.0", "v.0")
+				             .idi("r.1", "v.1")
+				             .call(BrilRegisterIndirection.CALL_PUSH, List.of(
+						             BrilFactory.argi("v.2")
+				             ))
+				             .calli("r.0", "getLeftOrRight", List.of(
+						             BrilFactory.argb("r.0"),
+						             BrilFactory.argi("r.1"),
+						             BrilFactory.argi("v.2")
+				             ))
+				             .idi("v.3", "r.0")
+				             .calli("v.2", BrilRegisterIndirection.CALL_POP, List.of())
+				             .idi("r.0", "v.3")
+				             .reti("r.0")
+				             .get(),
+		             new BrilRegisterIndirection("r.", "v.", 2,
+		                                         Map.of(
+				                                         "leftOrRight", "v.0",
+				                                         "left", "v.1",
+				                                         "right", "v.2",
+				                                         "result", "v.3"
+		                                         ),
+		                                         var -> var.startsWith("p."))
+				             .transformInstructions(new BrilInstructions()
+						                                    .constant("leftOrRight", true)
+						                                    .constant("left", 10)
+						                                    .constant("right", 20)
+						                                    .calli("result",
+						                                           "getLeftOrRight",
+						                                           List.of(BrilFactory.argb("leftOrRight"),
+						                                                   BrilFactory.argi("left"),
+						                                                   BrilFactory.argi("right")))
+						                                    .reti("result")
 						                                    .get()));
 	}
 }
