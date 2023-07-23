@@ -60,6 +60,11 @@ public final class BrilNode {
 		return this;
 	}
 
+	public BrilNode set(String key, boolean value) {
+		children.put(key, value);
+		return this;
+	}
+
 	public BrilNode set(String key, List<String> values) {
 		children.put(key, values);
 		return this;
@@ -108,6 +113,10 @@ public final class BrilNode {
 
 	public int getInt(String key) {
 		return (Integer)children.get(key);
+	}
+
+	public boolean getBoolean(String key) {
+		return (Boolean)children.get(key);
 	}
 
 	public List<String> getStringList(String key) {

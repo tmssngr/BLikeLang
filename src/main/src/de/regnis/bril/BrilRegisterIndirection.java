@@ -128,6 +128,19 @@ public final class BrilRegisterIndirection {
 		}
 
 		@Override
+		protected void constant(String dest, boolean value) {
+			final String newDest = getMapped(dest);
+			if (isStackParameter(newDest)) {
+				final String temp = createTemp();
+				factory.constant(temp, value);
+				factory.idb(newDest, temp);
+			}
+			else {
+				factory.constant(newDest, value);
+			}
+		}
+
+		@Override
 		protected void id(String dest, String type, String src) {
 			final String newSrc = getMapped(src);
 			final String newDest = getMapped(dest);

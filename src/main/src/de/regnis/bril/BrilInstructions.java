@@ -128,6 +128,10 @@ public class BrilInstructions {
 		return node.getInt(KEY_VALUE);
 	}
 
+	public static boolean getBooleanValue(BrilNode node) {
+		return node.getBoolean(KEY_VALUE);
+	}
+
 	@NotNull
 	public static String getName(BrilNode node) {
 		return node.getString(KEY_NAME);
@@ -221,6 +225,15 @@ public class BrilInstructions {
 		return add(new BrilNode()
 				           .set(KEY_DEST, dest)
 				           .set(KEY_TYPE, INT)
+				           .set(KEY_OP, CONST)
+				           .set(KEY_VALUE, value));
+	}
+
+	@NotNull
+	public BrilInstructions constant(String dest, boolean value) {
+		return add(new BrilNode()
+				           .set(KEY_DEST, dest)
+				           .set(KEY_TYPE, BOOL)
 				           .set(KEY_OP, CONST)
 				           .set(KEY_VALUE, value));
 	}
@@ -400,7 +413,16 @@ public class BrilInstructions {
 			final String op = getOp(instruction);
 			final String dest = getDest(instruction);
 			if (CONST.equals(op)) {
-				constant(dest, getIntValue(instruction));
+				final String type = getType(instruction);
+				if (INT.equals(type)) {
+					constant(dest, getIntValue(instruction));
+				}
+				else if (BOOL.equals(type)) {
+					constant(dest, getBooleanValue(instruction));
+				}
+				else {
+					throw new IllegalArgumentException("Invalid type " + type);
+				}
 			}
 			else if (ID.equals(op)) {
 				id(dest, getTypeNotNull(instruction), getVarNotNull(instruction));
@@ -467,6 +489,9 @@ public class BrilInstructions {
 		}
 
 		protected void constant(String dest, int value) {
+		}
+
+		protected void constant(String dest, boolean value) {
 		}
 
 		protected void id(String dest, String type, String src) {

@@ -184,6 +184,12 @@ public class BrilAsmFactory {
 	}
 
 	@NotNull
+	public BrilAsmFactory bconst(int register, boolean value) {
+		addCommand(new BrilAsm.LoadConst8(register, value ? 255 : 0));
+		return this;
+	}
+
+	@NotNull
 	public BrilAsmFactory ipush(int register) {
 		addCommand(new BrilAsm.Push8(register));
 		addCommand(new BrilAsm.Push8(register + 1));

@@ -93,6 +93,11 @@ final class BrilVarMapping {
 		asm.iconst(register, value);
 	}
 
+	public void loadConstant(String dest, boolean value, BrilAsmFactory asm) {
+		final int register = getRegisterLocation(dest);
+		asm.bconst(register, value);
+	}
+
 	public void i_binaryOperator(String dest, String var1, String var2, BrilAsmFactory asm, I_BinaryRegisterOperator operator) {
 		final int var1Reg = getRegisterLocation(var1);
 		final int var2Reg = getRegisterLocation(var2);

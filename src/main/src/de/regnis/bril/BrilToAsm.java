@@ -65,6 +65,11 @@ public final class BrilToAsm {
 		}
 
 		@Override
+		protected void constant(String dest, boolean value) {
+			varMapping.loadConstant(dest, value, asm);
+		}
+
+		@Override
 		protected void id(String dest, String type, String src) {
 			varMapping.id(dest, type, src, asm);
 		}

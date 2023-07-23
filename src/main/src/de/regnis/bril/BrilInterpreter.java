@@ -167,6 +167,11 @@ public class BrilInterpreter {
 			varToValue.put(dest, value);
 		}
 
+		@Override
+		protected void constant(String dest, boolean value) {
+			varToValue.put(dest, value);
+		}
+
 		/**
 		 * @throws InterpretingFailedException
 		 */
