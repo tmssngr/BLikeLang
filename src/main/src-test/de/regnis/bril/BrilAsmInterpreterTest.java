@@ -15,10 +15,9 @@ public class BrilAsmInterpreterTest {
 	@Test
 	public void testSimple() {
 		run(List.of(
-				    new BrilAsm.Label("main"),
 				    new BrilAsm.LoadConst8(0, 10),
 				    BrilAsm.RET
-		    ), 3, 2,
+		    ), 2, 2,
 		    (register, value) -> {
 			    //noinspection SwitchStatementWithTooFewBranches
 			    final int expectedValue = switch (register) {
@@ -29,12 +28,11 @@ public class BrilAsmInterpreterTest {
 		    });
 
 		run(List.of(
-				    new BrilAsm.Label("main"),
 				    new BrilAsm.LoadConst8(0, 10),
 				    new BrilAsm.LoadConst8(1, 6),
 				    new BrilAsm.AddConst16(0, 4000),
 				    BrilAsm.RET
-		    ), 5, 4,
+		    ), 4, 4,
 		    (register, value) -> {
 			    final int expectedValue = switch (register) {
 				    case 0 -> 25;
@@ -45,14 +43,13 @@ public class BrilAsmInterpreterTest {
 		    });
 
 		run(List.of(
-				    new BrilAsm.Label("main"),
 				    new BrilAsm.Call("test"),
 				    BrilAsm.RET,
 
 				    new BrilAsm.Label("test"),
 				    new BrilAsm.LoadConst8(2, 10),
 				    BrilAsm.RET
-		    ), 3, 4,
+		    ), 2, 4,
 		    (register, value) -> {
 			    //noinspection SwitchStatementWithTooFewBranches
 			    final int expectedValue = switch (register) {
@@ -63,14 +60,13 @@ public class BrilAsmInterpreterTest {
 		    });
 
 		run(List.of(
-				    new BrilAsm.Label("main"),
 				    new BrilAsm.Push8(0),
 				    new BrilAsm.Push8(1),
 				    new BrilAsm.LoadConst16(0, 1000),
 				    new BrilAsm.Pop8(1),
 				    new BrilAsm.Pop8(0),
 				    BrilAsm.RET
-		    ), 7, 6,
+		    ), 6, 6,
 		    (register, value) ->
 				    Assert.assertEquals(BrilAsmInterpreter.UNKNOWN, value));
 	}
@@ -174,7 +170,6 @@ public class BrilAsmInterpreterTest {
 	@Test
 	public void testCall() {
 		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(List.of(
-				new BrilAsm.Label("main"),
 				new BrilAsm.Call("getInt"),
 				BrilAsm.RET
 		), new BrilAsmInterpreter.CallHandler() {
@@ -188,7 +183,7 @@ public class BrilAsmInterpreterTest {
 			}
 		});
 		interpreter.run();
-		Assert.assertEquals(3, interpreter.getIp());
+		Assert.assertEquals(2, interpreter.getIp());
 		Assert.assertEquals(2, interpreter.getExecutedCommandCount());
 		interpreter.iterateRegisters(new BrilAsmInterpreter.ByteConsumer() {
 			@Override
@@ -216,7 +211,6 @@ public class BrilAsmInterpreterTest {
 
 	private static void runCpFlags(boolean expectedC, boolean expectedS, boolean expectedV, boolean expectedZ, int destValue, int srcValue) {
 		final List<BrilAsm> commands = List.of(
-				new BrilAsm.Label("main"),
 				new BrilAsm.LoadConst8(0, destValue),
 				new BrilAsm.LoadConst8(1, srcValue),
 				new BrilAsm.Cp8(0, 1),
@@ -233,7 +227,6 @@ public class BrilAsmInterpreterTest {
 
 	private static void testCpBranch(int left, int right, BrilAsm.BranchCondition trueCondition, BrilAsm.BranchCondition falseCondition) {
 		run(List.of(
-				    new BrilAsm.Label("main"),
 				    new BrilAsm.LoadConst8(0, left),
 				    new BrilAsm.LoadConst8(1, right),
 				    new BrilAsm.LoadConst8(2, 1),
@@ -247,7 +240,7 @@ public class BrilAsmInterpreterTest {
 
 				    new BrilAsm.Label("L1"),
 				    BrilAsm.RET
-		    ), 12, 7,
+		    ), 11, 7,
 		    (register, value) -> {
 			    final int expectedValue = switch (register) {
 				    case 0 -> left;

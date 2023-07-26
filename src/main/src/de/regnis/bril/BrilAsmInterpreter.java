@@ -1,6 +1,7 @@
 package de.regnis.bril;
 
 import de.regnis.utils.Utils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -288,7 +289,13 @@ public class BrilAsmInterpreter {
 	// Accessing ==============================================================
 
 	public void run() {
-		ip = getLabel("main");
+		run(null);
+	}
+
+	public void run(@Nullable String function) {
+		if (function != null) {
+			ip = getLabel(function);
+		}
 
 		while (!finished) {
 			final BrilAsm command = commands.get(ip++);
