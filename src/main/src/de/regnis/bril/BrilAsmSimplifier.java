@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * @author Thomas Singer
@@ -13,21 +12,27 @@ public final class BrilAsmSimplifier {
 
 	// Static =================================================================
 
-	public static Function<List<BrilAsm>, List<BrilAsm>> create() {
-		return new Function<>() {
-			@Override
-			public List<BrilAsm> apply(List<BrilAsm> prevCommands) {
-				final List<BrilAsm> commands = new ArrayList<>(prevCommands);
-				fixJumpToNextLabel(commands);
-				fixObsoleteLabels(commands);
-				fixCallRet(commands);
-				fixBiDiLoad(commands);
-				return commands;
-			}
-		};
+	@NotNull
+	public static List<BrilAsm> simplify(List<BrilAsm> commands) {
+		boolean changed;
+		do {
+			final List<BrilAsm> newCommands = new ArrayList<>(commands);
+			singlePass(newCommands);
+			changed = !commands.equals(newCommands);
+			commands = newCommands;
+		}
+		while (changed);
+		return commands;
 	}
 
 	// Utils ==================================================================
+
+	private static void singlePass(List<BrilAsm> commands) {
+		fixJumpToNextLabel(commands);
+		fixObsoleteLabels(commands);
+		fixCallRet(commands);
+		fixBiDiLoad(commands);
+	}
 
 	private static void fixJumpToNextLabel(List<BrilAsm> commands) {
 		new DualPeepHoleSimplifier(commands) {

@@ -17,7 +17,14 @@ public class BrilToAsmTest {
 
 	@Test
 	public void testBasicRetValue() {
+		final BrilAsmFactory asm = new BrilAsmFactory();
 		final String name = "pi10000";
+		BrilToAsm.convertToAsm(BrilFactory.createFunctionI(name, List.of(),
+		                                                   new BrilInstructions()
+				                                                   .constant("pi10000", 31415)
+				                                                   .reti("pi10000")
+				                                                   .get()
+		), asm);
 		Assert.assertEquals(new BrilAsmFactory()
 				                    .label(BrilToAsm.label(name))
 				                    .iconst(0, 31415)
@@ -25,18 +32,30 @@ public class BrilToAsmTest {
 				                    .label(BrilToAsm.label(name, 1))
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilFactory.createFunctionI(name, List.of(),
-		                                                          new BrilInstructions()
-				                                                          .constant("pi10000", 31415)
-				                                                          .reti("pi10000")
-				                                                          .get()
-		                    ))
+		                    asm.toLines()
 		);
+		executeAndVerifySimplification(asm.getCommands(),
+		                               (name_, access) -> false,
+		                               (register, value) -> {
+			                               final int expectedValue = switch (register) {
+				                               case 0 -> 122;
+				                               case 1 -> 183;
+				                               default -> BrilAsmInterpreter.UNKNOWN;
+			                               };
+			                               Assert.assertEquals(expectedValue, value);
+		                               });
 	}
 
 	@Test
 	public void test2ParamRetValue() {
+		final BrilAsmFactory asm = new BrilAsmFactory();
 		final String name = "sum";
+		BrilToAsm.convertToAsm(BrilFactory.createFunctionI(name, List.of(BrilFactory.argi("a"), BrilFactory.argi("b")),
+		                                                   new BrilInstructions()
+				                                      .add("sum", "a", "b")
+				                                      .reti("sum")
+				                                      .get()
+		), asm);
 		Assert.assertEquals(new BrilAsmFactory()
 				                    .label(BrilToAsm.label(name))
 				                    .iadd(ARG0_REGISTER, ARG1_REGISTER)
@@ -44,13 +63,25 @@ public class BrilToAsmTest {
 				                    .label(BrilToAsm.label(name, 1))
 				                    .ret()
 				                    .toLines(),
-		                    brilToAsm(BrilFactory.createFunctionI(name, List.of(BrilFactory.argi("a"), BrilFactory.argi("b")),
-		                                                          new BrilInstructions()
-				                                                          .add("sum", "a", "b")
-				                                                          .reti("sum")
-				                                                          .get()
-		                    ))
+		                    asm.toLines()
 		);
+		final List<BrilAsm> commands = new ArrayList<>();
+		commands.add(new BrilAsm.Label("main"));
+		commands.add(new BrilAsm.LoadConst16(0, 100));
+		commands.add(new BrilAsm.LoadConst16(2, -1));
+		commands.addAll(asm.getCommands());
+		executeAndVerifySimplification(commands,
+		                               (name_, access) -> false,
+		                               (register, value) -> {
+			                               final int expectedValue = switch (register) {
+				                               case 0 -> 0;
+				                               case 1 -> 99;
+				                               case 2 -> 255;
+				                               case 3 -> 255;
+				                               default -> BrilAsmInterpreter.UNKNOWN;
+			                               };
+			                               Assert.assertEquals(expectedValue, value);
+		                               });
 	}
 
 	@Test
@@ -141,20 +172,16 @@ public class BrilToAsmTest {
 				                    .toLines(),
 		                    asm.toLines()
 		);
-		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(asm.getCommands(),
-		                                                              (name, access) -> false);
-		interpreter.run();
-		interpreter.iterateRegisters(new BrilAsmInterpreter.ByteConsumer() {
-			@Override
-			public void consumer(int register, int value) {
-				final int expectedValue = switch (register) {
-					case 0 -> 0;
-					case 1 -> 10;
-					default -> BrilAsmInterpreter.UNKNOWN;
-				};
-				Assert.assertEquals(expectedValue, value);
-			}
-		});
+		executeAndVerifySimplification(asm.getCommands(),
+		                               (name, access) -> false,
+		                               (register, value) -> {
+			                               final int expectedValue = switch (register) {
+				                               case 0 -> 0;
+				                               case 1 -> 10;
+				                               default -> BrilAsmInterpreter.UNKNOWN;
+			                               };
+			                               Assert.assertEquals(expectedValue, value);
+		                               });
 	}
 
 	@Test
@@ -254,20 +281,17 @@ public class BrilToAsmTest {
 		commands.add(new BrilAsm.Label("main"));
 		commands.add(new BrilAsm.LoadConst16(0, 8));
 		commands.addAll(asm.getCommands());
-		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(commands,
-		                                                              (name_, access) -> false);
-		interpreter.run();
-		interpreter.iterateRegisters(new BrilAsmInterpreter.ByteConsumer() {
-			@Override
-			public void consumer(int register, int value) {
-				final int expectedValue = switch (register) {
-					case 0 -> 0;
-					case 1 -> 34;
-					default -> BrilAsmInterpreter.UNKNOWN;
-				};
-				Assert.assertEquals(expectedValue, value);
-			}
-		});
+
+		executeAndVerifySimplification(commands,
+		                               (name_, access) -> false,
+		                               (register, value) -> {
+			                               final int expectedValue = switch (register) {
+				                               case 0 -> 0;
+				                               case 1 -> 34;
+				                               default -> BrilAsmInterpreter.UNKNOWN;
+			                               };
+			                               Assert.assertEquals(expectedValue, value);
+		                               });
 	}
 
 	@Test
@@ -328,5 +352,16 @@ public class BrilToAsmTest {
 		final BrilAsmFactory asm = new BrilAsmFactory();
 		BrilToAsm.convertToAsm(function, asm);
 		return asm.toLines();
+	}
+
+	private static void executeAndVerifySimplification(List<BrilAsm> commands, BrilAsmInterpreter.CallHandler callHandler, BrilAsmInterpreter.ByteConsumer registerVerifier) {
+		executeAndVerify(commands, callHandler, registerVerifier);
+		executeAndVerify(BrilAsmSimplifier.simplify(commands), callHandler, registerVerifier);
+	}
+
+	private static void executeAndVerify(List<BrilAsm> commands, BrilAsmInterpreter.CallHandler callHandler, BrilAsmInterpreter.ByteConsumer registerVerifier) {
+		final BrilAsmInterpreter interpreter = new BrilAsmInterpreter(commands, callHandler);
+		interpreter.run();
+		interpreter.iterateRegisters(registerVerifier);
 	}
 }
