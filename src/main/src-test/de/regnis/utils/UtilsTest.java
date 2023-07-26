@@ -33,4 +33,20 @@ public class UtilsTest {
 
 		Assert.assertEquals("ABCD", Utils.toHex4(0xabcd, new StringBuilder()).toString());
 	}
+
+	@Test
+	public void testHighByte() {
+		Assert.assertEquals(255, Utils.highByte(-1));
+		Assert.assertEquals(255, Utils.highByte(-2));
+		Assert.assertEquals(128, Utils.highByte(32768));
+		Assert.assertEquals(127, Utils.highByte(32767));
+	}
+
+	@Test
+	public void testLowByte() {
+		Assert.assertEquals(255, Utils.lowByte(-1));
+		Assert.assertEquals(254, Utils.lowByte(-2));
+		Assert.assertEquals(0, Utils.lowByte(256));
+		Assert.assertEquals(255, Utils.lowByte(32767));
+	}
 }

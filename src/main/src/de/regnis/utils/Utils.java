@@ -190,7 +190,7 @@ public final class Utils {
 	}
 
 	public static int highByte(int value) {
-		return value >> 8;
+		return (value & 0xFF00) >> 8;
 	}
 
 	public static int lowByte(int value) {
