@@ -1,8 +1,11 @@
 package de.regnis.bril;
 
 import de.regnis.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Thomas Singer
@@ -19,6 +22,16 @@ public final class BrilToAsm {
 
 	// Static =================================================================
 
+	@NotNull
+	public static String label(String name) {
+		return label(name, 0);
+	}
+
+	@NotNull
+	public static String label(String name, int index) {
+		return name + "_" + index;
+	}
+
 	public static void convertToAsm(BrilNode function, BrilAsmFactory asm) {
 		final BrilPrepareForAsm prepare = new BrilPrepareForAsm(PREFIX_VIRTUAL_REGISTER, PREFIX_REGISTER, PREFIX_STACK_PARAMETER, MAX_REGISTERS, MAX_PARAMETERS_IN_REGISTERS);
 		final BrilNode cfgFunction = prepare.prepare(function);
@@ -26,13 +39,14 @@ public final class BrilToAsm {
 		final BrilNode functionFromCfg = BrilCfg.flattenBlocks(cfgFunction);
 
 		final String name = BrilFactory.getName(functionFromCfg);
-		asm.label(name);
+		asm.label(label(name));
 
 		final BrilVarMapping varMapping = BrilVarMapping.createVarMapping(functionFromCfg, PREFIX_VIRTUAL_REGISTER, PREFIX_REGISTER, PREFIX_STACK_PARAMETER, MAX_PARAMETERS_IN_REGISTERS);
 		varMapping.allocLocalVarSpace(asm);
 
-		final MyHandler handler = new MyHandler(varMapping, asm);
 		final List<BrilNode> instructions = BrilFactory.getInstructions(functionFromCfg);
+		final Map<String, String> labelToIndexLabel = createIndexLabels(instructions, name);
+		final MyHandler handler = new MyHandler(varMapping, labelToIndexLabel, asm);
 
 		for (BrilNode instruction : instructions) {
 			handler.visit(instruction);
@@ -42,21 +56,40 @@ public final class BrilToAsm {
 		asm.ret();
 	}
 
+	// Utils ==================================================================
+
+	private static Map<String, String> createIndexLabels(List<BrilNode> instructions, String name) {
+		final Map<String, String> labelToSortedLabel = new HashMap<>();
+		for (BrilNode instruction : instructions) {
+			final String label = BrilInstructions.getLabel(instruction);
+			if (label == null) {
+				continue;
+			}
+
+			if (labelToSortedLabel.put(label, label(name, labelToSortedLabel.size() + 1)) != null) {
+				throw new IllegalStateException("Duplicate label " + label);
+			}
+		}
+		return labelToSortedLabel;
+	}
+
 	// Inner Classes ==========================================================
 
 	private static final class MyHandler extends BrilInstructions.Handler {
 
 		private final BrilVarMapping varMapping;
+		private final Map<String, String> labelToIndexLabel;
 		private final BrilAsmFactory asm;
 
-		public MyHandler(BrilVarMapping varMapping, BrilAsmFactory asm) {
-			this.varMapping = varMapping;
-			this.asm        = asm;
+		public MyHandler(BrilVarMapping varMapping, Map<String, String> labelToIndexLabel, BrilAsmFactory asm) {
+			this.varMapping        = varMapping;
+			this.labelToIndexLabel = labelToIndexLabel;
+			this.asm               = asm;
 		}
 
 		@Override
 		protected void label(String name) {
-			asm.label(name);
+			asm.label(toIndexLabel(name));
 		}
 
 		@Override
@@ -139,12 +172,12 @@ public final class BrilToAsm {
 
 		@Override
 		protected void jump(String target) {
-			asm.jump(target);
+			asm.jump(toIndexLabel(target));
 		}
 
 		@Override
 		protected void branch(String var, String thenLabel, String elseLabel) {
-			varMapping.branch(var, thenLabel, elseLabel, asm);
+			varMapping.branch(var, toIndexLabel(thenLabel), toIndexLabel(elseLabel), asm);
 		}
 
 		@Override
@@ -158,7 +191,7 @@ public final class BrilToAsm {
 				return;
 			}
 
-			asm.call(name);
+			asm.call(BrilToAsm.label(name));
 		}
 
 		@Override
@@ -170,7 +203,12 @@ public final class BrilToAsm {
 				return;
 			}
 
-			asm.call(name);
+			asm.call(BrilToAsm.label(name));
+		}
+
+		@NotNull
+		private String toIndexLabel(String label) {
+			return labelToIndexLabel.get(label);
 		}
 
 		private int varToRegister(String var) {
