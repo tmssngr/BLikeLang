@@ -42,7 +42,7 @@ public class BrilAsmInterpreter {
 				if (labelToIndex.containsKey(label.label())) {
 					throw new InterpretingFailedException("duplicate label " + label);
 				}
-				labelToIndex.put(label.label(), i);
+				labelToIndex.put(label.label(), i + 1);
 			}
 		}
 
