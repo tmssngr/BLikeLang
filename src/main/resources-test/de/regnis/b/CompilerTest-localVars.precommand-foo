@@ -1,0 +1,17 @@
+foo_start:
+foo_if_1:
+    if p0_0 > 0
+    if ! goto foo_else_1
+foo_then_1:
+    p0_0 = p1_0
+    p0_0 += 2
+    printInt(p0_0)
+    goto foo_after_if_1
+
+foo_else_1:
+    p0_0 = p1_0
+    p0_0 += 45
+    printChar(p0_0)
+foo_after_if_1:
+foo_exit:
+    return

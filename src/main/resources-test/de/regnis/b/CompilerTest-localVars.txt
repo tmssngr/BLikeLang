@@ -1,0 +1,116 @@
+main:
+    ld r0, #%00
+    ld r1, #%01
+    push r0
+    push r1
+    ld r0, #%00
+    ld r1, #%02
+    push r0
+    push r1
+    call foo
+    pop r1
+    pop r0
+    pop r1
+    pop r0
+    ret
+
+foo:
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    cp r0, #%00
+    .jp gt, foo_then_1
+    .jp nz, foo_else_1
+    cp r1, #%00
+    .jp ule, foo_else_1
+foo_then_1:
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%02
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde @rr14, r1
+    incw r14
+    lde @rr14, r0
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    add r1, #%02
+    adc r0, #%00
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde @rr14, r1
+    incw r14
+    lde @rr14, r0
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld %12, r0
+    ld %13, r1
+    push %FD
+    srp #%10
+    call %0EE0
+    pop %FD
+    .jp foo_exit
+foo_else_1:
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%02
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde @rr14, r1
+    incw r14
+    lde @rr14, r0
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    add r1, #%2D
+    adc r0, #%00
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde @rr14, r1
+    incw r14
+    lde @rr14, r0
+    ld r14, %FE
+    ld r15, %FF
+    add r15, #%04
+    adc r14, #%00
+    lde r1, @rr14
+    incw r14
+    lde r0, @rr14
+    ld %15, r1
+    call %0818
+foo_exit:
+    ret

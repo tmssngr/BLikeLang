@@ -155,6 +155,28 @@ public class CompilerTest {
 		);
 	}
 
+	@Test
+	public void testLocalVars() throws IOException {
+		test("localVars",
+		     """
+				     void main() {
+				        foo(1, 2)
+				     }
+
+				     void foo(int a, int c) {
+				        if (a > 0) {
+				          var b = 2 + c
+				          printInt(b)
+				        }
+				        else {
+				          var b = '-' + c
+				          printChar(b)
+				        }
+				     }
+				     """,
+		     "");
+	}
+
 	// Utils ==================================================================
 
 	private void test(String testName, String input, String expectedWarnings) throws IOException {

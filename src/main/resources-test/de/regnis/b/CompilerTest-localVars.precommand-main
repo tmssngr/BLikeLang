@@ -1,0 +1,4 @@
+main_start:
+    foo(1, 2)
+main_exit:
+    return
