@@ -156,15 +156,15 @@ public class LexerTest {
 			protected void test() {
 				assertIdentifier("int");
 				assertIdentifier("method");
+				assertType(TokenType.PAREN_L);
+				assertType(TokenType.PAREN_R);
 				assertType(TokenType.BRACE_L);
-				assertType(TokenType.BRACE_R);
-				assertType(TokenType.CBRACKET_L);
 				assertType(TokenType.VAR);
 				assertIdentifier("a");
 				assertType(TokenType.EQ);
 				assertInt(0);
 				assertType(TokenType.SEMICOLON);
-				assertType(TokenType.CBRACKET_R);
+				assertType(TokenType.BRACE_R);
 				assertEof();
 			}
 		}.test();

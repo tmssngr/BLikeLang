@@ -29,22 +29,18 @@ public class Parser {
 	private DeclarationList getDeclarations() {
 		final List<Declaration> declarations = new ArrayList<>();
 		while (true) {
-			next();
+			consume();
 			if (token == TokenType.EOF) {
 				break;
 			}
 
-			final Type type = getType(getIdentifier());
+			final Type type = getType(consumeIdentifier());
 
-			next();
 			final Position position = getPosition();
-			final String name = getIdentifier();
+			final String name = consumeIdentifier();
 
-			next();
-			expect(TokenType.BRACE_L);
-
-			next();
-			expect(TokenType.BRACE_R);
+			consume(TokenType.PAREN_L);
+			consume(TokenType.PAREN_R);
 
 			final StatementList statementList = getStatementList();
 			declarations.add(new FuncDeclaration(type, name, FuncDeclarationParameters.of(List.of()), statementList, position));
@@ -54,18 +50,15 @@ public class Parser {
 
 	@NotNull
 	private StatementList getStatementList() {
-		next();
-		expect(TokenType.CBRACKET_L);
+		consume(TokenType.BRACE_L);
 
 		final StatementList statementList = new StatementList();
-		while (true) {
-			next();
-			if (token == TokenType.CBRACKET_R) {
-				break;
-			}
-
-			if (token == TokenType.VAR) {
+		while (token != TokenType.BRACE_R) {
+			if (isConsume(TokenType.VAR)) {
 				statementList.add(getVarDeclaration());
+			}
+			else {
+				throw new InvalidSyntaxException("Unexpected token " + token, getPosition());
 			}
 		}
 
@@ -73,52 +66,44 @@ public class Parser {
 	}
 
 	private Statement getVarDeclaration() {
-		next();
 		final Position position = getPosition();
-		final String name = getIdentifier();
-
-		next();
-		expect(TokenType.EQ);
+		final String name = consumeIdentifier();
+		consume(TokenType.EQ);
 
 		final Expression expression = getExpression(0);
-
+		// optional ;
+		isConsume(TokenType.SEMICOLON);
 		return new VarDeclaration(name, expression, position);
 	}
 
 	private Expression getExpression(int precedence) {
-		next();
-
 		Expression left;
 		if (token == TokenType.INT) {
 			left = new NumberLiteral((int)lexer.getIntValue());
+			consume();
 		}
-		else if (token == TokenType.TRUE) {
+		else if (isConsume(TokenType.TRUE)) {
 			left = NumberLiteral.TRUE;
 		}
-		else if (token == TokenType.FALSE) {
+		else if (isConsume(TokenType.FALSE)) {
 			left = NumberLiteral.FALSE;
 		}
 		else if (token == TokenType.IDENTIFIER) {
-			left = new VarRead(getIdentifier(), getPosition());
+			left = new VarRead(consumeIdentifier(), getPosition());
 		}
 		else {
 			throw new InvalidSyntaxException("Expected literal or var", getPosition());
 		}
 
-		next();
 		while (true) {
-			if (token == TokenType.SEMICOLON) {
+			final BinaryExpression.Op operator = getOperator();
+			if (operator == null) {
 				return left;
 			}
 
-			final BinaryExpression.Op operator = getOperator();
-			if (operator != null) {
-				final Expression right = getExpression(precedence);
-				left = new BinaryExpression(left, operator, right);
-			}
-			else {
-				throw new InvalidSyntaxException("Unexpected token " + token, getPosition());
-			}
+			consume();
+			final Expression right = getExpression(precedence);
+			left = new BinaryExpression(left, operator, right);
 		}
 	}
 
@@ -148,9 +133,28 @@ public class Parser {
 		return BasicTypes.getType(identifier, true);
 	}
 
-	private String getIdentifier() {
+	private boolean isConsume(TokenType type) {
+		if (token == type) {
+			consume();
+			return true;
+		}
+		return false;
+	}
+
+	private void consume(TokenType type) {
+		expect(type);
+		consume();
+	}
+
+	private String consumeIdentifier() {
 		expect(TokenType.IDENTIFIER);
-		return getText();
+		final String identifier = getText();
+		consume();
+		return identifier;
+	}
+
+	private void consume() {
+		token = lexer.next();
 	}
 
 	private void expect(TokenType type) {
@@ -166,9 +170,5 @@ public class Parser {
 	@NotNull
 	private String getText() {
 		return lexer.getText();
-	}
-
-	private void next() {
-		token = lexer.next();
 	}
 }

@@ -106,16 +106,16 @@ public final class Lexer {
 			return TokenType.GT;
 		}
 		case '(' -> {
-			return TokenType.BRACE_L;
+			return TokenType.PAREN_L;
 		}
 		case ')' -> {
-			return TokenType.BRACE_R;
+			return TokenType.PAREN_R;
 		}
 		case '{' -> {
-			return TokenType.CBRACKET_L;
+			return TokenType.BRACE_L;
 		}
 		case '}' -> {
-			return TokenType.CBRACKET_R;
+			return TokenType.BRACE_R;
 		}
 		case '&' -> {
 			return TokenType.AND;
